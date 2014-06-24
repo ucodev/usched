@@ -148,15 +148,15 @@ int runtime_exec_init(int argc, char **argv) {
 		return -1;
 	}
 
-	/* Initialize IPC */
-	if (pmq_exec_init() < 0) {
-		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
-		return -1;
-	}
-
 	/* Initialize threads behaviour */
 	if (thread_exec_behaviour_init() < 0) {
 		log_crit("thread_exec_behaviour_init(): %s\n", strerror(errno));
+		return -1;
+	}
+
+	/* Initialize IPC */
+	if (pmq_exec_init() < 0) {
+		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
@@ -164,15 +164,20 @@ int runtime_exec_init(int argc, char **argv) {
 }
 
 void runtime_client_destroy(void) {
+	/* Destroy connection interface */
+	conn_client_destroy();
+
+	/* Destroy pools */
+	pool_client_destroy();
+
+	/* Destroy requests */
 	parse_req_destroy(runc.req);
 
+	/* Destroy usage interface */
 	if (runc.usage_err_offending)
 		mm_free(runc.usage_err_offending);
 
-	conn_client_destroy();
-
-	pool_client_destroy();
-
+	/* Destroy logging interface */
 	log_destroy();
 }
 
@@ -180,17 +185,29 @@ void runtime_daemon_destroy(void) {
 	/* Destroy connections interface */
 	conn_daemon_destroy();
 
+	/* Destroy scheduling interface */
+	schedule_daemon_destroy();
+
 	/* Destroy pools */
 	pool_daemon_destroy();
 
 	/* Destroy mutexes */
 	thread_daemon_mutexes_destroy();
 
+	/* Destroy IPC interface */
+	pmq_daemon_destroy();
+
 	/* Destroy logging interface */
 	log_destroy();
 }
 
 void runtime_exec_destroy(void) {
+	/* Destroy IPC interface */
+	pmq_exec_destroy();
+
+	/* Destroy thread behaviour interface */
+	thread_exec_behaviour_destroy();
+
 	/* Destroy logging interface */
 	log_destroy();
 }

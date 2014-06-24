@@ -45,7 +45,7 @@ int pmq_daemon_init(void) {
 		0				/* Number of messages currently in queue */
 	};
 
-	if ((rund.pmqd = mq_open(CONFIG_USCHED_PMQ_DESC_NAME, O_WRONLY | O_CREAT, 0600, &mqattr)) == (mqd_t) - 1) {
+	if ((rund.pmqd = mq_open(CONFIG_USCHED_PMQ_DESC_NAME, O_WRONLY | O_CREAT, 0200, &mqattr)) == (mqd_t) - 1) {
 		log_crit("pmq_daemon_init(): mq_open(): %s\n", strerror(errno));
 
 		return -1;
@@ -62,7 +62,7 @@ int pmq_exec_init(void) {
 		0				/* Number of messages currently in queue */
 	};
 
-	if ((rune.pmqd = mq_open(CONFIG_USCHED_PMQ_DESC_NAME, O_RDONLY, 0600, &mqattr)) == (mqd_t) - 1) {
+	if ((rune.pmqd = mq_open(CONFIG_USCHED_PMQ_DESC_NAME, O_RDONLY, 0400, &mqattr)) == (mqd_t) - 1) {
 		log_crit("pmq_exec_init(): mq_open(): %s\n", strerror(errno));
 
 		return -1;

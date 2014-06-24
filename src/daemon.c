@@ -30,6 +30,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "debug.h"
+#include "bitops.h"
 #include "runtime.h"
 #include "log.h"
 #include "daemonize.h"
@@ -40,28 +42,39 @@ static void _init(int argc, char **argv) {
 		log_crit("_init(): runtime_daemon_init(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-
-	if (daemonize() < 0) {
-		log_crit("_init(): daemonize(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 }
 
 static void _destroy(void) {
 	runtime_daemon_destroy();
 }
 
-static void _loop(void) {
-	/* Process connections */
-	conn_daemon_process();
+static void _loop(int argc, char **argv) {
+	_init(argc, argv);
+
+	if (daemonize() < 0) {
+		log_crit("_init(): daemonize(): %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	for (;;) {
+		/* Process connections */
+		conn_daemon_process();
+
+		/* Check for runtime interruptions */
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE))
+			break;
+
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
+			_destroy();
+			_init(argc, argv);
+		}
+	}
+
+	_destroy();
 }
 
 int main(int argc, char *argv[]) {
-	_init(argc, argv);
-
-	_loop();
-
-	_destroy();
+	_loop(argc, argv);
 
 	return 0;
 }

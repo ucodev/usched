@@ -36,13 +36,13 @@
 
 int thread_daemon_mutexes_init(void) {
 	if (pthread_mutex_init(&rund.mutex_rpool, NULL)) {
-		log_crit("thread_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
 
 		return -1;
 	}
 
 	if (pthread_mutex_init(&rund.mutex_apool, NULL)) {
-		log_crit("thread_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
 
 		return -1;
 	}

@@ -41,6 +41,7 @@
 #include "runtime.h"
 #include "log.h"
 #include "daemonize.h"
+#include "bitops.h"
 
 static void *_exec_cmd(void *arg) {
 	char *buf = arg;	/* | uid (32 bits) | gid (32 bits) | cmd (dynnamic) ... | */
@@ -119,6 +120,10 @@ static void _exec_process(void) {
 	char *tbuf = NULL;
 
 	for (;;) {
+		/* Check for rutime interruptions */
+		if (runtime_exec_interrupted())
+			break;
+
 		if (!(tbuf = mm_alloc(CONFIG_USCHED_PMQ_MSG_SIZE))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));
 			continue;
@@ -147,27 +152,39 @@ static void _init(int argc, char **argv) {
 		log_crit("_init(): runtime_exec_init(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
-
-	if (daemonize() < 0) {
-		log_crit("_init(): daemonize(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 }
 
 static void _destroy(void) {
 	runtime_exec_destroy();
 }
 
-static void _loop(void) {
-	_exec_process();
+static void _loop(int argc, char **argv) {
+	_init(argc, argv);
+
+	if (daemonize() < 0) {
+		log_crit("_init(): daemonize(): %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	for (;;) {
+		/* Process exec requests */
+		_exec_process();
+
+		/* Check for runtime interruptions */
+		if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE))
+			break;
+
+		if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
+			_destroy();
+			_init(argc, argv);
+		}
+	}
+
+	_destroy();
 }
 
 int main(int argc, char *argv[]) {
-	_init(argc, argv);
-
-	_loop();
-
-	_destroy();
+	_loop(argc, argv);
 
 	return 0;
 }

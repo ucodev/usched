@@ -127,6 +127,11 @@ void conn_daemon_process(void) {
 	struct async_op *aop = NULL;
 
 	for (;;) {
+		/* Check for runtime interruptions */
+		if (runtime_daemon_interrupted())
+			break;
+
+		/* Accept client connection */
 		if ((fd = accept(rund.fd, NULL, NULL)) < 0) {
 			log_warn("conn_daemon_process(): accept(): %s\n", strerror(errno));
 			continue;
@@ -166,11 +171,6 @@ void conn_daemon_process(void) {
 
 void conn_daemon_destroy(void) {
 	panet_safe_close(rund.fd);
-
-	/* Destroy connection pool */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	pall_cll_destroy(rund.rpool);
-	pthread_mutex_lock(&rund.mutex_rpool);
 }
 
 int conn_is_local(int fd) {

@@ -45,6 +45,7 @@
 #include "schedule.h"
 #include "pmq.h"
 #include "sig.h"
+#include "bitops.h"
 
 
 /* Globals */
@@ -106,43 +107,71 @@ int runtime_daemon_init(int argc, char **argv) {
 		return -1;
 	}
 
+	log_info("Logging interface initialized.\n");
+
 	/* Initialize signals interface */
+	log_info("Initializing signals interface...\n");
+
 	if (sig_daemon_init() < 0) {
 		log_crit("runtime_daemon_init(): sig_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Signals interface initialized.\n");
+
 	/* Initialize IPC */
+	log_info("Initializing IPC interface...\n");
+
 	if (pmq_daemon_init() < 0) {
 		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("IPC interface initialized.\n");
+
 	/* Initialize mutexes */
+	log_info("Initializing thread mutexes...\n");
+
 	if (thread_daemon_mutexes_init() < 0) {
 		log_crit("runtime_daemon_init(): thread_mutexes_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Thread mutexes initialized.\n");
+
 	/* Initialize pools */
+	log_info("Initializing pools...\n");
+
 	if (pool_daemon_init() < 0) {
 		log_crit("runtime_daemon_init(): pool_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Pools initialized.\n");
+
 	/* Initialize scheduling interface */
+	log_info("Initializing scheduling interface...\n");
+
 	if (schedule_daemon_init() < 0) {
 		log_crit("runtime_daemon_init(): schedule_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Scheduling interface initialized.\n");
+
 	/* Initialize connections interface */
+	log_info("Initializing connections interface...\n");
+
 	if (conn_daemon_init() < 0) {
 		log_crit("runtime_daemon_init(): conn_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Connections interface initialized.\n");
+
 	/* All good */
+	log_info("All good\n");
+
 	return 0;
 }
 
@@ -158,23 +187,58 @@ int runtime_exec_init(int argc, char **argv) {
 		return -1;
 	}
 
+	log_info("Logging interface initialized.\n");
+
 	/* Initialize signals interface */
+	log_info("Initializing signals interface...\n");
+
 	if (sig_exec_init() < 0) {
 		log_crit("runtime_exec_init(): sig_exec_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Signals interface initialized.\n");
+
 	/* Initialize threads behaviour */
+	log_info("Initializing thread behaviour interface...\n");
+
 	if (thread_exec_behaviour_init() < 0) {
 		log_crit("thread_exec_behaviour_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
+	log_info("Thread behaviour interface initialized.\n");
+
 	/* Initialize IPC */
+	log_info("Initializing IPC interface...\n");
+
 	if (pmq_exec_init() < 0) {
 		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
 		return -1;
 	}
+
+	log_info("IPC interface initialized.\n");
+
+	/* All good */
+	log_info("All good\n");
+
+	return 0;
+}
+
+int runtime_client_interrupted(void) {
+	return 0;
+}
+
+int runtime_daemon_interrupted(void) {
+	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD))
+		return 1;
+
+	return 0;
+}
+
+int runtime_exec_interrupted(void) {
+	if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD))
+		return 1;
 
 	return 0;
 }
@@ -199,38 +263,62 @@ void runtime_client_destroy(void) {
 
 void runtime_daemon_destroy(void) {
 	/* Destroy connections interface */
+	log_info("Destroying connections interface...\n");
 	conn_daemon_destroy();
+	log_info("Connections interface destroyed.\n");
 
 	/* Destroy scheduling interface */
+	log_info("Destroying scheduling interface...\n");
 	schedule_daemon_destroy();
+	log_info("Scheduling interface destroyed.\n");
 
 	/* Destroy pools */
+	log_info("Destroying pools...\n");
 	pool_daemon_destroy();
+	log_info("Pools destroyed.\n");
 
 	/* Destroy mutexes */
+	log_info("Destroying thread mutexes...\n");
 	thread_daemon_mutexes_destroy();
+	log_info("Thread mutexes destroyed.\n");
 
 	/* Destroy IPC interface */
+	log_info("Destroying IPC interface...\n");
 	pmq_daemon_destroy();
+	log_info("IPC interface destroyed.\n");
 
 	/* Destroy signals interface */
+	log_info("Destroying signals interface...\n");
 	sig_daemon_destroy();
-	
+	log_info("Signals interface destroyed.\n");
+
+	log_info("All good\n");
+
 	/* Destroy logging interface */
+	log_info("Destroying logging interface...\n");
 	log_destroy();
 }
 
 void runtime_exec_destroy(void) {
 	/* Destroy IPC interface */
+	log_info("Destroying IPC interface...\n");
 	pmq_exec_destroy();
+	log_info("IPC interface destroyed.\n");
 
 	/* Destroy thread behaviour interface */
+	log_info("Destroying thread behaviour interface...\n");
 	thread_exec_behaviour_destroy();
+	log_info("Thread behaviour interface destroyed.\n");
 
 	/* Destroy signals interface */
+	log_info("Destroying signals interface...\n");
 	sig_exec_destroy();
-	
+	log_info("Signals interface destroyed.\n");
+
+	log_info("All good\n");
+
 	/* Destroy logging interface */
+	log_info("Destroying logging interface...\n");
 	log_destroy();
 }
 

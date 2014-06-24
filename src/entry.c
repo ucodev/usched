@@ -215,9 +215,17 @@ void entry_pmq_dispatch(void *arg) {
 		goto _finish;
 	}
 
+#if 0
+	/* TODO: Remove the following code and use libpsched interface to query the status of the current sched entry,
+	 * then update this entry according to what was returned by libpsched.
+	 */
+
 	/* If the entry is recurrent, do not delete it from the active pool until it expires */
 	if (entry->step && (!entry->expire || (entry->expire < time(NULL))))	/* FIXME: Grant UTC for both values */
 		return;
+
+	entry->trigger += entry->step;
+#endif
 
 _finish:
 	/* Remove the entry from active pool */

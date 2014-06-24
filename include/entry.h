@@ -39,7 +39,7 @@
 /* Entry flags */
 typedef enum USCHED_ENTRY_FLAGS {
 	/* Remote flags - Allowed to be handled by client */
-	USCHED_ENTRY_FLAG_NEW,
+	USCHED_ENTRY_FLAG_NEW = 1,
 	USCHED_ENTRY_FLAG_DEL,
 	USCHED_ENTRY_FLAG_GET,
 

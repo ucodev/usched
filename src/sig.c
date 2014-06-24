@@ -24,24 +24,134 @@
  *
  */
 
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+
+#include "runtime.h"
+#include "bitops.h"
+#include "log.h"
+#include "sig.h"
+
+static void _sig_term_daemon_handler(int n) {
+	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE);
+}
+
+static void _sig_hup_daemon_handler(int n) {
+	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD);
+}
+
+static void _sig_term_exec_handler(int n) {
+	bit_set(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE);
+}
+
+static void _sig_hup_exec_handler(int n) {
+	bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
+}
 
 int sig_daemon_init(void) {
-	/* TODO: To be implemented */
+	int errsv = errno;
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(struct sigaction));
+
+	sa.sa_handler = _sig_term_daemon_handler;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGTERM, &sa, &rund.sa_save) < 0) {
+		errsv = errno;
+		log_warn("sig_daemon_init(): sigaction(SIGTERM, ...): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (sigaction(SIGINT, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_daemon_init(): sigaction(SIGINT, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
+	if (sigaction(SIGQUIT, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_daemon_init(): sigaction(SIGQUIT, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
+	sa.sa_handler = _sig_hup_daemon_handler;
+
+	if (sigaction(SIGHUP, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_daemon_init(): sigaction(SIGHUP, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
 	return 0;
+
+_failure:
+	sig_daemon_destroy();
+
+	errno = errsv;
+
+	return -1;
 }
 
 int sig_exec_init(void) {
-	/* TODO: To be implemented */
+	int errsv = errno;
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(struct sigaction));
+
+	sa.sa_handler = _sig_term_exec_handler;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGTERM, &sa, &rune.sa_save) < 0) {
+		errsv = errno;
+		log_warn("sig_exec_init(): sigaction(SIGTERM, ...): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (sigaction(SIGINT, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_exec_init(): sigaction(SIGINT, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
+	if (sigaction(SIGQUIT, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_exec_init(): sigaction(SIGQUIT, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
+	sa.sa_handler = _sig_hup_exec_handler;
+
+	if (sigaction(SIGHUP, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_exec_init(): sigaction(SIGHUP, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
 	return 0;
+
+_failure:
+	sig_exec_destroy();
+
+	errno = errsv;
+
+	return -1;
 }
 
 void sig_daemon_destroy(void) {
-	/* TODO: To be implemented */
-	return ;
+	sigaction(SIGTERM, &rund.sa_save, NULL);
+	sigaction(SIGINT, &rund.sa_save, NULL);
+	sigaction(SIGQUIT, &rund.sa_save, NULL);
+	sigaction(SIGHUP, &rund.sa_save, NULL);
 }
 
 void sig_exec_destroy(void) {
-	/* TODO: To be implemented */
-	return ;
+	sigaction(SIGTERM, &rune.sa_save, NULL);
+	sigaction(SIGINT, &rune.sa_save, NULL);
+	sigaction(SIGQUIT, &rune.sa_save, NULL);
+	sigaction(SIGHUP, &rune.sa_save, NULL);
 }
 

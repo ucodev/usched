@@ -31,6 +31,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <mqueue.h>
+#include <signal.h>
 
 #include <pall/fifo.h>
 #include <panet/panet.h>
@@ -38,6 +39,12 @@
 
 #include "usched.h"
 #include "usage.h"
+
+/* Flags */
+typedef enum USCHED_RUNTIME_FLAGS {
+	USCHED_RUNTIME_FLAG_TERMINATE = 1,
+	USCHED_RUNTIME_FLAG_RELOAD
+} usched_runtime_flag_t;
 
 /* Structures */
 struct usched_runtime_client {
@@ -51,6 +58,8 @@ struct usched_runtime_client {
 	struct fifo_handler *epool;	/* Entries pool */
 
 	sock_t fd;
+	usched_runtime_flag_t flags;
+	struct sigaction sa_save;
 };
 
 struct usched_runtime_daemon {
@@ -58,6 +67,8 @@ struct usched_runtime_daemon {
 	char **argv;
 
 	sock_t fd;
+	usched_runtime_flag_t flags;
+	struct sigaction sa_save;
 
 	struct cll_handler *rpool;	/* Receiving pool */
 	struct cll_handler *apool;	/* Active pool */
@@ -73,6 +84,9 @@ struct usched_runtime_daemon {
 struct usched_runtime_exec {
 	int argc;
 	char **argv;
+
+	usched_runtime_flag_t flags;
+	struct sigaction sa_save;
 
 	mqd_t pmqd;
 };

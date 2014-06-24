@@ -154,6 +154,10 @@ static void _init(int argc, char **argv) {
 	}
 }
 
+static void _destroy(void) {
+	runtime_exec_destroy();
+}
+
 static void _loop(void) {
 	_exec_process();
 }
@@ -162,6 +166,8 @@ int main(int argc, char *argv[]) {
 	_init(argc, argv);
 
 	_loop();
+
+	_destroy();
 
 	return 0;
 }

@@ -96,10 +96,12 @@ int logic_process_run(void) {
 }
 
 int logic_process_stop(void) {
+	/* TODO: To be implemented */
 	return -1;
 }
 
 int logic_process_show(void) {
+	/* TODO: To be implemented */
 	return -1;
 }
 

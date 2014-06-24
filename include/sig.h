@@ -1,7 +1,7 @@
 /**
- * @file daemon.c
+ * @file sig.h
  * @brief uSched
- *        Daemon Main Component
+ *        Signals interface header
  *
  * Date: 24-06-2014
  * 
@@ -25,44 +25,16 @@
  */
 
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
+#ifndef USCHED_SIG_H
+#define USCHED_SIG_H
 
-#include "runtime.h"
-#include "log.h"
-#include "daemonize.h"
-#include "conn.h"
 
-static void _init(int argc, char **argv) {
-	if (runtime_daemon_init(argc, argv) < 0) {
-		log_crit("_init(): runtime_daemon_init(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+/* Prototypes */
 
-	if (daemonize() < 0) {
-		log_crit("_init(): daemonize(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-}
+int sig_daemon_init(void);
+int sig_exec_init(void);
+void sig_daemon_destroy(void);
+void sig_exec_destroy(void);
 
-static void _destroy(void) {
-	runtime_daemon_destroy();
-}
-
-static void _loop(void) {
-	/* Process connections */
-	conn_daemon_process();
-}
-
-int main(int argc, char *argv[]) {
-	_init(argc, argv);
-
-	_loop();
-
-	_destroy();
-
-	return 0;
-}
+#endif
 

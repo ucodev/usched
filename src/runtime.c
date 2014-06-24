@@ -44,10 +44,14 @@
 #include "pool.h"
 #include "schedule.h"
 #include "pmq.h"
+#include "sig.h"
 
+
+/* Globals */
 struct usched_runtime_client runc;
 struct usched_runtime_daemon rund;
 struct usched_runtime_exec rune;
+
 
 int runtime_client_init(int argc, char **argv) {
 	memset(&runc, 0, sizeof(struct usched_runtime_client));
@@ -102,6 +106,12 @@ int runtime_daemon_init(int argc, char **argv) {
 		return -1;
 	}
 
+	/* Initialize signals interface */
+	if (sig_daemon_init() < 0) {
+		log_crit("runtime_daemon_init(): sig_daemon_init(): %s\n", strerror(errno));
+		return -1;
+	}
+
 	/* Initialize IPC */
 	if (pmq_daemon_init() < 0) {
 		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
@@ -145,6 +155,12 @@ int runtime_exec_init(int argc, char **argv) {
 	/* Initialize logging interface */
 	if (log_exec_init() < 0) {
 		debug_printf(DEBUG_CRIT, "runtime_exec_init(): log_exec_init(): %s\n", strerror(errno));
+		return -1;
+	}
+
+	/* Initialize signals interface */
+	if (sig_exec_init() < 0) {
+		log_crit("runtime_exec_init(): sig_exec_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
@@ -197,6 +213,9 @@ void runtime_daemon_destroy(void) {
 	/* Destroy IPC interface */
 	pmq_daemon_destroy();
 
+	/* Destroy signals interface */
+	sig_daemon_destroy();
+	
 	/* Destroy logging interface */
 	log_destroy();
 }
@@ -208,6 +227,9 @@ void runtime_exec_destroy(void) {
 	/* Destroy thread behaviour interface */
 	thread_exec_behaviour_destroy();
 
+	/* Destroy signals interface */
+	sig_exec_destroy();
+	
 	/* Destroy logging interface */
 	log_destroy();
 }

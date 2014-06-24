@@ -154,7 +154,8 @@ static int _entry_authorize_local(struct usched_entry *entry, int fd) {
 }
 
 static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
-	errno = -ENOSYS;
+	/* TODO: To be implemented */
+	errno = ENOSYS;
 
 	return -1;
 }

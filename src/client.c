@@ -53,10 +53,16 @@ static void _do(void) {
 	}
 }
 
+static void _destroy(void) {
+	runtime_client_destroy();
+}
+
 int main(int argc, char *argv[]) {
 	_init(argc, argv);
 
 	_do();
+
+	_destroy();
 
 	return 0;
 }

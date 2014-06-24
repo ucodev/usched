@@ -176,7 +176,7 @@ int runtime_daemon_init(int argc, char **argv) {
 }
 
 int runtime_exec_init(int argc, char **argv) {
-	memset(&rune, 0, sizeof(struct usched_runtime_daemon));
+	memset(&rune, 0, sizeof(struct usched_runtime_exec));
 
 	rune.argc = argc;
 	rune.argv = argv;

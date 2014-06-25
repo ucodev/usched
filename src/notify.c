@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -248,11 +248,11 @@ void notify_write(struct async_op *aop) {
 		if (aop->data)
 			mm_free((void *) aop->data);
 
-		/* Do another rtsaio_read() of 32 bytes in order to wait for another entry */
+		/* Do another rtsaio_read() of usched_entry_hdr_size() bytes in order to wait for another entry */
 		memset(aop, 0, sizeof(struct async_op));
 
 		aop->fd = cur_fd;
-		aop->count = 32;
+		aop->count = usched_entry_hdr_size();
 		aop->priority = 0;
 		aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
 

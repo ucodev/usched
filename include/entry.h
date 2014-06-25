@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,7 @@
 #ifndef USCHED_ENTRY_H
 #define USCHED_ENTRY_H
 
+#include <stddef.h>
 #include <time.h>
 
 #include <sys/types.h>
@@ -48,10 +49,12 @@ typedef enum USCHED_ENTRY_FLAGS {
 } usched_entry_flag_t;
 
 /* uSched Entry Structure */
-#define usched_entry_id(id) ((struct usched_entry [1]) { { id, } })
+#define usched_entry_id(id) 	((struct usched_entry [1]) { { id, } })
+#define usched_entry_hdr_size()	(offsetof(struct usched_entry, cmd))
 #pragma pack(push)
 #pragma pack(4)
 struct usched_entry {
+	/* Entry header */
 	uint32_t id;
 	uint32_t flags;
 	uint32_t uid;
@@ -60,6 +63,8 @@ struct usched_entry {
 	uint32_t step;
 	uint32_t expire;
 	uint32_t cmd_size;
+
+	/* Entry payload */
 	char *cmd;
 
 	/* Reserved */

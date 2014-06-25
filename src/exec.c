@@ -64,7 +64,7 @@ static void *_exec_cmd(void *arg) {
 		debug_printf(DEBUG_INFO, "Executing: %s\nUID: %u\nGID: %u\n", cmd, uid, gid);
 
 		/* Create a new session */
-		if (setsid() == (pid_t) - 1)
+		if (setsid() == (pid_t) -1)
 			log_warn("PID[%u]: _exec_cmd(): setsid(): %s\n", pid, strerror(errno));
 
 		/* Redirect standard files */

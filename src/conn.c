@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -70,8 +70,8 @@ int conn_client_process(void) {
 		cur->expire = htonl(cur->expire);
 		cur->cmd_size = htonl(cur->cmd_size);
 
-		if (write(runc.fd, cur, 32) != 32) {
-			log_crit("conn_client_process(): write() != 32: %s\n", strerror(errno));
+		if (write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
+			log_crit("conn_client_process(): write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
 			entry_destroy(cur);
 			return -1;
 		}
@@ -146,7 +146,8 @@ void conn_daemon_process(void) {
 		memset(aop, 0, sizeof(struct async_op));
 
 		aop->fd = fd;
-		aop->count = 32; /* id(4), flags(4), uid(4), gid(4), trigger(4), step(4), expire(4), cmd_size(4) */
+		/* id(4), flags(4), uid(4), gid(4), trigger(4), step(4), expire(4), cmd_size(4) */
+		aop->count = usched_entry_hdr_size();
 		aop->priority = 0;
 		aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
 

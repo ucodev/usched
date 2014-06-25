@@ -24,8 +24,11 @@
  *
  */
 
+#include <errno.h>
+
 #include "runtime.h"
 #include "conn.h"
+#include "usage.h"
 
 static int _init(const char *req) {
 	if (runtime_client_lib_init(req) < 0)

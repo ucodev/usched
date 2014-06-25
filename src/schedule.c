@@ -132,7 +132,7 @@ int schedule_entry_delete(uint32_t id) {
 int schedule_entry_update(struct usched_entry *entry) {
 	struct timespec trigger, step, expire;
 
-	if (psched_search(rund.psched, entry->id, &trigger, &step, &expire) < 0) {
+	if (psched_search(rund.psched, entry->psched_id, &trigger, &step, &expire) < 0) {
 		/* Entry not found */
 		return 0;
 	}

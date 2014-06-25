@@ -314,6 +314,8 @@ void runtime_daemon_destroy(void) {
 	schedule_daemon_destroy();
 	log_info("Scheduling interface destroyed.\n");
 
+	/* TODO: Serialize pools before destroying them */
+
 	/* Destroy pools */
 	log_info("Destroying pools...\n");
 	pool_daemon_destroy();

@@ -55,6 +55,13 @@ int usched_request(const char *req) {
 	return 0;
 }
 
+usched_usage_client_err_t usched_error(void) {
+	/* TODO: Not yet implemented */
+	errno = ENOSYS;
+
+	return -1;
+}
+
 void usched_destroy(void) {
 	_destroy();
 }

@@ -27,6 +27,7 @@
 
 #include <stdint.h>
 
+/* TODO: A strong collision resistance hashing mechanism is required. */
 uint32_t hash_string_create(const char *str) {
 	unsigned int i = 0;
 	uint32_t ret = 0;

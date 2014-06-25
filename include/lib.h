@@ -29,9 +29,9 @@
 #define USCHED_LIB_H
 
 /* Prototypes */
-int usched_client_init(void);
-int usched_client_request(char *req);
-void usched_client_destroy(void);
+int usched_request(const char *req);
+usched_usage_client_err_t usched_error(void);
+void usched_destroy(void);
 
 #endif
 

@@ -1,9 +1,9 @@
 1. This project is still in the skeleton stage. Here is the list of expected behaviours at the current development stage:
 
   * May not compile
-  * May be boggus
+  * May be bogus
   * May have security issues
-  * May not do what is inteeded to do
+  * May not do what is intended to do
   * May corrupt data
   * May not work at all
 

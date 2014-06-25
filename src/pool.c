@@ -67,16 +67,25 @@ int pool_daemon_init(void) {
 }
 
 void pool_client_destroy(void) {
-	pall_fifo_destroy(runc.epool);
+	if (runc.epool) {
+		pall_fifo_destroy(runc.epool);
+		runc.epool = NULL;
+	}
 }
 
 void pool_daemon_destroy(void) {
 	pthread_mutex_lock(&rund.mutex_apool);
-	pall_cll_destroy(rund.apool);
+	if (rund.apool) {
+		pall_cll_destroy(rund.apool);
+		rund.apool = NULL;
+	}
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	pthread_mutex_lock(&rund.mutex_rpool);
-	pall_cll_destroy(rund.rpool);
+	if (rund.rpool) {
+		pall_cll_destroy(rund.rpool);
+		rund.rpool = NULL;
+	}
 	pthread_mutex_unlock(&rund.mutex_rpool);
 }
 

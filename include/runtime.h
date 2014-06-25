@@ -50,6 +50,7 @@ typedef enum USCHED_RUNTIME_FLAGS {
 struct usched_runtime_client {
 	int argc;
 	char **argv;
+	char *req_str;
 	time_t t;
 	usched_op_t op;
 	usched_usage_client_err_t usage_err;
@@ -98,7 +99,7 @@ extern struct usched_runtime_exec rune;
 
 /* Prototypes */
 int runtime_client_init(int argc, char **argv);
-int runtime_client_lib_init(const char *req);
+int runtime_client_lib_init(void);
 int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
 int runtime_client_interrupted(void);

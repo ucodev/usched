@@ -29,15 +29,46 @@
 #include "runtime.h"
 #include "conn.h"
 #include "usage.h"
+#include "op.h"
+#include "pool.h"
+#include "parse.h"
 
-static int _init(const char *req) {
-	if (runtime_client_lib_init(req) < 0)
+static int _init(void) {
+	if (runtime_client_lib_init() < 0)
 		return -1;
 
 	return 0;
 }
 
-static int _do(void) {
+static int _do(char *req) {
+	/* Clear data from previous request, if any */
+	pool_client_destroy();
+
+	if (runc.req)
+		parse_req_destroy(runc.req);
+
+	if (runc.usage_err_offending) {
+		mm_free(runc.usage_err_offending);
+		runc.usage_err_offending = NULL;
+		runc.usage_err = 0;
+	}
+
+	/* Parse and process data
+	 *
+	 * TODO: Set a unique runtime flag for each type of error in order to be returned by usched_error().
+	 *
+	 */
+	runc.req_str = req;
+
+	if (!(runc.req = parse_instruction(runc.req_str)))
+		return -1;
+
+	if (pool_client_init() < 0)
+		return -1;
+
+	if (op_client_process() < 0)
+		return -1;
+
 	if (conn_client_process() < 0)
 		return -1;
 
@@ -48,14 +79,19 @@ static void _destroy(void) {
 	runtime_client_lib_destroy();
 }
 
-int usched_request(const char *req) {
-	if (_init(req) < 0)
-		return -1;
+int usched_init(void) {
+	return _init();
+}
 
-	if (_do() < 0)
-		return -1;
+int usched_request(char *req) {
+	return _do(req);
+}
 
-	return 0;
+int usched_result(uint32_t *id) {
+	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
+	errno = ENOSYS;
+
+	return -1;
 }
 
 usched_usage_client_err_t usched_error(void) {
@@ -63,6 +99,13 @@ usched_usage_client_err_t usched_error(void) {
 	errno = ENOSYS;
 
 	return -1;
+}
+
+char *usched_error_str(usched_usage_client_err_t error) {
+	/*TODO: Not yet implemened */
+	errno = ENOSYS;
+
+	return NULL;
 }
 
 void usched_destroy(void) {

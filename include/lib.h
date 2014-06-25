@@ -3,7 +3,7 @@
  * @brief uSched
  *        Client Library interface header
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,8 +29,11 @@
 #define USCHED_LIB_H
 
 /* Prototypes */
-int usched_request(const char *req);
+int usched_init(void);
+int usched_request(char *req);
+int usched_result(uint32_t *id);
 usched_usage_client_err_t usched_error(void);
+char *usched_error_str(usched_usage_client_err_t error);
 void usched_destroy(void);
 
 #endif

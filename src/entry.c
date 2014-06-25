@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,6 +43,7 @@
 #include "log.h"
 #include "auth.h"
 #include "conn.h"
+#include "schedule.h"
 
 struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *cmd) {
 	struct usched_entry *entry = NULL;
@@ -155,6 +156,11 @@ static int _entry_authorize_local(struct usched_entry *entry, int fd) {
 
 static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
 	/* TODO: To be implemented */
+
+	/* rtsaio_read() ... */
+	/* Retrieve user/pass */
+	/* auth_remote() ... */
+
 	errno = ENOSYS;
 
 	return -1;
@@ -216,18 +222,16 @@ void entry_pmq_dispatch(void *arg) {
 		goto _finish;
 	}
 
-#if 0
-	/* TODO: Remove the following code and use libpsched interface to query the status of the current sched entry,
-	 * then update this entry according to what was returned by libpsched.
-	 */
-
-	/* If the entry is recurrent, do not delete it from the active pool until it expires */
-	if (entry->step && (!entry->expire || (entry->expire < time(NULL))))	/* FIXME: Grant UTC for both values */
+	/* Update trigger, step and expire parameters of the entry based on psched library data */
+	if (schedule_entry_update(entry) == 1) {
+		/* Entry was successfully updated. */
 		return;
+	}
 
-	entry->trigger += entry->step;
-#endif
-
+	/* Entry was not found. This means that it wasn't a recurrent entry (no step).
+	 * It should be deleted from the active pool.
+	 */
+		
 _finish:
 	/* Remove the entry from active pool */
 	pthread_mutex_lock(&rund.mutex_apool);

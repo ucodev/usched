@@ -170,7 +170,7 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Connections interface initialized.\n");
 
 	/* All good */
-	log_info("All good\n");
+	log_info("All systems go. Ignition!\n");
 
 	return 0;
 }
@@ -220,7 +220,7 @@ int runtime_exec_init(int argc, char **argv) {
 	log_info("IPC interface initialized.\n");
 
 	/* All good */
-	log_info("All good\n");
+	log_info("All systems go. Ignition!\n");
 
 	return 0;
 }
@@ -292,7 +292,7 @@ void runtime_daemon_destroy(void) {
 	sig_daemon_destroy();
 	log_info("Signals interface destroyed.\n");
 
-	log_info("All good\n");
+	log_info("All systems stopped.\n");
 
 	/* Destroy logging interface */
 	log_info("Destroying logging interface...\n");
@@ -315,7 +315,7 @@ void runtime_exec_destroy(void) {
 	sig_exec_destroy();
 	log_info("Signals interface destroyed.\n");
 
-	log_info("All good\n");
+	log_info("All systems stopped.\n");
 
 	/* Destroy logging interface */
 	log_info("Destroying logging interface...\n");

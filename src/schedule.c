@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -127,5 +127,20 @@ int schedule_entry_delete(uint32_t id) {
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	return 0;
+}
+
+int schedule_entry_update(struct usched_entry *entry) {
+	struct timespec trigger, step, expire;
+
+	if (psched_search(rund.psched, entry->id, &trigger, &step, &expire) < 0) {
+		/* Entry not found */
+		return 0;
+	}
+
+	entry->trigger = trigger.tv_sec;
+	entry->step = step.tv_sec;
+	entry->expire = expire.tv_sec;
+
+	return 1;
 }
 

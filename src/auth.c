@@ -42,3 +42,9 @@ int auth_local(int fd, uid_t *uid, gid_t *gid) {
 	return 0;
 }
 
+int auth_remote(int fd, const char *user, const char *passwd) {
+	errno = ENOSYS;
+
+	return -1;
+}
+

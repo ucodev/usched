@@ -32,6 +32,7 @@
 
 /* Prototypes */
 int auth_local(int fd, uid_t *uid, gid_t *gid);
+int auth_remote(int fd, const char *user, const char *passwd);
 
 #endif
 

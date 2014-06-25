@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,20 +24,38 @@
  *
  */
 
+#include "runtime.h"
+#include "conn.h"
 
-int usched_connect(void) {
-	/* TODO: To be implemented */
+static int _init(const char *req) {
+	if (runtime_client_lib_init(req) < 0)
+		return -1;
+
 	return 0;
 }
 
-int usched_request(char *req) {
-	/* TODO: To be implemented */
+static int _do(void) {
+	if (conn_client_process() < 0)
+		return -1;
+
 	return 0;
 }
 
-void usched_client_destroy(void) {
-	/* TODO: To be implemented */
-	return ;
+static void _destroy(void) {
+	runtime_client_lib_destroy();
 }
 
+int usched_request(const char *req) {
+	if (_init(req) < 0)
+		return -1;
+
+	if (_do() < 0)
+		return -1;
+
+	return 0;
+}
+
+void usched_destroy(void) {
+	_destroy();
+}
 

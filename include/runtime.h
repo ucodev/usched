@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -98,12 +98,14 @@ extern struct usched_runtime_exec rune;
 
 /* Prototypes */
 int runtime_client_init(int argc, char **argv);
+int runtime_client_lib_init(const char *req);
 int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
 int runtime_client_interrupted(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
 void runtime_client_destroy(void);
+void runtime_client_lib_destroy(void);
 void runtime_daemon_destroy(void);
 void runtime_exec_destroy(void);
 

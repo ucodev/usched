@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface
  *
- * Date: 24-06-2014
+ * Date: 25-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -90,6 +90,33 @@ int runtime_client_init(int argc, char **argv) {
 		log_crit("runtime_client_init(): conn_client_init(): %s\n", strerror(errno));
 		return -1;
 	}
+
+	/* All good */
+	return 0;
+}
+
+int runtime_client_lib_init(const char *req) {
+	memset(&runc, 0, sizeof(struct usched_runtime_client));
+
+	runc.t = time(NULL);
+
+	/* Parse requested instruction */
+	if (!(runc.req = parse_instruction(req))) {
+		usage_client_show();
+		return -1;
+	}
+
+	/* Initialize pools */
+	if (pool_client_init() < 0)
+		return -1;
+
+	/* Process requested operations */
+	if (op_client_process() < 0)
+		return -1;
+
+	/* Initialize client connection handlers */
+	if (conn_client_init() < 0)
+		return -1;
 
 	/* All good */
 	return 0;
@@ -259,6 +286,21 @@ void runtime_client_destroy(void) {
 
 	/* Destroy logging interface */
 	log_destroy();
+}
+
+void runtime_client_lib_destroy(void) {
+	/* Destroy connection interface */
+	conn_client_destroy();
+
+	/* Destroy pools */
+	pool_client_destroy();
+
+	/* Destroy requests */
+	parse_req_destroy(runc.req);
+
+	/* Destroy usage interface */
+	if (runc.usage_err_offending)
+		mm_free(runc.usage_err_offending);
 }
 
 void runtime_daemon_destroy(void) {

@@ -225,6 +225,8 @@ void notify_read(struct async_op *aop) {
 
 _read_failure:
 	/* Discard connection */
+	log_info("notify_read(): Discarding connection from file descriptor %d\n", aop->fd);
+
 	panet_safe_close(aop->fd);
 
 	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd)))) {
@@ -272,6 +274,9 @@ void notify_write(struct async_op *aop) {
 	}
 
 _write_failure:
+	/* Discard connection */
+	log_info("notify_write(): Discarding connection from file descriptor %d\n", aop->fd);
+
 	panet_safe_close(aop->fd);
 
 	if (aop->data)

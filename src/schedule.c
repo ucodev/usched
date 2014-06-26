@@ -32,6 +32,7 @@
 
 #include <psched/sched.h>
 
+#include "debug.h"
 #include "log.h"
 #include "mm.h"
 #include "runtime.h"

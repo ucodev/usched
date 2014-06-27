@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface header
  *
- * Date: 24-06-2014
+ * Date: 27-06-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,7 +31,7 @@
 #include <arpa/inet.h>
 
 /* Macros */
-#define htonll(val) (*(unsigned char *) (unsigned int [1]) { 1 }) ? ((uint64_t) htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[0]) << 32) | htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[1]) : (val)
+#define htonll(val) 	(*(unsigned char *) (unsigned int [1]) { 1 }) ? ((uint64_t) htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[0]) << 32) | htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[1]) : (val)
 #define ntohll(val)	(htonll(val))
 
 /* Prototypes */

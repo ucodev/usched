@@ -25,7 +25,6 @@
  */
 
 
-
 #ifndef USCHED_NOTIFY_H
 #define USCHED_NOTIFY_H
 

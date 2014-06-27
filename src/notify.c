@@ -40,6 +40,7 @@
 #include "log.h"
 #include "entry.h"
 #include "schedule.h"
+#include "conn.h"
 
 void notify_read(struct async_op *aop) {
 	struct usched_entry *entry = NULL;
@@ -118,13 +119,13 @@ void notify_read(struct async_op *aop) {
 
 			/* NOTE: After schedule_entry_create() success, a new and unique entry->id is now set. */
 
-			/* Reuse 'aop' to reply to the client */
+			/* Reuse 'aop' to reply the entry->id to the client */
 			mm_free((void *) aop->data);
 
 			memset(aop, 0, sizeof(struct async_op));
 
 			aop->fd = cur_fd;
-			aop->count = 4;
+			aop->count = sizeof(entry->id);
 			aop->priority = 0;
 			aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
 
@@ -138,9 +139,9 @@ void notify_read(struct async_op *aop) {
 				goto _read_failure;
 			}
 
-			memcpy((void *) aop->data, (uint32_t [1]) { htonl(entry->id) }, 4);
+			memcpy((void *) aop->data, (uint64_t [1]) { htonll(entry->id) }, sizeof(entry->id));
 
-			debug_printf(DEBUG_INFO, "Delivering entry id: %u\n", entry->id);
+			debug_printf(DEBUG_INFO, "Delivering entry id: %llu\n", entry->id);
 
 			/* Report the unique Entry ID back to the client */
 			if (rtsaio_write(aop) < 0) {

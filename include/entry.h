@@ -55,7 +55,7 @@ typedef enum USCHED_ENTRY_FLAGS {
 #pragma pack(4)
 struct usched_entry {
 	/* Entry header */
-	uint32_t id;
+	uint64_t id;
 	uint32_t flags;
 	uint32_t uid;
 	uint32_t gid;

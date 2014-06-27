@@ -27,8 +27,22 @@
 
 #include <stdint.h>
 
-/* TODO: A strong collision resistance hashing mechanism is required. */
-uint32_t hash_string_create(const char *str) {
+#include "config.h"
+
+uint64_t hash_fnv1a(const char *str) {
+	int i = 0;
+	uint64_t prime = 1099511628211ULL;		/* FNV prime */
+	uint64_t hash = 14695981039346656037ULL; 	/* FNV offset basis */
+
+	for (i = 0; str[i]; i ++) {
+		hash ^= str[i];
+		hash *= prime;
+	}
+
+	return hash;
+}
+
+uint32_t hash_djb2(const char *str) {
 	unsigned int i = 0;
 	uint32_t ret = 0;
 
@@ -36,5 +50,15 @@ uint32_t hash_string_create(const char *str) {
 		ret = 31 * ret + str[i];
 
 	return ret;
+}
+
+uint64_t hash_string_create(const char *str) {
+#if defined(CONFIG_USCHED_HASH_DJB2)
+	return hash_djb2(str);
+#elif defined(CONFIG_USCHED_HASH_FNV1A)
+	return hash_fnv1a(str);
+#else
+ #error "No hashing mechanism was configured. Check the include/config.h file."
+#endif
 }
 

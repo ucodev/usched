@@ -28,6 +28,12 @@
 #ifndef USCHED_CONN_H
 #define USCHED_CONN_H
 
+#include <arpa/inet.h>
+
+/* Macros */
+#define htonll(val) (*(unsigned char *) (unsigned int [1]) { 1 }) ? ((uint64_t) htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[0]) << 32) | htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[1]) : (val)
+#define ntohll(val)	(htonll(val))
+
 /* Prototypes */
 int conn_client_init(void);
 int conn_client_process(void);

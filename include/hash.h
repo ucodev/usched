@@ -29,7 +29,7 @@
 #define USCHED_HASH_H
 
 /* Prototypes */
-uint32_t hash_string_create(const char *str);
+uint64_t hash_string_create(const char *str);
 
 #endif
 

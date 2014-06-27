@@ -61,7 +61,7 @@ int conn_client_process(void) {
 		cmd_len = cur->cmd_size;
 
 		/* Convert endianness to network by order */
-		cur->id = htonl(cur->id);
+		cur->id = htonll(cur->id);
 		cur->flags = htonl(cur->flags);
 		cur->uid = htonl(cur->uid);
 		cur->gid = htonl(cur->gid);
@@ -83,15 +83,15 @@ int conn_client_process(void) {
 		}
 
 		/* Read the response in order to obtain the entry id */
-		if (read(runc.fd, &cur->id, 4) != 4) {
-			log_crit("conn_client_process(): read() != 4: %s\n", strerror(errno));
+		if (read(runc.fd, &cur->id, sizeof(cur->id)) != sizeof(cur->id)) {
+			log_crit("conn_client_process(): read() != %d: %s\n", sizeof(cur->id), strerror(errno));
 			entry_destroy(cur);
 			return -1;
 		}
 
-		cur->id = ntohl(cur->id);
+		cur->id = ntohll(cur->id);
 
-		debug_printf(DEBUG_INFO, "Received Entry ID: %u\n", cur->id);
+		debug_printf(DEBUG_INFO, "Received Entry ID: %llu\n", cur->id);
 
 		entry_destroy(cur);
 	}

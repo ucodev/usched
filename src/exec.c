@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 24-06-2014
+ * Date: 06-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -54,7 +54,7 @@ static void *_exec_cmd(void *arg) {
 	memcpy(&gid, buf + 4, 4);
 
 	/* Create a new process, drop privileges to UID and GID and execute CMD */
-	if ((pid = fork()) < 0) {
+	if ((pid = fork()) == (pid_t) -1) {
 		/* Failure */
 		log_warn("_exec_cmd(): fork(): %s\n", strerror(errno));
 	} else if (!pid) {

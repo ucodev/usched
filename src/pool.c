@@ -3,7 +3,7 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 24-06-2014
+ * Date: 07-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,7 @@
 #include "log.h"
 
 int pool_client_init(void) {
-	if (!(runc.epool = pall_fifo_init(&entry_destroy, NULL, NULL))) {
+	if (!(runc.epool = pall_fifo_init(&entry_destroy, &entry_serialize, &entry_unserialize))) {
 		log_crit("pool_client_init(): runc.epool = pall_fifo_init(): %s\n", strerror(errno));
 
 		return -1;
@@ -49,7 +49,7 @@ int pool_client_init(void) {
 
 int pool_daemon_init(void) {
 	/* Initialize active scheduling entries pool */
-	if (!(rund.apool = pall_cll_init(&entry_compare, &entry_destroy, NULL, NULL))) {
+	if (!(rund.apool = pall_cll_init(&entry_compare, &entry_destroy, &entry_serialize, &entry_unserialize))) {
 		log_crit("pool_daemon_init(): rund.apool = pall_cll_init(): %s\n", strerror(errno));
 		return -1;
 	}
@@ -58,7 +58,7 @@ int pool_daemon_init(void) {
 	rund.apool->set_config(rund.apool, CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD);
 
 	/* Initialize connection pool */
-	if (!(rund.rpool = pall_cll_init(&entry_compare, &entry_destroy, NULL, NULL))) {
+	if (!(rund.rpool = pall_cll_init(&entry_compare, &entry_destroy, &entry_serialize, &entry_unserialize))) {
 		log_crit("pool_daemon_init(): rund.rpool = pall_cll_init(): %s\n", strerror(errno));
 		return -1;
 	}

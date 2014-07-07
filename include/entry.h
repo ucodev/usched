@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 25-06-2014
+ * Date: 07-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -91,6 +91,8 @@ int entry_compare(const void *e1, const void *e2);
 int entry_authorize(struct usched_entry *entry, int fd);
 void entry_pmq_dispatch(void *arg);
 void entry_destroy(void *elem);
+int entry_serialize(pall_fd_t fd, void *entry);
+void *entry_unserialize(pall_fd_t fd);
 
 #endif
 

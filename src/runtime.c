@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface
  *
- * Date: 25-06-2014
+ * Date: 07-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,6 +46,7 @@
 #include "pmq.h"
 #include "sig.h"
 #include "bitops.h"
+#include "marshal.h"
 
 
 /* Globals */
@@ -171,6 +172,39 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Scheduling interface initialized.\n");
+
+	/* Initialize marshal interface */
+	log_info("Initializing marshal interface...\n");
+
+	if (marshal_daemon_init() < 0) {
+		log_crit("runtime_daemon_init(): marshal_daemon_init(): %s\n", strerror(errno));
+		return -1;
+	}
+
+	log_info("Marshal interface initialized.\n");
+
+	/* Unserialize data, if any */
+	log_info("Unserializing active pools...\n");
+
+	if (marshal_daemon_unserialize_pools() < 0) {
+		log_info("Unable to unserialize active pools.\n");
+	} else {
+		log_info("Active pools unserialized.\n");
+	}
+
+	/* Re-initialize marshal interface, wiping the current contents */
+	log_info("Re-initializing marshal interface...\n");
+
+	marshal_daemon_destroy();
+
+	marshal_daemon_wipe();
+
+	if (marshal_daemon_init() < 0) {
+		log_crit("runtime_daemon_init(): marshal_daemon_init(): %s\n", strerror(errno));
+		return -1;
+	}
+
+	log_info("Marshal interface initialized.\n");
 
 	/* Initialize connections interface */
 	log_info("Initializing connections interface...\n");
@@ -303,7 +337,13 @@ void runtime_daemon_destroy(void) {
 	schedule_daemon_destroy();
 	log_info("Scheduling interface destroyed.\n");
 
-	/* TODO: Serialize pools before destroying them */
+	/* Serialize active pools before destroying them */
+	log_info("Serializing active pools...\n");
+	if (marshal_daemon_serialize_pools() < 0) {
+		log_crit("runtime_daemon_destroy(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
+	} else {
+		log_info("Active pools serialized.\n");
+	}
 
 	/* Destroy pools */
 	log_info("Destroying pools...\n");

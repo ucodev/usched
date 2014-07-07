@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 25-06-2014
+ * Date: 07-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <mqueue.h>
+#include <unistd.h>
 
 #include <sys/types.h>
 
@@ -246,5 +247,123 @@ void entry_destroy(void *elem) {
 		mm_free(entry->cmd);
 
 	mm_free(entry);
+}
+
+int entry_serialize(pall_fd_t fd, void *data) {
+	int errsv = 0;
+	struct usched_entry *entry = data;
+
+	if (write(fd, &entry->id, sizeof(entry->id)) != sizeof(entry->id))
+		goto _serialize_error;
+
+	if (write(fd, &entry->flags, sizeof(entry->flags)) != sizeof(entry->flags))
+		goto _serialize_error;
+
+	if (write(fd, &entry->uid, sizeof(entry->uid)) != sizeof(entry->uid))
+		goto _serialize_error;
+
+	if (write(fd, &entry->gid, sizeof(entry->gid)) != sizeof(entry->gid))
+		goto _serialize_error;
+
+	if (write(fd, &entry->trigger, sizeof(entry->trigger)) != sizeof(entry->trigger))
+		goto _serialize_error;
+
+	if (write(fd, &entry->step, sizeof(entry->step)) != sizeof(entry->step))
+		goto _serialize_error;
+
+	if (write(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
+		goto _serialize_error;
+
+	if (write(fd, &entry->cmd_size, sizeof(entry->cmd_size)) != sizeof(entry->cmd_size))
+		goto _serialize_error;
+
+	if (write(fd, entry->cmd, entry->cmd_size) != entry->cmd_size)
+		goto _serialize_error;
+
+	if (write(fd, &entry->psched_id, sizeof(entry->psched_id)) != sizeof(entry->psched_id))
+		goto _serialize_error;
+
+	return 0;
+
+_serialize_error:
+	errsv = errno;
+
+	log_warn("entry_serialize(): write(): %s\n", strerror(errno));
+
+	errno = errsv;
+
+	return -1;
+
+}
+
+void *entry_unserialize(pall_fd_t fd) {
+	int errsv = 0;
+	struct usched_entry *entry = NULL;
+
+	if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
+		errsv = errno;
+		log_warn("entry_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return NULL;
+	}
+
+	memset(entry, 0, sizeof(struct usched_entry));
+
+	if (read(fd, &entry->id, sizeof(entry->id)) != sizeof(entry->id))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->flags, sizeof(entry->flags)) != sizeof(entry->flags))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->uid, sizeof(entry->uid)) != sizeof(entry->uid))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->gid, sizeof(entry->gid)) != sizeof(entry->gid))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->trigger, sizeof(entry->trigger)) != sizeof(entry->trigger))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->step, sizeof(entry->step)) != sizeof(entry->step))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
+		goto _unserialize_error;
+
+	if (read(fd, &entry->cmd_size, sizeof(entry->cmd_size)) != sizeof(entry->cmd_size))
+		goto _unserialize_error;
+
+	if (!(entry->cmd = mm_alloc(entry->cmd_size + 1))) {
+		errsv = errno;
+		log_warn("entry_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		mm_free(entry);
+		errno = errsv;
+		return NULL;
+	}
+
+	memset(entry->cmd, 0, entry->cmd_size + 1);
+
+	if (read(fd, entry->cmd, entry->cmd_size) != entry->cmd_size)
+		goto _unserialize_error;
+
+	if (read(fd, &entry->psched_id, sizeof(entry->psched_id)) != sizeof(entry->psched_id))
+		goto _unserialize_error;
+
+
+	return entry;
+
+_unserialize_error:
+	errsv = errno;
+
+	log_warn("entry_unserialize(): read(): %s\n", strerror(errno));
+
+	if (entry->cmd)
+		mm_free(entry->cmd);
+
+	mm_free(entry);
+
+	errno = errsv;
+
+	return NULL;
 }
 

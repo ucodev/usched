@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 24-06-2014
+ * Date: 07-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,7 @@
 #define CONFIG_USCHED_PATH_MAX			4088
 #define CONFIG_USCHED_CONN_TIMEOUT		5			/* 5 seconds timeout */
 #define CONFIG_USCHED_CONN_USER_NAMED_SOCKET	"/tmp/usched.sock"
+#define CONFIG_USCHED_FILE_DAEMON_SERIALIZE	"/tmp/usched_daemon.dat"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"
 #define CONFIG_USCHED_EXEC_PROC_NAME		"use"

@@ -1,4 +1,2 @@
- - Serialize on exit
- - Unserialize on start
  - Implement del and show operations
 

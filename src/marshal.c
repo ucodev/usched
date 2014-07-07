@@ -92,11 +92,18 @@ int marshal_daemon_unserialize_pools(void) {
 
 		/* Check if the trigger remains valid, i.e., does not exceed the expiration time */
 		if (entry->expire && (entry->trigger > entry->expire)) {
-			log_info("marshal_daemon_unserialize_pools(): An entry is expired.\n");
+			log_info("marshal_daemon_unserialize_pools(): An entry is expired (ID: 0x%llX).\n", entry->id);
 			rund.apool->del(rund.apool, entry);
 			continue;
 		}
 
+		/* If the trigger time is lesser than current time and no step is defined, invalidate this entry. */
+		if ((entry->trigger < t) && !entry->step) {
+			log_info("marshal_daemon_unserialize_pools(): Found an invalid entry (ID: 0x%llX).\n", entry->id);
+			rund.apool->del(rund.apool, entry);
+			continue;
+		}
+			
 		/* Install a new scheduling entry based on the current entry parameters */
 		if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_pmq_dispatch, entry)) == (pschedid_t) -1) {
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));

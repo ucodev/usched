@@ -250,7 +250,7 @@ int runtime_exec_init(int argc, char **argv) {
 	log_info("Initializing thread behaviour interface...\n");
 
 	if (thread_exec_behaviour_init() < 0) {
-		log_crit("thread_exec_behaviour_init(): %s\n", strerror(errno));
+		log_crit("runtmie_exec_init(): thread_exec_behaviour_init(): %s\n", strerror(errno));
 		return -1;
 	}
 
@@ -260,7 +260,7 @@ int runtime_exec_init(int argc, char **argv) {
 	log_info("Initializing IPC interface...\n");
 
 	if (pmq_exec_init() < 0) {
-		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
+		log_crit("runtime_exec_init(): pmq_exec_init(): %s\n", strerror(errno));
 		return -1;
 	}
 

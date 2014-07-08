@@ -45,7 +45,7 @@
 int marshal_daemon_init(void) {
 	int errsv = 0;
 
-	if ((rund.ser_fd = open(CONFIG_USCHED_FILE_DAEMON_SERIALIZE, O_CREAT | O_SYNC, S_IRUSR | S_IWUSR)) < 0) {
+	if ((rund.ser_fd = open(CONFIG_USCHED_FILE_DAEMON_SERIALIZE, O_CREAT | O_SYNC | O_RDWR, S_IRUSR | S_IWUSR)) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_init(): open(\"%s\", ...): %s\n", CONFIG_USCHED_FILE_DAEMON_SERIALIZE, strerror(errno));
 		errno = errsv;

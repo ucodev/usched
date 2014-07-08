@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface
  *
- * Date: 07-07-2014
+ * Date: 08-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -344,6 +344,8 @@ void runtime_daemon_destroy(void) {
 	} else {
 		log_info("Active pools serialized.\n");
 	}
+
+	marshal_daemon_destroy();
 
 	/* Destroy pools */
 	log_info("Destroying pools...\n");

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 07-07-2014
+ * Date: 09-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,8 +33,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <psched/sched.h>
+
+#include <fsop/file.h>
 
 #include "config.h"
 #include "runtime.h"
@@ -72,7 +75,7 @@ int marshal_daemon_serialize_pools(void) {
 }
 
 int marshal_daemon_unserialize_pools(void) {
-	int ret = -1;
+	int ret = -1, errsv = errno;
 	struct usched_entry *entry = NULL;
 	time_t t = time(NULL);
 
@@ -80,6 +83,7 @@ int marshal_daemon_unserialize_pools(void) {
 
 	/* Unserialize active pool */
 	if ((ret = rund.apool->unserialize(rund.apool, rund.ser_fd)) < 0) {
+		errsv = errno;
 		log_warn("marshal_daemon_unserialize_pools(): rund.apool->unserialize(): %s\n", strerror(errno));
 		goto _unserialize_finish;
 	}
@@ -117,7 +121,38 @@ int marshal_daemon_unserialize_pools(void) {
 _unserialize_finish:
 	pthread_mutex_unlock(&rund.mutex_apool);
 
+	errno = errsv;
+
 	return ret;
+}
+
+int marshal_daemon_backup(void) {
+	int errsv = 0;
+	size_t len = sizeof(CONFIG_USCHED_FILE_DAEMON_SERIALIZE) + 40;
+	char *file_bak = NULL;
+
+	if (!(file_bak = mm_alloc(len))) {
+		errsv = errno;
+		log_warn("marshal_daemon_backup(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	memset(file_bak, 0, len);
+
+	snprintf(file_bak, len - 1, "%s-%lu-%u", CONFIG_USCHED_FILE_DAEMON_SERIALIZE, time(NULL), getpid());
+
+	if (fsop_cp(CONFIG_USCHED_FILE_DAEMON_SERIALIZE, file_bak, 8192) < 0) {
+		errsv = errno;
+		log_warn("marshal_daemon_backup(): fsop_cp(): %s\n", strerror(errno));
+		mm_free(file_bak);
+		errno = errsv;
+		return -1;
+	}
+
+	mm_free(file_bak);
+
+	return 0;
 }
 
 void marshal_daemon_wipe(void) {

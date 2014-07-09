@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface
  *
- * Date: 08-07-2014
+ * Date: 09-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -188,6 +188,13 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	if (marshal_daemon_unserialize_pools() < 0) {
 		log_info("Unable to unserialize active pools.\n");
+		log_info("Backing up the current serialization file...\n");
+
+		if (marshal_daemon_backup() < 0) {
+			log_info("runtime_daemon_init(): marshal_daemon_backup(): %s\n", strerror(errno));
+		} else {
+			log_info("Serialization file backed up.\n");
+		}
 	} else {
 		log_info("Active pools unserialized.\n");
 	}

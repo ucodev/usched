@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 07-07-2014
+ * Date: 08-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,8 @@
 #include <unistd.h>
 
 #include <sys/types.h>
+
+#include <pall/cll.h>
 
 #include "config.h"
 #include "usched.h"

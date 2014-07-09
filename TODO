@@ -1,2 +1,3 @@
  - Implement del and show operations
+ - Backup serialization file when it fails to load at startup.
 

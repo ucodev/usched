@@ -60,7 +60,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 	if (index_entry_create(entry) < 0) {
 		log_warn("schedule_entry_create(): index_entry_create(): %s\n", strerror(errno));
 
-		mm_free(entry->cmd);
+		mm_free(entry->payload);
 		mm_free(entry);
 
 		return -1;
@@ -70,7 +70,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_pmq_dispatch, entry)) == (pschedid_t) -1) {
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
 
-		mm_free(entry->cmd);
+		mm_free(entry->payload);
 		mm_free(entry);
 
 		return -1;
@@ -89,7 +89,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 		if (psched_disarm(rund.psched, entry->psched_id) < 0)
 			log_warn("schedule_entry_create(): psched_disarm(): %s\n", strerror(errno));
 
-		mm_free(entry->cmd);
+		mm_free(entry->payload);
 		mm_free(entry);
 
 		return -1;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 08-07-2014
+ * Date: 11-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -48,7 +48,7 @@
 #include "conn.h"
 #include "schedule.h"
 
-struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *cmd) {
+struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *payload) {
 	struct usched_entry *entry = NULL;
 
 	if (!(entry = mm_alloc(sizeof(struct usched_entry))))
@@ -60,7 +60,7 @@ struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *cmd)
 	entry_set_gid(entry, gid);
 	entry_set_trigger(entry, trigger);
 
-	if (entry_set_cmd(entry, cmd, strlen(cmd) + 1) < 0) {
+	if (entry_set_payload(entry, payload, strlen(payload) + 1) < 0) {
 		mm_free(entry);
 		return NULL;
 	}
@@ -78,7 +78,9 @@ void entry_set_flags(struct usched_entry *entry, uint32_t flags) {
 
 void entry_unset_flags_local(struct usched_entry *entry) {
 	/* Clear all local flags */
+	entry_unset_flag(entry, USCHED_ENTRY_FLAG_INIT);
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
+	entry_unset_flag(entry, USCHED_ENTRY_FLAG_FINISH);
 }
 
 int entry_has_flag(struct usched_entry *entry, usched_entry_flag_t flag) {
@@ -113,23 +115,23 @@ void entry_set_expire(struct usched_entry *entry, time_t expire) {
 	entry->expire = (uint32_t) expire;
 }
 
-void entry_set_cmd_size(struct usched_entry *entry, size_t size) {
-	entry->cmd_size = (uint32_t) size;
+void entry_set_psize(struct usched_entry *entry, size_t size) {
+	entry->psize = (uint32_t) size;
 }
 
 
-int entry_set_cmd(struct usched_entry *entry, char *cmd, size_t len) {
+int entry_set_payload(struct usched_entry *entry, char *payload, size_t len) {
 	if (!len)
-		len = strlen(cmd) + 1;
+		len = strlen(payload) + 1;
 
-	if (!(entry->cmd = mm_alloc(len)))
+	if (!(entry->payload = mm_alloc(len)))
 		return -1;
 
-	memset(entry->cmd, 0, len);
+	memset(entry->payload, 0, len);
 
-	memcpy(entry->cmd, cmd, len);
+	memcpy(entry->payload, payload, len);
 
-	entry_set_cmd_size(entry, len);
+	entry_set_psize(entry, len);
 
 	return 0;
 }
@@ -211,14 +213,14 @@ void entry_pmq_dispatch(void *arg) {
 		goto _finish;
 	}
 
-	if ((strlen(entry->cmd) + 9) > sizeof(buf)) {
+	if ((strlen(entry->payload) + 9) > sizeof(buf)) {
 		log_warn("entry_pmq_dispatch(): msg_size > sizeof(buf)\n");
 		goto _finish;
 	}
 
 	memcpy(buf, &entry->uid, 4);
 	memcpy(buf + 4, &entry->gid, 4);
-	memcpy(buf + 8, entry->cmd, strlen(entry->cmd));
+	memcpy(buf + 8, entry->payload, strlen(entry->payload));
 
 	if (mq_send(rund.pmqd, buf, sizeof(buf), 0) < 0) {
 		log_warn("entry_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
@@ -245,8 +247,8 @@ _finish:
 void entry_destroy(void *elem) {
 	struct usched_entry *entry = elem;
 
-	if (entry->cmd)
-		mm_free(entry->cmd);
+	if (entry->payload)
+		mm_free(entry->payload);
 
 	mm_free(entry);
 }
@@ -276,10 +278,10 @@ int entry_serialize(pall_fd_t fd, void *data) {
 	if (write(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
 		goto _serialize_error;
 
-	if (write(fd, &entry->cmd_size, sizeof(entry->cmd_size)) != sizeof(entry->cmd_size))
+	if (write(fd, &entry->psize, sizeof(entry->psize)) != sizeof(entry->psize))
 		goto _serialize_error;
 
-	if (write(fd, entry->cmd, entry->cmd_size) != entry->cmd_size)
+	if (write(fd, entry->payload, entry->psize) != entry->psize)
 		goto _serialize_error;
 
 	if (write(fd, &entry->psched_id, sizeof(entry->psched_id)) != sizeof(entry->psched_id))
@@ -332,10 +334,10 @@ void *entry_unserialize(pall_fd_t fd) {
 	if (read(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->cmd_size, sizeof(entry->cmd_size)) != sizeof(entry->cmd_size))
+	if (read(fd, &entry->psize, sizeof(entry->psize)) != sizeof(entry->psize))
 		goto _unserialize_error;
 
-	if (!(entry->cmd = mm_alloc(entry->cmd_size + 1))) {
+	if (!(entry->payload = mm_alloc(entry->psize + 1))) {
 		errsv = errno;
 		log_warn("entry_unserialize(): mm_alloc(): %s\n", strerror(errno));
 		mm_free(entry);
@@ -343,9 +345,9 @@ void *entry_unserialize(pall_fd_t fd) {
 		return NULL;
 	}
 
-	memset(entry->cmd, 0, entry->cmd_size + 1);
+	memset(entry->payload, 0, entry->psize + 1);
 
-	if (read(fd, entry->cmd, entry->cmd_size) != entry->cmd_size)
+	if (read(fd, entry->payload, entry->psize) != entry->psize)
 		goto _unserialize_error;
 
 	if (read(fd, &entry->psched_id, sizeof(entry->psched_id)) != sizeof(entry->psched_id))
@@ -359,8 +361,8 @@ _unserialize_error:
 
 	log_warn("entry_unserialize(): read(): %s\n", strerror(errno));
 
-	if (entry->cmd)
-		mm_free(entry->cmd);
+	if (entry->payload)
+		mm_free(entry->payload);
 
 	mm_free(entry);
 

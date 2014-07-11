@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 07-07-2014
+ * Date: 11-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,12 +45,14 @@ typedef enum USCHED_ENTRY_FLAGS {
 	USCHED_ENTRY_FLAG_GET,
 
 	/* Local flags - Allowed to be handled by daemon */
-	USCHED_ENTRY_FLAG_AUTHORIZED
+	USCHED_ENTRY_FLAG_INIT,
+	USCHED_ENTRY_FLAG_AUTHORIZED,
+	USCHED_ENTRY_FLAG_FINISH
 } usched_entry_flag_t;
 
 /* uSched Entry Structure */
 #define usched_entry_id(id) 	((struct usched_entry [1]) { { id, } })
-#define usched_entry_hdr_size()	(offsetof(struct usched_entry, cmd))
+#define usched_entry_hdr_size()	(offsetof(struct usched_entry, payload))
 #pragma pack(push)
 #pragma pack(4)
 struct usched_entry {
@@ -62,18 +64,20 @@ struct usched_entry {
 	uint32_t trigger;
 	uint32_t step;
 	uint32_t expire;
-	uint32_t cmd_size;
+	uint32_t psize;		/* Payload size */
 
 	/* Entry payload */
-	char *cmd;
+	char *payload;
 
 	/* Reserved */
-	pschedid_t psched_id;
+	pschedid_t psched_id;	/* The libpsched entry identifier */
+	char *subj;		/* TODO: The entry subject (eg: cmd) */
+	char *username;		/* TODO: The username used for authentication and authorization */
 };
 #pragma pack(pop)
 
 /* Prototypes */
-struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *cmd);
+struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *payload);
 void entry_set_id(struct usched_entry *entry, uint32_t id);
 void entry_set_flags(struct usched_entry *entry, uint32_t flags);
 void entry_unset_flags_local(struct usched_entry *entry);
@@ -85,8 +89,8 @@ void entry_set_gid(struct usched_entry *entry, gid_t gid);
 void entry_set_trigger(struct usched_entry *entry, time_t trigger);
 void entry_set_step(struct usched_entry *entry, time_t step);
 void entry_set_expire(struct usched_entry *entry, time_t expire);
-void entry_set_cmd_size(struct usched_entry *entry, size_t size);
-int entry_set_cmd(struct usched_entry *entry, char *cmd, size_t len);
+void entry_set_psize(struct usched_entry *entry, size_t size);
+int entry_set_payload(struct usched_entry *entry, char *payload, size_t len);
 int entry_compare(const void *e1, const void *e2);
 int entry_authorize(struct usched_entry *entry, int fd);
 void entry_pmq_dispatch(void *arg);

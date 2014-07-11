@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface
  *
- * Date: 24-06-2014
+ * Date: 11-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,6 +45,9 @@ int logic_process_run(void) {
 		/* Allocate a new scheduling entry */
 		if (!(entry = entry_init(cur->uid, cur->gid, time_ref + cur->arg, cur->subj)))
 			return -1;
+
+		/* This is a new entry */
+		entry_set_flag(entry, USCHED_ENTRY_FLAG_NEW);
 
 		/* Check if this is a THEN conjunction */
 		if (cur->conj == USCHED_CONJ_THEN) {

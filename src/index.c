@@ -34,14 +34,14 @@
 
 int index_entry_create(struct usched_entry *e) {
 	char *str = NULL;
-	size_t len = strlen(e->cmd) + 1 + 60 + 1;
+	size_t len = strlen(e->payload) + 1 + 60 + 1;
 
 	if (!(str = mm_alloc(len)))
 		return -1;
 
 	memset(str, 0, len);
 
-	snprintf(str, len - 1, "%s%u%u%u", e->cmd, e->trigger, e->step, e->expire);
+	snprintf(str, len - 1, "%s%u%u%u", e->payload, e->trigger, e->step, e->expire);
 
 	e->id = hash_string_create(str);
 

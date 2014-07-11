@@ -55,10 +55,10 @@ int conn_client_init(void) {
 
 int conn_client_process(void) {
 	struct usched_entry *cur = NULL;
-	size_t cmd_len = 0;
+	size_t payload_len = 0;
 
 	while ((cur = runc.epool->pop(runc.epool))) {
-		cmd_len = cur->cmd_size;
+		payload_len = cur->psize;
 
 		/* Convert endianness to network by order */
 		cur->id = htonll(cur->id);
@@ -68,7 +68,7 @@ int conn_client_process(void) {
 		cur->trigger = htonl(cur->trigger);
 		cur->step = htonl(cur->step);
 		cur->expire = htonl(cur->expire);
-		cur->cmd_size = htonl(cur->cmd_size);
+		cur->psize = htonl(cur->psize);
 
 		if (write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
 			log_crit("conn_client_process(): write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
@@ -76,8 +76,8 @@ int conn_client_process(void) {
 			return -1;
 		}
 
-		if (write(runc.fd, cur->cmd, cmd_len) != cmd_len) {
-			log_crit("conn_client_process(): write() != cmd_len: %s\n", strerror(errno));
+		if (write(runc.fd, cur->payload, payload_len) != payload_len) {
+			log_crit("conn_client_process(): write() != payload_len: %s\n", strerror(errno));
 			entry_destroy(cur);
 			return -1;
 		}
@@ -146,7 +146,7 @@ void conn_daemon_process(void) {
 		memset(aop, 0, sizeof(struct async_op));
 
 		aop->fd = fd;
-		/* id(4), flags(4), uid(4), gid(4), trigger(4), step(4), expire(4), cmd_size(4) */
+		/* id(4), flags(4), uid(4), gid(4), trigger(4), step(4), expire(4), psize(4) */
 		aop->count = usched_entry_hdr_size();
 		aop->priority = 0;
 		aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;

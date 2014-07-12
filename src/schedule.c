@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 11-07-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -100,31 +100,52 @@ int schedule_entry_create(struct usched_entry *entry) {
 	return 0;
 }
 
-int schedule_entry_delete(uint32_t id) {
-	struct usched_entry *entry = NULL;
+struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {
+	int errsv = 0;
 
 	pthread_mutex_lock(&rund.mutex_apool);
-	entry = rund.apool->search(rund.apool, usched_entry_id(id));
+	entry = rund.apool->search(rund.apool, entry);
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	if (!entry) {
-		log_warn("schedule_entry_delete(): entry == NULL\n");
-		return -1;
+		errsv = errno;
+		log_warn("schedule_entry_disable(): entry == NULL\n");
+		errno = errsv;
+		return NULL;
 	}
 
 	if (!entry->psched_id) {
-		log_warn("schedule_entry_delete(): entry->psched_id == NULL\n");
-		return -1;
+		errsv = errno;
+		log_warn("schedule_entry_disable(): entry->psched_id == NULL\n");
+		errno = errsv;
+		return NULL;
 	}
 
 	if (psched_disarm(rund.psched, entry->psched_id) < 0) {
-		log_warn("schedule_entry_delete(): psched_disarm(): %s\n", strerror(errno));
-		return -1;
+		errsv = errno;
+		log_warn("schedule_entry_disable(): psched_disarm(): %s\n", strerror(errno));
+		errno = errsv;
+		/* This isn't critical, so do not return NULL here. */
 	}
 
 	pthread_mutex_lock(&rund.mutex_apool);
-	rund.apool->del(rund.apool, entry);
+	entry = rund.apool->pope(rund.apool, entry);
 	pthread_mutex_unlock(&rund.mutex_apool);
+
+	return entry;
+}
+
+int schedule_entry_delete(struct usched_entry *entry) {
+	int errsv = 0;
+
+	if (!(entry = schedule_entry_disable(entry))) {
+		errsv = errno;
+		log_warn("schedule_entry_delete(): schedule_entry_disable(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	entry_destroy(entry);
 
 	return 0;
 }

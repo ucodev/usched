@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 11-07-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -69,6 +69,11 @@ _read_failure:
 
 	panet_safe_close(aop->fd);
 
+	/* Entries in the remote connections pool (rpool) are always identified by its file descriptor.
+	 * Although the entry's handling functions will remove invalid connections from this pool (rpool),
+	 * this last search will grant that no residual entries will be kept in the pool in the case of a
+	 * mishandled error.
+	 */
 	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd)))) {
 		pthread_mutex_lock(&rund.mutex_rpool);
 		rund.rpool->del(rund.rpool, entry);

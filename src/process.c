@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 11-07-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,7 +49,10 @@ static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry
 	if (rund.rpool->insert(rund.rpool, entry) < 0) {
 		errsv = errno;
 		log_warn("process_recv_create(): rund.rpool->insert(): %s\n", strerror(errno));
-		entry_destroy(entry);
+
+		/* NOTE: In this special case, we do not need to pop the entry from the rpool as we were unable
+		 * to insert it.
+		 */
 		errno = errsv;
 
 		return -1;
@@ -58,11 +61,22 @@ static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry
 	mm_free((void *) aop->data);
 
 	if (!entry->psize) {
-		/* TODO: If the entry payload size is zero, don't try to receive anything and process the
-		 * the response at this point.
+		/* A NEW entry shall contain payload (for a command or for authentication).
+		 * If no payload is present at this stage, this entry is invalid.
 		 */
-		//mm_free((void *) aop);
-		//return;
+		errsv = errno;
+		log_warn("_process_recv_create_op_new(): entry->psize == 0.\n");
+
+		/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
+		 * context.
+		 */
+		pthread_mutex_lock(&rund.mutex_rpool);
+		rund.rpool->pope(rund.rpool, entry); 
+		pthread_mutex_unlock(&rund.mutex_rpool);
+
+		errno = errsv;
+
+		return -1;
 	}
 
 	/* Reuse 'aop' for next read request: Receive the entry command */
@@ -77,8 +91,11 @@ static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("process_recv_create(): aop->data = mm_alloc(): %s\n", strerror(errno));
 
+		/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
+		 * context.
+		 */
 		pthread_mutex_lock(&rund.mutex_rpool);
-		rund.rpool->del(rund.rpool, entry);
+		rund.rpool->pope(rund.rpool, entry); 
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		errno = errsv;
@@ -93,8 +110,11 @@ static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("process_recv_create(): rtsaio_read(): %s\n", strerror(errno));
 
+		/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
+		 * context.
+		 */
 		pthread_mutex_lock(&rund.mutex_rpool);
-		rund.rpool->del(rund.rpool, entry);
+		rund.rpool->pope(rund.rpool, entry); 
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		errno = errsv;
@@ -127,8 +147,11 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("process_recv_update(): aop->count != entry->psize\n");
 
+		/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
+		 * context.
+		 */
 		pthread_mutex_lock(&rund.mutex_rpool);
-		rund.rpool->del(rund.rpool, entry);
+		rund.rpool->pope(rund.rpool, entry); 
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		errno = errsv;
@@ -141,8 +164,11 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("process_recv_update(): entry_set_payload(): %s\n", strerror(errno));
 
+		/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
+		 * context.
+		 */
 		pthread_mutex_lock(&rund.mutex_rpool);
-		rund.rpool->del(rund.rpool, entry);
+		rund.rpool->pope(rund.rpool, entry); 
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		errno = errsv;
@@ -161,6 +187,12 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	if (schedule_entry_create(entry) < 0) {
 		errsv = errno;
 		log_warn("process_recv_update(): schedule_entry_create(): %s\n", strerror(errno));
+
+		/* NOTE: This is a special case: The current entry is no longer in the rpool and wasn't inserted into
+		 * the active pool (apool) due to errors.
+		 * Since the entry was already pop'd, we don't need to do it here.
+		 */
+
 		errno = errsv;
 
 		return -1;
@@ -181,11 +213,8 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	if (!(aop->data = mm_alloc(4))) {
 		errsv = errno;
 		log_warn("process_recv_update(): aop->data = mm_alloc(4): %s\n", strerror(errno));
-
-		pthread_mutex_lock(&rund.mutex_apool);
-		rund.apool->del(rund.apool, entry);
-		pthread_mutex_unlock(&rund.mutex_apool);
-
+		/* If we're unable to comunicate with the client, the scheduled entry should be destroyed */
+		schedule_entry_delete(entry->id);
 		errno = errsv;
 
 		return -1;
@@ -199,11 +228,8 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	if (rtsaio_write(aop) < 0) {
 		errsv = errno;
 		log_warn("process_recv_update(): rtsaio_write(): %s\n", strerror(errno));
-
-		pthread_mutex_lock(&rund.mutex_apool);
-		rund.apool->del(rund.apool, entry);
-		pthread_mutex_unlock(&rund.mutex_apool);
-
+		/* If we're unable to comunicate with the client, the scheduled entry should be destroyed */
+		schedule_entry_delete(entry->id);
 		errno = errsv;
 
 		return -1;
@@ -259,6 +285,7 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 		if (_process_recv_create_op_new(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_create(): _process_recv_create_op_new(): %s\n", strerror(errno));
+			/* Destroy the current entry */
 			entry_destroy(entry);
 			errno = errsv;
 
@@ -268,6 +295,7 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 		if (_process_recv_create_op_del(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_create(): _process_recv_create_op_del(): %s\n", strerror(errno));
+			/* Destroy the current entry */
 			entry_destroy(entry);
 			errno = errsv;
 
@@ -277,6 +305,7 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 		if (_process_recv_create_op_get(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_create(): _process_recv_create_op_get(): %s\n", strerror(errno));
+			/* Destroy the current entry */
 			entry_destroy(entry);
 			errno = errsv;
 
@@ -285,6 +314,7 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	} else {
 		log_warn("process_recv_create(): The requested operation is invalid.\n");
 
+		/* Destroy the current entry */
 		entry_destroy(entry);
 
 		return NULL;
@@ -301,6 +331,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): Trying to update an existing entry that wasn't initialized yet.\n");
 
+		/* Delete the entry from rpool. */
 		pthread_mutex_lock(&rund.mutex_rpool);
 		rund.rpool->del(rund.rpool, entry);
 		pthread_mutex_unlock(&rund.mutex_rpool);
@@ -315,6 +346,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): entry_authorize(): %s\n", strerror(errno));
 
+		/* Delete the entry from rpool. */
 		pthread_mutex_lock(&rund.mutex_rpool);
 		rund.rpool->del(rund.rpool, entry);
 		pthread_mutex_unlock(&rund.mutex_rpool);
@@ -329,6 +361,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): Unauthorized entry\n", strerror(errno));
 
+		/* Delete the entry from rpool. */
 		pthread_mutex_lock(&rund.mutex_rpool);
 		rund.rpool->del(rund.rpool, entry);
 		pthread_mutex_unlock(&rund.mutex_rpool);
@@ -343,6 +376,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		if (_process_recv_update_op_new(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_new(): %s\n", strerror(errno));
+			/* Destroy the current entry in this context, as it was already pop'd from the rpool */
 			entry_destroy(entry);
 			errno = errsv;
 
@@ -352,6 +386,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		if (_process_recv_update_op_del(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_del(): %s\n", strerror(errno));
+			/* Destroy the current entry in this context, as it was already pop'd from the rpool */
 			entry_destroy(entry);
 			errno = errsv;
 
@@ -361,6 +396,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		if (_process_recv_update_op_get(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_get(): %s\n", strerror(errno));
+			/* Destroy the current entry in this context, as it was already pop'd from the rpool */
 			entry_destroy(entry);
 			errno = errsv;
 
@@ -369,7 +405,12 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 	} else {
 		log_warn("process_recv_update(): The requested operation is invalid.\n");
 
-		entry_destroy(entry);
+		/* Since no _process_recv_update_op_*() function was called, the current entry is still present in
+		 * the rpool. We need to delete it in this context.
+		 */
+		pthread_mutex_lock(&rund.mutex_rpool);
+		rund.rpool->del(rund.rpool, entry);
+		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		return -1;
 	}

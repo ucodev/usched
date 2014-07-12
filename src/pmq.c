@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface
  *
- * Date: 24-06-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,6 +38,7 @@
 #include "pmq.h"
 
 int pmq_daemon_init(void) {
+	int errsv = 0;
 	struct mq_attr mqattr = {
 		0,				/* Flags */
 		CONFIG_USCHED_PMQ_MSG_MAX,	/* Max number of messagees on queue */
@@ -46,8 +47,9 @@ int pmq_daemon_init(void) {
 	};
 
 	if ((rund.pmqd = mq_open(CONFIG_USCHED_PMQ_DESC_NAME, O_WRONLY | O_CREAT, 0200, &mqattr)) == (mqd_t) - 1) {
+		errsv = errno;
 		log_crit("pmq_daemon_init(): mq_open(): %s\n", strerror(errno));
-
+		errno = errsv;
 		return -1;
 	}
 
@@ -55,6 +57,7 @@ int pmq_daemon_init(void) {
 }
 
 int pmq_exec_init(void) {
+	int errsv = 0;
 	struct mq_attr mqattr = {
 		0,				/* Flags */
 		CONFIG_USCHED_PMQ_MSG_MAX,	/* Max number of messagees on queue */
@@ -63,8 +66,9 @@ int pmq_exec_init(void) {
 	};
 
 	if ((rune.pmqd = mq_open(CONFIG_USCHED_PMQ_DESC_NAME, O_RDONLY, 0400, &mqattr)) == (mqd_t) - 1) {
+		errsv = errno;
 		log_crit("pmq_exec_init(): mq_open(): %s\n", strerror(errno));
-
+		errno = errsv;
 		return -1;
 	}
 

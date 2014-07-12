@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 27-06-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,8 +45,12 @@
 #include "log.h"
 
 int conn_client_init(void) {
+	int errsv = 0;
+
 	if ((runc.fd = panet_client_unix(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, PANET_PROTO_UNIX_STREAM)) < 0) {
+		errsv = errno;
 		log_crit("conn_client_init(): panet_client_unix(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -54,6 +58,7 @@ int conn_client_init(void) {
 }
 
 int conn_client_process(void) {
+	int errsv = 0;
 	struct usched_entry *cur = NULL;
 	size_t payload_len = 0;
 
@@ -71,21 +76,27 @@ int conn_client_process(void) {
 		cur->psize = htonl(cur->psize);
 
 		if (write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
+			errsv = errno;
 			log_crit("conn_client_process(): write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
 			entry_destroy(cur);
+			errno = errsv;
 			return -1;
 		}
 
 		if (write(runc.fd, cur->payload, payload_len) != payload_len) {
+			errsv = errno;
 			log_crit("conn_client_process(): write() != payload_len: %s\n", strerror(errno));
 			entry_destroy(cur);
+			errno = errsv;
 			return -1;
 		}
 
 		/* Read the response in order to obtain the entry id */
 		if (read(runc.fd, &cur->id, sizeof(cur->id)) != sizeof(cur->id)) {
+			errsv = errno;
 			log_crit("conn_client_process(): read() != %d: %s\n", sizeof(cur->id), strerror(errno));
 			entry_destroy(cur);
+			errno = errsv;
 			return -1;
 		}
 
@@ -104,18 +115,26 @@ void conn_client_destroy(void) {
 }
 
 int conn_daemon_init(void) {
+	int errsv = 0;
+
 	if (rtsaio_init(-5, SCHED_OTHER, 0, &notify_write, &notify_read) < 0) {
+		errsv = errno;
 		log_crit("conn_daemon_init(): rtsaio_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
 	if ((rund.fd = panet_server_unix(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
+		errsv = errno;
 		log_crit("conn_daemon_init(): panet_server_unix(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
 	if (chmod(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, 0666) < 0) {
+		errsv = errno;
 		log_crit("conn_daemon_init(): chmod(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -175,10 +194,13 @@ void conn_daemon_destroy(void) {
 }
 
 int conn_is_local(int fd) {
+	int errsv = 0;
 	int ret = panet_info_sock_family(fd);
 
 	if (ret < 0) {
+		errsv = errno;
 		log_warn("conn_is_local(): panet_info_sock_family(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -186,10 +208,13 @@ int conn_is_local(int fd) {
 }
 
 int conn_is_remote(int fd) {
+	int errsv = 0;
 	int ret = panet_info_sock_family(fd);
 
 	if (ret < 0) {
+		errsv = errno;
 		log_warn("conn_is_remote(): panet_info_sock_family(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 

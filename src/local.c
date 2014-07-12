@@ -3,7 +3,7 @@
  * @brief uSched
  *        Local utilities and handlers interface
  *
- * Date: 24-06-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -48,6 +48,8 @@
 #include "local.h"
 
 int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
+	int errsv = 0;
+
 #if defined(CONFIG_SYS_LINUX) || defined(CONFIG_SYS_NETBSD)
 	socklen_t uc_len = 0;
  #if defined(SO_PEERCRED)
@@ -69,7 +71,9 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 
 	if (getsockopt(fd, 0, LOCAL_PEERCRED, &uc, &uc_len) < 0) {
  #endif
+		errsv = errno;
 		log_warn("local_fd_peer_cred(): getsockopt(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -82,7 +86,9 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 	return 0;
 #elif defined(CONFIG_SYS_BSD)
 	if (getpeereid(fd, uid, gid) < 0) {
+		errsv = errno;
 		log_warn("local_fd_peer_cred(): getpeereid(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -91,7 +97,9 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 	ucred_t *uc = NULL;
 
 	if (getpeerucred(fd, &ucred) < 0) {
+		errsv = errno;
 		log_warn("local_fd_peer_cred(): getpeerucred(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -102,7 +110,7 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 
 	return 0;
 #else
-	errno = ENOSYS;
+	errsv = errno = ENOSYS;
 #endif
 	return -1;
 }

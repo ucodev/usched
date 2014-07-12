@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 09-07-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,6 +59,7 @@ int marshal_daemon_init(void) {
 }
 
 int marshal_daemon_serialize_pools(void) {
+	int errsv = 0;
 	int ret = -1;
 
 	pthread_mutex_lock(&rund.mutex_apool);
@@ -66,8 +67,11 @@ int marshal_daemon_serialize_pools(void) {
 	/* NOTE: All entries present in the active pool shall be already disarmed (granted by schedule_daemon_destroy()) */
 
 	/* Serialize the active pool */
-	if ((ret = rund.apool->serialize(rund.apool, rund.ser_fd)) < 0)
+	if ((ret = rund.apool->serialize(rund.apool, rund.ser_fd)) < 0) {
+		errsv = errno;
 		log_warn("marshal_daemon_serialize_pools(): rund.apool->serialize(): %s\n", strerror(errno));
+		errno = errsv;
+	}
 
 	pthread_mutex_unlock(&rund.mutex_apool);
 

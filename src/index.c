@@ -3,7 +3,7 @@
  * @brief uSched
  *        Indexing interface
  *
- * Date: 24-06-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,17 +27,25 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
+#include <string.h>
 
 #include "mm.h"
 #include "entry.h"
 #include "hash.h"
+#include "log.h"
 
 int index_entry_create(struct usched_entry *e) {
+	int errsv = 0;
 	char *str = NULL;
 	size_t len = strlen(e->payload) + 1 + 60 + 1;
 
-	if (!(str = mm_alloc(len)))
+	if (!(str = mm_alloc(len))) {
+		errsv = errno;
+		log_warn("index_entry_create(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
+	}
 
 	memset(str, 0, len);
 

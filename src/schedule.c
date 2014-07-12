@@ -40,9 +40,12 @@
 #include "schedule.h"
 
 int schedule_daemon_init(void) {
-	if (!(rund.psched = psched_thread_init())) {
-		log_crit("schedule_daemon_init(): psched_thread_init(): %s\n", strerror(errno));
+	int errsv = 0;
 
+	if (!(rund.psched = psched_thread_init())) {
+		errsv = errno;
+		log_crit("schedule_daemon_init(): psched_thread_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -58,20 +61,26 @@ int schedule_entry_create(struct usched_entry *entry) {
 
 	/* Create the unique index key for this entry */
 	if (index_entry_create(entry) < 0) {
+		errsv = errno;
 		log_warn("schedule_entry_create(): index_entry_create(): %s\n", strerror(errno));
 
 		mm_free(entry->payload);
 		mm_free(entry);
+
+		errno = errsv;
 
 		return -1;
 	}
 
 	/* Install a new scheduling entry based on the current entry parameters */
 	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_pmq_dispatch, entry)) == (pschedid_t) -1) {
+		errsv = errno;
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 		mm_free(entry->payload);
 		mm_free(entry);
+
+		errno = errsv;
 
 		return -1;
 	}
@@ -91,6 +100,8 @@ int schedule_entry_create(struct usched_entry *entry) {
 
 		mm_free(entry->payload);
 		mm_free(entry);
+
+		errno = errsv;
 
 		return -1;
 	}

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface
  *
- * Date: 24-06-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,8 +34,12 @@
 #include "local.h"
 
 int auth_local(int fd, uid_t *uid, gid_t *gid) {
+	int errsv = 0;
+
 	if (local_fd_peer_cred(fd, uid, gid) < 0) {
+		errsv = errno;
 		log_warn("auth_local(): local_fd_peer_cred(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 

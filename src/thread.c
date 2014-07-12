@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface
  *
- * Date: 24-06-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,15 +35,19 @@
 #include "thread.h"
 
 int thread_daemon_mutexes_init(void) {
-	if (pthread_mutex_init(&rund.mutex_rpool, NULL)) {
-		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+	int errsv = 0;
 
+	if (pthread_mutex_init(&rund.mutex_rpool, NULL)) {
+		errsv = errno;
+		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
 	if (pthread_mutex_init(&rund.mutex_apool, NULL)) {
+		errsv = errno;
 		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
-
+		errno = errsv;
 		return -1;
 	}
 
@@ -72,8 +76,12 @@ static void _thread_atfork_child(void) {
 }
 
 int thread_exec_behaviour_init(void) {
+	int errsv = 0;
+
 	if (pthread_atfork(&_thread_atfork_prepare, &_thread_atfork_parent, &_thread_atfork_child)) {
+		errsv = errno;
 		log_crit("thread_exec_behaviour_init(): pthread_atfork(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 

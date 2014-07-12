@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 11-07-2014
+ * Date: 12-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,10 +49,15 @@
 #include "schedule.h"
 
 struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *payload) {
+	int errsv = 0;
 	struct usched_entry *entry = NULL;
 
-	if (!(entry = mm_alloc(sizeof(struct usched_entry))))
+	if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
+		errsv = errno;
+		log_warn("entry_init(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
 		return NULL;
+	}
 
 	memset(entry, 0, sizeof(struct usched_entry));
 
@@ -61,7 +66,10 @@ struct usched_entry *entry_init(uid_t uid, gid_t gid, time_t trigger, char *payl
 	entry_set_trigger(entry, trigger);
 
 	if (entry_set_payload(entry, payload, strlen(payload) + 1) < 0) {
+		errsv = errno;
+		log_warn("entry_init(): entry_set_payload(): %s\n", strerror(errno));
 		mm_free(entry);
+		errno = errsv;
 		return NULL;
 	}
 
@@ -121,11 +129,17 @@ void entry_set_psize(struct usched_entry *entry, size_t size) {
 
 
 int entry_set_payload(struct usched_entry *entry, char *payload, size_t len) {
+	int errsv = 0;
+
 	if (!len)
 		len = strlen(payload) + 1;
 
-	if (!(entry->payload = mm_alloc(len)))
+	if (!(entry->payload = mm_alloc(len))) {
+		errsv = errno;
+		log_warn("entry_set_payload(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
+	}
 
 	memset(entry->payload, 0, len);
 
@@ -149,8 +163,12 @@ int entry_compare(const void *e1, const void *e2) {
 }
 
 static int _entry_authorize_local(struct usched_entry *entry, int fd) {
+	int errsv = 0;
+
 	if (auth_local(fd, &entry->uid, &entry->gid) < 0) {
+		errsv = errno;
 		log_warn("entry_authorize_local(): auth_local(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -172,6 +190,7 @@ static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
 }
 
 int entry_authorize(struct usched_entry *entry, int fd) {
+	int errsv = 0;
 	int ret = -1;
 
 	if ((ret = conn_is_local(fd)) < 0) {
@@ -179,17 +198,23 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 		return -1;
 	} else if (ret == 1) {
 		if ((ret = _entry_authorize_local(entry, fd)) < 0) {
+			errsv = errno;
 			log_warn("entry_authorize(): entry_authorize_local(): %s\n", strerror(errno));
+			errno = errsv;
 			return -1;
 		}
 
 		return ret;	/* ret == 1: Authorized, ret == 0: Not authorized (connection will timeout) */
 	} else if ((ret = conn_is_remote(fd) < 0)) {
+		errsv = errno;
 		log_warn("entry_authorize(): conn_is_remote(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	} else if (ret == 1) {
 		if ((ret = _entry_authorize_remote(entry, fd)) < 0) {
+			errsv = errno;
 			log_warn("entry_authorize(): entry_authorize_remote(): %s\n", strerror(errno));
+			errno = errsv;
 			return -1;
 		}
 
@@ -202,6 +227,7 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 }
 
 void entry_pmq_dispatch(void *arg) {
+	int errsv = 0;
 	char buf[CONFIG_USCHED_PMQ_MSG_SIZE];
 	struct usched_entry *entry = arg;
 
@@ -210,11 +236,13 @@ void entry_pmq_dispatch(void *arg) {
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		log_warn("entry_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
+		errno = EACCES;
 		goto _finish;
 	}
 
 	if ((strlen(entry->payload) + 9) > sizeof(buf)) {
 		log_warn("entry_pmq_dispatch(): msg_size > sizeof(buf)\n");
+		errno = EMSGSIZE;
 		goto _finish;
 	}
 
@@ -223,7 +251,9 @@ void entry_pmq_dispatch(void *arg) {
 	memcpy(buf + 8, entry->payload, strlen(entry->payload));
 
 	if (mq_send(rund.pmqd, buf, sizeof(buf), 0) < 0) {
+		errsv = errno;
 		log_warn("entry_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
+		errno = errsv;
 		goto _finish;
 	}
 

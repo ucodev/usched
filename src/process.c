@@ -202,20 +202,10 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 _update_op_new_failure_3:
 	/* If we're unable to comunicate with the client, the scheduled entry should be disabled and pop'd from apool */
 	if (!schedule_entry_disable(entry)) {
-		/* This is critical: A possible race condition would happen here if we do not validate the existence of
-		 * the disabled entry.
-		 * This special case require us to create a temporary entry so it can be free'd in the correct context
-		 * that will be unaware of this situation.
+		/* This is critical and should never happen. This means that a race condition occured that allowed
+		 * the user to operate over a unfinished entry. We'll abort here in order to prevent further damage.
 		 */
-		if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
-			/* We're in a very, very bad situation. Without memory available we'll be unable to handle this
-			 * critical handling. We need to abort() the execution here before something worst happens.
-			 */
-			abort();
-		}
-
-		/* Reset the temporary entry region */
-		memset(entry, 0, sizeof(struct usched_entry));
+		abort();
 	}
 
 	goto _update_op_new_failure_1;
@@ -236,11 +226,21 @@ _update_op_new_failure_1:
 
 static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry *entry) {
 	/* TODO: To be implemented */
+
+	/* TODO: Check if the requested entries to be deleted are flagged as FINISH. Operations other than NEW over
+	 * an unfinished entry shall be discarded and logged
+	 */
+
 	return -1;
 }
 
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
 	/* TODO: To be implemented */
+
+	/* TODO: Check if the requested entries to be deleted are flagged as FINISH. Operations other than NEW over
+	 * an unfinished entry shall be discarded and logged
+	 */
+
 	return -1;
 }
 

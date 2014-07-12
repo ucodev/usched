@@ -70,10 +70,11 @@ int marshal_daemon_serialize_pools(void) {
 	if ((ret = rund.apool->serialize(rund.apool, rund.ser_fd)) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_serialize_pools(): rund.apool->serialize(): %s\n", strerror(errno));
-		errno = errsv;
 	}
 
 	pthread_mutex_unlock(&rund.mutex_apool);
+
+	errno = errsv;
 
 	return ret;
 }

@@ -42,111 +42,11 @@
 #include "schedule.h"
 #include "conn.h"
 
-static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry *entry) {
-	int errsv = 0;
-
-	/* Free aop data. We no longer need it */
-	mm_free((void *) aop->data);
-	aop->data = NULL;
-
-	if (!entry->psize) {
-		/* A NEW entry shall contain payload (for a command or for authentication).
-		 * If no payload is present at this stage, this entry is invalid.
-		 */
-		errsv = errno;
-		log_warn("_process_recv_create_op_new(): entry->psize == 0.\n");
-
-		goto _create_op_new_failure_1;
-	}
-
-	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
-
-	/* Insert this entry into the rpool */
-	if (rund.rpool->insert(rund.rpool, entry) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_create_op_new(): rund.rpool->insert(): %s\n", strerror(errno));
-
-		/* NOTE: In this special case, we do not need to pop the entry from the rpool as we were unable
-		 * to insert it.
-		 */
-		goto _create_op_new_failure_1;
-	}
-
-	/* Reuse 'aop' for next read request: Receive the entry command */
-	memset(aop, 0, sizeof(struct async_op));
-
-	aop->fd = entry->id;
-	aop->count = entry->psize;
-	aop->priority = 0;
-	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
-
-	if (!(aop->data = mm_alloc(aop->count))) {
-		errsv = errno;
-		log_warn("_process_recv_create_op_new(): aop->data = mm_alloc(): %s\n", strerror(errno));
-
-		goto _create_op_new_failure_2;
-	}
-
-	memset((void *) aop->data, 0, aop->count);
-
-	/* Request the entry command */
-	if (rtsaio_read(aop) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_create_op_new(): rtsaio_read(): %s\n", strerror(errno));
-
-		goto _create_op_new_failure_2;
-	}
-
-	return 0;
-
-_create_op_new_failure_2:
-	/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
-	 * context.
-	 */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	rund.rpool->pope(rund.rpool, entry); 
-	pthread_mutex_unlock(&rund.mutex_rpool);
-
-_create_op_new_failure_1:
-	errno = errsv;
-
-	return -1;
-}
-
-static int _process_recv_create_op_del(struct async_op *aop, struct usched_entry *entry) {
-	/* TODO: To be implemented */
-	return -1;
-}
-
-static int _process_recv_create_op_get(struct async_op *aop, struct usched_entry *entry) {
-	/* TODO: To be implemented */
-	return -1;
-}
-
 static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0;
 	int cur_fd = aop->fd;
 
-	/* Process the received entry command */
-	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
-
-	/* Grant that the received data does not exceed the expected size */
-	if (aop->count != entry->psize) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_new(): aop->count != entry->psize\n");
-
-		goto _update_op_new_failure_2;
-	}
-
-	/* Set the received entry command */
-	if (entry_set_payload(entry, (char *) aop->data, entry->psize) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_new(): entry_set_payload(): %s\n", strerror(errno));
-
-		goto _update_op_new_failure_2;
-	}
-
-	debug_printf(DEBUG_INFO, "CMD: %s\n", entry->payload);
+	debug_printf(DEBUG_INFO, "PAYLOAD: %s\n", entry->payload);
 
 	/* Pop the entry from the pool */
 	pthread_mutex_lock(&rund.mutex_rpool);
@@ -182,7 +82,7 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("_process_recv_update_op_new(): aop->data = mm_alloc(4): %s\n", strerror(errno));
 
-		goto _update_op_new_failure_3;
+		goto _update_op_new_failure_2;
 	}
 
 	memcpy((void *) aop->data, (uint64_t [1]) { htonll(entry->id) }, sizeof(entry->id));
@@ -194,12 +94,12 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("_process_recv_update_op_new(): rtsaio_write(): %s\n", strerror(errno));
 
-		goto _update_op_new_failure_3;
+		goto _update_op_new_failure_2;
 	}
 
 	return 0;
 
-_update_op_new_failure_3:
+_update_op_new_failure_2:
 	/* If we're unable to comunicate with the client, the scheduled entry should be disabled and pop'd from apool */
 	if (!schedule_entry_disable(entry)) {
 		/* This is critical and should never happen. This means that a race condition occured that allowed
@@ -207,16 +107,6 @@ _update_op_new_failure_3:
 		 */
 		abort();
 	}
-
-	goto _update_op_new_failure_1;
-
-_update_op_new_failure_2:
-	/* Pop the entry from rpool, but do not delete it. Entry should be free'd in the original allocation
-	 * context.
-	 */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	rund.rpool->pope(rund.rpool, entry); 
-	pthread_mutex_unlock(&rund.mutex_rpool);
 
 _update_op_new_failure_1:
 	errno = errsv;
@@ -260,6 +150,11 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 
 	memcpy(entry, (void *) aop->data, aop->count);
 
+	/* Free aop data. We no longer need it */
+	mm_free((void *) aop->data);
+	aop->data = NULL;
+
+	/* Setup received entry */
 	entry_set_id(entry, aop->fd);
 	entry_set_flags(entry, ntohl(entry->flags));
 	entry_set_uid(entry, ntohl(entry->uid));
@@ -272,32 +167,60 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	/* Clear all local flags that the client have possibly set */
 	entry_unset_flags_local(entry);
 
-	/* Process specific operation types */
-	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW)) {
-		if (_process_recv_create_op_new(aop, entry) < 0) {
-			errsv = errno;
-			log_warn("process_recv_create(): _process_recv_create_op_new(): %s\n", strerror(errno));
-
-			goto _create_failure_2;
-		}
-	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL)) {
-		if (_process_recv_create_op_del(aop, entry) < 0) {
-			errsv = errno;
-			log_warn("process_recv_create(): _process_recv_create_op_del(): %s\n", strerror(errno));
-
-			goto _create_failure_2;
-		}
-	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
-		if (_process_recv_create_op_get(aop, entry) < 0) {
-			errsv = errno;
-			log_warn("process_recv_create(): _process_recv_create_op_get(): %s\n", strerror(errno));
-
-			goto _create_failure_2;
-		}
-	} else {
+	/* Validate if this entry has at least one valid operation flag */
+	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
 		log_warn("process_recv_create(): The requested operation is invalid.\n");
 
 		goto _create_failure_2;
+	}
+
+	/* Validate payload size */
+	if (!entry->psize) {
+		/* A NEW entry shall contain payload (for a command or for authentication).
+		 * If no payload is present at this stage, this entry is invalid.
+		 */
+		errsv = errno;
+		log_warn("process_recv_create(): entry->psize == 0.\n");
+
+		goto _create_failure_2;
+	}
+
+	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
+
+	/* Insert this entry into the rpool */
+	if (rund.rpool->insert(rund.rpool, entry) < 0) {
+		errsv = errno;
+		log_warn("process_recv_create(): rund.rpool->insert(): %s\n", strerror(errno));
+
+		/* NOTE: In this special case, we do not need to pop the entry from the rpool as we were unable
+		 * to insert it.
+		 */
+		goto _create_failure_2;
+	}
+
+	/* Reuse 'aop' for next read request: Receive the entry command */
+	memset(aop, 0, sizeof(struct async_op));
+
+	aop->fd = entry->id;
+	aop->count = entry->psize;
+	aop->priority = 0;
+	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+
+	if (!(aop->data = mm_alloc(aop->count))) {
+		errsv = errno;
+		log_warn("process_recv_create(): aop->data = mm_alloc(): %s\n", strerror(errno));
+
+		goto _create_failure_3;
+	}
+
+	memset((void *) aop->data, 0, aop->count);
+
+	/* Request the entry payload */
+	if (rtsaio_read(aop) < 0) {
+		errsv = errno;
+		log_warn("process_recv_create(): rtsaio_read(): %s\n", strerror(errno));
+
+		goto _create_failure_3;
 	}
 
 	/* Set the initialization flag as this is a new entry */
@@ -305,8 +228,14 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 
 	return entry;
 
+_create_failure_3:
+	/* Pop the entry from rpool without destroying it */
+	pthread_mutex_lock(&rund.mutex_rpool);
+	rund.rpool->pope(rund.rpool, entry); 
+	pthread_mutex_unlock(&rund.mutex_rpool);
+
 _create_failure_2:
-	/* Destroy the current entry */
+	/* Destroy the entry */
 	entry_destroy(entry);
 
 _create_failure_1:
@@ -338,6 +267,24 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		errsv = errno;
 		log_warn("process_recv_update(): Unauthorized entry\n", strerror(errno));
+
+		goto _update_failure_2;
+	}
+
+	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
+
+	/* Grant that the received data does not exceed the expected size */
+	if (aop->count != entry->psize) {
+		errsv = errno;
+		log_warn("process_recv_update(): aop->count != entry->psize\n");
+
+		goto _update_failure_2;
+	}
+
+	/* Set the received entry payload */
+	if (entry_set_payload(entry, (char *) aop->data, entry->psize) < 0) {
+		errsv = errno;
+		log_warn("process_recv_update(): entry_set_payload(): %s\n", strerror(errno));
 
 		goto _update_failure_2;
 	}

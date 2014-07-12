@@ -45,19 +45,9 @@
 static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0;
 
-	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
-
-	if (rund.rpool->insert(rund.rpool, entry) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_create_op_new(): rund.rpool->insert(): %s\n", strerror(errno));
-
-		/* NOTE: In this special case, we do not need to pop the entry from the rpool as we were unable
-		 * to insert it.
-		 */
-		goto _create_op_new_failure_1;
-	}
-
+	/* Free aop data. We no longer need it */
 	mm_free((void *) aop->data);
+	aop->data = NULL;
 
 	if (!entry->psize) {
 		/* A NEW entry shall contain payload (for a command or for authentication).
@@ -66,7 +56,20 @@ static int _process_recv_create_op_new(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("_process_recv_create_op_new(): entry->psize == 0.\n");
 
-		goto _create_op_new_failure_2;
+		goto _create_op_new_failure_1;
+	}
+
+	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
+
+	/* Insert this entry into the rpool */
+	if (rund.rpool->insert(rund.rpool, entry) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_create_op_new(): rund.rpool->insert(): %s\n", strerror(errno));
+
+		/* NOTE: In this special case, we do not need to pop the entry from the rpool as we were unable
+		 * to insert it.
+		 */
+		goto _create_op_new_failure_1;
 	}
 
 	/* Reuse 'aop' for next read request: Receive the entry command */
@@ -269,9 +272,6 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	/* Clear all local flags that the client have possibly set */
 	entry_unset_flags_local(entry);
 
-	/* Set the initialization flag as this is a new entry */
-	entry_set_flag(entry, USCHED_ENTRY_FLAG_INIT);
-
 	/* Process specific operation types */
 	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW)) {
 		if (_process_recv_create_op_new(aop, entry) < 0) {
@@ -299,6 +299,9 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 
 		goto _create_failure_2;
 	}
+
+	/* Set the initialization flag as this is a new entry */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_INIT);
 
 	return entry;
 
@@ -369,6 +372,9 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		 */
 		goto _update_failure_2;
 	}
+
+	/* Set the finishing flag as this entry is now fully processed. */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_FINISH);
 
 	return 0;
 

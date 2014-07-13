@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 12-07-2014
+ * Date: 13-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <stdint.h>
 #include <pthread.h>
+
+#include <sys/types.h>
 
 #include <psched/sched.h>
 
@@ -64,9 +66,6 @@ int schedule_entry_create(struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("schedule_entry_create(): index_entry_create(): %s\n", strerror(errno));
 
-		mm_free(entry->payload);
-		mm_free(entry);
-
 		errno = errsv;
 
 		return -1;
@@ -76,9 +75,6 @@ int schedule_entry_create(struct usched_entry *entry) {
 	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_pmq_dispatch, entry)) == (pschedid_t) -1) {
 		errsv = errno;
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
-
-		mm_free(entry->payload);
-		mm_free(entry);
 
 		errno = errsv;
 
@@ -97,9 +93,6 @@ int schedule_entry_create(struct usched_entry *entry) {
 
 		if (psched_disarm(rund.psched, entry->psched_id) < 0)
 			log_warn("schedule_entry_create(): psched_disarm(): %s\n", strerror(errno));
-
-		mm_free(entry->payload);
-		mm_free(entry);
 
 		errno = errsv;
 
@@ -157,6 +150,45 @@ int schedule_entry_delete(struct usched_entry *entry) {
 	}
 
 	entry_destroy(entry);
+
+	return 0;
+}
+
+int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid) {
+	struct usched_entry *entry = NULL;
+
+	pthread_mutex_lock(&rund.mutex_apool);
+
+	entry = rund.apool->search(rund.apool, usched_entry_id(id));
+
+	/* Check if the entry exists */
+	if (!entry) {
+		log_warn("schedule_entry_ownership_delete_by_id(): Entry ID 0x%llX not found.\n", id);
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = EACCES;
+		return -1;
+	}
+
+	/* Check if the entry is active and processing is finished */
+	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_FINISH)) {
+		log_warn("schedule_entry_ownership_delete_by_id(): Entry ID 0x%llX is still being processed.\n", id);
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = EAGAIN;
+		return -1;
+	}
+
+	/* Check if the requester owns the entry */
+	if (entry->uid != uid) {
+		log_warn("schedule_entry_ownership_delete_by_id(): Unauthorized delete (entry->uid[%u] != uid[%u])", entry->uid, uid);
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = EACCES;
+		return -1;
+	}
+
+	/* Delete the entry */
+	rund.apool->del(rund.apool, entry);
+
+	pthread_mutex_unlock(&rund.mutex_apool);
 
 	return 0;
 }

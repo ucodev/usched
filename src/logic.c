@@ -42,8 +42,8 @@ int logic_process_run(void) {
 	time_t time_ref = runc.t;
 
 	for (cur = runc.req; cur; cur = cur->next, runc.epool->push(runc.epool, entry)) {
-		/* Allocate a new scheduling entry */
-		if (!(entry = entry_init(cur->uid, cur->gid, time_ref + cur->arg, cur->subj)))
+		/* Allocate a new scheduling entry with subject as its payload. */
+		if (!(entry = entry_client_init(cur->uid, cur->gid, time_ref + cur->arg, cur->subj)))
 			return -1;
 
 		/* This is a new entry */

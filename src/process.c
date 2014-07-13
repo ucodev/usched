@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 12-07-2014
+ * Date: 13-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -48,10 +48,26 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 	debug_printf(DEBUG_INFO, "PAYLOAD: %s\n", entry->payload);
 
+	/* The payload of a NEW entry is the entry subject. */
+	if (entry_set_subj(entry, entry->payload, entry->psize)) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_new(): entry_set_subj(): %s\n", strerror(errno));
+		goto _update_op_new_failure_1;
+	}
+
+	/* Clear payload information */
+	entry_unset_payload(entry);
+
 	/* Pop the entry from the pool */
 	pthread_mutex_lock(&rund.mutex_rpool);
-	rund.rpool->pope(rund.rpool, entry); 
+	entry = rund.rpool->pope(rund.rpool, entry); 
 	pthread_mutex_unlock(&rund.mutex_rpool);
+
+	/* Ensure that entry is still valid */
+	if (!entry) {
+		log_warn("_process_recv_update_op_new(): entry == NULL after rund.rpool->pope().\n");
+		goto _update_op_new_failure_1;
+	}
 
 	/* We're done. Now we need to install and set a global and unique id for this entry */
 	if (schedule_entry_create(entry) < 0) {
@@ -78,9 +94,9 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	aop->priority = 0;
 	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
 
-	if (!(aop->data = mm_alloc(4))) {
+	if (!(aop->data = mm_alloc(sizeof(entry->id)))) {
 		errsv = errno;
-		log_warn("_process_recv_update_op_new(): aop->data = mm_alloc(4): %s\n", strerror(errno));
+		log_warn("_process_recv_update_op_new(): aop->data = mm_alloc(%zu): %s\n", sizeof(entry->id), strerror(errno));
 
 		goto _update_op_new_failure_2;
 	}
@@ -115,11 +131,100 @@ _update_op_new_failure_1:
 }
 
 static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry *entry) {
-	/* TODO: To be implemented */
+	int errsv = 0, i = 0, cur_fd = aop->fd;
+	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
+	uint32_t entry_list_req_size = 0, entry_list_res_size = 0;
 
-	/* TODO: Check if the requested entries to be deleted are flagged as FINISH. Operations other than NEW over
-	 * an unfinished entry shall be discarded and logged
+	/* Pop the entry from the pool */
+	pthread_mutex_lock(&rund.mutex_rpool);
+	entry = rund.rpool->pope(rund.rpool, entry);
+	pthread_mutex_unlock(&rund.mutex_rpool);
+
+	/* Ensure that entry is still valid */
+	if (!entry) {
+		log_warn("_process_recv_update_op_del(): entry == NULL after rund.rpool->pope()\n");
+		goto _update_op_del_failure_1;
+	}
+
+	/* Check if the payload size if aligned with the entry->id size */
+	if ((entry->psize % sizeof(entry->id))) {
+		log_warn("_process_recv_update_op_del(): entry->psize %% sizeof(entry->id) != 0\n");
+		goto _update_op_del_failure_1;
+	}
+
+	/* Gather the request entry list and respective list size */
+	entry_list_req = (uint64_t *) entry->payload;
+	entry_list_req_size = entry->psize / sizeof(entry->id);
+
+	/* entry_list_req_size should never be 0 since we grant that entry->psize != 0 in the entry creation stage.
+	 * Anyway, since we're dealing with integers and entry->psize < sizeof(entry->id) is accepted in the pre-checks,
+	 * lets play safe and grant that entry_list_req_size != 0.
 	 */
+	if (!entry_list_req_size) {
+		/* Someone is probably trying something nasty */
+		log_warn("_process_recv_update_op_del(): entry_list_req_size == 0 (Possible exploit attempt)\n");
+		goto _update_op_del_failure_1;
+	}
+
+	/* Iterate payload, ensure the user that's requesting the deletion is authorized to do so, and delete each of
+	 * the valid entries through schedule_delete_entry().
+	 */
+	for (i = 0, entry_list_res_size = 0; i < entry_list_req_size; i ++) {
+		if (schedule_entry_ownership_delete_by_id(entry_list_req[i], entry->uid) < 0) {
+			log_warn("_process_recv_update_op_del(): schedule_entry_ownership_delete_by_id(): %s\n", strerror(errno));
+			entry_list_res_size ++;
+
+			if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_size))) {
+				errsv = errno;
+				log_warn("_process_recv_update_op_del(): realloc(): %s\n", strerror(errno));
+				goto _update_op_del_failure_1;
+			}
+
+			/* Set early network byte order, as this list won't be used locally */
+			entry_list_res[entry_list_res_size - 1] = htonll(entry_list_req[i]);
+
+			continue;
+		}
+	}
+
+	/* Report back the failed entries. */
+
+	/* Reuse 'aop' to reply the failed deleted entries to the client */
+	mm_free((void *) aop->data);
+
+	memset(aop, 0, sizeof(struct async_op));
+
+	aop->fd = cur_fd;
+	aop->count = (sizeof(entry->id) * entry_list_res_size) + sizeof(entry_list_res_size);
+	aop->priority = 0;
+	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+
+	if (!(aop->data = mm_alloc(aop->count))) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_del(): aop->data = mm_alloc(%zu): %s\n", aop->count, strerror(errno));
+
+		goto _update_op_del_failure_1;
+	}
+
+	/* Craft the list size at the head of the packet. */
+	memcpy((void *) aop->data, (uint32_t [1]) { htonl(entry_list_res_size) }, 4);
+	/* Append the list contents right after the list size field */
+	memcpy((void *) (((char *) aop->data) + 4), entry_list_res, aop->count - 4);
+
+	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that failed to be deleted.\n", entry_list_res_size);
+
+	/* Report back the failed entries to the client */
+	if (rtsaio_write(aop) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_del(): rtsaio_write(): %s\n", strerror(errno));
+
+		goto _update_op_del_failure_1;
+	}
+
+	return 0;
+
+_update_op_del_failure_1:
+	errno = errsv;
 
 	return -1;
 }
@@ -127,7 +232,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
 	/* TODO: To be implemented */
 
-	/* TODO: Check if the requested entries to be deleted are flagged as FINISH. Operations other than NEW over
+	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
 	 * an unfinished entry shall be discarded and logged
 	 */
 
@@ -176,9 +281,7 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 
 	/* Validate payload size */
 	if (!entry->psize) {
-		/* A NEW entry shall contain payload (for a command or for authentication).
-		 * If no payload is present at this stage, this entry is invalid.
-		 */
+		/* All entry requests expect a payload. If none is set, this entry request is invalid. */
 		errsv = errno;
 		log_warn("process_recv_create(): entry->psize == 0.\n");
 
@@ -231,8 +334,13 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 _create_failure_3:
 	/* Pop the entry from rpool without destroying it */
 	pthread_mutex_lock(&rund.mutex_rpool);
-	rund.rpool->pope(rund.rpool, entry); 
+	entry = rund.rpool->pope(rund.rpool, entry);
 	pthread_mutex_unlock(&rund.mutex_rpool);
+
+	if (!entry) {
+		log_warn("process_recv_create(): _create_failure_3: entry == NULL after rund.rpool->pope()\n");
+		goto _create_failure_1;
+	}
 
 _create_failure_2:
 	/* Destroy the entry */
@@ -328,8 +436,13 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 _update_failure_2:
 	/* Pop the entry from rpool. */
 	pthread_mutex_lock(&rund.mutex_rpool);
-	rund.rpool->pope(rund.rpool, entry);
+	entry = rund.rpool->pope(rund.rpool, entry);
 	pthread_mutex_unlock(&rund.mutex_rpool);
+
+	if (!entry) {
+		log_warn("process_recv_update(): _update_failure_2: entry == NULL after rund.rpool->pope()\n");
+		goto _update_failure_1;
+	}
 
 _update_failure_1:
 	/* Destroy the current entry in this context, as it was already pop'd from the rpool */

@@ -38,7 +38,7 @@
 int index_entry_create(struct usched_entry *e) {
 	int errsv = 0;
 	char *str = NULL;
-	size_t len = strlen(e->payload) + 1 + 60 + 1;
+	size_t len = strlen(e->subj) + 1 + 60 + 1;
 
 	if (!(str = mm_alloc(len))) {
 		errsv = errno;
@@ -49,7 +49,7 @@ int index_entry_create(struct usched_entry *e) {
 
 	memset(str, 0, len);
 
-	snprintf(str, len - 1, "%s%u%u%u", e->payload, e->trigger, e->step, e->expire);
+	snprintf(str, len - 1, "%s%u%u%u", e->subj, e->trigger, e->step, e->expire);
 
 	e->id = hash_string_create(str);
 

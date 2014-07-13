@@ -285,6 +285,10 @@ void entry_pmq_dispatch(void *arg) {
 		errsv = errno;
 		log_warn("entry_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
 		errno = errsv;
+		/* TODO: We should not delete this entry from active pool if we're unable to write the pqueue of
+		 * the execution process. We should put this entries in some sort of local queue and wait for the
+		 * pqueue to become available.
+		 */
 		goto _finish;
 	}
 

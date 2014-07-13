@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface
  *
- * Date: 09-07-2014
+ * Date: 13-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,6 +56,8 @@ struct usched_runtime_exec rune;
 
 
 int runtime_client_init(int argc, char **argv) {
+	int errsv = 0;
+
 	memset(&runc, 0, sizeof(struct usched_runtime_client));
 
 	runc.argc = argc;
@@ -64,7 +66,9 @@ int runtime_client_init(int argc, char **argv) {
 
 	/* Initialize logging interface */
 	if (log_client_init() < 0) {
+		errsv = errno;
 		debug_printf(DEBUG_CRIT, "runtime_client_init(): log_client_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -76,19 +80,25 @@ int runtime_client_init(int argc, char **argv) {
 
 	/* Initialize pools */
 	if (pool_client_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_client_init(): pool_client_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
 	/* Process requested operations */
 	if (op_client_process() < 0) {
+		errsv = errno;
 		log_crit("runtime_client_init(): op_client_process(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
 	/* Initialize client connection handlers */
 	if (conn_client_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_client_init(): conn_client_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -110,6 +120,8 @@ int runtime_client_lib_init(void) {
 }
 
 int runtime_daemon_init(int argc, char **argv) {
+	int errsv = 0;
+
 	memset(&rund, 0, sizeof(struct usched_runtime_daemon));
 
 	rund.argc = argc;
@@ -117,7 +129,9 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	/* Initialize logging interface */
 	if (log_daemon_init() < 0) {
+		errsv = errno;
 		debug_printf(DEBUG_CRIT, "runtime_daemon_init(): log_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -127,7 +141,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing signals interface...\n");
 
 	if (sig_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): sig_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -137,7 +153,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing IPC interface...\n");
 
 	if (pmq_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -147,7 +165,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing thread mutexes...\n");
 
 	if (thread_daemon_mutexes_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): thread_mutexes_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -157,7 +177,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing pools...\n");
 
 	if (pool_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): pool_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -167,7 +189,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing scheduling interface...\n");
 
 	if (schedule_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): schedule_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -177,7 +201,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing marshal interface...\n");
 
 	if (marshal_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): marshal_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -207,7 +233,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	marshal_daemon_wipe();
 
 	if (marshal_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): marshal_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -217,7 +245,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Initializing connections interface...\n");
 
 	if (conn_daemon_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_daemon_init(): conn_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -230,6 +260,8 @@ int runtime_daemon_init(int argc, char **argv) {
 }
 
 int runtime_exec_init(int argc, char **argv) {
+	int errsv = 0;
+
 	memset(&rune, 0, sizeof(struct usched_runtime_exec));
 
 	rune.argc = argc;
@@ -237,7 +269,9 @@ int runtime_exec_init(int argc, char **argv) {
 
 	/* Initialize logging interface */
 	if (log_exec_init() < 0) {
+		errsv = errno;
 		debug_printf(DEBUG_CRIT, "runtime_exec_init(): log_exec_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -247,7 +281,9 @@ int runtime_exec_init(int argc, char **argv) {
 	log_info("Initializing signals interface...\n");
 
 	if (sig_exec_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_exec_init(): sig_exec_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -257,7 +293,9 @@ int runtime_exec_init(int argc, char **argv) {
 	log_info("Initializing thread behaviour interface...\n");
 
 	if (thread_exec_behaviour_init() < 0) {
+		errsv = errno;
 		log_crit("runtmie_exec_init(): thread_exec_behaviour_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 
@@ -267,7 +305,9 @@ int runtime_exec_init(int argc, char **argv) {
 	log_info("Initializing IPC interface...\n");
 
 	if (pmq_exec_init() < 0) {
+		errsv = errno;
 		log_crit("runtime_exec_init(): pmq_exec_init(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	}
 

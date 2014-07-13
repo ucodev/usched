@@ -360,7 +360,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): Trying to update an existing entry that wasn't initialized yet.\n");
 
-		goto _update_failure_2;
+		goto _update_failure_3;
 	}
 
 	/* Check if the entry is authorized. If not, authorize it and try to proceed. */
@@ -368,7 +368,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): entry_authorize(): %s\n", strerror(errno));
 
-		goto _update_failure_2;
+		goto _update_failure_3;
 	}
 
 	/* Re-validate authorization. If not authorized, discard this entry */
@@ -376,7 +376,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): Unauthorized entry\n", strerror(errno));
 
-		goto _update_failure_2;
+		goto _update_failure_3;
 	}
 
 	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
@@ -386,7 +386,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): aop->count != entry->psize\n");
 
-		goto _update_failure_2;
+		goto _update_failure_3;
 	}
 
 	/* Set the received entry payload */
@@ -394,7 +394,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		errsv = errno;
 		log_warn("process_recv_update(): entry_set_payload(): %s\n", strerror(errno));
 
-		goto _update_failure_2;
+		goto _update_failure_3;
 	}
 
 	/* Process specific operation types */
@@ -403,21 +403,21 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_new(): %s\n", strerror(errno));
 
-			goto _update_failure_1;
+			goto _update_failure_2;
 		}
 	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL)) {
 		if (_process_recv_update_op_del(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_del(): %s\n", strerror(errno));
 
-			goto _update_failure_1;
+			goto _update_failure_2;
 		}
 	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
 		if (_process_recv_update_op_get(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_get(): %s\n", strerror(errno));
 
-			goto _update_failure_1;
+			goto _update_failure_2;
 		}
 	} else {
 		log_warn("process_recv_update(): The requested operation is invalid.\n");
@@ -425,7 +425,7 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 		/* Since no _process_recv_update_op_*() function was called, the current entry is still present in
 		 * the rpool. We need to delete it in this context.
 		 */
-		goto _update_failure_2;
+		goto _update_failure_3;
 	}
 
 	/* Set the finishing flag as this entry is now fully processed. */
@@ -433,21 +433,22 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 
 	return 0;
 
-_update_failure_2:
+_update_failure_3:
 	/* Pop the entry from rpool. */
 	pthread_mutex_lock(&rund.mutex_rpool);
 	entry = rund.rpool->pope(rund.rpool, entry);
 	pthread_mutex_unlock(&rund.mutex_rpool);
 
 	if (!entry) {
-		log_warn("process_recv_update(): _update_failure_2: entry == NULL after rund.rpool->pope()\n");
+		log_warn("process_recv_update(): _update_failure_3: entry == NULL after rund.rpool->pope()\n");
 		goto _update_failure_1;
 	}
 
-_update_failure_1:
+_update_failure_2:
 	/* Destroy the current entry in this context, as it was already pop'd from the rpool */
 	entry_destroy(entry);
 
+_update_failure_1:
 	errno = errsv;
 
 	return -1;

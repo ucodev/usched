@@ -57,7 +57,7 @@ typedef enum USCHED_ENTRY_FLAGS {
 #pragma pack(push)
 #pragma pack(4)
 struct usched_entry {
-	/* Entry request/response header */
+	/* Entry request header */
 	uint64_t id;
 	uint32_t flags;
 	uint32_t uid;
@@ -84,7 +84,7 @@ struct usched_entry {
 #pragma pack(pop)
 
 /* Prototypes */
-struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, char *payload);
+struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize);
 void entry_set_id(struct usched_entry *entry, uint32_t id);
 void entry_set_flags(struct usched_entry *entry, uint32_t flags);
 void entry_unset_flags_local(struct usched_entry *entry);

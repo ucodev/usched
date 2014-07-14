@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface
  *
- * Date: 24-06-2014
+ * Date: 13-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -436,7 +436,11 @@ static struct usched_request *_parse_subj_compound(struct usched_request *req, i
 
 	debug_printf(DEBUG_INFO, "SUBJ: %s\n", req->subj);
 
-	return (argc - 1) ? _parse_prep_compound(req, argc - 1, &argv[1]) : req;
+	switch (req->op) {
+		case USCHED_OP_RUN:  return (argc - 1) ? _parse_prep_compound(req, argc - 1, &argv[1]) : req;
+		case USCHED_OP_STOP: if (!(argc - 1)) { return req; } else break;
+		case USCHED_OP_SHOW: if (!(argc - 1)) { return req; } else break;
+	}
 
 _cmd_error:
 	parse_req_destroy(req);
@@ -463,7 +467,7 @@ static struct usched_request *_parse_op_compound(struct usched_request *req, int
 	switch (req->op) {
 		case USCHED_OP_RUN:  if (argc < 3)  { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
 		case USCHED_OP_STOP: if (argc != 2) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_SHOW: if (argc != 1) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
+		case USCHED_OP_SHOW: if (argc != 2) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
 	}
 
 	return _parse_subj_compound(req, argc - 1, &argv[1]);

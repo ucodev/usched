@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface
  *
- * Date: 11-07-2014
+ * Date: 13-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 #include <time.h>
 
 #include "mm.h"
+#include "debug.h"
 #include "runtime.h"
 #include "entry.h"
 #include "logic.h"
@@ -43,7 +44,7 @@ int logic_process_run(void) {
 
 	for (cur = runc.req; cur; cur = cur->next, runc.epool->push(runc.epool, entry)) {
 		/* Allocate a new scheduling entry with subject as its payload. */
-		if (!(entry = entry_client_init(cur->uid, cur->gid, time_ref + cur->arg, cur->subj)))
+		if (!(entry = entry_client_init(cur->uid, cur->gid, time_ref + cur->arg, cur->subj, strlen(cur->subj) + 1)))
 			return -1;
 
 		/* This is a new entry */
@@ -99,8 +100,59 @@ int logic_process_run(void) {
 }
 
 int logic_process_stop(void) {
-	/* TODO: To be implemented */
-	return -1;
+	char *ptr = NULL, *saveptr = NULL;
+	struct usched_request *cur = NULL;
+	struct usched_entry *entry = NULL;
+	uint64_t *entry_list = NULL;
+	uint64_t entry_id;
+	size_t entry_list_nmemb = 0;
+
+	/* Iterate the current request list in order to craft an entry payload */
+	if (!(cur = runc.req))
+		return -1;
+
+	for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {
+		entry_list_nmemb ++;
+
+		/* Realloc the entry_list size */
+		if (!(entry_list = mm_realloc(entry_list, entry_list_nmemb * sizeof(uint64_t))))
+			return -1;
+
+		/* If the requested entry id to be deleted is 0, fail to accept logic */
+		if (!(entry_id = strtoull(ptr, NULL, 16))) {
+			mm_free(entry_list);
+			return -1;
+		}
+
+		debug_printf(DEBUG_INFO, "OP == STOP: entry_id == 0x%llX\n", entry_id);
+
+		entry_list[(entry_list_nmemb * sizeof(uint64_t))- 1] = entry_id;
+
+		/* No conjunctions are accepted in a STOP operation */
+		if (cur->conj) {
+			mm_free(entry_list);
+			return -1;
+		}
+	}
+
+	/* Initialize the entry to be transmitted */
+	if (!(entry = entry_client_init(cur->uid, cur->gid, 0, entry_list, entry_list_nmemb * sizeof(uint64_t)))) {
+		mm_free(entry_list);
+		return -1;
+	}
+
+	/* Set this entry to be deleted */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_DEL);
+
+	/* Push the entry into the entries pool */
+	if (runc.epool->push(runc.epool, entry) < 0) {
+		mm_free(entry_list);
+		entry_destroy(entry);
+		return -1;
+	}
+
+	/* Logic accepted */
+	return 0;
 }
 
 int logic_process_show(void) {

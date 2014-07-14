@@ -48,7 +48,7 @@
 #include "conn.h"
 #include "schedule.h"
 
-struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, char *payload) {
+struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize) {
 	int errsv = 0;
 	struct usched_entry *entry = NULL;
 
@@ -65,7 +65,7 @@ struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, cha
 	entry_set_gid(entry, gid);
 	entry_set_trigger(entry, trigger);
 
-	if (entry_set_payload(entry, payload, strlen(payload) + 1) < 0) {
+	if (entry_set_payload(entry, payload, psize) < 0) {
 		errsv = errno;
 		log_warn("entry_init(): entry_set_subj(): %s\n", strerror(errno));
 		mm_free(entry);

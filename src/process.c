@@ -133,7 +133,7 @@ _update_op_new_failure_1:
 static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0, i = 0, cur_fd = aop->fd;
 	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
-	uint32_t entry_list_req_size = 0, entry_list_res_size = 0;
+	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
 
 	/* Pop the entry from the pool */
 	pthread_mutex_lock(&rund.mutex_rpool);
@@ -154,34 +154,34 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 	/* Gather the request entry list and respective list size */
 	entry_list_req = (uint64_t *) entry->payload;
-	entry_list_req_size = entry->psize / sizeof(entry->id);
+	entry_list_req_nmemb = entry->psize / sizeof(entry->id);
 
 	/* entry_list_req_size should never be 0 since we grant that entry->psize != 0 in the entry creation stage.
 	 * Anyway, since we're dealing with integers and entry->psize < sizeof(entry->id) is accepted in the pre-checks,
 	 * lets play safe and grant that entry_list_req_size != 0.
 	 */
-	if (!entry_list_req_size) {
+	if (!entry_list_req_nmemb) {
 		/* Someone is probably trying something nasty */
-		log_warn("_process_recv_update_op_del(): entry_list_req_size == 0 (Possible exploit attempt)\n");
+		log_warn("_process_recv_update_op_del(): entry_list_req_nmemb == 0 (Possible exploit attempt)\n");
 		goto _update_op_del_failure_1;
 	}
 
 	/* Iterate payload, ensure the user that's requesting the deletion is authorized to do so, and delete each of
 	 * the valid entries through schedule_delete_entry().
 	 */
-	for (i = 0, entry_list_res_size = 0; i < entry_list_req_size; i ++) {
+	for (i = 0, entry_list_res_nmemb = 0; i < entry_list_req_nmemb; i ++) {
 		if (schedule_entry_ownership_delete_by_id(entry_list_req[i], entry->uid) < 0) {
 			log_warn("_process_recv_update_op_del(): schedule_entry_ownership_delete_by_id(): %s\n", strerror(errno));
-			entry_list_res_size ++;
+			entry_list_res_nmemb ++;
 
-			if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_size))) {
+			if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_nmemb * sizeof(entry->id)))) {
 				errsv = errno;
 				log_warn("_process_recv_update_op_del(): realloc(): %s\n", strerror(errno));
 				goto _update_op_del_failure_1;
 			}
 
 			/* Set early network byte order, as this list won't be used locally */
-			entry_list_res[entry_list_res_size - 1] = htonll(entry_list_req[i]);
+			entry_list_res[(entry_list_res_nmemb * sizeof(entry->id)) - 1] = htonll(entry_list_req[i]);
 
 			continue;
 		}
@@ -195,7 +195,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	memset(aop, 0, sizeof(struct async_op));
 
 	aop->fd = cur_fd;
-	aop->count = (sizeof(entry->id) * entry_list_res_size) + sizeof(entry_list_res_size);
+	aop->count = (sizeof(entry->id) * entry_list_res_nmemb) + sizeof(entry_list_res_nmemb);
 	aop->priority = 0;
 	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
 
@@ -207,11 +207,11 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	}
 
 	/* Craft the list size at the head of the packet. */
-	memcpy((void *) aop->data, (uint32_t [1]) { htonl(entry_list_res_size) }, 4);
+	memcpy((void *) aop->data, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
 	/* Append the list contents right after the list size field */
 	memcpy((void *) (((char *) aop->data) + 4), entry_list_res, aop->count - 4);
 
-	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that failed to be deleted.\n", entry_list_res_size);
+	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that failed to be deleted.\n", entry_list_res_nmemb);
 
 	/* Report back the failed entries to the client */
 	if (rtsaio_write(aop) < 0) {

@@ -100,11 +100,11 @@ int logic_process_run(void) {
 }
 
 int logic_process_stop(void) {
-	char *ptr = NULL, *saveptr = NULL;
+	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
 	struct usched_request *cur = NULL;
 	struct usched_entry *entry = NULL;
 	uint64_t *entry_list = NULL;
-	uint64_t entry_id;
+	uint64_t entry_id = 0;
 	size_t entry_list_nmemb = 0;
 
 	/* Iterate the current request list in order to craft an entry payload */
@@ -118,14 +118,15 @@ int logic_process_stop(void) {
 		if (!(entry_list = mm_realloc(entry_list, entry_list_nmemb * sizeof(uint64_t))))
 			return -1;
 
-		/* If the requested entry id to be deleted is 0, fail to accept logic */
-		if (!(entry_id = strtoull(ptr, NULL, 16))) {
+		/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
+		if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
 			mm_free(entry_list);
 			return -1;
 		}
 
 		debug_printf(DEBUG_INFO, "OP == STOP: entry_id == 0x%llX\n", entry_id);
 
+		/* Append the extracted entry id to the current entry list */
 		entry_list[(entry_list_nmemb * sizeof(uint64_t))- 1] = entry_id;
 
 		/* No conjunctions are accepted in a STOP operation */

@@ -35,6 +35,7 @@
 #include "runtime.h"
 #include "entry.h"
 #include "logic.h"
+#include "conn.h"
 
 
 int logic_process_run(void) {
@@ -107,32 +108,40 @@ int logic_process_stop(void) {
 	uint64_t entry_id = 0;
 	size_t entry_list_nmemb = 0;
 
-	/* Iterate the current request list in order to craft an entry payload */
+	/* Validate the if the current request list has at least one valid entry */
 	if (!(cur = runc.req))
 		return -1;
 
-	for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {
+	/* Validate if this request refers to all entries beloging to this user */
+	if (!strcasecmp(cur->subj, "all")) {
 		entry_list_nmemb ++;
+		entry_list = mm_alloc(sizeof(uint64_t));
+		entry_list[0] = 0;	/* 0 means all entries belonging to this user */
+	} else {
+		/* Iterate the current request list in order to craft an entry payload */
+		for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {
+			entry_list_nmemb ++;
 
-		/* Realloc the entry_list size */
-		if (!(entry_list = mm_realloc(entry_list, entry_list_nmemb * sizeof(uint64_t))))
-			return -1;
+			/* Realloc the entry_list size */
+			if (!(entry_list = mm_realloc(entry_list, entry_list_nmemb * sizeof(uint64_t))))
+				return -1;
 
-		/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
-		if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
-			mm_free(entry_list);
-			return -1;
-		}
+			/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
+			if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
+				mm_free(entry_list);
+				return -1;
+			}
 
-		debug_printf(DEBUG_INFO, "OP == STOP: entry_id == 0x%llX\n", entry_id);
+			debug_printf(DEBUG_INFO, "OP == STOP: entry_id == 0x%llX\n", entry_id);
 
-		/* Append the extracted entry id to the current entry list */
-		entry_list[(entry_list_nmemb * sizeof(uint64_t))- 1] = entry_id;
+			/* Append the extracted entry id to the current entry list */
+			entry_list[(entry_list_nmemb * sizeof(uint64_t))- 1] = entry_id;
 
-		/* No conjunctions are accepted in a STOP operation */
-		if (cur->conj) {
-			mm_free(entry_list);
-			return -1;
+			/* No conjunctions are accepted in a STOP operation */
+			if (cur->conj) {
+				mm_free(entry_list);
+				return -1;
+			}
 		}
 	}
 
@@ -157,8 +166,69 @@ int logic_process_stop(void) {
 }
 
 int logic_process_show(void) {
-	/* TODO: To be implemented */
-	return -1;
+	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
+	struct usched_request *cur = NULL;
+	struct usched_entry *entry = NULL;
+	uint64_t *entry_list = NULL;
+	uint64_t entry_id = 0;
+	size_t entry_list_nmemb = 0;
+
+	/* Validate the if the current request list has at least one valid entry */
+	if (!(cur = runc.req))
+		return -1;
+
+	/* Validate if this request refers to all entries beloging to this user */
+	if (!strcasecmp(cur->subj, "all")) {
+		entry_list_nmemb ++;
+		entry_list = mm_alloc(sizeof(uint64_t));
+		entry_list[0] = 0;	/* 0 means all entries belonging to this user */
+	} else {
+		/* Iterate the current request list in order to craft an entry payload */
+		for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {
+			entry_list_nmemb ++;
+
+			/* Realloc the entry_list size */
+			if (!(entry_list = mm_realloc(entry_list, entry_list_nmemb * sizeof(uint64_t))))
+				return -1;
+
+			/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
+			if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
+				mm_free(entry_list);
+				return -1;
+			}
+
+			debug_printf(DEBUG_INFO, "OP == SHOW: entry_id == 0x%llX\n", entry_id);
+
+			/* Append the extracted entry id to the current entry list */
+			entry_list[(entry_list_nmemb * sizeof(uint64_t)) - 1] = htonll(entry_id);
+
+			/* No conjunctions are accepted in a STOP operation */
+			if (cur->conj) {
+				mm_free(entry_list);
+				return -1;
+			}
+		}
+	}
+
+	/* Initialize the entry to be transmitted */
+	if (!(entry = entry_client_init(cur->uid, cur->gid, 0, entry_list, entry_list_nmemb * sizeof(uint64_t)))) {
+		mm_free(entry_list);
+		return -1;
+	}
+
+	/* Set this entry to be deleted */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_GET);
+
+	/* Push the entry into the entries pool */
+	if (runc.epool->push(runc.epool, entry) < 0) {
+		mm_free(entry_list);
+		entry_destroy(entry);
+		return -1;
+	}
+
+	/* Logic accepted */
+	return 0;
+
 }
 
 

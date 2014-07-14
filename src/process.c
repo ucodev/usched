@@ -170,7 +170,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	 * the valid entries through schedule_delete_entry().
 	 */
 	for (i = 0, entry_list_res_nmemb = 0; i < entry_list_req_nmemb; i ++) {
-		if (schedule_entry_ownership_delete_by_id(entry_list_req[i], entry->uid) < 0) {
+		if (schedule_entry_ownership_delete_by_id(ntohll(entry_list_req[i]), entry->uid) < 0) {
 			log_warn("_process_recv_update_op_del(): schedule_entry_ownership_delete_by_id(): %s\n", strerror(errno));
 			entry_list_res_nmemb ++;
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface
  *
- * Date: 13-07-2014
+ * Date: 14-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -115,7 +115,10 @@ int logic_process_stop(void) {
 	/* Validate if this request refers to all entries beloging to this user */
 	if (!strcasecmp(cur->subj, "all")) {
 		entry_list_nmemb ++;
-		entry_list = mm_alloc(sizeof(uint64_t));
+
+		if (!(entry_list = mm_alloc(sizeof(uint64_t))))
+			return -1;
+
 		entry_list[0] = 0;	/* 0 means all entries belonging to this user */
 	} else {
 		/* Iterate the current request list in order to craft an entry payload */
@@ -180,7 +183,10 @@ int logic_process_show(void) {
 	/* Validate if this request refers to all entries beloging to this user */
 	if (!strcasecmp(cur->subj, "all")) {
 		entry_list_nmemb ++;
-		entry_list = mm_alloc(sizeof(uint64_t));
+
+		if (!(entry_list = mm_alloc(sizeof(uint64_t))))
+			return -1;
+
 		entry_list[0] = 0;	/* 0 means all entries belonging to this user */
 	} else {
 		/* Iterate the current request list in order to craft an entry payload */

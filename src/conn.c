@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 12-07-2014
+ * Date: 14-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,15 +57,48 @@ int conn_client_init(void) {
 	return 0;
 }
 
-int conn_client_process(void) {
+static int _conn_client_process_recv_run(void) {
 	int errsv = 0;
+	uint64_t entry_id = 0;
+
+	/* Read the response in order to obtain the entry id */
+	if (read(runc.fd, &entry_id, sizeof(entry_id)) != sizeof(entry_id)) {
+		errsv = errno;
+		log_crit("conn_client_process_recv_run(): read() != %zu: %s\n", sizeof(entry_id), strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	entry_id = ntohll(entry_id);
+
+	debug_printf(DEBUG_INFO, "Received Entry ID: %llu\n", entry_id);
+
+	return 0;
+}
+
+static int _conn_client_process_recv_stop(void) {
+	/* TODO: To be implemented */
+	errno = ENOSYS;
+
+	return -1;
+}
+
+static int _conn_client_process_recv_show(void) {
+	/* TODO: To be implemented */
+	errno = ENOSYS;
+
+	return -1;
+}
+
+int conn_client_process(void) {
+	int errsv = 0, ret = 0;
 	struct usched_entry *cur = NULL;
 	size_t payload_len = 0;
 
 	while ((cur = runc.epool->pop(runc.epool))) {
 		payload_len = cur->psize;
 
-		/* Convert endianness to network by order */
+		/* Convert endianness to network byte order */
 		cur->id = htonll(cur->id);
 		cur->flags = htonl(cur->flags);
 		cur->uid = htonl(cur->uid);
@@ -91,18 +124,36 @@ int conn_client_process(void) {
 			return -1;
 		}
 
-		/* Read the response in order to obtain the entry id */
-		if (read(runc.fd, &cur->id, sizeof(cur->id)) != sizeof(cur->id)) {
+		/* Revert endianness back to host byte order */
+		cur->id = ntohll(cur->id);
+		cur->flags = ntohl(cur->flags);
+		cur->uid = ntohl(cur->uid);
+		cur->gid = ntohl(cur->gid);
+		cur->trigger = ntohl(cur->trigger);
+		cur->step = ntohl(cur->step);
+		cur->expire = ntohl(cur->expire);
+		cur->psize = ntohl(cur->psize);
+
+		/* Process the response */
+		if (entry_has_flag(cur, USCHED_ENTRY_FLAG_NEW)) {
+			ret = _conn_client_process_recv_run();
+		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_DEL)) {
+			ret = _conn_client_process_recv_stop();
+		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_GET)) {
+			ret = _conn_client_process_recv_show();
+		} else {
+			errno = EINVAL;
+			ret = -1;
+		}
+
+		/* Check if a valid response was received */
+		if (ret < 0) {
 			errsv = errno;
-			log_crit("conn_client_process(): read() != %d: %s\n", sizeof(cur->id), strerror(errno));
+			log_crit("conn_client_process(): %s\n", strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
 		}
-
-		cur->id = ntohll(cur->id);
-
-		debug_printf(DEBUG_INFO, "Received Entry ID: %llu\n", cur->id);
 
 		entry_destroy(cur);
 	}

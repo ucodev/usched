@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface
  *
- * Date: 14-07-2014
+ * Date: 16-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -138,14 +138,14 @@ int logic_process_stop(void) {
 			debug_printf(DEBUG_INFO, "OP == STOP: entry_id == 0x%llX\n", entry_id);
 
 			/* Append the extracted entry id to the current entry list */
-			entry_list[(entry_list_nmemb * sizeof(uint64_t))- 1] = entry_id;
-
-			/* No conjunctions are accepted in a STOP operation */
-			if (cur->conj) {
-				mm_free(entry_list);
-				return -1;
-			}
+			entry_list[entry_list_nmemb - 1] = htonll(entry_id);
 		}
+	}
+
+	/* No conjunctions are accepted in a STOP operation */
+	if (cur->conj) {
+		mm_free(entry_list);
+		return -1;
 	}
 
 	/* Initialize the entry to be transmitted */

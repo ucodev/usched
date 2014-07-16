@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 14-07-2014
+ * Date: 16-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -71,16 +71,60 @@ static int _conn_client_process_recv_run(void) {
 
 	entry_id = ntohll(entry_id);
 
-	debug_printf(DEBUG_INFO, "Received Entry ID: %llu\n", entry_id);
+	debug_printf(DEBUG_INFO, "Received Entry ID: 0x%llX\n", entry_id);
 
 	return 0;
 }
 
 static int _conn_client_process_recv_stop(void) {
-	/* TODO: To be implemented */
-	errno = ENOSYS;
+	int i = 0, errsv = 0;
+	uint32_t entry_list_nmemb = 0;
+	uint64_t *entry_list = NULL;
 
-	return -1;
+	/* Read te number of elements to receive */
+	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
+		errsv = errno;
+		log_crit("conn_client_process_recv_stop(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Network to Host byte order */
+	entry_list_nmemb = ntohl(entry_list_nmemb);
+
+	if (!entry_list_nmemb) {
+		log_info("conn_client_process_recv_stop(): No entries were deleted.\n");
+		return 0;
+	}
+
+	/* Alloc sufficient memory to receive the deleted entries list */
+	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(uint64_t)))) {
+		errsv = errno;
+		log_crit("conn_client_process_recv_stop(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Receive the deleted entries list */
+	if (read(runc.fd, entry_list, entry_list_nmemb * sizeof(uint64_t)) != (entry_list_nmemb * sizeof(uint64_t))) {
+		errsv = errno;
+		log_crit("conn_client_process_recv_stop(): read() != %zu: %s\n", entry_list_nmemb * sizeof(uint64_t), strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Iterate the received entries list */
+	for (i = 0; i < entry_list_nmemb; i ++) {
+		/* Network to Host byte order */
+		entry_list[i] = ntohll(entry_list[i]);
+
+		/* TODO: Print the deleted entries */
+		debug_printf(DEBUG_INFO, "Entry ID 0x%llX was deleted\n", entry_list[i]);
+	}
+
+	mm_free(entry_list);
+
+	return 0;
 }
 
 static int _conn_client_process_recv_show(void) {

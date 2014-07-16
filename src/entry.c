@@ -131,7 +131,7 @@ void entry_set_subj_size(struct usched_entry *entry, size_t size) {
 	entry->subj_size = (uint32_t) size;
 }
 
-int entry_set_payload(struct usched_entry *entry, char *payload, size_t len) {
+int entry_set_payload(struct usched_entry *entry, const char *payload, size_t len) {
 	int errsv = 0;
 
 	if (!(entry->payload = mm_alloc(len))) {
@@ -159,7 +159,7 @@ void entry_unset_payload(struct usched_entry *entry) {
 	entry->psize = 0;
 }
 
-int entry_set_subj(struct usched_entry *entry, char *subj, size_t len) {
+int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 	int errsv = 0;
 
 	if (!len)

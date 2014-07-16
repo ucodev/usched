@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 13-07-2014
+ * Date: 16-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -172,19 +172,19 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	for (i = 0, entry_list_res_nmemb = 0; i < entry_list_req_nmemb; i ++) {
 		if (schedule_entry_ownership_delete_by_id(ntohll(entry_list_req[i]), entry->uid) < 0) {
 			log_warn("_process_recv_update_op_del(): schedule_entry_ownership_delete_by_id(): %s\n", strerror(errno));
-			entry_list_res_nmemb ++;
-
-			if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_nmemb * sizeof(entry->id)))) {
-				errsv = errno;
-				log_warn("_process_recv_update_op_del(): realloc(): %s\n", strerror(errno));
-				goto _update_op_del_failure_1;
-			}
-
-			/* Set early network byte order, as this list won't be used locally */
-			entry_list_res[(entry_list_res_nmemb * sizeof(entry->id)) - 1] = htonll(entry_list_req[i]);
-
 			continue;
 		}
+
+		entry_list_res_nmemb ++;
+
+		if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_nmemb * sizeof(entry->id)))) {
+			errsv = errno;
+			log_warn("_process_recv_update_op_del(): mm_realloc(): %s\n", strerror(errno));
+			goto _update_op_del_failure_1;
+		}
+
+		/* Set early network byte order, as this list won't be used locally */
+		entry_list_res[entry_list_res_nmemb - 1] = htonll(entry_list_req[i]);
 	}
 
 	/* Report back the failed entries. */
@@ -208,12 +208,15 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 	/* Craft the list size at the head of the packet. */
 	memcpy((void *) aop->data, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
-	/* Append the list contents right after the list size field */
-	memcpy((void *) (((char *) aop->data) + 4), entry_list_res, aop->count - 4);
+
+	if (entry_list_res_nmemb) {
+		/* Append the list contents right after the list size field */
+		memcpy((void *) (((char *) aop->data) + 4), entry_list_res, aop->count - 4);
+	}
 
 	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that failed to be deleted.\n", entry_list_res_nmemb);
 
-	/* Report back the failed entries to the client */
+	/* Report back the successfully deleted entries to the client */
 	if (rtsaio_write(aop) < 0) {
 		errsv = errno;
 		log_warn("_process_recv_update_op_del(): rtsaio_write(): %s\n", strerror(errno));

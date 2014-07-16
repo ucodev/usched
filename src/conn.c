@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 16-07-2014
+ * Date: 17-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *

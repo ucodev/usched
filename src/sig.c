@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface
  *
- * Date: 14-07-2014
+ * Date: 16-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -159,6 +159,7 @@ void sig_daemon_destroy(void) {
 	sigaction(SIGINT, &rund.sa_save, NULL);
 	sigaction(SIGQUIT, &rund.sa_save, NULL);
 	sigaction(SIGHUP, &rund.sa_save, NULL);
+	sigaction(SIGPIPE, &rund.sa_save, NULL);
 }
 
 void sig_exec_destroy(void) {

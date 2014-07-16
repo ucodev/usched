@@ -184,7 +184,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		}
 
 		/* Set early network byte order, as this list won't be used locally */
-		entry_list_res[entry_list_res_nmemb - 1] = htonll(entry_list_req[i]);
+		entry_list_res[entry_list_res_nmemb - 1] = entry_list_req[i];
 	}
 
 	/* Report back the failed entries. */
@@ -214,7 +214,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		memcpy((void *) (((char *) aop->data) + 4), entry_list_res, aop->count - 4);
 	}
 
-	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that failed to be deleted.\n", entry_list_res_nmemb);
+	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that were successfully deleted.\n", entry_list_res_nmemb);
 
 	/* Report back the successfully deleted entries to the client */
 	if (rtsaio_write(aop) < 0) {

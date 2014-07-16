@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 13-07-2014
+ * Date: 16-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -120,7 +120,7 @@ struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {
 
 	if (!entry->psched_id) {
 		errsv = errno;
-		log_warn("schedule_entry_disable(): entry->psched_id == NULL\n");
+		log_warn("schedule_entry_disable(): entry->psched_id == 0\n");
 		errno = errsv;
 		return NULL;
 	}
@@ -183,6 +183,19 @@ int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid) {
 		pthread_mutex_unlock(&rund.mutex_apool);
 		errno = EACCES;
 		return -1;
+	}
+
+	/* Check if psched_id is still valid */
+	if (!entry->psched_id) {
+		log_warn("schedule_entry_ownership_delete_by_id(): entry->psched_id == 0\n");
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (psched_disarm(rund.psched, entry->psched_id) < 0) {
+		log_warn("schedule_entry_ownership_delete_by_id(): psched_disarm(): %s\n", strerror(errno));
+		/* This isn't critical, so do not return NULL here. */
 	}
 
 	/* Delete the entry */

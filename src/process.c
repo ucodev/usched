@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 16-07-2014
+ * Date: 18-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -203,6 +203,8 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("_process_recv_update_op_del(): aop->data = mm_alloc(%zu): %s\n", aop->count, strerror(errno));
 
+		mm_free(entry_list_res);
+
 		goto _update_op_del_failure_1;
 	}
 
@@ -221,8 +223,12 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		errsv = errno;
 		log_warn("_process_recv_update_op_del(): rtsaio_write(): %s\n", strerror(errno));
 
+		mm_free(entry_list_res);
+
 		goto _update_op_del_failure_1;
 	}
+
+	mm_free(entry_list_res);
 
 	return 0;
 
@@ -233,11 +239,56 @@ _update_op_del_failure_1:
 }
 
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
+	int errsv = 0, i = 0, cur_fd = aop->fd;
+	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
+	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
+
+	/* Pop the entry from the pool */
+	pthread_mutex_lock(&rund.mutex_rpool);
+	entry = rund.rpool->pope(rund.rpool, entry);
+	pthread_mutex_unlock(&rund.mutex_rpool);
+
+	/* Ensure that entry is still valid */
+	if (!entry) {
+		log_warn("_process_recv_update_op_get(): entry == NULL after rund.rpool->pope()\n");
+		goto _update_op_get_failure_1;
+	}
+
+	/* Check if the payload size if aligned with the entry->id size */
+	if ((entry->psize % sizeof(entry->id))) {
+		log_warn("_process_recv_update_op_get(): entry->psize %% sizeof(entry->id) != 0\n");
+		goto _update_op_get_failure_1;
+	}
+
+	/* Gather the request entry list and respective list size */
+	entry_list_req = (uint64_t *) entry->payload;
+	entry_list_req_nmemb = entry->psize / sizeof(entry->id);
+
+	/* entry_list_req_size should never be 0 since we grant that entry->psize != 0 in the entry creation stage.
+	 * Anyway, since we're dealing with integers and entry->psize < sizeof(entry->id) is accepted in the pre-checks,
+	 * lets play safe and grant that entry_list_req_size != 0.
+	 */
+	if (!entry_list_req_nmemb) {
+		/* Someone is probably trying something nasty */
+		log_warn("_process_recv_update_op_get(): entry_list_req_nmemb == 0 (Possible exploit attempt)\n");
+		goto _update_op_get_failure_1;
+	}
+
+	/* Iterate payload, ensure the user that's requesting a given entry id is authorized to do so. */
+	for (i = 0, entry_list_res_nmemb = 0; i < entry_list_req_nmemb; i ++) {
+	}
+
+
 	/* TODO: To be implemented */
 
 	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
 	 * an unfinished entry shall be discarded and logged
 	 */
+
+	return -1;
+
+_update_op_get_failure_1:
+	errno = errsv;
 
 	return -1;
 }

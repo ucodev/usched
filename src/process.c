@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 18-07-2014
+ * Date: 19-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -143,13 +143,13 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	/* Ensure that entry is still valid */
 	if (!entry) {
 		log_warn("_process_recv_update_op_del(): entry == NULL after rund.rpool->pope()\n");
-		goto _update_op_del_failure_1;
+		return -1;
 	}
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
 		log_warn("_process_recv_update_op_del(): entry->psize %% sizeof(entry->id) != 0\n");
-		goto _update_op_del_failure_1;
+		return -1;
 	}
 
 	/* Gather the request entry list and respective list size */
@@ -163,7 +163,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	if (!entry_list_req_nmemb) {
 		/* Someone is probably trying something nasty */
 		log_warn("_process_recv_update_op_del(): entry_list_req_nmemb == 0 (Possible exploit attempt)\n");
-		goto _update_op_del_failure_1;
+		return -1;
 	}
 
 	/* Iterate payload, ensure the user that's requesting the deletion is authorized to do so, and delete each of
@@ -180,7 +180,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_nmemb * sizeof(entry->id)))) {
 			errsv = errno;
 			log_warn("_process_recv_update_op_del(): mm_realloc(): %s\n", strerror(errno));
-			goto _update_op_del_failure_1;
+			errno = errsv;
+
+			return -1;
 		}
 
 		/* Set early network byte order, as this list won't be used locally */
@@ -205,7 +207,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 		mm_free(entry_list_res);
 
-		goto _update_op_del_failure_1;
+		errno = errsv;
+
+		return -1;
 	}
 
 	/* Craft the list size at the head of the packet. */
@@ -225,17 +229,14 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 		mm_free(entry_list_res);
 
-		goto _update_op_del_failure_1;
+		errno = errsv;
+
+		return -1;
 	}
 
 	mm_free(entry_list_res);
 
 	return 0;
-
-_update_op_del_failure_1:
-	errno = errsv;
-
-	return -1;
 }
 
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
@@ -251,13 +252,13 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	/* Ensure that entry is still valid */
 	if (!entry) {
 		log_warn("_process_recv_update_op_get(): entry == NULL after rund.rpool->pope()\n");
-		goto _update_op_get_failure_1;
+		return -1;
 	}
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
 		log_warn("_process_recv_update_op_get(): entry->psize %% sizeof(entry->id) != 0\n");
-		goto _update_op_get_failure_1;
+		return -1;
 	}
 
 	/* Gather the request entry list and respective list size */
@@ -271,7 +272,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	if (!entry_list_req_nmemb) {
 		/* Someone is probably trying something nasty */
 		log_warn("_process_recv_update_op_get(): entry_list_req_nmemb == 0 (Possible exploit attempt)\n");
-		goto _update_op_get_failure_1;
+		return -1;
 	}
 
 	/* Iterate payload, ensure the user that's requesting a given entry id is authorized to do so. */
@@ -284,11 +285,6 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
 	 * an unfinished entry shall be discarded and logged
 	 */
-
-	return -1;
-
-_update_op_get_failure_1:
-	errno = errsv;
 
 	return -1;
 }

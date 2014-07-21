@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface header
  *
- * Date: 13-07-2014
+ * Date: 21-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -37,6 +37,7 @@
 int schedule_daemon_init(void);
 void schedule_daemon_destroy(void);
 int schedule_entry_create(struct usched_entry *entry);
+struct usched_entry *schedule_entry_get_copy(uint64_t entry_id);
 struct usched_entry *schedule_entry_disable(struct usched_entry *entry);
 int schedule_entry_delete(struct usched_entry *entry);
 int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid);

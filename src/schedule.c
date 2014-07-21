@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 16-07-2014
+ * Date: 21-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -104,6 +104,49 @@ int schedule_entry_create(struct usched_entry *entry) {
 	return 0;
 }
 
+struct usched_entry *schedule_entry_get_copy(uint64_t entry_id) {
+	int errsv = 0;
+	struct usched_entry *entry = NULL, *entry_dest = NULL;
+
+	pthread_mutex_lock(&rund.mutex_apool);
+	entry = rund.apool->search(rund.apool, usched_entry_id(entry_id));
+
+	if (!entry) {
+		log_warn("schedule_entry_search(): entry == NULL\n");
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (!entry->psched_id) {
+		log_warn("schedule_entry_get_copy(): entry->psched_id == 0\n");
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (!(entry_dest = mm_alloc(sizeof(struct usched_entry)))) {
+		errsv = errno;
+		log_warn("schedule_entry_get_copy(): mm_alloc(): %s\n", strerror(errno));
+		pthread_mutex_unlock(&rund.mutex_apool);
+		errno = errsv;
+		return NULL;
+	}
+
+	if (entry_copy(entry_dest, entry) < 0) {
+		errsv = errno;
+		log_warn("schedule_entry_get_copy(): entry_copy(): %s\n", strerror(errno));
+		pthread_mutex_unlock(&rund.mutex_apool);
+		mm_free(entry_dest);
+		errno = errsv;
+		return NULL;
+	}
+
+	pthread_mutex_unlock(&rund.mutex_apool);
+
+	return entry_dest;
+}
+
 struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {
 	int errsv = 0;
 
@@ -112,16 +155,14 @@ struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	if (!entry) {
-		errsv = errno;
 		log_warn("schedule_entry_disable(): entry == NULL\n");
-		errno = errsv;
+		errno = EINVAL;
 		return NULL;
 	}
 
 	if (!entry->psched_id) {
-		errsv = errno;
 		log_warn("schedule_entry_disable(): entry->psched_id == 0\n");
-		errno = errsv;
+		errno = EINVAL;
 		return NULL;
 	}
 

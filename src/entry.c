@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 13-07-2014
+ * Date: 21-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -67,7 +67,7 @@ struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, voi
 
 	if (entry_set_payload(entry, payload, psize) < 0) {
 		errsv = errno;
-		log_warn("entry_init(): entry_set_subj(): %s\n", strerror(errno));
+		log_warn("entry_init(): entry_set_payload(): %s\n", strerror(errno));
 		mm_free(entry);
 		errno = errsv;
 		return NULL;
@@ -177,6 +177,29 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 	memcpy(entry->subj, subj, len);
 
 	entry_set_subj_size(entry, len);
+
+	return 0;
+}
+
+int entry_copy(struct usched_entry *dest, struct usched_entry *src) {
+	int errsv = 0;
+
+	memcpy(dest, src, sizeof(struct usched_entry));
+
+	if (entry_set_subj(dest, src->subj, src->subj_size) < 0) {
+		errsv = errno;
+		log_warn("entry_copy(): entry_set_subj(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (entry_set_payload(dest, src->payload, src->psize) < 0) {
+		errsv = errno;
+		log_warn("entry_copy(): entry_set_payload(): %s\n", strerror(errno));
+		mm_free(dest->subj);
+		errno = errsv;
+		return -1;
+	}
 
 	return 0;
 }

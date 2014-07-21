@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 19-07-2014
+ * Date: 21-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -65,6 +65,7 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 	/* Ensure that entry is still valid */
 	if (!entry) {
+		errsv = EINVAL;
 		log_warn("_process_recv_update_op_new(): entry == NULL after rund.rpool->pope().\n");
 		goto _update_op_new_failure_1;
 	}
@@ -143,12 +144,14 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	/* Ensure that entry is still valid */
 	if (!entry) {
 		log_warn("_process_recv_update_op_del(): entry == NULL after rund.rpool->pope()\n");
+		errno = EINVAL;
 		return -1;
 	}
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
 		log_warn("_process_recv_update_op_del(): entry->psize %% sizeof(entry->id) != 0\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -163,6 +166,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	if (!entry_list_req_nmemb) {
 		/* Someone is probably trying something nasty */
 		log_warn("_process_recv_update_op_del(): entry_list_req_nmemb == 0 (Possible exploit attempt)\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -240,9 +244,11 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 }
 
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
-	int errsv = 0, i = 0, cur_fd = aop->fd;
-	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
-	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
+	int i = 0;
+	/* int errsv = 0, i = 0, cur_fd = aop->fd; */
+	uint64_t *entry_list_req = NULL;
+	uint32_t entry_list_req_nmemb = 0;
+	struct usched_entry *entry_c = NULL;
 
 	/* Pop the entry from the pool */
 	pthread_mutex_lock(&rund.mutex_rpool);
@@ -252,12 +258,14 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	/* Ensure that entry is still valid */
 	if (!entry) {
 		log_warn("_process_recv_update_op_get(): entry == NULL after rund.rpool->pope()\n");
+		errno = EINVAL;
 		return -1;
 	}
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
 		log_warn("_process_recv_update_op_get(): entry->psize %% sizeof(entry->id) != 0\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -272,11 +280,39 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	if (!entry_list_req_nmemb) {
 		/* Someone is probably trying something nasty */
 		log_warn("_process_recv_update_op_get(): entry_list_req_nmemb == 0 (Possible exploit attempt)\n");
+		errno = EINVAL;
 		return -1;
 	}
 
 	/* Iterate payload, ensure the user that's requesting a given entry id is authorized to do so. */
-	for (i = 0, entry_list_res_nmemb = 0; i < entry_list_req_nmemb; i ++) {
+	for (i = 0; i < entry_list_req_nmemb; i ++) {
+		/* Search for the entry id in the active pool */
+		if (!(entry_c = schedule_entry_get_copy(ntohll(entry_list_req[i])))) {
+			log_warn("_process_recv_op_get(): schedule_entry_get_copy(): %s\n", strerror(errno));
+			continue;
+		}
+
+		/* Grant that the found entry belongs to the requesting uid */
+		if (entry_c->uid != entry->uid) {
+			log_warn("_process_recv_op_get(): entry_c->uid != entry->uid. (UID of the request: %u\n", entry->uid);
+			continue;
+		}
+
+		/* Clear entry password, so it won't be transmitted to client */
+		memset(entry_c->password, 0, CONFIG_USCHED_AUTH_PASSWORD_MAX);
+
+		/* Clear entry payload */
+		if (entry_c->payload) {
+			mm_free(entry_c->payload);
+			entry_c->psize = 0;
+		}
+
+		/* Clear entry psched_id. The client should not be aware of this information */
+		entry_c->psched_id = 0;
+
+		/* TODO: Push this entry into a temporary queue. */
+
+		entry_destroy(entry_c);
 	}
 
 

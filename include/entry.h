@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 16-07-2014
+ * Date: 21-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -101,6 +101,7 @@ void entry_set_subj_size(struct usched_entry *entry, size_t size);
 int entry_set_payload(struct usched_entry *entry, const char *payload, size_t len);
 void entry_unset_payload(struct usched_entry *entry);
 int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len);
+int entry_copy(struct usched_entry *dest, struct usched_entry *src);
 int entry_compare(const void *e1, const void *e2);
 int entry_authorize(struct usched_entry *entry, int fd);
 void entry_pmq_dispatch(void *arg);

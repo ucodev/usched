@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 12-07-2014
+ * Date: 23-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,6 +59,8 @@ void notify_read(struct async_op *aop) {
 		} else if (!(entry = process_recv_create(aop))) {
 			goto _read_failure;
 		}
+
+		/* TODO Expect a COMPLETED indicator from the client */
 
 		return;
 	}

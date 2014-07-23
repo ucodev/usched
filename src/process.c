@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 21-07-2014
+ * Date: 23-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -136,6 +136,10 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
 	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
 
+	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
+	 * an unfinished entry shall be discarded and logged
+	 */
+
 	/* Pop the entry from the pool */
 	pthread_mutex_lock(&rund.mutex_rpool);
 	entry = rund.rpool->pope(rund.rpool, entry);
@@ -244,11 +248,40 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 }
 
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
-	int i = 0;
-	/* int errsv = 0, i = 0, cur_fd = aop->fd; */
+	int errsv = 0, i = 0, cur_fd = aop->fd;
 	uint64_t *entry_list_req = NULL;
-	uint32_t entry_list_req_nmemb = 0;
+	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
+	size_t buf_offset = 0;
 	struct usched_entry *entry_c = NULL;
+	char *buf = NULL;
+
+	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
+	 * an unfinished entry shall be discarded and logged
+	 */
+
+
+	/* 'buf' layout
+	 *
+	 * +===========+=================================+
+	 * | Field     | Size                            |
+	 * +===========+=================================+
+	 * | nmemb     | 32 bits                         |
+	 * +-----------+----------------------------------
+	 * | id        | 64 bits                         |
+	 * | flags     | 32 bits                         |
+	 * | uid       | 32 bits                         |
+	 * | gid       | 32 bits                         |
+	 * | trigger   | 32 bits                         |
+	 * | step      | 32 bits                         |
+	 * | expire    | 32 bits                         |
+	 * | username  | CONFIG_USCHED_AUTH_USERNAME_MAX |
+	 * | subj_size | 32 bits                         |
+	 * | subj      | subj_size                       |
+	 * +-----------+---------------------------------+
+	 * |   ....    |              ....               |
+	 * |           |                                 |
+	 *
+	 */
 
 	/* Pop the entry from the pool */
 	pthread_mutex_lock(&rund.mutex_rpool);
@@ -284,6 +317,18 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		return -1;
 	}
 
+	/* Initialize transmission buffer (nmemb -> 32bits) */
+	buf_offset = 4;
+
+	if (!(buf = mm_alloc(buf_offset))) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_get(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	memset(buf, 0, buf_offset);
+
 	/* Iterate payload, ensure the user that's requesting a given entry id is authorized to do so. */
 	for (i = 0; i < entry_list_req_nmemb; i ++) {
 		/* Search for the entry id in the active pool */
@@ -310,19 +355,69 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		/* Clear entry psched_id. The client should not be aware of this information */
 		entry_c->psched_id = 0;
 
-		/* TODO: Push this entry into a temporary queue. */
+		/* Extend transmission buffer */
 
+		if (!(buf = mm_realloc(buf, buf_offset + offsetof(struct usched_entry, psize) + CONFIG_USCHED_AUTH_USERNAME_MAX + sizeof(entry_c->subj_size) + entry_c->subj_size + 1))) {
+			errsv = errno;
+			log_warn("_process_recv_op_get(): mm_realloc(): %s\n", strerror(errno));
+			entry_destroy(entry_c);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Set entry contents endianess to network byte order */
+		entry_c->id = htonll(entry_c->id);
+		entry_c->flags = htonl(entry_c->flags);
+		entry_c->uid = htonl(entry_c->uid);
+		entry_c->gid = htonl(entry_c->gid);
+		entry_c->trigger = htonl(entry_c->trigger);
+		entry_c->step = htonl(entry_c->step);
+		entry_c->expire = htonl(entry_c->expire);
+		/* NOTE: We don't convert the entry_c->subj_size here as we need to handle sizes
+		 * based on this value. It will be converted later
+		 */
+
+		/* Serialize entry contents into the transmission buffer */
+		memcpy(buf + buf_offset, entry_c, offsetof(struct usched_entry, psize));
+		buf_offset += offsetof(struct usched_entry, psize);
+		memcpy(buf + buf_offset, entry_c->username, CONFIG_USCHED_AUTH_USERNAME_MAX);
+		buf_offset += CONFIG_USCHED_AUTH_USERNAME_MAX;
+		memcpy(buf + buf_offset, (uint32_t [1]) { htonl(entry_c->subj_size) }, sizeof(entry_c->subj_size));
+		buf_offset += sizeof(entry_c->subj_size);
+		memcpy(buf + buf_offset, entry_c->subj, entry_c->subj_size + 1);
+		buf_offset += entry_c->subj_size + 1;
+
+		/* Increment the number of elements in the buffer */
+		entry_list_res_nmemb ++;
+
+		/* Destroy the entry copy */
 		entry_destroy(entry_c);
 	}
 
+	/* Update buffer header with the current number of entries */
+	memcpy(buf, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
 
-	/* TODO: To be implemented */
+	/* Reuse 'aop' to reply the contents of the requested entries */
+	mm_free((void *) aop->data);
 
-	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
-	 * an unfinished entry shall be discarded and logged
-	 */
+	memset(aop, 0, sizeof(struct async_op));
 
-	return -1;
+	aop->fd = cur_fd;
+	aop->count = buf_offset;
+	aop->priority = 0;
+	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+	aop->data = buf;
+
+	/* Report back the successfully read entries to the client */
+	if (rtsaio_write(aop) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_get(): rtsaio_write(): %s\n", strerror(errno));
+		errno = errsv;
+
+		return -1;
+	}
+
+	return 0;
 }
 
 struct usched_entry *process_recv_create(struct async_op *aop) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 21-07-2014
+ * Date: 23-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -75,7 +75,7 @@ struct usched_entry {
 	char *payload;
 
 	/* Entry properties */
-	size_t subj_size;
+	uint32_t subj_size;
 	char *subj;
 
 	/* Reserved */

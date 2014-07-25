@@ -197,9 +197,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		entry_list_res[entry_list_res_nmemb - 1] = entry_list_req[i];
 	}
 
-	/* Report back the failed entries. */
+	/* Report back the deleted entries. */
 
-	/* Reuse 'aop' to reply the failed deleted entries to the client */
+	/* Reuse 'aop' to reply the deleted entries to the client */
 	mm_free((void *) aop->data);
 
 	memset(aop, 0, sizeof(struct async_op));
@@ -260,26 +260,30 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	 */
 
 
-	/* 'buf' layout
+	/* Transmission buffer 'buf' layout
 	 *
 	 * +===========+=================================+
 	 * | Field     | Size                            |
-	 * +===========+=================================+
-	 * | nmemb     | 32 bits                         |
-	 * +-----------+----------------------------------
-	 * | id        | 64 bits                         |
-	 * | flags     | 32 bits                         |
-	 * | uid       | 32 bits                         |
-	 * | gid       | 32 bits                         |
-	 * | trigger   | 32 bits                         |
-	 * | step      | 32 bits                         |
-	 * | expire    | 32 bits                         |
-	 * | username  | CONFIG_USCHED_AUTH_USERNAME_MAX |
-	 * | subj_size | 32 bits                         |
-	 * | subj      | subj_size                       |
-	 * +-----------+---------------------------------+
-	 * |   ....    |              ....               |
-	 * |           |                                 |
+	 * +===========+=================================+   --+
+	 * | nmemb     | 32 bits                         |      > Header
+	 * +-----------+---------------------------------+   --+
+	 * | id        | 64 bits                         |     |
+	 * | flags     | 32 bits                         |     |
+	 * | uid       | 32 bits                         |     |
+	 * | gid       | 32 bits                         |     |
+	 * | trigger   | 32 bits                         |     |
+	 * | step      | 32 bits                         |      > Serialized entry #1
+	 * | expire    | 32 bits                         |     |
+	 * | username  | CONFIG_USCHED_AUTH_USERNAME_MAX |     |
+	 * | subj_size | 32 bits                         |     |
+	 * | subj      | subj_size                       |     |
+	 * +-----------+---------------------------------+   --+
+	 * |           |                                 |     |
+	 * |   ....    |              ....               |     | 
+	 * |           |                                 |      > Serialized entry #2
+	 * .           .                                 .     .
+         * .           .                                 .     .
+         * .           .                                 .    ..
 	 *
 	 */
 
@@ -349,6 +353,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		/* Clear entry payload */
 		if (entry_c->payload) {
 			mm_free(entry_c->payload);
+			entry_c->payload = NULL;
 			entry_c->psize = 0;
 		}
 

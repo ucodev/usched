@@ -1,0 +1,66 @@
+/**
+ * @file print.c
+ * @brief uSched
+ *        Printing interface
+ *
+ * Date: 26-07-2014
+ * 
+ * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ *
+ * This file is part of usched.
+ *
+ * usched is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * usched is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with usched.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include <stdio.h>
+#include <stdint.h>
+
+#include "entry.h"
+
+void print_result_run(uint64_t entry_id) {
+	printf("Installed Entry ID: 0x%llX\n", (unsigned long long) entry_id);
+}
+
+void print_result_del(uint64_t *entry_list, size_t count) {
+	int i = 0;
+
+	for (i = 0; i < count; i ++)
+		printf("Deleted Entry ID: 0x%llX\n", (unsigned long long) entry_list[i]);
+}
+
+void print_result_show(struct usched_entry *entry_list, size_t count) {
+	int i = 0;
+
+	for (i = 0; i < count; i ++) {
+		printf(
+			"ID: 0x%llX\t" \
+			"Username: %12s\t" \
+			"UID: %u\t" \
+			"GID: %u\t" \
+			"Trigger: %u\t" \
+			"Step: %u\t" \
+			"Expire: %u\t" \
+			"Command:\t%s\n",
+			(unsigned long long) entry_list[i].id,
+			entry_list[i].username,
+			entry_list[i].uid,
+			entry_list[i].gid,
+			entry_list[i].trigger,
+			entry_list[i].step,
+			entry_list[i].expire,
+			entry_list[i].subj);
+	}
+}
+

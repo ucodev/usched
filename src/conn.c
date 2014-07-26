@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 25-07-2014
+ * Date: 26-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,6 +43,7 @@
 #include "notify.h"
 #include "conn.h"
 #include "log.h"
+#include "print.h"
 
 int conn_client_init(void) {
 	int errsv = 0;
@@ -72,6 +73,8 @@ static int _conn_client_process_recv_run(void) {
 	entry_id = ntohll(entry_id);
 
 	debug_printf(DEBUG_INFO, "Received Entry ID: 0x%llX\n", entry_id);
+
+	print_result_run(entry_id);
 
 	return 0;
 }
@@ -118,10 +121,13 @@ static int _conn_client_process_recv_stop(void) {
 		/* Network to Host byte order */
 		entry_list[i] = ntohll(entry_list[i]);
 
-		/* TODO: Print the deleted entries */
 		debug_printf(DEBUG_INFO, "Entry ID 0x%llX was deleted\n", entry_list[i]);
 	}
 
+	/* Print the deleted entries */
+	print_result_del(entry_list, entry_list_nmemb);
+
+	/* Free entry_list memory */
 	mm_free(entry_list);
 
 	return 0;
@@ -223,9 +229,11 @@ static int _conn_client_process_recv_show(void) {
 		}
 	}
 
-	/* TODO: Print the entries */
+	/* Print the received entries */
+	print_result_show(entry_list, entry_list_nmemb);
 
-	mm_free(entry_list);
+	/* Free entry_list memory */
+	mm_free(entry_list); /* FIXME: Leak here. Need to free members */
 
 	return 0;
 }

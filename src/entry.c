@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 21-07-2014
+ * Date: 26-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -186,19 +186,23 @@ int entry_copy(struct usched_entry *dest, struct usched_entry *src) {
 
 	memcpy(dest, src, sizeof(struct usched_entry));
 
-	if (entry_set_subj(dest, src->subj, src->subj_size) < 0) {
-		errsv = errno;
-		log_warn("entry_copy(): entry_set_subj(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
+	if (src->subj && src->subj_size) {
+		if (entry_set_subj(dest, src->subj, src->subj_size) < 0) {
+			errsv = errno;
+			log_warn("entry_copy(): entry_set_subj(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	}
 
-	if (entry_set_payload(dest, src->payload, src->psize) < 0) {
-		errsv = errno;
-		log_warn("entry_copy(): entry_set_payload(): %s\n", strerror(errno));
-		mm_free(dest->subj);
-		errno = errsv;
-		return -1;
+	if (src->payload && src->psize) {
+		if (entry_set_payload(dest, src->payload, src->psize) < 0) {
+			errsv = errno;
+			log_warn("entry_copy(): entry_set_payload(): %s\n", strerror(errno));
+			mm_free(dest->subj);
+			errno = errsv;
+			return -1;
+		}
 	}
 
 	return 0;

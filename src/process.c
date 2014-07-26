@@ -337,7 +337,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	for (i = 0; i < entry_list_req_nmemb; i ++) {
 		/* Search for the entry id in the active pool */
 		if (!(entry_c = schedule_entry_get_copy(ntohll(entry_list_req[i])))) {
-			log_warn("_process_recv_op_get(): schedule_entry_get_copy(): %s\n", strerror(errno));
+			log_warn("_process_recv_update_op_get(): schedule_entry_get_copy(): %s\n", strerror(errno));
 			continue;
 		}
 

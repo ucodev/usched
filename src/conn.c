@@ -150,7 +150,7 @@ static int _conn_client_process_recv_show(void) {
 	entry_list_nmemb = ntohl(entry_list_nmemb);
 
 	if (!entry_list_nmemb) {
-		log_info("conn_client_process_recv_show(): No entries were deleted.\n");
+		log_info("conn_client_process_recv_show(): No entries were found.\n");
 		return 0;
 	}
 

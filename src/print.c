@@ -43,18 +43,20 @@ void print_result_del(uint64_t *entry_list, size_t count) {
 void print_result_show(struct usched_entry *entry_list, size_t count) {
 	int i = 0;
 
+	printf("                 id | username |   uid |   gid |     trigger |   step |      expire | cmd\n");
+
 	for (i = 0; i < count; i ++) {
 		printf(
-			"ID: 0x%llX\t" \
-			"Username: %12s\t" \
-			"UID: %u\t" \
-			"GID: %u\t" \
-			"Trigger: %u\t" \
-			"Step: %u\t" \
-			"Expire: %u\t" \
-			"Command:\t%s\n",
+			" 0x%16llX | " \
+			"%8s | " \
+			"%5u | " \
+			"%5u | " \
+			"%11u | " \
+			"%6u | " \
+			"%11u | " \
+			"%s\n",
 			(unsigned long long) entry_list[i].id,
-			entry_list[i].username,
+			!entry_list[i].username[0] ? "-" : entry_list[i].username,
 			entry_list[i].uid,
 			entry_list[i].gid,
 			entry_list[i].trigger,

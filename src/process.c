@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 23-07-2014
+ * Date: 26-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -174,11 +174,31 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		return -1;
 	}
 
+	/* Revert network to host byte order */
+	for (i = 0; i < entry_list_req_nmemb; i ++)
+		entry_list_req[i] = ntohll(entry_list_req[i]);
+
+	/* If the number of requested elements is 1 and the requested entry id is 0, this means to
+	 * delete all the entries that match the entry's uid
+	 */
+	if ((entry_list_req_nmemb == 1) && (!entry_list_req[0])) {
+		mm_free(entry->payload);
+		entry->psize = 0;
+		entry_list_req = NULL;
+
+		if (schedule_entry_get_by_uid(entry->uid, &entry_list_req, &entry_list_req_nmemb) < 0) {
+			errsv = errno;
+			log_warn("_process_recv_update_op_get(): schedule_entry_get_by_uid(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	}
+
 	/* Iterate payload, ensure the user that's requesting the deletion is authorized to do so, and delete each of
 	 * the valid entries through schedule_delete_entry().
 	 */
 	for (i = 0, entry_list_res_nmemb = 0; i < entry_list_req_nmemb; i ++) {
-		if (schedule_entry_ownership_delete_by_id(ntohll(entry_list_req[i]), entry->uid) < 0) {
+		if (schedule_entry_ownership_delete_by_id(entry_list_req[i], entry->uid) < 0) {
 			log_warn("_process_recv_update_op_del(): schedule_entry_ownership_delete_by_id(): %s\n", strerror(errno));
 			continue;
 		}
@@ -321,6 +341,26 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		return -1;
 	}
 
+	/* Revert network to host byte order */
+	for (i = 0; i < entry_list_req_nmemb; i ++)
+		entry_list_req[i] = ntohll(entry_list_req[i]);
+
+	/* If the number of requested elements is 1 and the requested entry id is 0, this means to
+	 * fetch all the entries that match the entry's uid
+	 */
+	if ((entry_list_req_nmemb == 1) && (!entry_list_req[0])) {
+		mm_free(entry->payload);
+		entry->psize = 0;
+		entry_list_req = NULL;
+
+		if (schedule_entry_get_by_uid(entry->uid, &entry_list_req, &entry_list_req_nmemb) < 0) {
+			errsv = errno;
+			log_warn("_process_recv_update_op_get(): schedule_entry_get_by_uid(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	}
+
 	/* Initialize transmission buffer (nmemb -> 32bits) */
 	buf_offset = 4;
 
@@ -336,14 +376,14 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	/* Iterate payload, ensure the user that's requesting a given entry id is authorized to do so. */
 	for (i = 0; i < entry_list_req_nmemb; i ++) {
 		/* Search for the entry id in the active pool */
-		if (!(entry_c = schedule_entry_get_copy(ntohll(entry_list_req[i])))) {
+		if (!(entry_c = schedule_entry_get_copy(entry_list_req[i]))) {
 			log_warn("_process_recv_update_op_get(): schedule_entry_get_copy(): %s\n", strerror(errno));
 			continue;
 		}
 
 		/* Grant that the found entry belongs to the requesting uid */
 		if (entry_c->uid != entry->uid) {
-			log_warn("_process_recv_op_get(): entry_c->uid != entry->uid. (UID of the request: %u\n", entry->uid);
+			log_warn("_process_recv_update_op_get(): entry_c->uid != entry->uid. (UID of the request: %u\n", entry->uid);
 			continue;
 		}
 
@@ -364,7 +404,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 
 		if (!(buf = mm_realloc(buf, buf_offset + offsetof(struct usched_entry, psize) + CONFIG_USCHED_AUTH_USERNAME_MAX + sizeof(entry_c->subj_size) + entry_c->subj_size + 1))) {
 			errsv = errno;
-			log_warn("_process_recv_op_get(): mm_realloc(): %s\n", strerror(errno));
+			log_warn("_process_recv_update_op_get(): mm_realloc(): %s\n", strerror(errno));
 			entry_destroy(entry_c);
 			errno = errsv;
 			return -1;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 21-07-2014
+ * Date: 26-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,7 @@
 
 #include <psched/sched.h>
 
+#include "debug.h"
 #include "log.h"
 #include "mm.h"
 #include "runtime.h"
@@ -145,6 +146,33 @@ struct usched_entry *schedule_entry_get_copy(uint64_t entry_id) {
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	return entry_dest;
+}
+
+int schedule_entry_get_by_uid(uid_t uid, uint64_t **entry_list, uint32_t *count) {
+	int errsv = 0;
+	struct usched_entry *entry = NULL;
+
+	pthread_mutex_lock(&rund.mutex_apool);
+
+	for (*count = 0, rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
+		if (entry->uid != uid)
+			continue;
+
+		if (!(*entry_list = mm_realloc(*entry_list, ++ *count))) {
+			errsv = errno;
+			log_warn("schedule_entry_get_by_uid(): mm_realloc(): %s\n", strerror(errno));
+			*count = 0;
+			pthread_mutex_unlock(&rund.mutex_apool);
+			errno = errsv;
+			return -1;
+		}
+
+		(*entry_list)[(*count) - 1] = entry->id;
+	}
+
+	pthread_mutex_unlock(&rund.mutex_apool);
+
+	return 0;
 }
 
 struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {

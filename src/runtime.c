@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface
  *
- * Date: 13-07-2014
+ * Date: 26-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,7 +25,6 @@
  */
 
 
-#include <stdio.h> /* Debug */
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>

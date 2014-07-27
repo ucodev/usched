@@ -392,11 +392,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 			return -1;
 		}
 
-		/* Reset the extended memory region.
-		 * TODO: valgrind states there's unitialized bytes in this buffer. This is most likely
-		 * a false positive, even though a memset() is performed. Anyway, The possibility of
-		 * a real issue stills valid and this should be carefully analyzed.
-		 */
+		/* Reset the extended memory region. */
 		memset(buf + buf_offset, 0, len - buf_offset);
 
 		/* Set entry contents endianess to network byte order */

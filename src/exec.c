@@ -59,6 +59,11 @@ static void *_exec_cmd(void *arg) {
 		log_warn("_exec_cmd(): fork(): %s\n", strerror(errno));
 	} else if (!pid) {
 		/* Child */
+
+		/* Cleanup child */
+		runtime_exec_destroy();
+
+		/* Get child pid */
 		pid = getpid();
 
 		debug_printf(DEBUG_INFO, "PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", pid, cmd, uid, gid);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface
  *
- * Date: 26-07-2014
+ * Date: 27-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -154,6 +154,9 @@ int logic_process_stop(void) {
 		return -1;
 	}
 
+	/* Free entry_list */
+	mm_free(entry_list);
+
 	/* Set this entry to be deleted */
 	entry_set_flag(entry, USCHED_ENTRY_FLAG_DEL);
 
@@ -221,6 +224,9 @@ int logic_process_show(void) {
 		mm_free(entry_list);
 		return -1;
 	}
+
+	/* Free entry_list */
+	mm_free(entry_list);
 
 	/* Set this entry to be deleted */
 	entry_set_flag(entry, USCHED_ENTRY_FLAG_GET);

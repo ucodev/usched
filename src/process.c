@@ -87,6 +87,9 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 		goto _update_op_new_failure_1;
 	}
 
+	/* Update entry->id in order to report back the Entry ID to the client */
+	entry->id = entry_new->id;
+
 	/* NOTE: After schedule_entry_create() success, a new and unique entry->id is now set. */
 
 	/* Reuse 'aop' to reply the entry->id to the client */
@@ -262,7 +265,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	int errsv = 0, i = 0, cur_fd = aop->fd;
 	uint64_t *entry_list_req = NULL;
 	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
-	size_t buf_offset = 0;
+	size_t buf_offset = 0, len = 0;
 	struct usched_entry *entry_c = NULL;
 	char *buf = NULL;
 
@@ -377,15 +380,24 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		/* Clear entry psched_id. The client should not be aware of this information */
 		entry_c->psched_id = 0;
 
-		/* Extend transmission buffer */
+		/* Calculate the next length for buf */
+		len = buf_offset + offsetof(struct usched_entry, psize) + CONFIG_USCHED_AUTH_USERNAME_MAX + sizeof(entry_c->subj_size) + entry_c->subj_size + 1;
 
-		if (!(buf = mm_realloc(buf, buf_offset + offsetof(struct usched_entry, psize) + CONFIG_USCHED_AUTH_USERNAME_MAX + sizeof(entry_c->subj_size) + entry_c->subj_size + 1))) {
+		/* Extend transmission buffer */
+		if (!(buf = mm_realloc(buf, len))) {
 			errsv = errno;
 			log_warn("_process_recv_update_op_get(): mm_realloc(): %s\n", strerror(errno));
 			entry_destroy(entry_c);
 			errno = errsv;
 			return -1;
 		}
+
+		/* Reset the extended memory region.
+		 * TODO: valgrind states there's unitialized bytes in this buffer. This is most likely
+		 * a false positive, even though a memset() is performed. Anyway, The possibility of
+		 * a real issue stills valid and this should be carefully analyzed.
+		 */
+		memset(buf + buf_offset, 0, len - buf_offset);
 
 		/* Set entry contents endianess to network byte order */
 		entry_c->id = htonll(entry_c->id);

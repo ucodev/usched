@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface
  *
- * Date: 26-07-2014
+ * Date: 27-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -172,7 +172,7 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 		return -1;
 	}
 
-	memset(entry->subj, 0, len);
+	memset(entry->subj, 0, len + 1);
 
 	memcpy(entry->subj, subj, len);
 

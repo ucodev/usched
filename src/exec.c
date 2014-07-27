@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 06-07-2014
+ * Date: 27-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -61,7 +61,7 @@ static void *_exec_cmd(void *arg) {
 		/* Child */
 		pid = getpid();
 
-		debug_printf(DEBUG_INFO, "Executing: %s\nUID: %u\nGID: %u\n", cmd, uid, gid);
+		debug_printf(DEBUG_INFO, "PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", pid, cmd, uid, gid);
 
 		/* Create a new session */
 		if (setsid() == (pid_t) -1)
@@ -101,6 +101,8 @@ static void *_exec_cmd(void *arg) {
 		}
 
 		log_info("PID[%u]: Executed '%s'. Exit Status: %d\n", pid, cmd, WEXITSTATUS(status));
+
+		mm_free(arg);
 
 		/* Exit child process with the exit status returned by system() */
 		exit(WEXITSTATUS(status));

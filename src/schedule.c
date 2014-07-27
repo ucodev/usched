@@ -57,6 +57,7 @@ int schedule_daemon_init(void) {
 
 void schedule_daemon_destroy(void) {
 	psched_destroy(rund.psched);
+	psched_handler_destroy(rund.psched);
 }
 
 int schedule_entry_create(struct usched_entry *entry) {
@@ -154,11 +155,11 @@ int schedule_entry_get_by_uid(uid_t uid, uint64_t **entry_list, uint32_t *count)
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	for (*count = 0, rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
+	for (*count= 0, *entry_list = NULL, rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ++ *count) {
 		if (entry->uid != uid)
 			continue;
 
-		if (!(*entry_list = mm_realloc(*entry_list, ++ *count))) {
+		if (!(*entry_list = mm_realloc(*entry_list, (1 + *count) * sizeof(uint64_t)))) {
 			errsv = errno;
 			log_warn("schedule_entry_get_by_uid(): mm_realloc(): %s\n", strerror(errno));
 			*count = 0;
@@ -167,7 +168,7 @@ int schedule_entry_get_by_uid(uid_t uid, uint64_t **entry_list, uint32_t *count)
 			return -1;
 		}
 
-		(*entry_list)[(*count) - 1] = entry->id;
+		(*entry_list)[*count] = entry->id;
 	}
 
 	pthread_mutex_unlock(&rund.mutex_apool);

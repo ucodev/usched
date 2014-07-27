@@ -45,6 +45,7 @@
 static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0;
 	int cur_fd = aop->fd;
+	struct usched_entry *entry_new = NULL;
 
 	debug_printf(DEBUG_INFO, "PAYLOAD: %s\n", entry->payload);
 
@@ -58,8 +59,23 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	/* Clear payload information */
 	entry_unset_payload(entry);
 
+	/* Alloc memory for entry duplication */
+	if (!(entry_new = mm_alloc(sizeof(struct usched_entry)))) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_new(): mm_alloc(): %s\n", strerror(errno));
+		goto _update_op_new_failure_1;
+	}
+
+	/* Duplicate the entry */
+	if (entry_copy(entry_new, entry) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_new(): entry_copy(): %s\n", strerror(errno));
+		mm_free(entry_new);
+		goto _update_op_new_failure_1;
+	}
+
 	/* We're done. Now we need to install and set a global and unique id for this entry */
-	if (schedule_entry_create(entry) < 0) {
+	if (schedule_entry_create(entry_new) < 0) {
 		errsv = errno;
 		log_warn("_process_recv_update_op_new(): schedule_entry_create(): %s\n", strerror(errno));
 
@@ -106,7 +122,7 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 _update_op_new_failure_2:
 	/* If we're unable to comunicate with the client, the scheduled entry should be disabled and pop'd from apool */
-	if (!schedule_entry_disable(entry)) {
+	if (!schedule_entry_disable(entry_new)) {
 		/* This is critical and should never happen. This means that a race condition occured that allowed
 		 * the user to operate over a unfinished entry. We'll abort here in order to prevent further damage.
 		 */
@@ -164,6 +180,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 			errno = errsv;
 			return -1;
 		}
+
+		entry->psize = entry_list_req_nmemb * sizeof(uint64_t);
+		entry->payload = (char *) entry_list_req;
 	}
 
 	/* Iterate payload, ensure the user that's requesting the deletion is authorized to do so, and delete each of
@@ -314,6 +333,9 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 			errno = errsv;
 			return -1;
 		}
+
+		entry->psize = entry_list_req_nmemb * sizeof(uint64_t);
+		entry->payload = (char *) entry_list_req;
 	}
 
 	/* Initialize transmission buffer (nmemb -> 32bits) */

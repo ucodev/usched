@@ -389,6 +389,7 @@ void conn_daemon_process(void) {
 
 void conn_daemon_destroy(void) {
 	panet_safe_close(rund.fd);
+	rtsaio_destroy();
 }
 
 int conn_is_local(int fd) {

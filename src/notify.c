@@ -50,7 +50,6 @@ void notify_read(struct async_op *aop) {
 
 		/* Search for an existing entry. If found, the received data belongs to the entry command */
 		pthread_mutex_lock(&rund.mutex_rpool);
-		/* entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd)); */
 		entry = rund.rpool->pope(rund.rpool, usched_entry_id(aop->fd));
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
@@ -65,6 +64,9 @@ void notify_read(struct async_op *aop) {
 		 * and now belongs to the rund.apool list.
 		 */
 		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
+			/* Destroy this entry */
+			entry_destroy(entry);
+
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
 		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_INIT) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
@@ -82,7 +84,7 @@ void notify_read(struct async_op *aop) {
 			/* Entry state not recognized. This is an error state. */
 			goto _read_failure;
 		}
-			
+
 		return;
 	}
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 26-07-2014
+ * Date: 27-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -50,7 +50,8 @@ void notify_read(struct async_op *aop) {
 
 		/* Search for an existing entry. If found, the received data belongs to the entry command */
 		pthread_mutex_lock(&rund.mutex_rpool);
-		entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd));
+		/* entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd)); */
+		entry = rund.rpool->pope(rund.rpool, usched_entry_id(aop->fd));
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		if (entry) {
@@ -60,27 +61,46 @@ void notify_read(struct async_op *aop) {
 			goto _read_failure;
 		}
 
-		/* TODO Expect a COMPLETED indicator from the client in order to destroy the entry
-		 * gracefully.
+		/* If we've reached this point without errors, the 'entry' pointer is still valid
+		 * and now belongs to the rund.apool list.
 		 */
+		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
+			/* This is a complete entry */
+			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
+		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_INIT) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
+			/* This is a newly created entry */
+			pthread_mutex_lock(&rund.mutex_rpool);
 
+			if (rund.rpool->insert(rund.rpool, entry) < 0) {
+				log_warn("notify_read(): rund.rpool->insert(): %s\n", strerror(errno));
+				pthread_mutex_unlock(&rund.mutex_rpool);
+				goto _read_failure;
+			}
+
+			pthread_mutex_unlock(&rund.mutex_rpool);
+		} else {
+			/* Entry state not recognized. This is an error state. */
+			goto _read_failure;
+		}
+			
 		return;
 	}
 
 _read_failure:
 	/* Discard connection */
-	log_info("notify_read(): Discarding connection from file descriptor %d\n", aop->fd);
+	log_info("notify_read(): Terminating connection from file descriptor %d\n", aop->fd);
 
 	/* Entries in the remote connections pool (rpool) are always identified by its file descriptor.
 	 * Although the entry's handling functions will remove invalid connections from this pool (rpool),
 	 * this last search will grant that no residual entries will be kept in the pool in the case of a
 	 * connection timeout occur.
 	 */
-	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd)))) {
-		pthread_mutex_lock(&rund.mutex_rpool);
+	pthread_mutex_lock(&rund.mutex_rpool);
+
+	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd))))
 		rund.rpool->del(rund.rpool, entry);
-		pthread_mutex_unlock(&rund.mutex_rpool);
-	}
+
+	pthread_mutex_unlock(&rund.mutex_rpool);
 
 	panet_safe_close(aop->fd);
 
@@ -125,18 +145,19 @@ void notify_write(struct async_op *aop) {
 
 _write_failure:
 	/* Discard connection */
-	log_info("notify_write(): Discarding connection from file descriptor %d\n", aop->fd);
+	log_info("notify_write(): Terminating connection from file descriptor %d\n", aop->fd);
 
 	/* Entries in the remote connections pool (rpool) are always identified by its file descriptor.
 	 * Although the entry's handling functions will remove invalid connections from this pool (rpool),
 	 * this last search will grant that no residual entries will be kept in the pool in the case of a
 	 * connection timeout occur.
 	 */
-	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd)))) {
-		pthread_mutex_lock(&rund.mutex_rpool);
+	pthread_mutex_lock(&rund.mutex_rpool);
+
+	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd))))
 		rund.rpool->del(rund.rpool, entry);
-		pthread_mutex_unlock(&rund.mutex_rpool);
-	}
+
+	pthread_mutex_unlock(&rund.mutex_rpool);
 
 	panet_safe_close(aop->fd);
 

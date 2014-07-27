@@ -1,6 +1,5 @@
  - Remote authentication
  - Command Line Options
- - Terminate connections gracefully
  - Implement 'usm' (usched monitoring)
  - Fix leaks
  - Cleanup code

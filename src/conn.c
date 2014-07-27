@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface
  *
- * Date: 26-07-2014
+ * Date: 27-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -134,7 +134,7 @@ static int _conn_client_process_recv_stop(void) {
 }
 
 static int _conn_client_process_recv_show(void) {
-	int i = 0, errsv = 0;
+	int i = 0, errsv = 0, ret = -1;
 	uint32_t entry_list_nmemb = 0;
 	struct usched_entry *entry_list = NULL;
 
@@ -171,9 +171,7 @@ static int _conn_client_process_recv_show(void) {
 		if (read(runc.fd, &entry_list[i], offsetof(struct usched_entry, psize)) != offsetof(struct usched_entry, psize)) {
 			errsv = errno;
 			log_crit("conn_client_process_recv_show(): read() != %zu: %s\n", offsetof(struct usched_entry, psize), strerror(errno));
-			mm_free(entry_list);
-			errno = errsv;
-			return -1;
+			goto _recv_show_finish;
 		}
 
 		/* Convert Network to Host byte order */
@@ -189,19 +187,14 @@ static int _conn_client_process_recv_show(void) {
 		if (read(runc.fd, entry_list[i].username, CONFIG_USCHED_AUTH_USERNAME_MAX) != CONFIG_USCHED_AUTH_USERNAME_MAX) {
 			errsv = errno;
 			log_crit("conn_client_process_recv_show(): read() != %zu: %s\n", CONFIG_USCHED_AUTH_USERNAME_MAX, strerror(errno));
-			mm_free(entry_list); /* FIXME: Leak here. Need to free members */
-			errno = errsv;
-			return -1;
+			goto _recv_show_finish;
 		}
 
 		/* Read the subject size */
 		if (read(runc.fd, &entry_list[i].subj_size, 4) != 4) {
 			errsv = errno;
 			log_crit("conn_client_process_recv_show(): read() != 4: %s\n", strerror(errno));
-			mm_free(entry_list); /* FIXME: Leak here. Need to free members */
- 
-			errno = errsv;
-			return -1;
+			goto _recv_show_finish;
 		}
 
 		/* Convert Network to Host byte order */
@@ -211,9 +204,7 @@ static int _conn_client_process_recv_show(void) {
 		if (!(entry_list[i].subj = mm_alloc(entry_list[i].subj_size + 1))) {
 			errsv = errno;
 			log_crit("conn_client_process_recv_show(): mm_alloc(%d): %s\n", entry_list[i].subj_size + 1, strerror(errno));
-			mm_free(entry_list); /* FIXME: Leak here. Need to free members */
-			errno = errsv;
-			return -1;
+			goto _recv_show_finish;
 		}
 
 		/* Reset subject memory */
@@ -223,19 +214,27 @@ static int _conn_client_process_recv_show(void) {
 		if (read(runc.fd, entry_list[i].subj, entry_list[i].subj_size + 1) != (entry_list[i].subj_size + 1)) {
 			errsv = errno;
 			log_crit("conn_client_process_recv_show(): read() != %d: %s\n", entry_list[i].subj_size + 1, strerror(errno));
-			mm_free(entry_list); /* FIXME: Leak here. Need to free members */
-			errno = errsv;
-			return -1;
+			goto _recv_show_finish;
 		}
 	}
 
 	/* Print the received entries */
 	print_result_show(entry_list, entry_list_nmemb);
 
-	/* Free entry_list memory */
-	mm_free(entry_list); /* FIXME: Leak here. Need to free members */
+	ret = 0;
+	i --;
 
-	return 0;
+_recv_show_finish:
+	for (; i >= 0; i --) {
+		if (entry_list[i].subj)
+			mm_free(entry_list[i].subj);
+	}
+
+	mm_free(entry_list);
+
+	errno = errsv;
+
+	return ret;
 }
 
 int conn_client_process(void) {

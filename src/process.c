@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface
  *
- * Date: 26-07-2014
+ * Date: 27-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,18 +57,6 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 	/* Clear payload information */
 	entry_unset_payload(entry);
-
-	/* Pop the entry from the pool */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	entry = rund.rpool->pope(rund.rpool, entry); 
-	pthread_mutex_unlock(&rund.mutex_rpool);
-
-	/* Ensure that entry is still valid */
-	if (!entry) {
-		errsv = EINVAL;
-		log_warn("_process_recv_update_op_new(): entry == NULL after rund.rpool->pope().\n");
-		goto _update_op_new_failure_1;
-	}
 
 	/* We're done. Now we need to install and set a global and unique id for this entry */
 	if (schedule_entry_create(entry) < 0) {
@@ -135,22 +123,6 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	int errsv = 0, i = 0, cur_fd = aop->fd;
 	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
 	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
-
-	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
-	 * an unfinished entry shall be discarded and logged
-	 */
-
-	/* Pop the entry from the pool */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	entry = rund.rpool->pope(rund.rpool, entry);
-	pthread_mutex_unlock(&rund.mutex_rpool);
-
-	/* Ensure that entry is still valid */
-	if (!entry) {
-		log_warn("_process_recv_update_op_del(): entry == NULL after rund.rpool->pope()\n");
-		errno = EINVAL;
-		return -1;
-	}
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
@@ -275,11 +247,6 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	struct usched_entry *entry_c = NULL;
 	char *buf = NULL;
 
-	/* TODO: Check if the requested entries to be fetched are flagged as FINISH. Operations other than NEW over
-	 * an unfinished entry shall be discarded and logged
-	 */
-
-
 	/* Transmission buffer 'buf' layout
 	 *
 	 * +===========+=================================+
@@ -306,18 +273,6 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
          * .           .                                 .    ..
 	 *
 	 */
-
-	/* Pop the entry from the pool */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	entry = rund.rpool->pope(rund.rpool, entry);
-	pthread_mutex_unlock(&rund.mutex_rpool);
-
-	/* Ensure that entry is still valid */
-	if (!entry) {
-		log_warn("_process_recv_update_op_get(): entry == NULL after rund.rpool->pope()\n");
-		errno = EINVAL;
-		return -1;
-	}
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
@@ -473,8 +428,8 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
 		errsv = errno;
 		log_warn("process_recv_create(): entry = mm_alloc(): %s\n", strerror(errno));
-
-		goto _create_failure_1;
+		errno = errsv;
+		return NULL;
 	}
 
 	memset(entry, 0, sizeof(struct usched_entry));
@@ -501,31 +456,21 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	/* Validate if this entry has at least one valid operation flag */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
 		log_warn("process_recv_create(): The requested operation is invalid.\n");
-
-		goto _create_failure_2;
+		entry_destroy(entry);
+		errno = EINVAL;
+		return NULL;
 	}
 
 	/* Validate payload size */
 	if (!entry->psize) {
 		/* All entry requests expect a payload. If none is set, this entry request is invalid. */
-		errsv = errno;
 		log_warn("process_recv_create(): entry->psize == 0.\n");
-
-		goto _create_failure_2;
+		entry_destroy(entry);
+		errno = EINVAL;
+		return NULL;
 	}
 
 	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
-
-	/* Insert this entry into the rpool */
-	if (rund.rpool->insert(rund.rpool, entry) < 0) {
-		errsv = errno;
-		log_warn("process_recv_create(): rund.rpool->insert(): %s\n", strerror(errno));
-
-		/* NOTE: In this special case, we do not need to pop the entry from the rpool as we were unable
-		 * to insert it.
-		 */
-		goto _create_failure_2;
-	}
 
 	/* Reuse 'aop' for next read request: Receive the entry command */
 	memset(aop, 0, sizeof(struct async_op));
@@ -538,8 +483,9 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	if (!(aop->data = mm_alloc(aop->count))) {
 		errsv = errno;
 		log_warn("process_recv_create(): aop->data = mm_alloc(): %s\n", strerror(errno));
-
-		goto _create_failure_3;
+		entry_destroy(entry);
+		errno = errsv;
+		return NULL;
 	}
 
 	memset((void *) aop->data, 0, aop->count);
@@ -548,34 +494,15 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	if (rtsaio_read(aop) < 0) {
 		errsv = errno;
 		log_warn("process_recv_create(): rtsaio_read(): %s\n", strerror(errno));
-
-		goto _create_failure_3;
+		entry_destroy(entry);
+		errno = errsv;
+		return NULL;
 	}
 
 	/* Set the initialization flag as this is a new entry */
 	entry_set_flag(entry, USCHED_ENTRY_FLAG_INIT);
 
 	return entry;
-
-_create_failure_3:
-	/* Pop the entry from rpool without destroying it */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	entry = rund.rpool->pope(rund.rpool, entry);
-	pthread_mutex_unlock(&rund.mutex_rpool);
-
-	if (!entry) {
-		log_warn("process_recv_create(): _create_failure_3: entry == NULL after rund.rpool->pope()\n");
-		goto _create_failure_1;
-	}
-
-_create_failure_2:
-	/* Destroy the entry */
-	entry_destroy(entry);
-
-_create_failure_1:
-	errno = errsv;
-
-	return NULL;
 }
 
 int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
@@ -583,26 +510,50 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 
 	/* Check if the entry is initialized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_INIT)) {
-		errsv = errno;
 		log_warn("process_recv_update(): Trying to update an existing entry that wasn't initialized yet.\n");
+		entry_destroy(entry);
+		errno = EINVAL;
+		return -1;
+	}
 
-		goto _update_failure_3;
+	/* Check if the entry is marked as complete */
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
+		log_warn("process_recv_update(): Trying to update an existing entry that is already complete.\n");
+		entry_destroy(entry);
+		errno = EINVAL;
+		return -1;
 	}
 
 	/* Check if the entry is authorized. If not, authorize it and try to proceed. */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED) && (entry_authorize(entry, aop->fd) < 0)) {
 		errsv = errno;
 		log_warn("process_recv_update(): entry_authorize(): %s\n", strerror(errno));
+		entry_destroy(entry);
 
-		goto _update_failure_3;
+		if (!errsv)
+			errno = EINVAL;
+
+		return -1;
 	}
+
+	/* Check if the entry is on a finishing state */
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_FINISH)) {
+		log_warn("process_recv_update(): Trying to update an entry that's in a FINISH state.\n");
+		entry_destroy(entry);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Set the FINISH flag as this entry is now on a finishing state. */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_FINISH);
 
 	/* Re-validate authorization. If not authorized, discard this entry */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		errsv = errno;
 		log_warn("process_recv_update(): Unauthorized entry\n", strerror(errno));
-
-		goto _update_failure_3;
+		entry_destroy(entry);
+		errno = errsv;
+		return -1;
 	}
 
 	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
@@ -611,16 +562,18 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 	if (aop->count != entry->psize) {
 		errsv = errno;
 		log_warn("process_recv_update(): aop->count != entry->psize\n");
-
-		goto _update_failure_3;
+		entry_destroy(entry);
+		errno = errsv;
+		return -1;
 	}
 
 	/* Set the received entry payload */
 	if (entry_set_payload(entry, (char *) aop->data, entry->psize) < 0) {
 		errsv = errno;
 		log_warn("process_recv_update(): entry_set_payload(): %s\n", strerror(errno));
-
-		goto _update_failure_3;
+		entry_destroy(entry);
+		errno = errsv;
+		return -1;
 	}
 
 	/* Process specific operation types */
@@ -629,54 +582,37 @@ int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_new(): %s\n", strerror(errno));
 
-			goto _update_failure_2;
+			entry_destroy(entry);
+			errno = errsv;
+			return -1;
 		}
 	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL)) {
 		if (_process_recv_update_op_del(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_del(): %s\n", strerror(errno));
-
-			goto _update_failure_2;
+			entry_destroy(entry);
+			errno = errsv;
+			return -1;
 		}
 	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
 		if (_process_recv_update_op_get(aop, entry) < 0) {
 			errsv = errno;
 			log_warn("process_recv_update(): _process_recv_update_op_get(): %s\n", strerror(errno));
 
-			goto _update_failure_2;
+			entry_destroy(entry);
+			errno = errsv;
+			return -1;
 		}
 	} else {
 		log_warn("process_recv_update(): The requested operation is invalid.\n");
-
-		/* Since no _process_recv_update_op_*() function was called, the current entry is still present in
-		 * the rpool. We need to delete it in this context.
-		 */
-		goto _update_failure_3;
+		entry_destroy(entry);
+		errno = EINVAL;
+		return -1;
 	}
 
-	/* Set the finishing flag as this entry is now fully processed. */
-	entry_set_flag(entry, USCHED_ENTRY_FLAG_FINISH);
+	/* Set the complete flag as this entry is now fully processed. */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
 
 	return 0;
-
-_update_failure_3:
-	/* Pop the entry from rpool. */
-	pthread_mutex_lock(&rund.mutex_rpool);
-	entry = rund.rpool->pope(rund.rpool, entry);
-	pthread_mutex_unlock(&rund.mutex_rpool);
-
-	if (!entry) {
-		log_warn("process_recv_update(): _update_failure_3: entry == NULL after rund.rpool->pope()\n");
-		goto _update_failure_1;
-	}
-
-_update_failure_2:
-	/* Destroy the current entry in this context, as it was already pop'd from the rpool */
-	entry_destroy(entry);
-
-_update_failure_1:
-	errno = errsv;
-
-	return -1;
 }
 

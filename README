@@ -1,6 +1,6 @@
 1. Description
 
-  uSched services provides an interface to schedule commands to be executed at a particular time, optionally repeating and stopping them at any other particular time.
+  uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating over a specific period of time, and optionally stopping them at any other particular time.
 
   It provides a simple and intuitive structured language that is intepreted via a command line client, but can also be integrated into any other programming language.
 

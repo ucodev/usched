@@ -34,7 +34,6 @@
 #include "bitops.h"
 #include "runtime.h"
 #include "log.h"
-#include "daemonize.h"
 #include "conn.h"
 
 static void _init(int argc, char **argv) {
@@ -50,11 +49,6 @@ static void _destroy(void) {
 
 static void _loop(int argc, char **argv) {
 	_init(argc, argv);
-
-	if (daemonize() < 0) {
-		log_crit("_init(): daemonize(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 
 	for (;;) {
 		/* Process connections */

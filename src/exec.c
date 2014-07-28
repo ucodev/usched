@@ -40,7 +40,6 @@
 #include "debug.h"
 #include "runtime.h"
 #include "log.h"
-#include "daemonize.h"
 #include "bitops.h"
 
 static void *_exec_cmd(void *arg) {
@@ -167,11 +166,6 @@ static void _destroy(void) {
 
 static void _loop(int argc, char **argv) {
 	_init(argc, argv);
-
-	if (daemonize() < 0) {
-		log_crit("_init(): daemonize(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 
 	for (;;) {
 		/* Process exec requests */

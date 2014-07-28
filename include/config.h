@@ -33,11 +33,14 @@
 #define CONFIG_USCHED_DEBUG			1
 #define CONFIG_USCHED_PATH_MAX			4088
 #define CONFIG_USCHED_CONN_TIMEOUT		5			/* 5 seconds timeout */
-#define CONFIG_USCHED_CONN_USER_NAMED_SOCKET	"/tmp/usched.sock"
-#define CONFIG_USCHED_FILE_DAEMON_SERIALIZE	"/tmp/usched_daemon.dat"
+#define CONFIG_USCHED_CONN_USER_NAMED_SOCKET	"/var/run/usched.sock"
+#define CONFIG_USCHED_FILE_DAEMON_SERIALIZE	"/var/run/usched_daemon.dat"
+#define CONFIG_USCHED_DAEMON_PID_FILE		"/var/run/usched_usd.pid"
+#define CONFIG_USCHED_EXEC_PID_FILE		"/var/run/usched_use.pid"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"
 #define CONFIG_USCHED_EXEC_PROC_NAME		"use"
+#define CONFIG_USCHED_MONITOR_PROC_NAME		"usm"
 #define CONFIG_USCHED_LOG_MSG_MAX_SIZE		1024
 #define CONFIG_USCHED_PMQ_DESC_NAME		"/uschedpmq01"
 #define CONFIG_USCHED_PMQ_MSG_MAX		128
@@ -47,7 +50,7 @@
 #define CONFIG_USCHED_HASH_FNV1A		1
 /* #define CONFIG_USCHED_HASH_DJB2		1 */
 
-/* #define CONFIG_SYS_LINUX			0 */
+/* #define CONFIG_SYS_LINUX			1 */
 /* #define CONFIG_SYS_NETBSD			0 */
 /* #define CONFIG_SYS_BSD			0 */
 /* #define CONFIG_SYS_SOLARIS			0 */

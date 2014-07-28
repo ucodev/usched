@@ -1,5 +1,4 @@
 v0.1:
- - 'usd' signal to serialize runtime data
  - Finish client library implementation
  - Cleanup code
  - Install scripts

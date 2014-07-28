@@ -1,9 +1,9 @@
 /**
- * @file conn.c
+ * @file conn_client.c
  * @brief uSched
- *        Connections interface
+ *        Connections interface - Client
  *
- * Date: 27-07-2014
+ * Date: 28-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -310,113 +310,5 @@ int conn_client_process(void) {
 
 void conn_client_destroy(void) {
 	panet_safe_close(runc.fd);
-}
-
-int conn_daemon_init(void) {
-	int errsv = 0;
-
-	if (rtsaio_init(-5, SCHED_OTHER, 0, &notify_write, &notify_read) < 0) {
-		errsv = errno;
-		log_crit("conn_daemon_init(): rtsaio_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if ((rund.fd = panet_server_unix(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
-		errsv = errno;
-		log_crit("conn_daemon_init(): panet_server_unix(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (chmod(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, 0666) < 0) {
-		errsv = errno;
-		log_crit("conn_daemon_init(): chmod(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-void conn_daemon_process(void) {
-	sock_t fd = 0;
-	struct async_op *aop = NULL;
-
-	for (;;) {
-		/* Check for runtime interruptions */
-		if (runtime_daemon_interrupted())
-			break;
-
-		/* Accept client connection */
-		if ((fd = accept(rund.fd, NULL, NULL)) < 0) {
-			log_warn("conn_daemon_process(): accept(): %s\n", strerror(errno));
-			continue;
-		}
-
-		if (!(aop = mm_alloc(sizeof(struct async_op)))) {
-			log_warn("conn_daemon_process(): mm_alloc(): %s\n", strerror(errno));
-			panet_safe_close(fd);
-			continue;
-		}
-
-		memset(aop, 0, sizeof(struct async_op));
-
-		aop->fd = fd;
-		/* id(4), flags(4), uid(4), gid(4), trigger(4), step(4), expire(4), psize(4) */
-		aop->count = usched_entry_hdr_size();
-		aop->priority = 0;
-		aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
-
-		if (!(aop->data = mm_alloc(aop->count))) {
-			log_warn("conn_daemon_process(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(aop);
-			panet_safe_close(fd);
-			continue;
-		}
-
-		memset((void *) aop->data, 0, aop->count);
-
-		if (rtsaio_read(aop) < 0) {
-			log_warn("conn_daemon_process(): rtsaio_read(): %s\n", strerror(errno));
-			mm_free((void *) aop->data);
-			mm_free(aop);
-			panet_safe_close(fd);
-			continue;
-		}
-	}
-}
-
-void conn_daemon_destroy(void) {
-	panet_safe_close(rund.fd);
-	rtsaio_destroy();
-}
-
-int conn_is_local(int fd) {
-	int errsv = 0;
-	int ret = panet_info_sock_family(fd);
-
-	if (ret < 0) {
-		errsv = errno;
-		log_warn("conn_is_local(): panet_info_sock_family(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return (ret == AF_UNIX);
-}
-
-int conn_is_remote(int fd) {
-	int errsv = 0;
-	int ret = panet_info_sock_family(fd);
-
-	if (ret < 0) {
-		errsv = errno;
-		log_warn("conn_is_remote(): panet_info_sock_family(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return (ret != AF_UNIX);
 }
 

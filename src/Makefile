@@ -1,14 +1,13 @@
 CC=/usr/bin/clang
 ECFLAGS=-DCONFIG_SYS_LINUX=1 -D_GNU_SOURCE=1
-#CCFLAGS=-fPIC -DUSE_LIBFSMA -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRANT -std=c11 -fstrict-aliasing -pedantic -pthread -Wall -Werror -g
-CCFLAGS=-fPIC -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRANT -std=c11 -fstrict-aliasing -pedantic -pthread -Wall -Werror -g
+CCFLAGS=-fPIC -DUSE_LIBFSMA -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRANT -std=c11 -fstrict-aliasing -pedantic -pthread -Wall -Werror -g
 LDFLAGS=-g -pthread -lpsched -lpall -lfsma -lrt -lrtsaio -lpanet -lfsop
 INCLUDEDIRS=-I../include
-SOURCES=auth.c bitops.c client.c conn.c daemon.c daemonize.c debug.c entry.c exec.c index.c hash.c lib.c local.c log.c logic.c marshal.c mm.c notify.c op.c parse.c pmq.c pool.c print.c process.c runtime.c schedule.c sig.c thread.c usage.c
-LIB_OBJS=auth.o bitops.o conn.o debug.o entry.o index.o hash.o lib.o local.o log.o logic.o marshal.o mm.o op.o notify.o parse.o pmq.o pool.o print.o process.o runtime.o schedule.o sig.o thread.o usage.o
-CLIENT_OBJS=auth.o bitops.o client.o conn.o debug.o entry.o index.o hash.o local.o log.o logic.o marshal.o mm.o notify.o op.o parse.o pmq.o pool.o print.o process.o runtime.o schedule.o sig.o thread.o usage.o
-DAEMON_OBJS=auth.o bitops.o conn.o daemon.o daemonize.o debug.o entry.o index.o hash.o local.o log.o logic.o marshal.o mm.o notify.o op.o parse.o pmq.o pool.o print.o process.o runtime.o schedule.o sig.o thread.o usage.o
-EXEC_OBJS=auth.o bitops.o conn.o daemonize.o debug.o entry.o exec.o index.o hash.o local.o log.o logic.o marshal.o mm.o notify.o op.o parse.o pmq.o pool.o print.o process.o runtime.o schedule.o sig.o thread.o usage.o
+SOURCES=auth.c bitops.c client.c conn_client.c conn_daemon.c conn_common.c daemon.c daemonize.c debug.c entry_client.c entry_common.c entry_daemon.c exec.c index.c hash.c lib.c local.c log.c logic.c marshal.c mm.c notify.c op.c parse.c pmq.c pool_client.c pool_daemon.c print.c process.c runtime_client.c runtime_common.c runtime_daemon.c runtime_exec.c schedule.c sig.c thread.c usage.c
+LIB_OBJS=bitops.o conn_client.o conn_common.o debug.o entry_client.o entry_common.o lib.o log.o logic.o mm.o op.o parse.o pmq.o pool_client.o print.o runtime_client.o runtime_common.o sig.o thread.o usage.o
+CLIENT_OBJS=bitops.o client.o conn_client.o conn_common.o debug.o entry_client.o entry_common.o log.o logic.o mm.o op.o parse.o pmq.o pool_client.o print.o runtime_client.o runtime_common.o sig.o thread.o usage.o
+DAEMON_OBJS=auth.o bitops.o conn_daemon.o conn_common.o daemon.o daemonize.o debug.o entry_common.o entry_daemon.o index.o hash.o local.o log.o marshal.o mm.o notify.o pmq.o pool_daemon.o process.o runtime_common.o runtime_daemon.o schedule.o sig.o thread.o
+EXEC_OBJS=bitops.o daemonize.o debug.o exec.o log.o mm.o pmq.o runtime_common.o runtime_exec.o sig.o thread.o
 LIB_TARGET=libusc.so
 CLIENT_TARGET=usc
 DAEMON_TARGET=usd

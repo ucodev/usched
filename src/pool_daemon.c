@@ -1,5 +1,5 @@
 /**
- * @file pool.c
+ * @file pool_daemon.c
  * @brief uSched
  *        Pool handlers interface
  *
@@ -37,19 +37,6 @@
 #include "entry.h"
 #include "log.h"
 
-int pool_client_init(void) {
-	int errsv = 0;
-
-	if (!(runc.epool = pall_fifo_init(&entry_destroy, &entry_serialize, &entry_unserialize))) {
-		errsv = errno;
-		log_crit("pool_client_init(): runc.epool = pall_fifo_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
 int pool_daemon_init(void) {
 	int errsv = 0;
 
@@ -73,13 +60,6 @@ int pool_daemon_init(void) {
 	}
 
 	return 0;
-}
-
-void pool_client_destroy(void) {
-	if (runc.epool) {
-		pall_fifo_destroy(runc.epool);
-		runc.epool = NULL;
-	}
 }
 
 void pool_daemon_destroy(void) {

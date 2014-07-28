@@ -1,9 +1,9 @@
 /**
- * @file runtime.c
+ * @file runtime_daemon.c
  * @brief uSched
- *        Runtime handlers interface
+ *        Runtime handlers interface - Daemon
  *
- * Date: 27-07-2014
+ * Date: 28-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,76 +47,6 @@
 #include "bitops.h"
 #include "marshal.h"
 
-
-/* Globals */
-struct usched_runtime_client runc;
-struct usched_runtime_daemon rund;
-struct usched_runtime_exec rune;
-
-
-int runtime_client_init(int argc, char **argv) {
-	int errsv = 0;
-
-	memset(&runc, 0, sizeof(struct usched_runtime_client));
-
-	runc.argc = argc;
-	runc.argv = argv;
-	runc.t = time(NULL);
-
-	/* Initialize logging interface */
-	if (log_client_init() < 0) {
-		errsv = errno;
-		debug_printf(DEBUG_CRIT, "runtime_client_init(): log_client_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Parse requested command line instruction */
-	if (!(runc.req = parse_instruction_array(argc - 1, &argv[1]))) {
-		usage_client_show();
-		return -1;
-	}
-
-	/* Initialize pools */
-	if (pool_client_init() < 0) {
-		errsv = errno;
-		log_crit("runtime_client_init(): pool_client_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Process requested operations */
-	if (op_client_process() < 0) {
-		errsv = errno;
-		log_crit("runtime_client_init(): op_client_process(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Initialize client connection handlers */
-	if (conn_client_init() < 0) {
-		errsv = errno;
-		log_crit("runtime_client_init(): conn_client_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* All good */
-	return 0;
-}
-
-int runtime_client_lib_init(void) {
-	memset(&runc, 0, sizeof(struct usched_runtime_client));
-
-	runc.t = time(NULL);
-
-	/* Initialize client connection handlers */
-	if (conn_client_init() < 0)
-		return -1;
-
-	/* All good */
-	return 0;
-}
 
 int runtime_daemon_init(int argc, char **argv) {
 	int errsv = 0;
@@ -258,118 +188,11 @@ int runtime_daemon_init(int argc, char **argv) {
 	return 0;
 }
 
-int runtime_exec_init(int argc, char **argv) {
-	int errsv = 0;
-
-	memset(&rune, 0, sizeof(struct usched_runtime_exec));
-
-	rune.argc = argc;
-	rune.argv = argv;
-
-	/* Initialize logging interface */
-	if (log_exec_init() < 0) {
-		errsv = errno;
-		debug_printf(DEBUG_CRIT, "runtime_exec_init(): log_exec_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	log_info("Logging interface initialized.\n");
-
-	/* Initialize signals interface */
-	log_info("Initializing signals interface...\n");
-
-	if (sig_exec_init() < 0) {
-		errsv = errno;
-		log_crit("runtime_exec_init(): sig_exec_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	log_info("Signals interface initialized.\n");
-
-	/* Initialize threads behaviour */
-	log_info("Initializing thread behaviour interface...\n");
-
-	if (thread_exec_behaviour_init() < 0) {
-		errsv = errno;
-		log_crit("runtmie_exec_init(): thread_exec_behaviour_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	log_info("Thread behaviour interface initialized.\n");
-
-	/* Initialize IPC */
-	log_info("Initializing IPC interface...\n");
-
-	if (pmq_exec_init() < 0) {
-		errsv = errno;
-		log_crit("runtime_exec_init(): pmq_exec_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	log_info("IPC interface initialized.\n");
-
-	/* All good */
-	log_info("All systems go. Ignition!\n");
-
-	return 0;
-}
-
-int runtime_client_interrupted(void) {
-	return 0;
-}
-
 int runtime_daemon_interrupted(void) {
 	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD))
 		return 1;
 
 	return 0;
-}
-
-int runtime_exec_interrupted(void) {
-	if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD))
-		return 1;
-
-	return 0;
-}
-
-void runtime_client_destroy(void) {
-	/* Destroy connection interface */
-	conn_client_destroy();
-
-	/* Destroy pools */
-	pool_client_destroy();
-
-	/* Destroy requests */
-	parse_req_destroy(runc.req);
-	runc.req = NULL;
-
-	/* Destroy usage interface */
-	if (runc.usage_err_offending) {
-		mm_free(runc.usage_err_offending);
-		runc.usage_err_offending = NULL;
-	}
-
-	/* Destroy logging interface */
-	log_destroy();
-}
-
-void runtime_client_lib_destroy(void) {
-	/* Destroy connection interface */
-	conn_client_destroy();
-
-	/* Destroy pools */
-	pool_client_destroy();
-
-	/* Destroy requests */
-	parse_req_destroy(runc.req);
-
-	/* Destroy usage interface */
-	if (runc.usage_err_offending)
-		mm_free(runc.usage_err_offending);
 }
 
 void runtime_daemon_destroy(void) {
@@ -411,29 +234,6 @@ void runtime_daemon_destroy(void) {
 	/* Destroy signals interface */
 	log_info("Destroying signals interface...\n");
 	sig_daemon_destroy();
-	log_info("Signals interface destroyed.\n");
-
-	log_info("All systems stopped.\n");
-
-	/* Destroy logging interface */
-	log_info("Destroying logging interface...\n");
-	log_destroy();
-}
-
-void runtime_exec_destroy(void) {
-	/* Destroy IPC interface */
-	log_info("Destroying IPC interface...\n");
-	pmq_exec_destroy();
-	log_info("IPC interface destroyed.\n");
-
-	/* Destroy thread behaviour interface */
-	log_info("Destroying thread behaviour interface...\n");
-	thread_exec_behaviour_destroy();
-	log_info("Thread behaviour interface destroyed.\n");
-
-	/* Destroy signals interface */
-	log_info("Destroying signals interface...\n");
-	sig_exec_destroy();
 	log_info("Signals interface destroyed.\n");
 
 	log_info("All systems stopped.\n");

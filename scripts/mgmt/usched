@@ -38,34 +38,52 @@ CONFIG_USCHED_EXEC_PID_FILE = "/var/run/usched_use.pid"
 
 # Operations
 USCHED_OP_FLUSH = "flush"
+USCHED_OP_RELOAD = "reload"
 USCHED_OP_START = "start"
 USCHED_OP_STOP = "stop"
+
+# Options
+BE_QUIET = 0
 
 # Globals
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
+def print_info(msg):
+	if not BE_QUIET:
+		sys.stdout.write(msg)
+
 def usage_print():
-	print("Usage: %s %s|%s|%s" % (sys.argv[0], USCHED_OP_FLUSH, USCHED_OP_START, USCHED_OP_STOP))
+	print_info("Usage: %s %s|%s|%s|%s [quiet]\n" % (sys.argv[0], USCHED_OP_FLUSH, USCHED_OP_RELOAD, USCHED_OP_START, USCHED_OP_STOP))
 	sys.exit(EXIT_FAILURE)
 
 def usage_check():
-	if len(sys.argv) != 2:
+	global BE_QUIET
+
+	if len(sys.argv) < 2:
 		usage_print()
+
+	if len(sys.argv) == 3:
+		if sys.argv[2] != "quiet":
+			usage_print()
+		else:
+			BE_QUIET = 1
 
 def perms_check():
 	if os.getuid() != 0:
-		print("You need to be root to perform that operation.")
+		print_info("You need to be root to perform that operation.\n")
 		sys.exit(EXIT_FAILURE)
 
 def op_check():
-	if sys.argv[1] != USCHED_OP_FLUSH and sys.argv[1] != USCHED_OP_START and sys.argv[1] != USCHED_OP_STOP:
-		print("Invalid operation: " + sys.argv[1])
+	if sys.argv[1] != USCHED_OP_FLUSH and sys.argv[1] != USCHED_OP_RELOAD and sys.argv[1] != USCHED_OP_START and sys.argv[1] != USCHED_OP_STOP:
+		print_info("Invalid operation: " + sys.argv[1] + "\n")
 		sys.exit(EXIT_FAILURE)
 
 def op_process():
 	if sys.argv[1] == USCHED_OP_FLUSH:
 		return usched_flush()
+	elif sys.argv[1] == USCHED_OP_RELOAD:
+		return usched_reload()
 	elif sys.argv[1] == USCHED_OP_START:
 		return usched_start()
 	elif sys.argv[1] == USCHED_OP_STOP:
@@ -74,16 +92,25 @@ def op_process():
 	return False
 
 def usched_flush():
-	sys.stdout.write("Flush operation status: ")
+	print_info("Flush operation status: ")
 
-	# Terminate usd
+	# Signal usd
 	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGUSR1) == False:
 		return False
 
 	return True
 
+def usched_reload():
+	print_info("Reload operation status: ")
+
+	# Signal usd
+	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGHUP) == False:
+		return False
+
+	return True
+
 def usched_start():
-	sys.stdout.write("Start operation status: ")
+	print_info("Start operation status: ")
 
 	try:
 		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", CONFIG_USCHED_DAEMON_BIN])
@@ -91,7 +118,7 @@ def usched_start():
 		status = 127
 
 	if status != EXIT_SUCCESS:
-		print("Failed: Unable to start uSched Daemon")
+		print_info("Failed: Unable to start uSched Daemon\n")
 		return False
 
 	try:
@@ -100,13 +127,13 @@ def usched_start():
 		status = 127
 
 	if status != EXIT_SUCCESS:
-		print("Failed: Unable to start uSched Exec Module")
+		print_info("Failed: Unable to start uSched Exec Module\n")
 		return False
 
 	return True
 
 def usched_stop():
-	sys.stdout.write("Stop operation status: ")
+	print_info("Stop operation status: ")
 
 	# Terminate usd
 	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGTERM) == False:
@@ -126,12 +153,10 @@ def signal_pid_file(pid_file, sig):
 			try:
 				os.kill(int(usd_pid), sig)
 			except OSError, ex:
-				print("Failed: %s" % ex[1])
+				print_info("Failed: %s\n" % ex[1])
 				return False
-
-			print("Success")
 	except IOError, ex:
-		print("Failed: %s: '%s'" % (ex[1], pid_file))
+		print_info("Failed: %s: '%s'\n" % (ex[1], pid_file))
 		return False
 
 	return True
@@ -146,6 +171,8 @@ if __name__ == "__main__":
 
 	if op_process() == False:
 		sys.exit(EXIT_FAILURE)
+
+	print_info("Success\n")
 
 	sys.exit(EXIT_SUCCESS)
 

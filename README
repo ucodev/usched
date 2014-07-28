@@ -1,13 +1,47 @@
-1. This project is still in the skeleton stage. Here is the list of expected behaviours at the current development stage:
+1. Description
 
-  * May not compile
+
+2. Installation
+
+  See INSTALL
+
+
+3. Usage Examples
+
+ - Run the do_backups.sh script at 23:00 and then run it every 24 hours:
+
+      $ usc run '/usr/local/bin/do_backups.sh' on hour 23 then every 24 hours
+
+ - Dump 'df -h' output into /tmp/disk_stats.log after 10 minutes of running this command, and run it again every 30 minutes:
+
+      $ usc run '/bin/df -h >> /tmp/disk_stats.log' in 10 minutes then every 30 minutes
+
+ - Run the command 'sync' now, repeat every 45 seconds and stop when the time is 12:00:
+
+      $ usc run '/bin/sync' now then every 45 seconds until time '12:00:00'
+
+ - Show all scheduled entries for the user running the following command:
+
+      $ usc show all
+
+ - Stop all scheduled entries for the user running the following command:
+
+      $ usc stop all
+
+
+4. Documentation
+
+ - See doc/*
+
+
+5. Notes
+
+ - This project is in its alpha stage. Here is the list of expected behaviours at the current development stage:
+
   * May be bogus
   * May have security issues
-  * May not do what is intended to do
   * May corrupt data
-  * May not work at all
 
 
-2. Consider yourself warned.
-
+ - Consider yourself warned.
 

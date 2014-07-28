@@ -1,7 +1,11 @@
- - Remote authentication
- - Command Line Options
+v0.1:
  - 'usd' signal to serialize runtime data
  - Finish client library implementation
- - Python bindings for client library
  - Cleanup code
+ - Install scripts
+
+v0.2
+ - Remote Authentication
+ - Command Line Options
+ - Python bindings for Client Library
 

@@ -32,6 +32,7 @@
 int log_client_init(void);
 int log_daemon_init(void);
 int log_exec_init(void);
+int log_monitor_init(void);
 void log_info(const char *fmt, ...);
 void log_warn(const char *fmt, ...);
 void log_crit(const char *fmt, ...);

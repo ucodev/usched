@@ -52,6 +52,12 @@ int log_exec_init(void) {
 	return 0;
 }
 
+int log_monitor_init(void) {
+	openlog(CONFIG_USCHED_MONITOR_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
+
+	return 0;
+}
+
 static void _log_msg(int priority, const char *msg) {
 	syslog(priority, "%s", msg);
 }

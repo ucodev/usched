@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+#
+# @file usched
+# @brief uSched
+#        uSched flush/start/stop script
+#
+# Date: 28-07-2014
+# 
+# Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+#
+# This file is part of usched.
+#
+# usched is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# usched is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with usched.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+import sys
+import os
+import signal
+import subprocess
+
+# Config
+CONFIG_USCHED_DAEMON_BIN = "/usr/sbin/usd"
+CONFIG_USCHED_EXEC_BIN = "/usr/sbin/use"
+CONFIG_USCHED_MONITOR_BIN = "/usr/sbin/usm"
+CONFIG_USCHED_DAEMON_PID_FILE = "/var/run/usched_usd.pid"
+CONFIG_USCHED_EXEC_PID_FILE = "/var/run/usched_use.pid"
+
+# Globals
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+
+def usage_print():
+	print("Usage: %s flush|start|stop" % sys.argv[0])
+	sys.exit(EXIT_FAILURE)
+
+def usage_check():
+	if len(sys.argv) != 2:
+		usage_print()
+
+def perms_check():
+	if os.getuid() != 0:
+		print("You need to be root to perform that operation.")
+		sys.exit(EXIT_FAILURE)
+
+def op_check():
+	if sys.argv[1] != "flush" and sys.argv[1] != "start" and sys.argv[1] != "stop":
+		print("Invalid operation: " + sys.argv[1])
+		sys.exit(EXIT_FAILURE)
+
+def op_process():
+	if sys.argv[1] == "flush":
+		return usched_flush()
+	elif sys.argv[1] == "start":
+		return usched_start()
+	elif sys.argv[1] == "stop":
+		return usched_stop()
+
+	return False
+
+def usched_flush():
+	sys.stdout.write("Flush operation status: ")
+
+	# Terminate usd
+	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGUSR1) == False:
+		return False
+
+	return True
+
+def usched_start():
+	sys.stdout.write("Start operation status: ")
+
+	try:
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", CONFIG_USCHED_DAEMON_BIN])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print("Failed: Unable to start uSched Daemon")
+		return False
+
+	try:
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_EXEC_PID_FILE, "-r", CONFIG_USCHED_EXEC_BIN])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print("Failed: Unable to start uSched Exec Module")
+		return False
+
+	return True
+
+def usched_stop():
+	sys.stdout.write("Stop operation status: ")
+
+	# Terminate usd
+	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGTERM) == False:
+		return False
+
+	# Terminate use
+	if signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGTERM) == False:
+		return False
+
+	return True
+
+def signal_pid_file(pid_file, sig):
+	try:
+		with open(pid_file, "r") as fp:
+			usd_pid = fp.readline().strip()
+
+			try:
+				os.kill(int(usd_pid), sig)
+			except OSError, ex:
+				print("Failed: %s" % ex[1])
+				return False
+
+			print("Success")
+	except IOError, ex:
+		print("Failed: %s: '%s'" % (ex[1], pid_file))
+		return False
+
+	return True
+
+# Main
+if __name__ == "__main__":
+	usage_check()
+
+	perms_check()
+
+	op_check()
+
+	if op_process() == False:
+		sys.exit(EXIT_FAILURE)
+
+	sys.exit(EXIT_SUCCESS)
+

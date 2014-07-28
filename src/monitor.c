@@ -46,6 +46,7 @@
 #include <signal.h>
 
 #include "config.h"
+#include "log.h"
 
 extern char *optarg;
 extern int optind, optopt;
@@ -102,6 +103,14 @@ static int _strisdigit(const char *str) {
 	return 1;
 }
 
+static void _log_init(void) {
+	log_monitor_init();
+}
+
+static void _log_destroy(void) {
+	log_destroy();
+}
+
 static void _config_default_init(void) {
 	memset(&config, 0, sizeof(struct cmdline_params));
 
@@ -136,7 +145,8 @@ static void _config_destroy(void) {
 }
 
 static void _failure(const char *caller) {
-	fprintf(stderr, "[daemonizer] %s() error: %s\n", caller, strerror(errno));
+	fprintf(stderr, "[%s] %s() error: %s\n", CONFIG_USCHED_MONITOR_PROC_NAME, caller, strerror(errno));
+	log_crit("_failure(): %s(): %s\n", caller, strerror(errno));
 
 	_config_destroy();
 
@@ -366,6 +376,8 @@ static int _signal_init(void) {
 int main(int argc, char *argv[], char *envp[]) {
 	int ret = 0;
 
+	_log_init();
+
 	_config_default_init();
 
 	_cmdline_process(argc, argv);
@@ -408,6 +420,8 @@ int main(int argc, char *argv[], char *envp[]) {
 	}
 
 	_config_destroy();
+
+	_log_destroy();
 
 	return 0;
 }

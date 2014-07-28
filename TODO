@@ -1,5 +1,7 @@
  - Remote authentication
  - Command Line Options
- - Implement 'usm' (usched monitoring)
+ - 'usd' signal to serialize runtime data
+ - Finish client library implementation
+ - Python bindings for client library
  - Cleanup code
 

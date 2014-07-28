@@ -62,6 +62,11 @@ static void _loop(int argc, char **argv) {
 			_destroy();
 			_init(argc, argv);
 		}
+
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH)) {
+			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH);
+			/* TODO: Serialize data */
+		}
 	}
 
 	_destroy();

@@ -28,19 +28,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <rtsaio/rtsaio.h>
 #include <panet/panet.h>
 
 #include "debug.h"
 #include "config.h"
 #include "mm.h"
 #include "runtime.h"
-#include "notify.h"
 #include "conn.h"
 #include "log.h"
 #include "print.h"

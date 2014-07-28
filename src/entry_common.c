@@ -26,27 +26,18 @@
 
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <pthread.h>
-#include <mqueue.h>
-#include <unistd.h>
 
 #include <sys/types.h>
 
-#include <pall/cll.h>
-
 #include "config.h"
-#include "usched.h"
-#include "runtime.h"
 #include "mm.h"
 #include "entry.h"
 #include "bitops.h"
 #include "log.h"
-#include "auth.h"
-#include "conn.h"
-#include "schedule.h"
 
 void entry_set_id(struct usched_entry *entry, uint32_t id) {
 	entry->id = id;

@@ -29,24 +29,13 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#include <pthread.h>
-#include <mqueue.h>
-#include <unistd.h>
 
 #include <sys/types.h>
 
-#include <pall/cll.h>
-
 #include "config.h"
-#include "usched.h"
-#include "runtime.h"
 #include "mm.h"
 #include "entry.h"
-#include "bitops.h"
 #include "log.h"
-#include "auth.h"
-#include "conn.h"
-#include "schedule.h"
 
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize) {
 	int errsv = 0;

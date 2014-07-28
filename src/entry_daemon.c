@@ -28,21 +28,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
 #include <pthread.h>
 #include <mqueue.h>
 #include <unistd.h>
 
 #include <sys/types.h>
 
-#include <pall/cll.h>
-
 #include "config.h"
 #include "usched.h"
 #include "runtime.h"
 #include "mm.h"
 #include "entry.h"
-#include "bitops.h"
 #include "log.h"
 #include "auth.h"
 #include "conn.h"
@@ -66,8 +62,7 @@ static int _entry_authorize_local(struct usched_entry *entry, int fd) {
 static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
 	/* TODO: To be implemented */
 
-	/* rtsaio_read() ... */
-	/* Retrieve user/pass */
+	/* Read user/pass from entry->username and entry->password */
 	/* auth_remote() ... */
 
 	errno = ENOSYS;

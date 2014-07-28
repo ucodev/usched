@@ -43,7 +43,6 @@
 #include "notify.h"
 #include "conn.h"
 #include "log.h"
-#include "print.h"
 
 int conn_daemon_init(void) {
 	int errsv = 0;

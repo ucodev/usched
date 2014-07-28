@@ -29,23 +29,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <pall/cll.h>
-
 #include "debug.h"
 #include "runtime.h"
-#include "mm.h"
-#include "conn.h"
-#include "usage.h"
-#include "parse.h"
-#include "op.h"
 #include "log.h"
 #include "thread.h"
-#include "pool.h"
 #include "schedule.h"
 #include "pmq.h"
 #include "sig.h"
 #include "bitops.h"
-#include "marshal.h"
 
 
 int runtime_exec_init(int argc, char **argv) {

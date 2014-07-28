@@ -208,7 +208,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 		}
 
 		/* Set early network byte order, as this list won't be used locally */
-		entry_list_res[entry_list_res_nmemb - 1] = entry_list_req[i];
+		entry_list_res[entry_list_res_nmemb - 1] = htonll(entry_list_req[i]);
 	}
 
 	/* Report back the deleted entries. */

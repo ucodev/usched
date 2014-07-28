@@ -1,0 +1,38 @@
+1. Dependencies
+
+ The following dependencies are automatically installed through the 'deps' script:
+
+  - fsop Library
+    * https://github.com/ucodev/libfsop
+
+  - pall Library
+    * https://github.com/ucodev/libpall
+
+  - panet Library
+    * https://github.com/ucodev/libpanet
+
+  - rtsaio Library
+    * https://github.com/ucodev/librtsaio
+
+  - psched Library
+    * https://github.com/ucodev/libpsched
+
+  - fsma Library
+    * https://github.com/ucodev/libfsma
+
+
+2. Installation
+
+ The following commands will fetch all the required dependencies and install the uSched services:
+
+   # ./deps
+   # ./do
+   # ./install
+   # ./undo
+
+
+3. Starting uSched Services
+
+   # usched start
+
+

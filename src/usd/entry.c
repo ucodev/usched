@@ -1,5 +1,5 @@
 /**
- * @file entry_daemon.c
+ * @file entry.c
  * @brief uSched
  *        Entry handling interface - Daemon
  *

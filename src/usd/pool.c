@@ -1,5 +1,5 @@
 /**
- * @file pool_daemon.c
+ * @file pool.c
  * @brief uSched
  *        Pool handlers interface
  *

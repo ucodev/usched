@@ -1,7 +1,7 @@
 /**
- * @file entry_client.c
+ * @file pool.c
  * @brief uSched
- *        Entry handling interface - Client
+ *        Pool handlers interface - Client
  *
  * Date: 28-07-2014
  * 
@@ -28,40 +28,32 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
+#include <pthread.h>
 
-#include <sys/types.h>
+#include <pall/cll.h>
 
-#include "config.h"
-#include "mm.h"
+#include "runtime.h"
+#include "pool.h"
 #include "entry.h"
 #include "log.h"
 
-struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize) {
+int pool_client_init(void) {
 	int errsv = 0;
-	struct usched_entry *entry = NULL;
 
-	if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
+	if (!(runc.epool = pall_fifo_init(&entry_destroy, NULL, NULL))) {
 		errsv = errno;
-		log_warn("entry_init(): mm_alloc(): %s\n", strerror(errno));
+		log_crit("pool_client_init(): runc.epool = pall_fifo_init(): %s\n", strerror(errno));
 		errno = errsv;
-		return NULL;
+		return -1;
 	}
 
-	memset(entry, 0, sizeof(struct usched_entry));
+	return 0;
+}
 
-	entry_set_uid(entry, uid);
-	entry_set_gid(entry, gid);
-	entry_set_trigger(entry, trigger);
-
-	if (entry_set_payload(entry, payload, psize) < 0) {
-		errsv = errno;
-		log_warn("entry_init(): entry_set_payload(): %s\n", strerror(errno));
-		mm_free(entry);
-		errno = errsv;
-		return NULL;
+void pool_client_destroy(void) {
+	if (runc.epool) {
+		pall_fifo_destroy(runc.epool);
+		runc.epool = NULL;
 	}
-
-	return entry;
 }
 

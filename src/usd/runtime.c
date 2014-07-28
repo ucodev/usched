@@ -1,5 +1,5 @@
 /**
- * @file runtime_daemon.c
+ * @file runtime.c
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *

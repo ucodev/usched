@@ -1,5 +1,5 @@
 /**
- * @file runtime_client.c
+ * @file runtime.c
  * @brief uSched
  *        Runtime handlers interface - Client
  *

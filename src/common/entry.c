@@ -1,5 +1,5 @@
 /**
- * @file entry_common.c
+ * @file entry.c
  * @brief uSched
  *        Entry handling interface - Common
  *

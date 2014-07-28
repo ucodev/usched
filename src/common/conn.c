@@ -1,5 +1,5 @@
 /**
- * @file conn_common.c
+ * @file conn.c
  * @brief uSched
  *        Connections interface - Common
  *

@@ -36,12 +36,17 @@ CONFIG_USCHED_MONITOR_BIN = "/usr/sbin/usm"
 CONFIG_USCHED_DAEMON_PID_FILE = "/var/run/usched_usd.pid"
 CONFIG_USCHED_EXEC_PID_FILE = "/var/run/usched_use.pid"
 
+# Operations
+USCHED_OP_FLUSH = "flush"
+USCHED_OP_START = "start"
+USCHED_OP_STOP = "stop"
+
 # Globals
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
 def usage_print():
-	print("Usage: %s flush|start|stop" % sys.argv[0])
+	print("Usage: %s %s|%s|%s" % (sys.argv[0], USCHED_OP_FLUSH, USCHED_OP_START, USCHED_OP_STOP))
 	sys.exit(EXIT_FAILURE)
 
 def usage_check():
@@ -54,16 +59,16 @@ def perms_check():
 		sys.exit(EXIT_FAILURE)
 
 def op_check():
-	if sys.argv[1] != "flush" and sys.argv[1] != "start" and sys.argv[1] != "stop":
+	if sys.argv[1] != USCHED_OP_FLUSH and sys.argv[1] != USCHED_OP_START and sys.argv[1] != USCHED_OP_STOP:
 		print("Invalid operation: " + sys.argv[1])
 		sys.exit(EXIT_FAILURE)
 
 def op_process():
-	if sys.argv[1] == "flush":
+	if sys.argv[1] == USCHED_OP_FLUSH:
 		return usched_flush()
-	elif sys.argv[1] == "start":
+	elif sys.argv[1] == USCHED_OP_START:
 		return usched_start()
-	elif sys.argv[1] == "stop":
+	elif sys.argv[1] == USCHED_OP_STOP:
 		return usched_stop()
 
 	return False

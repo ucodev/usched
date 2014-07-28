@@ -1,5 +1,5 @@
 /**
- * @file runtime_common.c
+ * @file runtime.c
  * @brief uSched
  *        Runtime handlers interface - Common
  *

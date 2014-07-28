@@ -1,5 +1,5 @@
 /**
- * @file conn_client.c
+ * @file conn.c
  * @brief uSched
  *        Connections interface - Client
  *

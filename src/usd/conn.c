@@ -1,5 +1,5 @@
 /**
- * @file conn_daemon.c
+ * @file conn.c
  * @brief uSched
  *        Connections interface - Daemon
  *

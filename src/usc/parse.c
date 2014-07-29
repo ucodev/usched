@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface
  *
- * Date: 13-07-2014
+ * Date: 29-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -525,7 +525,7 @@ struct usched_request *parse_instruction(const char *cmd) {
 
 		args[counter] = args[counter + 1] = NULL;
 
-		if ((counter == 1) && ((ptr[0] == '\'') || (ptr[0] == '\"'))) {
+		if ((ptr[0] == '\'') || (ptr[0] == '\"')) {
 			size_t len = strlen(ptr);
 			char qchr = ptr[0];
 			int done = (len > 1) && (ptr[len - 1] == qchr) && (ptr[len - 2] != '\\');

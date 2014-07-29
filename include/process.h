@@ -28,9 +28,14 @@
 #ifndef USCHED_PROCESS_H
 #define USCHED_PROCESS_H
 
+#include <rtsaio/rtsaio.h>
+
 /* Prototypes */
-struct usched_entry *process_recv_create(struct async_op *aop);
-int process_recv_update(struct async_op *aop, struct usched_entry *entry);
+struct usched_entry *process_daemon_recv_create(struct async_op *aop);
+int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry);
+int process_client_recv_run(void);
+int process_client_recv_stop(void);
+int process_client_recv_show(void);
 
 #endif
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 28-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,6 +39,8 @@
 #include "conn.h"
 #include "log.h"
 #include "print.h"
+#include "process.h"
+
 
 int conn_client_init(void) {
 	int errsv = 0;
@@ -51,185 +53,6 @@ int conn_client_init(void) {
 	}
 
 	return 0;
-}
-
-static int _conn_client_process_recv_run(void) {
-	int errsv = 0;
-	uint64_t entry_id = 0;
-
-	/* Read the response in order to obtain the entry id */
-	if (read(runc.fd, &entry_id, sizeof(entry_id)) != sizeof(entry_id)) {
-		errsv = errno;
-		log_crit("conn_client_process_recv_run(): read() != %zu: %s\n", sizeof(entry_id), strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	entry_id = ntohll(entry_id);
-
-	debug_printf(DEBUG_INFO, "Received Entry ID: 0x%llX\n", entry_id);
-
-	print_result_run(entry_id);
-
-	return 0;
-}
-
-static int _conn_client_process_recv_stop(void) {
-	int i = 0, errsv = 0;
-	uint32_t entry_list_nmemb = 0;
-	uint64_t *entry_list = NULL;
-
-	/* Read te number of elements to receive */
-	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
-		errsv = errno;
-		log_crit("conn_client_process_recv_stop(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Network to Host byte order */
-	entry_list_nmemb = ntohl(entry_list_nmemb);
-
-	if (!entry_list_nmemb) {
-		log_info("conn_client_process_recv_stop(): No entries were deleted.\n");
-		return 0;
-	}
-
-	/* Alloc sufficient memory to receive the deleted entries list */
-	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(uint64_t)))) {
-		errsv = errno;
-		log_crit("conn_client_process_recv_stop(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Receive the deleted entries list */
-	if (read(runc.fd, entry_list, entry_list_nmemb * sizeof(uint64_t)) != (entry_list_nmemb * sizeof(uint64_t))) {
-		errsv = errno;
-		log_crit("conn_client_process_recv_stop(): read() != %zu: %s\n", entry_list_nmemb * sizeof(uint64_t), strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Iterate the received entries list */
-	for (i = 0; i < entry_list_nmemb; i ++) {
-		/* Network to Host byte order */
-		entry_list[i] = ntohll(entry_list[i]);
-
-		debug_printf(DEBUG_INFO, "Entry ID 0x%llX was deleted\n", entry_list[i]);
-	}
-
-	/* Print the deleted entries */
-	print_result_del(entry_list, entry_list_nmemb);
-
-	/* Free entry_list memory */
-	mm_free(entry_list);
-
-	return 0;
-}
-
-static int _conn_client_process_recv_show(void) {
-	int i = 0, errsv = 0, ret = -1;
-	uint32_t entry_list_nmemb = 0;
-	struct usched_entry *entry_list = NULL;
-
-	/* Read te number of elements to receive */
-	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
-		errsv = errno;
-		log_crit("conn_client_process_recv_show(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Network to Host byte order */
-	entry_list_nmemb = ntohl(entry_list_nmemb);
-
-	if (!entry_list_nmemb) {
-		log_info("conn_client_process_recv_show(): No entries were found.\n");
-		return 0;
-	}
-
-	/* Alloc the entries array */
-	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(struct usched_entry)))) {
-		errsv = errno;
-		log_crit("conn_client_process_recv_show(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Reset array memory */
-	memset(entry_list, 0, entry_list_nmemb * sizeof(struct usched_entry));
-
-	/* Receive the entries */
-	for (i = 0; i < entry_list_nmemb; i ++) {
-		/* Read the first block of the entry */
-		if (read(runc.fd, &entry_list[i], offsetof(struct usched_entry, psize)) != offsetof(struct usched_entry, psize)) {
-			errsv = errno;
-			log_crit("conn_client_process_recv_show(): read() != %zu: %s\n", offsetof(struct usched_entry, psize), strerror(errno));
-			goto _recv_show_finish;
-		}
-
-		/* Convert Network to Host byte order */
-		entry_list[i].id = ntohll(entry_list[i].id);
-		entry_list[i].flags = ntohl(entry_list[i].flags);
-		entry_list[i].uid = ntohl(entry_list[i].uid);
-		entry_list[i].gid = ntohl(entry_list[i].gid);
-		entry_list[i].trigger = ntohl(entry_list[i].trigger);
-		entry_list[i].step = ntohl(entry_list[i].step);
-		entry_list[i].expire = ntohl(entry_list[i].expire);
-
-		/* Read the entry username */
-		if (read(runc.fd, entry_list[i].username, CONFIG_USCHED_AUTH_USERNAME_MAX) != CONFIG_USCHED_AUTH_USERNAME_MAX) {
-			errsv = errno;
-			log_crit("conn_client_process_recv_show(): read() != %zu: %s\n", CONFIG_USCHED_AUTH_USERNAME_MAX, strerror(errno));
-			goto _recv_show_finish;
-		}
-
-		/* Read the subject size */
-		if (read(runc.fd, &entry_list[i].subj_size, 4) != 4) {
-			errsv = errno;
-			log_crit("conn_client_process_recv_show(): read() != 4: %s\n", strerror(errno));
-			goto _recv_show_finish;
-		}
-
-		/* Convert Network to Host byte order */
-		entry_list[i].subj_size = ntohl(entry_list[i].subj_size);
-
-		/* Allocate the subject memory */
-		if (!(entry_list[i].subj = mm_alloc(entry_list[i].subj_size + 1))) {
-			errsv = errno;
-			log_crit("conn_client_process_recv_show(): mm_alloc(%d): %s\n", entry_list[i].subj_size + 1, strerror(errno));
-			goto _recv_show_finish;
-		}
-
-		/* Reset subject memory */
-		memset(entry_list[i].subj, 0, entry_list[i].subj_size + 1);
-
-		/* Read the subject contents */
-		if (read(runc.fd, entry_list[i].subj, entry_list[i].subj_size + 1) != (entry_list[i].subj_size + 1)) {
-			errsv = errno;
-			log_crit("conn_client_process_recv_show(): read() != %d: %s\n", entry_list[i].subj_size + 1, strerror(errno));
-			goto _recv_show_finish;
-		}
-	}
-
-	/* Print the received entries */
-	print_result_show(entry_list, entry_list_nmemb);
-
-	ret = 0;
-	i --;
-
-_recv_show_finish:
-	for (; i >= 0; i --) {
-		if (entry_list[i].subj)
-			mm_free(entry_list[i].subj);
-	}
-
-	mm_free(entry_list);
-
-	errno = errsv;
-
-	return ret;
 }
 
 int conn_client_process(void) {
@@ -278,11 +101,11 @@ int conn_client_process(void) {
 
 		/* Process the response */
 		if (entry_has_flag(cur, USCHED_ENTRY_FLAG_NEW)) {
-			ret = _conn_client_process_recv_run();
+			ret = process_client_recv_run();
 		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_DEL)) {
-			ret = _conn_client_process_recv_stop();
+			ret = process_client_recv_stop();
 		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_GET)) {
-			ret = _conn_client_process_recv_show();
+			ret = process_client_recv_show();
 		} else {
 			errno = EINVAL;
 			ret = -1;

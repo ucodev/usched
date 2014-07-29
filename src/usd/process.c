@@ -1,9 +1,9 @@
 /**
  * @file process.c
  * @brief uSched
- *        Data Processing interface
+ *        Data Processing interface - Daemon
  *
- * Date: 27-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -450,7 +450,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	return 0;
 }
 
-struct usched_entry *process_recv_create(struct async_op *aop) {
+struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	int errsv = 0;
 	struct usched_entry *entry = NULL;
 
@@ -535,7 +535,7 @@ struct usched_entry *process_recv_create(struct async_op *aop) {
 	return entry;
 }
 
-int process_recv_update(struct async_op *aop, struct usched_entry *entry) {
+int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0;
 
 	/* Check if the entry is initialized */

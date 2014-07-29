@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 07-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,7 +44,8 @@
 typedef enum USCHED_RUNTIME_FLAGS {
 	USCHED_RUNTIME_FLAG_TERMINATE = 1,
 	USCHED_RUNTIME_FLAG_RELOAD,
-	USCHED_RUNTIME_FLAG_FLUSH
+	USCHED_RUNTIME_FLAG_FLUSH,
+	USCHED_RUNTIME_FLAG_LIB
 } usched_runtime_flag_t;
 
 /* Structures */

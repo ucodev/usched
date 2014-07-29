@@ -94,18 +94,24 @@ int usched_result(uint32_t *id) {
 	return -1;
 }
 
-usched_usage_client_err_t usched_error(void) {
-	/* TODO: Not yet implemented */
-	errno = ENOSYS;
-
-	return -1;
+usched_usage_client_err_t usched_usage_error(void) {
+	return runc.usage_err;
 }
 
-char *usched_error_str(usched_usage_client_err_t error) {
-	/*TODO: Not yet implemened */
-	errno = ENOSYS;
+char *usched_usage_error_str(usched_usage_client_err_t error) {
+	switch (error) {
+		case USCHED_USAGE_CLIENT_ERR_INVALID_OP: return USCHED_USAGE_CLIENT_ERR_INVALID_OP_STR;
+		case USCHED_USAGE_CLIENT_ERR_INVALID_PREP: return USCHED_USAGE_CLIENT_ERR_INVALID_PREP_STR;
+		case USCHED_USAGE_CLIENT_ERR_INVALID_ADVERB: return USCHED_USAGE_CLIENT_ERR_INVALID_ADVERB_STR;
+		case USCHED_USAGE_CLIENT_ERR_INVALID_CONJ: return USCHED_USAGE_CLIENT_ERR_INVALID_CONJ_STR;
+		case USCHED_USAGE_CLIENT_ERR_INVALID_ARG: return USCHED_USAGE_CLIENT_ERR_INVALID_ARG_STR;
+		case USCHED_USAGE_CLIENT_ERR_UNEXPECT_PREP: return USCHED_USAGE_CLIENT_ERR_UNEXPECT_PREP_STR;
+		case USCHED_USAGE_CLIENT_ERR_UNEXPECT_CONJ: return USCHED_USAGE_CLIENT_ERR_UNEXPECT_CONJ_STR;
+		case USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS: return USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS_STR;
+		case USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS: return USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS_STR;
+	}
 
-	return NULL;
+	return "Success";
 }
 
 void usched_destroy(void) {

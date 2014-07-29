@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 27-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -54,9 +54,9 @@ void notify_read(struct async_op *aop) {
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		if (entry) {
-			if (process_recv_update(aop, entry) < 0)
+			if (process_daemon_recv_update(aop, entry) < 0)
 				goto _read_failure;
-		} else if (!(entry = process_recv_create(aop))) {
+		} else if (!(entry = process_daemon_recv_create(aop))) {
 			goto _read_failure;
 		}
 

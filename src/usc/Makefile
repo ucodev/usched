@@ -5,7 +5,7 @@ LDFLAGS=-g -pthread -lpall -lfsma -lpanet
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/sig.o ../common/thread.o
 OBJS_LIB=conn.o entry.o lib.o logic.o op.o parse.o pool.o print.o runtime.o usage.o
-OBJS_CLIENT=client.o conn.o entry.o logic.o op.o parse.o pool.o print.o runtime.o usage.o
+OBJS_CLIENT=client.o conn.o entry.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
 TARGET_LIB=libusc.so
 TARGET_CLIENT=usc
 
@@ -19,6 +19,7 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c parse.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c pool.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c print.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c process.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c runtime.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c usage.c
 	${CC} -o ${TARGET_CLIENT} ${OBJS_CLIENT} ${OBJS_COMMON} ${LDFLAGS}

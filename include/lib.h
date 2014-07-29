@@ -32,8 +32,8 @@
 int usched_init(void);
 int usched_request(char *req);
 int usched_result(uint32_t *id);
-usched_usage_client_err_t usched_error(void);
-char *usched_error_str(usched_usage_client_err_t error);
+usched_usage_client_err_t usched_usage_error(void);
+char *usched_usage_error_str(usched_usage_client_err_t error);
 void usched_destroy(void);
 
 #endif

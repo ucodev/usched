@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 27-07-2014
+ * Date: 29-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -88,13 +88,13 @@ static void *_exec_cmd(void *arg) {
 		}
 
 		/* Drop privileges, if required */
-		if (setuid(uid) < 0) {
-			log_crit("PID[%u]: _exec_cmd(): setuid(%u): %s\n", pid, uid, strerror(errno));
+		if (setregid(gid, gid) < 0) {
+			log_crit("PID[%u]: _exec_cmd(): setregid(%u): %s\n", pid, gid, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 
-		if (setgid(gid) < 0) {
-			log_crit("PID[%u]: _exec_cmd(): setgid(%u): %s\n", pid, gid, strerror(errno));
+		if (setreuid(uid, uid) < 0) {
+			log_crit("PID[%u]: _exec_cmd(): setreuid(%u): %s\n", pid, uid, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
 
@@ -113,9 +113,13 @@ static void *_exec_cmd(void *arg) {
 	}
 
 	/* Parent */
-
 	mm_free(arg);
 
+	/* Wait for child to return */
+	if (waitpid(-1, &status, 0) < 0)
+		log_crit("_exec_cmd(): waitpid(): %s\n", strerror(errno));
+
+	/* Terminate this thread */
 	pthread_exit(NULL);
 
 	return NULL;

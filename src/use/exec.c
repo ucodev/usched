@@ -60,7 +60,7 @@ static void *_exec_cmd(void *arg) {
 		/* Child */
 
 		/* Cleanup child */
-		runtime_exec_destroy();
+		runtime_exec_quiet_destroy();
 
 		/* Get child pid */
 		pid = getpid();

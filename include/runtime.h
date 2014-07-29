@@ -112,6 +112,7 @@ void runtime_client_destroy(void);
 void runtime_client_lib_destroy(void);
 void runtime_daemon_destroy(void);
 void runtime_exec_destroy(void);
+void runtime_exec_quiet_destroy(void);
 
 #endif
 

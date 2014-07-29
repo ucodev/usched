@@ -129,3 +129,10 @@ void runtime_exec_destroy(void) {
 	log_destroy();
 }
 
+void runtime_exec_quiet_destroy(void) {
+	pmq_exec_destroy();
+	thread_exec_behaviour_destroy();
+	sig_exec_destroy();
+	log_destroy();
+}
+

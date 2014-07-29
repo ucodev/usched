@@ -1,0 +1,9 @@
+#!/bin/bash
+
+make clean
+
+rm -f .compiler
+rm -f .ecflags
+rm -f .elflags
+rm -f .done
+

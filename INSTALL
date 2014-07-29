@@ -21,6 +21,7 @@
     * https://github.com/ucodev/libfsma
 
 
+
 2. Installation
 
  The following commands will fetch all the required dependencies and install the uSched services:
@@ -31,8 +32,27 @@
    # ./undo
 
 
-3. Starting uSched Services
+
+3. Specific Add-ons
+
+ In order to install operating system specific add-ons, run:
+
+   # make install_<distro>
+
+ Where distro is the name of the system distribution. For example, to install Debian add-ons, run:
+
+   # make install_debian
+
+
+
+4. Starting uSched Services
 
    # usched start
+
+
+
+5. Stopping uSched Services
+
+   # usched stop
 
 

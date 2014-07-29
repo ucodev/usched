@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if ! [ -e ".done" ]; then
+	echo "Run 'do' first"
+	exit 1
+fi
+
+if [ `id -u` -ne 0 ]; then
+	echo "Current user is not root"
+	exit 1
+fi
+
+make install_all
+
+if [ $? -ne 0 ]; then
+	echo "Installation failed."
+	exit 1;
+fi
+
+ldconfig
+
+if [ $? -ne 0 ]; then
+	echo "Failed to execute ldconfig"
+	exit 1;
+fi
+
+echo "Installation complete."
+
+exit 0
+

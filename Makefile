@@ -2,7 +2,7 @@ all:
 	make -C src/
 	make -C scripts/
 
-install:
+install_all:
 	make -C src/ install
 	make -C scripts/ install
 

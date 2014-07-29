@@ -1,0 +1,48 @@
+#!/bin/bash
+
+install_lib()
+{
+	lib=$1
+	cd $lib
+	wget https://github.com/ucodev/$lib/archive/master.zip
+	unzip master.zip
+	cd $lib-master
+	./do fsma && ./install
+	cd ../../
+}
+
+# Check if we're root
+if [ `id -u` -ne 0 ]; then
+	echo "Current user is not root"
+	exit 1
+fi
+
+# Check if unzip is installed
+if ! [ -e "/usr/bin/unzip" ]; then
+	echo "Unzip isn't installed"
+	exit 1
+fi
+
+# Prepare
+rm -rf build
+mkdir build
+mkdir build/libfsma
+mkdir build/libfsop
+mkdir build/libpall
+mkdir build/libpanet
+mkdir build/libpsched
+mkdir build/librtsaio
+cd build
+
+# Install dependencies
+install_lib "libfsma"
+install_lib "libfsop"
+install_lib "libpall"
+install_lib "libpanet"
+install_lib "libpsched"
+install_lib "librtsaio"
+
+# Cleanup
+cd ../
+rm -rf build
+

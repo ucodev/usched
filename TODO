@@ -1,7 +1,6 @@
 v0.1:
  - Finish client library implementation
  - Cleanup code
- - Install scripts
 
 v0.2
  - Remote Authentication

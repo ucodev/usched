@@ -2,12 +2,18 @@
 
 install_lib()
 {
-	lib=$1
-	cd $lib
-	wget https://github.com/ucodev/$lib/archive/master.zip
+	lib=${1}
+	cd ${lib}
+	wget https://github.com/ucodev/${lib}/archive/master.zip
 	unzip master.zip
-	cd $lib-master
+	cd ${lib}-master
 	./do fsma && ./install
+
+	if [ ${?} -ne 0 ]; then
+		echo "Unable to install ${lib}"
+		exit 1;
+	fi
+
 	cd ../../
 }
 
@@ -19,11 +25,18 @@ fi
 
 # Check if unzip is installed
 if ! [ -e "/usr/bin/unzip" ]; then
-	echo "Unzip isn't installed"
+	echo "unzip isn't installed"
+	exit 1
+fi
+
+# Check if unzip is installed
+if ! [ -e "/usr/bin/wget" ]; then
+	echo "wget isn't installed"
 	exit 1
 fi
 
 # Prepare
+echo "Installing dependencies..."
 rm -rf build
 mkdir build
 mkdir build/libfsma
@@ -45,4 +58,9 @@ install_lib "librtsaio"
 # Cleanup
 cd ../
 rm -rf build
+
+# Exit
+echo "Dependencies installed."
+
+exit 0
 

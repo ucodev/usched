@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface header
  *
- * Date: 27-06-2014
+ * Date: 29-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,11 +28,29 @@
 #ifndef USCHED_CONN_H
 #define USCHED_CONN_H
 
+#include <string.h>
+
 #include <arpa/inet.h>
 
 /* Macros */
-#define htonll(val) 	(*(unsigned char *) (unsigned int [1]) { 1 }) ? ((uint64_t) htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[0]) << 32) | htonl(((uint32_t *) &((uint64_t [1]) { (val) }[0]))[1]) : (val)
-#define ntohll(val)	(htonll(val))
+#define ntohll(netlonglong)	(htonll(netlonglong))
+#ifdef __clang__
+#define htonll(hostlonglong) 	(*(unsigned char *) (unsigned int [1]) { 1 }) ? ((uint64_t) htonl(((uint32_t *) &((uint64_t [1]) { (hostlonglong) }[0]))[0]) << 32) | htonl(((uint32_t *) &((uint64_t [1]) { (hostlonglong) }[0]))[1]) : (hostlonglong)
+#else
+static inline uint64_t htonll(uint64_t hostlonglong) {
+	uint32_t *ptr = (uint32_t *) &hostlonglong;
+	uint32_t hi = 0, lo = 0;
+
+	if (*(unsigned char *) (unsigned int [1]) { 1 }) {
+		memcpy(&lo, (uint32_t [1]) { htonl(ptr[1]) }, 4);
+		memcpy(&hi, (uint32_t [1]) { htonl(ptr[0]) }, 4);
+		memcpy(ptr, &lo, 4);
+		memcpy(&ptr[1], &hi, 4);
+	}
+
+	return hostlonglong;
+}
+#endif
 
 /* Prototypes */
 int conn_client_init(void);

@@ -1,0 +1,143 @@
+#! /bin/sh
+# uCodev uSched
+# uSched init script
+
+#
+# Date: 28-07-2014
+# 
+# Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+#
+# This file is part of usched.
+#
+# usched is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# usched is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with usched.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+# chkconfig: 35 30 70
+# description: uSched Service
+#
+### BEGIN INIT INFO
+# Provides:       usched
+# Required-Start: 
+# Required-Stop:  
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+# Short-Description: uSched Service
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+flush()
+{
+	log_begin_msg "Flushing uSched services"
+
+	/usr/sbin/usched flush quiet
+
+	if [ $? -ne 0 ]; then
+		log_failure_msg "Unable to flush services"
+		log_end_msg 1
+		return 1
+	fi
+
+	log_end_msg 0
+}
+
+reload()
+{
+	log_begin_msg "Reloading uSched services"
+
+	/usr/sbin/usched reload quiet
+
+	if [ $? -ne 0 ]; then
+		log_failure_msg "Unable to reload services"
+		log_end_msg 1
+		return 1
+	fi
+
+	log_end_msg 0
+}
+
+start()
+{
+	log_begin_msg "Starting uSched services"
+
+	/usr/sbin/usched start quiet
+
+	if [ $? -ne 0 ]; then
+		log_failure_msg "Unable to start services"
+		log_end_msg 1
+		return 1
+	fi
+
+
+	log_end_msg 0
+}
+
+stop()
+{
+	log_begin_msg "Stopping uSched services"
+	
+	/usr/sbin/usched stop quiet
+
+	if [ $? -ne 0 ]; then
+		log_failure_msg "Unable to stop services"
+		log_end_msg 1
+		return 1
+	fi
+
+	log_end_msg 0
+}
+
+status()
+{
+	log_begin_msg "Checking uSched services status"
+
+	if [ ! -f /var/run/usched_usd.pid ]; then
+		log_failure_msg "uSched Daemon Service isn't running"
+		log_end_msg 1
+		return 1
+	fi
+
+	if [ ! -f /var/run/usched_use.pid ]; then
+		log_failure_msg "uSched Exec Service isn't running"
+		log_end_msg 1
+		return 1
+	fi
+
+	log_end_msg 0
+}
+
+case "$1" in
+flush)
+	flush
+	;;
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+reload)
+	reload
+	;;
+restart)
+	stop && start
+	;;
+status)
+	status
+	;;
+*)
+	echo "Usage: $0 {flush|status|start|stop|reload|restart}"
+	exit 1
+esac
+

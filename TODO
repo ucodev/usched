@@ -2,8 +2,20 @@ v0.1:
  - Finish client library implementation
  - Cleanup code
 
-v0.2
+v0.2:
  - Remote Authentication
  - Command Line Options
  - Python bindings for Client Library
+
+v0.3:
+ - PHP bindings for Client Library
+ - Configuration File for Services
+
+v0.4:
+ - Java bindings for Client Library
+ - Encrypted connections
+
+v0.5:
+ - Ruby bindings for Client Library
+ - C# bindings for Client Library
 

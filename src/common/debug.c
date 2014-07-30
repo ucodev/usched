@@ -3,7 +3,7 @@
  * @brief uSched
  *        Debugging interface
  *
- * Date: 24-06-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,9 +29,11 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "config.h"
 #include "debug.h"
 
 void debug_printf(dbglvl_t level, char *fmt, ...) {
+#if CONFIG_USCHED_DEBUG == 1
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -39,5 +41,6 @@ void debug_printf(dbglvl_t level, char *fmt, ...) {
 	vfprintf(stderr, fmt, ap);
 
 	va_end(ap);
+#endif
 }
 

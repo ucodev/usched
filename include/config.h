@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 07-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,7 +30,7 @@
 
 #include <sys/types.h>
 
-#define CONFIG_USCHED_DEBUG			1
+#define CONFIG_USCHED_DEBUG			0
 #define CONFIG_USCHED_PATH_MAX			4088
 #define CONFIG_USCHED_CONN_TIMEOUT		5			/* 5 seconds timeout */
 #define CONFIG_USCHED_CONN_USER_NAMED_SOCKET	"/var/run/usched.sock"

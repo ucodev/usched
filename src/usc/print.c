@@ -29,6 +29,14 @@
 
 #include "entry.h"
 
+void print_result_error(void) {
+	printf("An error ocurred. Check your syslog entries for more details.");
+}
+
+void print_result_empty(void) {
+	printf("No results.\n");
+}
+
 void print_result_run(uint64_t entry_id) {
 	printf("Installed Entry ID: 0x%llX\n", (unsigned long long) entry_id);
 }

@@ -32,6 +32,8 @@
 #include "entry.h"
 
 /* Prototypes */
+void print_result_error(void);
+void print_result_empty(void);
 void print_result_run(uint64_t entry_id);
 void print_result_del(uint64_t *entry_list, size_t count);
 void print_result_show(struct usched_entry *entry_list, size_t count);

@@ -24,7 +24,12 @@
 
 2. Installation
 
- The following commands will fetch all the required dependencies and install the uSched services:
+ The following command will fetch all the required dependencies and install the uSched services:
+
+   # ./deploy
+
+
+ Alternatively, each of the scripts invoked by 'deploy' can be executed separately:
 
    # ./deps
    # ./do

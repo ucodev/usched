@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# @file usched.py
+# @file setup.py
 # @brief uSched
-#        uSched Python Library Module
+#        uSched Python Library Module - Setup
 #
 # Date: 30-07-2014
 # 
@@ -25,23 +25,14 @@
 #
 
 
-from ctypes import *
+from distutils.core import setup
 
-# Load uSched Client Library
-cdll.LoadLibrary("libusc.so")
-libusc = CDLL("libusc.so")
-
-# C to Python bindings
-usched_init = libusc.usched_init
-usched_request = libusc.usched_request
-usched_result_get_run = libusc.usched_result_get_run
-usched_result_get_stop = libusc.usched_result_get_stop
-usched_result_get_show = libusc.usched_result_get_show
-usched_result_free_run = libusc.usched_result_free_run
-usched_result_free_stop = libusc.usched_result_free_stop
-usched_result_free_show = libusc.usched_result_free_show
-usched_usage_error = libusc.usched_usage_error
-usched_usage_error_str = libusc.usched_usage_error_str
-usched_destroy = libusc.usched_destroy
-
+setup(	name='usched',
+	version='0.1a',
+	description='uSched Library Python Module',
+	author='Pedro A. Hortas',
+	author_email='pah@ucodev.org',
+	url='http://www.ucodev.org',
+	py_modules=['usched'],
+)
 

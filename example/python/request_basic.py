@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# @file usched.py
+# @file request_basic.py
 # @brief uSched
-#        uSched Python Library Module
+#        uSched Basic Library Request Example
 #
 # Date: 30-07-2014
 # 
@@ -25,23 +25,11 @@
 #
 
 
-from ctypes import *
+from usched import *
 
-# Load uSched Client Library
-cdll.LoadLibrary("libusc.so")
-libusc = CDLL("libusc.so")
-
-# C to Python bindings
-usched_init = libusc.usched_init
-usched_request = libusc.usched_request
-usched_result_get_run = libusc.usched_result_get_run
-usched_result_get_stop = libusc.usched_result_get_stop
-usched_result_get_show = libusc.usched_result_get_show
-usched_result_free_run = libusc.usched_result_free_run
-usched_result_free_stop = libusc.usched_result_free_stop
-usched_result_free_show = libusc.usched_result_free_show
-usched_usage_error = libusc.usched_usage_error
-usched_usage_error_str = libusc.usched_usage_error_str
-usched_destroy = libusc.usched_destroy
-
+# Example
+usched_init()
+usched_request("run 'ls -lah /' in 10 seconds then every 5 seconds")
+usched_result_free_run()
+usched_destroy()
 

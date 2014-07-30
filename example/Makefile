@@ -1,8 +1,6 @@
-CC=`cat ../.compiler`
-
 all:
-	${CC} -o request_basic request_basic.c -lusc
+	make -C c/
 
 clean:
-	rm -f request_basic
+	make -C c/ clean
 

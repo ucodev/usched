@@ -5,7 +5,8 @@ all:
 install_all:
 	make -C src/ install
 	make -C scripts/ install
-	mkdir /usr/include/usched
+	make -C bindings/ install_all
+	mkdir -p /usr/include/usched
 	cp include/*.h /usr/include/usched/
 
 examples:
@@ -33,4 +34,5 @@ clean:
 	make -C src/ clean
 	make -C scripts/ clean
 	make -C example/ clean
+	make -C bindings/ clean
 

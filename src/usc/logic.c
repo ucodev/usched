@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <time.h>
 
 #include "mm.h"
@@ -53,47 +54,61 @@ int logic_process_run(void) {
 
 		/* Check if this is a THEN conjunction */
 		if (cur->conj == USCHED_CONJ_THEN) {
-			if (!cur->next)
+			if (!cur->next) {
+				errno = EINVAL;
 				return -1;
+			}
 
 			cur = cur->next;
 
 			/* Expect the EVERY preposition after a THEN conjunction */
-			if (cur->prep != USCHED_PREP_EVERY)
+			if (cur->prep != USCHED_PREP_EVERY) {
+				errno = EINVAL;
 				return -1;
+			}
 
 			entry_set_step(entry, cur->arg);
 		}
 
 		/* Check if this is an UNTIL conjunction */
 		if (cur->conj == USCHED_CONJ_UNTIL) {
-			if (!cur->next)
+			if (!cur->next) {
+				errno = EINVAL;
 				return -1;
+			}
 
 			cur = cur->next;
 
 			/* Expect the TO preposition after an UNTIL conjunction */
-			if (cur->prep != USCHED_PREP_TO)
+			if (cur->prep != USCHED_PREP_TO) {
+				errno = EINVAL;
 				return -1;
+			}
 
 			entry_set_expire(entry, time_ref + cur->arg);
 		} else if (cur->conj == USCHED_CONJ_WHILE) {
 			/* If this is a WHILE conjunction */
-			if (!cur->next)
+			if (!cur->next) {
+				errno = EINVAL;
 				return -1;
+			}
 
 			cur = cur->next;
 
 			/* Expect the IN preposition after a WHILE conjunction */
-			if (cur->prep != USCHED_PREP_IN)
+			if (cur->prep != USCHED_PREP_IN) {
+				errno = EINVAL;
 				return -1;
+			}
 
 			entry_set_expire(entry, time_ref + cur->arg);
 		}
 
 		/* If there's a conjuntion, it's expected to be AND */
-		if (cur->conj && (cur->conj != USCHED_CONJ_AND))
+		if (cur->conj && (cur->conj != USCHED_CONJ_AND)) {
+			errno = EINVAL;
 			return -1;
+		}
 	}
 
 	/* Logic accepted */
@@ -101,6 +116,7 @@ int logic_process_run(void) {
 }
 
 int logic_process_stop(void) {
+	int errsv = 0;
 	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
 	struct usched_request *cur = NULL;
 	struct usched_entry *entry = NULL;
@@ -109,8 +125,10 @@ int logic_process_stop(void) {
 	size_t entry_list_nmemb = 0;
 
 	/* Validate the if the current request list has at least one valid entry */
-	if (!(cur = runc.req))
+	if (!(cur = runc.req)) {
+		errno = EINVAL;
 		return -1;
+	}
 
 	/* Validate if this request refers to all entries beloging to this user */
 	if (!strcasecmp(cur->subj, "all")) {
@@ -132,6 +150,7 @@ int logic_process_stop(void) {
 			/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
 			if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
 				mm_free(entry_list);
+				errno = EINVAL;
 				return -1;
 			}
 
@@ -145,12 +164,15 @@ int logic_process_stop(void) {
 	/* No conjunctions are accepted in a STOP operation */
 	if (cur->conj) {
 		mm_free(entry_list);
+		errno = EINVAL;
 		return -1;
 	}
 
 	/* Initialize the entry to be transmitted */
 	if (!(entry = entry_client_init(cur->uid, cur->gid, 0, entry_list, entry_list_nmemb * sizeof(uint64_t)))) {
+		errsv = errno;
 		mm_free(entry_list);
+		errno = errsv;
 		return -1;
 	}
 
@@ -162,8 +184,10 @@ int logic_process_stop(void) {
 
 	/* Push the entry into the entries pool */
 	if (runc.epool->push(runc.epool, entry) < 0) {
+		errsv = errno;
 		mm_free(entry_list);
 		entry_destroy(entry);
+		errno = errsv;
 		return -1;
 	}
 
@@ -172,6 +196,7 @@ int logic_process_stop(void) {
 }
 
 int logic_process_show(void) {
+	int errsv = 0;
 	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
 	struct usched_request *cur = NULL;
 	struct usched_entry *entry = NULL;
@@ -180,8 +205,10 @@ int logic_process_show(void) {
 	size_t entry_list_nmemb = 0;
 
 	/* Validate the if the current request list has at least one valid entry */
-	if (!(cur = runc.req))
+	if (!(cur = runc.req)) {
+		errno = EINVAL;
 		return -1;
+	}
 
 	/* Validate if this request refers to all entries beloging to this user */
 	if (!strcasecmp(cur->subj, "all")) {
@@ -203,6 +230,7 @@ int logic_process_show(void) {
 			/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
 			if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
 				mm_free(entry_list);
+				errno = EINVAL;
 				return -1;
 			}
 
@@ -216,12 +244,15 @@ int logic_process_show(void) {
 	/* No conjunctions are accepted in a STOP operation */
 	if (cur->conj) {
 		mm_free(entry_list);
+		errno = EINVAL;
 		return -1;
 	}
 
 	/* Initialize the entry to be transmitted */
 	if (!(entry = entry_client_init(cur->uid, cur->gid, 0, entry_list, entry_list_nmemb * sizeof(uint64_t)))) {
+		errsv = errno;
 		mm_free(entry_list);
+		errno = errsv;
 		return -1;
 	}
 
@@ -233,8 +264,10 @@ int logic_process_show(void) {
 
 	/* Push the entry into the entries pool */
 	if (runc.epool->push(runc.epool, entry) < 0) {
+		errsv = errno;
 		mm_free(entry_list);
 		entry_destroy(entry);
+		errno = errsv;
 		return -1;
 	}
 

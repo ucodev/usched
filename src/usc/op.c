@@ -3,7 +3,7 @@
  * @brief uSched
  *        Operation Handling interface
  *
- * Date: 24-06-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *

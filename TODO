@@ -1,10 +1,10 @@
 v0.1:
+ - Python bindings for Client Library
  - Cleanup code
 
 v0.2:
  - Remote Authentication
  - Command Line Options
- - Python bindings for Client Library
 
 v0.3:
  - PHP bindings for Client Library

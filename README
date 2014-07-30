@@ -14,7 +14,7 @@
 
 
 
-3. Usage Examples
+3. Command-Line Usage Examples
 
   Run the do_backups.sh script at 23:00 and then run it every 24 hours:
 

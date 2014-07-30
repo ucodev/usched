@@ -24,23 +24,57 @@
  *
  */
 
+#include <string.h>
+#include <errno.h>
 
 #include "usched.h"
 #include "runtime.h"
+#include "log.h"
 #include "logic.h"
 
 int op_client_process(void) {
-	if (!runc.req)
+	int errsv = 0, ret = -1;
+
+	if (!runc.req) {
+		errno = EINVAL;
 		return -1;
+	}
 
 	runc.op = runc.req->op;
 
 	switch (runc.op) {
-		case USCHED_OP_RUN:	return logic_process_run();
-		case USCHED_OP_STOP:	return logic_process_stop();
-		case USCHED_OP_SHOW:	return logic_process_show();
+		case USCHED_OP_RUN:
+			ret = logic_process_run();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_client_process(): logic_process_run(): %s\n", strerror(errno));
+			}
+
+			break;
+		case USCHED_OP_STOP:
+			ret = logic_process_stop();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_client_process(): logic_process_run(): %s\n", strerror(errno));
+			}
+
+			break;
+		case USCHED_OP_SHOW:
+			ret = logic_process_show();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_client_process(): logic_process_run(): %s\n", strerror(errno));
+			}
+
+			break;
+		default: errsv = EINVAL;
 	}
 
-	return -1;
+	errno = errsv;
+
+	return ret;
 }
 

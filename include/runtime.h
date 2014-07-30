@@ -59,6 +59,8 @@ struct usched_runtime_client {
 	char *usage_err_offending;
 	struct usched_request *req;
 	struct fifo_handler *epool;	/* Entries pool */
+	void *result;
+	size_t result_nmemb;
 
 	sock_t fd;
 	usched_runtime_flag_t flags;

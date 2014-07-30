@@ -79,6 +79,7 @@ static void _destroy(void) {
 	runtime_client_lib_destroy();
 }
 
+/* Library Interface */
 int usched_init(void) {
 	return _init();
 }
@@ -87,7 +88,21 @@ int usched_request(char *req) {
 	return _do(req);
 }
 
-int usched_result(uint32_t *id) {
+int usched_result_get_run(uint64_t **entry_list, size_t *nmemb) {
+	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
+	errno = ENOSYS;
+
+	return -1;
+}
+
+int usched_result_get_stop(uint64_t **entry_list, size_t *nmemb) {
+	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
+	errno = ENOSYS;
+
+	return -1;
+}
+
+int usched_result_get_show(struct usched_entry **entry_list, size_t *nmemb) {
 	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
 	errno = ENOSYS;
 

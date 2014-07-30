@@ -28,10 +28,17 @@
 #ifndef USCHED_LIB_H
 #define USCHED_LIB_H
 
-/* Prototypes */
+#include <stdint.h>
+
+#include "entry.h"
+#include "usage.h"
+
+/* Library Interface Prototypes */
 int usched_init(void);
 int usched_request(char *req);
-int usched_result(uint32_t *id);
+int usched_result_get_run(uint64_t **entry_list, size_t *nmemb);
+int usched_result_get_stop(uint64_t **entry_list, size_t *nmemb);
+int usched_result_get_show(struct usched_entry **entry_list, size_t *nmemb);
 usched_usage_client_err_t usched_usage_error(void);
 char *usched_usage_error_str(usched_usage_client_err_t error);
 void usched_destroy(void);

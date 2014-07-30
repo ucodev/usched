@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 25-06-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -88,26 +88,48 @@ int usched_request(char *req) {
 	return _do(req);
 }
 
-int usched_result_get_run(uint64_t **entry_list, size_t *nmemb) {
-	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
-	errno = ENOSYS;
-
-	return -1;
+void usched_result_get_run(uint64_t **entry_list, size_t *nmemb) {
+	*entry_list = runc.result;
+	*nmemb = runc.result_nmemb;
 }
 
-int usched_result_get_stop(uint64_t **entry_list, size_t *nmemb) {
-	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
-	errno = ENOSYS;
-
-	return -1;
+void usched_result_get_stop(uint64_t **entry_list, size_t *nmemb) {
+	*entry_list = runc.result;
+	*nmemb = runc.result_nmemb;
 }
 
-int usched_result_get_show(struct usched_entry **entry_list, size_t *nmemb) {
-	/* TODO: Store the IDs of the entries in the 'id' array (NULL terminated) */
-	errno = ENOSYS;
-
-	return -1;
+void usched_result_get_show(struct usched_entry **entry_list, size_t *nmemb) {
+	*entry_list = runc.result;
+	*nmemb = runc.result_nmemb;
 }
+
+void usched_result_free_run(void) {
+	mm_free(runc.result);
+	runc.result = NULL;
+	runc.result_nmemb = 0;
+}
+
+void usched_result_free_stop(void) {
+	mm_free(runc.result);
+	runc.result = NULL;
+	runc.result_nmemb = 0;
+}
+
+void usched_result_free_show(void) {
+	int i = 0;
+	struct usched_entry *entry_list = runc.result;
+
+	for (i = runc.result_nmemb - 1; i >= 0; i --) {
+		if (entry_list[i].subj)
+			mm_free(entry_list[i].subj);
+	}
+
+	mm_free(entry_list);
+
+	runc.result = NULL;
+	runc.result_nmemb = 0;
+}
+
 
 usched_usage_client_err_t usched_usage_error(void) {
 	return runc.usage_err;

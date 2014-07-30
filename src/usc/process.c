@@ -45,15 +45,29 @@
 
 /* Reserved library functions */
 static int _process_lib_result_add_run(uint64_t entry_id) {
-	return -1;
+	if (!(runc.result = mm_realloc(runc.result, sizeof(uint64_t) * (runc.result_nmemb + 1)))) {
+		log_warn("_process_lib_result_add_run(): mm_realloc(): %s\n", strerror(errno));
+		runc.result_nmemb = 0;
+		return -1;
+	}
+
+	memcpy(&((uint64_t *) runc.result)[++ runc.result_nmemb], &entry_id, sizeof(uint64_t));
+
+	return 0;
 }
 
 static int _process_lib_result_set_stop(uint64_t *entry_list, size_t nmemb) {
-	return -1;
+	runc.result = entry_list;
+	runc.result_nmemb = nmemb;
+
+	return 0;
 }
 
 static int _process_lib_result_set_show(struct usched_entry *entry_list, size_t nmemb) {
-	return -1;
+	runc.result = entry_list;
+	runc.result_nmemb = nmemb;
+
+	return 0;
 }
 
 int process_client_recv_run(void) {
@@ -74,12 +88,11 @@ int process_client_recv_run(void) {
 
 	if (bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB)) {
 		/* This is from library */
-		_process_lib_result_add_run(entry_id);
+		return _process_lib_result_add_run(entry_id);
 	} else {
 		/* Otherwise print the installed entry */
 		print_result_run(entry_id);
 	}
-
 
 	return 0;
 }
@@ -131,7 +144,7 @@ int process_client_recv_stop(void) {
 
 	if (bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB)) {
 		/* This is from library */
-		_process_lib_result_set_stop(entry_list, entry_list_nmemb);
+		return _process_lib_result_set_stop(entry_list, entry_list_nmemb);
 	} else {
 		/* Otherwise print the deleted entries */
 		print_result_del(entry_list, entry_list_nmemb);
@@ -231,7 +244,7 @@ int process_client_recv_show(void) {
 	/* Check if this is a library call */
 	if (bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB)) {
 		/* This is from library */
-		_process_lib_result_set_show(entry_list, entry_list_nmemb);
+		return _process_lib_result_set_show(entry_list, entry_list_nmemb);
 	} else {
 		/* Otherwise print the received entries */
 		print_result_show(entry_list, entry_list_nmemb);

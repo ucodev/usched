@@ -39,13 +39,8 @@
 #include "parse.h"
 #include "op.h"
 #include "log.h"
-#include "thread.h"
 #include "pool.h"
-#include "schedule.h"
-#include "pmq.h"
-#include "sig.h"
 #include "bitops.h"
-#include "marshal.h"
 
 
 int runtime_client_init(int argc, char **argv) {

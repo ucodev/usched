@@ -3,7 +3,7 @@
  * @brief uSched
  *        Client interface
  *
- * Date: 24-06-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,11 +36,13 @@
 #include "runtime.h"
 #include "log.h"
 #include "conn.h"
+#include "print.h"
 
 
 static void _init(int argc, char **argv) {
 	if (runtime_client_init(argc, argv) < 0) {
 		log_crit("_init(): runtime_client_init(): %s\n", strerror(errno));
+		print_result_error();
 		exit(EXIT_FAILURE);
 	}
 }
@@ -49,6 +51,7 @@ static void _do(void) {
 	/* Transmit entries */
 	if (conn_client_process() < 0) {
 		log_crit("_do: conn_client_process(): %s\n", strerror(errno));
+		print_result_error();
 		exit(EXIT_FAILURE);
 	}
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface
  *
- * Date: 26-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,7 +30,7 @@
 #include "entry.h"
 
 void print_result_error(void) {
-	printf("An error ocurred. Check your syslog entries for more details.");
+	printf("An error ocurred. Check your syslog entries for more details.\n");
 }
 
 void print_result_empty(void) {

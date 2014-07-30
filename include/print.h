@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface header
  *
- * Date: 25-07-2014
+ * Date: 30-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *

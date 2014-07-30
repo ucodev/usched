@@ -78,10 +78,6 @@ int process_client_recv_run(void) {
 	if (read(runc.fd, &entry_id, sizeof(entry_id)) != sizeof(entry_id)) {
 		errsv = errno;
 		log_crit("process_client_recv_run(): read() != %zu: %s\n", sizeof(entry_id), strerror(errno));
-
-		if (!bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB))
-			print_result_error();
-
 		errno = errsv;
 		return -1;
 	}
@@ -110,10 +106,6 @@ int process_client_recv_stop(void) {
 	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
 		errsv = errno;
 		log_crit("process_client_recv_stop(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
-
-		if (!bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB))
-			print_result_error();
-
 		errno = errsv;
 		return -1;
 	}
@@ -131,10 +123,6 @@ int process_client_recv_stop(void) {
 	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(uint64_t)))) {
 		errsv = errno;
 		log_crit("process_client_recv_stop(): mm_alloc(): %s\n", strerror(errno));
-
-		if (!bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB))
-			print_result_error();
-
 		errno = errsv;
 		return -1;
 	}
@@ -143,10 +131,6 @@ int process_client_recv_stop(void) {
 	if (read(runc.fd, entry_list, entry_list_nmemb * sizeof(uint64_t)) != (entry_list_nmemb * sizeof(uint64_t))) {
 		errsv = errno;
 		log_crit("process_client_recv_stop(): read() != %zu: %s\n", entry_list_nmemb * sizeof(uint64_t), strerror(errno));
-
-		if (!bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB))
-			print_result_error();
-
 		errno = errsv;
 		return -1;
 	}
@@ -182,10 +166,6 @@ int process_client_recv_show(void) {
 	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
-
-		if (!bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB))
-			print_result_error();
-
 		errno = errsv;
 		return -1;
 	}
@@ -203,10 +183,6 @@ int process_client_recv_show(void) {
 	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(struct usched_entry)))) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): mm_alloc(): %s\n", strerror(errno));
-
-		if (!bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB))
-			print_result_error();
-
 		errno = errsv;
 		return -1;
 	}
@@ -286,10 +262,6 @@ _recv_show_finish:
 	}
 
 	mm_free(entry_list);
-
-	/* If an error ocurred, print an error message */
-	if (errsv)
-		print_result_error();
 
 	errno = errsv;
 

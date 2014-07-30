@@ -5,6 +5,11 @@ all:
 install_all:
 	make -C src/ install
 	make -C scripts/ install
+	mkdir /usr/include/usched
+	cp include/*.h /usr/include/usched/
+
+examples:
+	make -C example/
 
 install_centos:
 	make -C scripts/ install_centos
@@ -27,4 +32,5 @@ install_ubuntu:
 clean:
 	make -C src/ clean
 	make -C scripts/ clean
+	make -C example/ clean
 

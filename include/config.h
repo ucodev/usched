@@ -35,10 +35,28 @@
 #define CONFIG_USCHED_DEBUG			0
 #define CONFIG_USCHED_PATH_MAX			4088
 #define CONFIG_USCHED_DIR_BASE			"/etc/usched"
-#define CONFIG_USCHED_DIR_AUTH			"/etc/usched/auth"
-#define CONFIG_USCHED_DIR_CORE			"/etc/usched/core"
-#define CONFIG_USCHED_DIR_NETWORK		"/etc/usched/network"
-#define CONFIG_USCHED_DIR_USERS			"/etc/usched/users"
+#define CONFIG_USCHED_DIR_AUTH			"auth"
+#define CONFIG_USCHED_DIR_CORE			"core"
+#define CONFIG_USCHED_DIR_NETWORK		"network"
+#define CONFIG_USCHED_DIR_USERS			"users"
+#define CONFIG_USCHED_FILE_AUTH_GID_BL		"gid.blacklist"
+#define CONFIG_USCHED_FILE_AUTH_GID_WL		"gid.whitelist"
+#define CONFIG_USCHED_FILE_AUTH_UID_BL		"uid.blacklist"
+#define CONFIG_USCHED_FILE_AUTH_UID_WL		"uid.whitelist"
+#define CONFIG_USCHED_FILE_AUTH_USE_LOCAL	"use.local"
+#define CONFIG_USCHED_FILE_AUTH_USE_PAM		"use.pam"
+#define CONFIG_USCHED_FILE_AUTH_USERS_REMOTE	"users.remote"
+#define CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE	"file.serialize"
+#define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
+#define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
+#define CONFIG_USCHED_FILE_CORE_PMQ_NAME	"pmq.name"
+#define CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY	"thread.priority"
+#define CONFIG_USCHED_FILE_CORE_THREAD_WORKERS	"thread.workers"
+#define CONFIG_USCHED_FILE_NETWORK_BIND_ADDR	"bind.addr"
+#define CONFIG_USCHED_FILE_NETWORK_BIND_PORT	"bind.port"
+#define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"
+#define CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT	"conn.timeout"
+#define CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED	"sock.named"
 #define CONFIG_USCHED_CONN_TIMEOUT		5			/* 5 seconds timeout */
 #define CONFIG_USCHED_CONN_USER_NAMED_SOCKET	"/var/run/usched.sock"
 #define CONFIG_USCHED_FILE_DAEMON_SERIALIZE	"/var/run/usched_daemon.dat"
@@ -82,15 +100,15 @@ struct usched_config_auth {
 	struct cll_handler *gid_whitelist;
 	struct cll_handler *uid_blacklist;
 	struct cll_handler *uid_whitelist;
-	unsigned short use_local;
-	unsigned short use_pam;
-	unsigned short users_remote;
+	unsigned int use_local;
+	unsigned int use_pam;
+	unsigned int users_remote;
 };
 
 struct usched_config_core {
 	char *file_serialize;
 	unsigned int pmq_msgmax;
-	size_t pmq_msgsize;
+	unsigned int pmq_msgsize;
 	char *pmq_name;
 	int thread_priority;
 	unsigned int thread_workers;

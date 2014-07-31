@@ -86,6 +86,8 @@ struct usched_runtime_daemon {
 	mqd_t pmqd;
 
 	pall_fd_t ser_fd;
+
+	struct usched_config config;
 };
 
 struct usched_runtime_exec {

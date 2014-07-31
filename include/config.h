@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 30-07-2014
+ * Date: 31-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,8 +30,15 @@
 
 #include <sys/types.h>
 
+#include <pall/cll.h>
+
 #define CONFIG_USCHED_DEBUG			0
 #define CONFIG_USCHED_PATH_MAX			4088
+#define CONFIG_USCHED_DIR_BASE			"/etc/usched"
+#define CONFIG_USCHED_DIR_AUTH			"/etc/usched/auth"
+#define CONFIG_USCHED_DIR_CORE			"/etc/usched/core"
+#define CONFIG_USCHED_DIR_NETWORK		"/etc/usched/network"
+#define CONFIG_USCHED_DIR_USERS			"/etc/usched/users"
 #define CONFIG_USCHED_CONN_TIMEOUT		5			/* 5 seconds timeout */
 #define CONFIG_USCHED_CONN_USER_NAMED_SOCKET	"/var/run/usched.sock"
 #define CONFIG_USCHED_FILE_DAEMON_SERIALIZE	"/var/run/usched_daemon.dat"
@@ -56,6 +63,59 @@
 /* #define CONFIG_SYS_SOLARIS			0 */
 #define CONFIG_SYS_DEV_ZERO			"/dev/zero"
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
+
+
+/* Configuration structures */
+struct usched_config_userinfo {
+	char *username;
+	char *password;
+	uid_t uid;
+	gid_t gid;
+};
+
+struct usched_config_users {
+	struct cll_handler *list;
+};
+
+struct usched_config_auth {
+	struct cll_handler *gid_blacklist;
+	struct cll_handler *gid_whitelist;
+	struct cll_handler *uid_blacklist;
+	struct cll_handler *uid_whitelist;
+	unsigned short use_local;
+	unsigned short use_pam;
+	unsigned short users_remote;
+};
+
+struct usched_config_core {
+	char *file_serialize;
+	unsigned int pmq_msgmax;
+	size_t pmq_msgsize;
+	char *pmq_name;
+	int thread_priority;
+	unsigned int thread_workers;
+};
+
+struct usched_config_network {
+	char *bind_addr;
+	char *bind_port;
+	unsigned int conn_limit;
+	unsigned int conn_timeout;
+	char *sock_named;
+};
+
+struct usched_config {
+	struct usched_config_auth auth;
+	struct usched_config_core core;
+	struct usched_config_network network;
+	struct usched_config_users users;
+};
+
+
+/* Prototypes */
+int config_init(struct usched_config *config);
+void config_destroy(struct usched_config *config);
+
 
 #endif
 

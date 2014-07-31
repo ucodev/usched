@@ -54,16 +54,16 @@ int conn_daemon_init(void) {
 		return -1;
 	}
 
-	if ((rund.fd = panet_server_unix(rund.config.core.pmq_name, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
+	if ((rund.fd = panet_server_unix(rund.config.network.sock_named, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.core.pmq_name, strerror(errno));
+		log_crit("conn_daemon_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.network.sock_named, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (chmod(rund.config.core.pmq_name, 0666) < 0) {
+	if (chmod(rund.config.network.sock_named, 0666) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_init(): chmod(\"%s\", 0666): %s\n", rund.config.core.pmq_name, strerror(errno));
+		log_crit("conn_daemon_init(): chmod(\"%s\", 0666): %s\n", rund.config.network.sock_named, strerror(errno));
 		errno = errsv;
 		return -1;
 	}

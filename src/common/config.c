@@ -568,8 +568,8 @@ int config_init_network(struct usched_config_network *network) {
 }
 
 int config_init_users(struct usched_config_users *users) {
-	errno = ENOSYS;
-	return -1;
+	/* TODO */
+	return 0;
 }
 
 void config_destroy_auth(struct usched_config_auth *auth) {

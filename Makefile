@@ -6,6 +6,13 @@ install_all:
 	make -C src/ install
 	make -C scripts/ install
 	make -C bindings/ install_all
+	mkdir -p /etc/usched
+	cp -r config/* /etc/usched/
+	chown -R root:root /etc/usched
+	chmod 700 /etc/usched/auth
+	chmod 700 /etc/usched/core
+	chmod 755 /etc/usched/network
+	chmod 700 /etc/usched/users
 	mkdir -p /usr/include/usched
 	cp include/*.h /usr/include/usched/
 

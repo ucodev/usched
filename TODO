@@ -1,19 +1,19 @@
 v0.1:
  - Configuration Tree for Services
+ - Remote Authentication
+ - Command Line Options
  - Cleanup code
 
 v0.2:
- - Remote Authentication
- - Command Line Options
+ - Java bindings for Client Library
 
 v0.3:
  - PHP bindings for Client Library
 
 v0.4:
- - Java bindings for Client Library
  - Encrypted connections
 
 v0.5:
- - Ruby bindings for Client Library
- - C# bindings for Client Library
+ - Ruby bindings for Client Library (?)
+ - C# bindings for Client Library (?)
 

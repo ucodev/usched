@@ -65,6 +65,8 @@ struct usched_runtime_client {
 	sock_t fd;
 	usched_runtime_flag_t flags;
 	struct sigaction sa_save;
+
+	struct usched_config config;
 };
 
 struct usched_runtime_daemon {
@@ -98,6 +100,8 @@ struct usched_runtime_exec {
 	struct sigaction sa_save;
 
 	mqd_t pmqd;
+
+	struct usched_config config;
 };
 
 /* External */

@@ -28,7 +28,11 @@
 #ifndef USCHED_PMQ_H
 #define USCHED_PMQ_H
 
+#include <sys/types.h>
+
 /* Prototypes */
+mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, unsigned int msgsize);
+void pmq_destroy(mqd_t pmqd);
 int pmq_daemon_init(void);
 int pmq_exec_init(void);
 void pmq_daemon_destroy(void);

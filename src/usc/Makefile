@@ -1,16 +1,17 @@
 CC=`cat ../../.compiler`
 ECFLAGS=-DCONFIG_SYS_LINUX=1 -D_GNU_SOURCE=1
 CCFLAGS=-fPIC -DUSE_LIBFSMA -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRANT -std=c11 -fstrict-aliasing -pedantic -pthread -Wall -Werror -g
-LDFLAGS=-g -pthread -lpall -lfsma -lpanet
+LDFLAGS=-g -pthread -lpall -lfsma -lfsop -lpanet
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/bitops.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/sig.o ../common/thread.o
-OBJS_LIB=conn.o entry.o lib.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
-OBJS_CLIENT=client.o conn.o entry.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
+OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/sig.o ../common/thread.o
+OBJS_LIB=config.o conn.o entry.o lib.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
+OBJS_CLIENT=config.o client.o conn.o entry.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
 TARGET_LIB=libusc.so
 TARGET_CLIENT=usc
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c client.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c config.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c conn.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c entry.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c lib.c

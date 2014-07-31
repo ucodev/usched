@@ -100,7 +100,7 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	aop->fd = cur_fd;
 	aop->count = sizeof(entry->id);
 	aop->priority = 0;
-	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 	if (!(aop->data = mm_alloc(sizeof(entry->id)))) {
 		errsv = errno;
@@ -221,7 +221,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	aop->fd = cur_fd;
 	aop->count = (sizeof(entry->id) * entry_list_res_nmemb) + sizeof(entry_list_res_nmemb);
 	aop->priority = 0;
-	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 	if (!(aop->data = mm_alloc(aop->count))) {
 		errsv = errno;
@@ -435,7 +435,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	aop->fd = cur_fd;
 	aop->count = buf_offset;
 	aop->priority = 0;
-	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 	aop->data = buf;
 
 	/* Report back the successfully read entries to the client */
@@ -508,7 +508,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	aop->fd = entry->id;
 	aop->count = entry->psize;
 	aop->priority = 0;
-	aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 	if (!(aop->data = mm_alloc(aop->count))) {
 		errsv = errno;

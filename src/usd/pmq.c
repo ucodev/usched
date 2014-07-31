@@ -1,9 +1,9 @@
 /**
  * @file pmq.c
  * @brief uSched
- *        POSIX Message Queueing interface
+ *        POSIX Message Queueing interface - Daemon
  *
- * Date: 13-07-2014
+ * Date: 31-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,43 +24,37 @@
  *
  */
 
-
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <mqueue.h>
 
 #include <sys/stat.h>
+#include <mqueue.h>
 
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
 #include "pmq.h"
 
-mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, unsigned int msgsize) {
+int pmq_daemon_init(void) {
 	int errsv = 0;
-	mqd_t ret;
-	struct mq_attr mqattr;
 
-	memset(&ret, 0, sizeof(mqd_t));
-	memset(&mqattr, 0, sizeof(struct mq_attr));
-
-	mqattr.mq_flags = 0;		/* Flags */
-	mqattr.mq_maxmsg = maxmsg;	/* Max number of messagees on queue */
-	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
-	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
-
-	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) - 1) {
+	if ((rund.pmqd = pmq_init(rund.config.core.pmq_name, O_WRONLY | O_CREAT, 0200, rund.config.core.pmq_msgmax, rund.config.core.pmq_msgsize)) == (mqd_t) - 1) {
 		errsv = errno;
-		log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
+		log_crit("pmq_daemon_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
-		return (mqd_t) -1;
+		return -1;
 	}
 
-	return ret;
+	/* TODO: Consume everything that might exist in this newly created queue before returning from
+	 * this initialization. This will prevent any of the listening processes to process outdated
+	 * events.
+	 */
+
+	return 0;
 }
 
-void pmq_destroy(mqd_t pmqd) {
-	mq_close(pmqd);
+void pmq_daemon_destroy(void) {
+	pmq_destroy(rund.pmqd);
 }
 

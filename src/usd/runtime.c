@@ -63,6 +63,18 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	log_info("Logging interface initialized.\n");
 
+	/* Initialize configuration interface */
+	log_info("Initializing configuration interface...\n");
+
+	if (config_daemon_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): config_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Configuration interface initialized.\n");
+
 	/* Initialize signals interface */
 	log_info("Initializing signals interface...\n");
 
@@ -232,6 +244,11 @@ void runtime_daemon_destroy(void) {
 	log_info("Destroying signals interface...\n");
 	sig_daemon_destroy();
 	log_info("Signals interface destroyed.\n");
+
+	/* Destroy configuration interface */
+	log_info("Destroying configuration interface...\n");
+	config_daemon_destroy();
+	log_info("Configuration interface destroyed.\n");
 
 	log_info("All systems stopped.\n");
 

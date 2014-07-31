@@ -1,9 +1,9 @@
 /**
- * @file pmq.c
+ * @file config.c
  * @brief uSched
- *        POSIX Message Queueing interface
+ *        Configuration interface - Exec
  *
- * Date: 13-07-2014
+ * Date: 31-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,43 +24,35 @@
  *
  */
 
-
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <mqueue.h>
-
-#include <sys/stat.h>
 
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
-#include "pmq.h"
 
-mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, unsigned int msgsize) {
+
+int config_exec_init(void) {
 	int errsv = 0;
-	mqd_t ret;
-	struct mq_attr mqattr;
+	struct usched_config *config = &rune.config;
 
-	memset(&ret, 0, sizeof(mqd_t));
-	memset(&mqattr, 0, sizeof(struct mq_attr));
+	memset(config, 0, sizeof(struct usched_config));
 
-	mqattr.mq_flags = 0;		/* Flags */
-	mqattr.mq_maxmsg = maxmsg;	/* Max number of messagees on queue */
-	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
-	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
-
-	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) - 1) {
+	if (config_init_core(&config->core) < 0) {
 		errsv = errno;
-		log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
+		log_warn("config_exec_init(): config_init_core(): %s\n", strerror(errno));
 		errno = errsv;
-		return (mqd_t) -1;
+		return -1;
 	}
 
-	return ret;
+	return 0;
 }
 
-void pmq_destroy(mqd_t pmqd) {
-	mq_close(pmqd);
+void config_exec_destroy(void) {
+	struct usched_config *config = &rune.config;
+
+	config_destroy_core(&config->core);
+
+	memset(config, 0, sizeof(struct usched_config));
 }
 

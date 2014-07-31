@@ -1,9 +1,9 @@
 /**
  * @file pmq.c
  * @brief uSched
- *        POSIX Message Queueing interface
+ *        POSIX Message Queueing interface - Exec
  *
- * Date: 13-07-2014
+ * Date: 31-07-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,39 +28,29 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <mqueue.h>
 
 #include <sys/stat.h>
+#include <mqueue.h>
 
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
 #include "pmq.h"
 
-mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, unsigned int msgsize) {
+int pmq_exec_init(void) {
 	int errsv = 0;
-	mqd_t ret;
-	struct mq_attr mqattr;
 
-	memset(&ret, 0, sizeof(mqd_t));
-	memset(&mqattr, 0, sizeof(struct mq_attr));
-
-	mqattr.mq_flags = 0;		/* Flags */
-	mqattr.mq_maxmsg = maxmsg;	/* Max number of messagees on queue */
-	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
-	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
-
-	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) - 1) {
+	if ((rune.pmqd = pmq_init(rune.config.core.pmq_name, O_RDONLY, 0400, rune.config.core.pmq_msgmax, rune.config.core.pmq_msgsize)) == (mqd_t) - 1) {
 		errsv = errno;
-		log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
+		log_crit("pmq_exec_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
-		return (mqd_t) -1;
+		return -1;
 	}
 
-	return ret;
+	return 0;
 }
 
-void pmq_destroy(mqd_t pmqd) {
-	mq_close(pmqd);
+void pmq_exec_destroy(void) {
+	pmq_destroy(rune.pmqd);
 }
 

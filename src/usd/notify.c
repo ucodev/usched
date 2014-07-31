@@ -126,7 +126,7 @@ void notify_write(struct async_op *aop) {
 		aop->fd = cur_fd;
 		aop->count = usched_entry_hdr_size();
 		aop->priority = 0;
-		aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+		aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 		if (!(aop->data = mm_alloc(aop->count))) {
 			log_warn("notify_write(): aop->data = mm_alloc(): %s\n", strerror(errno));

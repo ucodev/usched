@@ -358,7 +358,7 @@ static int _config_init_auth_users_remote(struct usched_config_auth *auth) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_USERS_REMOTE, &auth->users_remote);
 }
 
-static int _config_init_auth(struct usched_config_auth *auth) {
+int config_init_auth(struct usched_config_auth *auth) {
 	int errsv = 0;
 
 	/* Read GID blacklist */
@@ -445,7 +445,7 @@ static int _config_init_core_thread_workers(struct usched_config_core *core) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, &core->thread_workers);
 }
 
-static int _config_init_core(struct usched_config_core *core) {
+int config_init_core(struct usched_config_core *core) {
 	int errsv = 0;
 
 	/* Read file serialize */
@@ -520,7 +520,7 @@ static int _config_init_network_sock_named(struct usched_config_network *network
 	return _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED, &network->sock_named);
 }
 
-static int _config_init_network(struct usched_config_network *network) {
+int config_init_network(struct usched_config_network *network) {
 	int errsv = 0;
 
 	/* Read bind addr */
@@ -567,65 +567,41 @@ static int _config_init_network(struct usched_config_network *network) {
 	return 0;
 }
 
-static int _config_init_users(struct usched_config_users *users) {
+int config_init_users(struct usched_config_users *users) {
 	errno = ENOSYS;
 	return -1;
 }
 
-static void _config_destroy_auth(struct usched_config_auth *auth) {
+void config_destroy_auth(struct usched_config_auth *auth) {
+	pall_cll_destroy(auth->gid_blacklist);
+	pall_cll_destroy(auth->gid_whitelist);
+	pall_cll_destroy(auth->uid_blacklist);
+	pall_cll_destroy(auth->uid_whitelist);
+
+	memset(auth, 0, sizeof(struct usched_config_auth));
+}
+
+void config_destroy_core(struct usched_config_core *core) {
+	memset(core->file_serialize, 0, strlen(core->file_serialize));
+	mm_free(core->file_serialize);
+	memset(core->pmq_name, 0, strlen(core->pmq_name));
+	mm_free(core->pmq_name);
+
+	memset(core, 0, sizeof(struct usched_config_core));
+}
+
+void config_destroy_network(struct usched_config_network *network) {
+	memset(network->bind_addr, 0, strlen(network->bind_addr));
+	mm_free(network->bind_addr);
+	memset(network->bind_port, 0, strlen(network->bind_port));
+	mm_free(network->bind_port);
+	memset(network->sock_named, 0, strlen(network->sock_named));
+	mm_free(network->sock_named);
+
+	memset(network, 0, sizeof(struct usched_config_network));
+}
+
+void config_destroy_users(struct usched_config_users *users) {
 	return ;
-}
-
-static void _config_destroy_core(struct usched_config_core *core) {
-	return ;
-}
-
-static void _config_destroy_network(struct usched_config_network *network) {
-	return ;
-}
-
-static void _config_destroy_users(struct usched_config_users *users) {
-	return ;
-}
-
-int config_init(struct usched_config *config) {
-	int errsv = 0;
-
-	if (_config_init_auth(&config->auth) < 0) {
-		errsv = errno;
-		log_warn("config_init(): _config_read_auth(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (_config_init_core(&config->core) < 0) {
-		errsv = errno;
-		log_warn("config_init(): _config_read_core(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (_config_init_network(&config->network) < 0) {
-		errsv = errno;
-		log_warn("config_init(): _config_read_network(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (_config_init_users(&config->users) < 0) {
-		errsv = errno;
-		log_warn("config_init(): _config_read_users(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-void config_destroy(struct usched_config *config) {
-	_config_destroy_auth(&config->auth);
-	_config_destroy_core(&config->core);
-	_config_destroy_network(&config->network);
-	_config_destroy_users(&config->users);
 }
 

@@ -109,10 +109,17 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 
 void entry_pmq_dispatch(void *arg) {
 	int errsv = 0;
-	char buf[CONFIG_USCHED_PMQ_MSG_SIZE];
+	char *buf;
 	struct usched_entry *entry = arg;
 
-	memset(buf, 0, sizeof(buf));
+	if (!(buf = mm_alloc(rund.config.core.pmq_msgsize))) {
+		errsv = errno;
+		log_warn("entry_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		goto _finish;
+	}
+
+	memset(buf, 0, rund.config.core.pmq_msgsize);
 
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
@@ -121,7 +128,7 @@ void entry_pmq_dispatch(void *arg) {
 		goto _finish;
 	}
 
-	if ((strlen(entry->subj) + 9) > sizeof(buf)) {
+	if ((strlen(entry->subj) + 9) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_pmq_dispatch(): msg_size > sizeof(buf)\n");
 		errno = EMSGSIZE;
 		goto _finish;
@@ -131,7 +138,7 @@ void entry_pmq_dispatch(void *arg) {
 	memcpy(buf + 4, &entry->gid, 4);
 	memcpy(buf + 8, entry->subj, strlen(entry->subj));
 
-	if (mq_send(rund.pmqd, buf, sizeof(buf), 0) < 0) {
+	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
 		errsv = errno;
 		log_warn("entry_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
 		errno = errsv;
@@ -144,6 +151,7 @@ void entry_pmq_dispatch(void *arg) {
 
 	/* Update trigger, step and expire parameters of the entry based on psched library data */
 	if (schedule_entry_update(entry) == 1) {
+		mm_free(buf);
 		/* Entry was successfully updated. */
 		return;
 	}
@@ -157,6 +165,8 @@ _finish:
 	pthread_mutex_lock(&rund.mutex_apool);
 	rund.apool->del(rund.apool, entry);
 	pthread_mutex_unlock(&rund.mutex_apool);
+
+	mm_free(buf);
 }
 
 int entry_serialize(pall_fd_t fd, void *data) {

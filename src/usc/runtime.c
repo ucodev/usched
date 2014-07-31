@@ -60,6 +60,13 @@ int runtime_client_init(int argc, char **argv) {
 		return -1;
 	}
 
+	if (config_client_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_client_init(): config_client_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Parse requested command line instruction */
 	if (!(runc.req = parse_instruction_array(argc - 1, &argv[1]))) {
 		usage_client_show();
@@ -145,8 +152,14 @@ void runtime_client_lib_destroy(void) {
 	/* Destroy requests */
 	parse_req_destroy(runc.req);
 
+	/* Destroy configuration */
+	config_client_destroy();
+
 	/* Destroy usage interface */
 	if (runc.usage_err_offending)
 		mm_free(runc.usage_err_offending);
+
+	/* Destroy log interface */
+	log_destroy();
 }
 

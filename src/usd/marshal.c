@@ -48,9 +48,9 @@
 int marshal_daemon_init(void) {
 	int errsv = 0;
 
-	if ((rund.ser_fd = open(CONFIG_USCHED_FILE_DAEMON_SERIALIZE, O_CREAT | O_SYNC | O_RDWR, S_IRUSR | S_IWUSR)) < 0) {
+	if ((rund.ser_fd = open(rund.config.core.file_serialize, O_CREAT | O_SYNC | O_RDWR, S_IRUSR | S_IWUSR)) < 0) {
 		errsv = errno;
-		log_warn("marshal_daemon_init(): open(\"%s\", ...): %s\n", CONFIG_USCHED_FILE_DAEMON_SERIALIZE, strerror(errno));
+		log_warn("marshal_daemon_init(): open(\"%s\", ...): %s\n", rund.config.core.file_serialize, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -133,7 +133,7 @@ _unserialize_finish:
 
 int marshal_daemon_backup(void) {
 	int errsv = 0;
-	size_t len = sizeof(CONFIG_USCHED_FILE_DAEMON_SERIALIZE) + 40;
+	size_t len = strlen(rund.config.core.file_serialize) + 50;
 	char *file_bak = NULL;
 
 	if (!(file_bak = mm_alloc(len))) {
@@ -145,9 +145,9 @@ int marshal_daemon_backup(void) {
 
 	memset(file_bak, 0, len);
 
-	snprintf(file_bak, len - 1, "%s-%lu-%u", CONFIG_USCHED_FILE_DAEMON_SERIALIZE, time(NULL), getpid());
+	snprintf(file_bak, len - 1, "%s-%lu-%u", rund.config.core.file_serialize, time(NULL), getpid());
 
-	if (fsop_cp(CONFIG_USCHED_FILE_DAEMON_SERIALIZE, file_bak, 8192) < 0) {
+	if (fsop_cp(rund.config.core.file_serialize, file_bak, 8192) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_backup(): fsop_cp(): %s\n", strerror(errno));
 		mm_free(file_bak);
@@ -161,8 +161,8 @@ int marshal_daemon_backup(void) {
 }
 
 void marshal_daemon_wipe(void) {
-	if (unlink(CONFIG_USCHED_FILE_DAEMON_SERIALIZE) < 0)
-		log_warn("marshal_daemon_wipe(): unlink(\"%s\"): %s\n", CONFIG_USCHED_FILE_DAEMON_SERIALIZE, strerror(errno));
+	if (unlink(rund.config.core.file_serialize) < 0)
+		log_warn("marshal_daemon_wipe(): unlink(\"%s\"): %s\n", rund.config.core.file_serialize, strerror(errno));
 }
 
 void marshal_daemon_destroy(void) {

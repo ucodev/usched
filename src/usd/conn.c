@@ -47,23 +47,23 @@
 int conn_daemon_init(void) {
 	int errsv = 0;
 
-	if (rtsaio_init(-5, SCHED_OTHER, 0, &notify_write, &notify_read) < 0) {
+	if (rtsaio_init(-rund.config.core.thread_workers, SCHED_OTHER, 0, &notify_write, &notify_read) < 0) {
 		errsv = errno;
 		log_crit("conn_daemon_init(): rtsaio_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if ((rund.fd = panet_server_unix(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
+	if ((rund.fd = panet_server_unix(rund.config.core.pmq_name, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_init(): panet_server_unix(): %s\n", strerror(errno));
+		log_crit("conn_daemon_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.core.pmq_name, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (chmod(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, 0666) < 0) {
+	if (chmod(rund.config.core.pmq_name, 0666) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_init(): chmod(): %s\n", strerror(errno));
+		log_crit("conn_daemon_init(): chmod(\"%s\", 0666): %s\n", rund.config.core.pmq_name, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -98,7 +98,7 @@ void conn_daemon_process(void) {
 		/* id(4), flags(4), uid(4), gid(4), trigger(4), step(4), expire(4), psize(4) */
 		aop->count = usched_entry_hdr_size();
 		aop->priority = 0;
-		aop->timeout.tv_sec = CONFIG_USCHED_CONN_TIMEOUT;
+		aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 		if (!(aop->data = mm_alloc(aop->count))) {
 			log_warn("conn_daemon_process(): mm_alloc(): %s\n", strerror(errno));

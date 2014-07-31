@@ -57,6 +57,18 @@ int runtime_exec_init(int argc, char **argv) {
 
 	log_info("Logging interface initialized.\n");
 
+	/* Initialize configuration interface */
+	log_info("Initializing configuration interface...\n");
+
+	if (config_exec_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_exec_init(): config_exec_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Configuration interface initialized.\n");
+
 	/* Initialize signals interface */
 	log_info("Initializing signals interface...\n");
 
@@ -123,6 +135,11 @@ void runtime_exec_destroy(void) {
 	log_info("Signals interface destroyed.\n");
 
 	log_info("All systems stopped.\n");
+
+	/* Destroy configuration interface */
+	log_info("Destroying configuration interface...\n");
+	config_exec_destroy();
+	log_info("Configuration interface destroyed.\n");
 
 	/* Destroy logging interface */
 	log_info("Destroying logging interface...\n");

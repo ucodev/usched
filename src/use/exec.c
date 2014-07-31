@@ -147,15 +147,15 @@ static void _exec_process(void) {
 		if (runtime_exec_interrupted())
 			break;
 
-		if (!(tbuf = mm_alloc(CONFIG_USCHED_PMQ_MSG_SIZE))) {
+		if (!(tbuf = mm_alloc(rune.config.core.pmq_msgsize))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));
 			continue;
 		}
 
-		memset(tbuf, 0, CONFIG_USCHED_PMQ_MSG_SIZE);
+		memset(tbuf, 0, rune.config.core.pmq_msgsize);
 
 		/* Read message from queue */
-		if (mq_receive(rune.pmqd, tbuf, CONFIG_USCHED_PMQ_MSG_SIZE, 0) < 0) {
+		if (mq_receive(rune.pmqd, tbuf, rune.config.core.pmq_msgsize, 0) < 0) {
 			log_warn("_exec_process(): mq_receive(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;

@@ -45,7 +45,7 @@
 int conn_client_init(void) {
 	int errsv = 0;
 
-	if ((runc.fd = panet_client_unix(CONFIG_USCHED_CONN_USER_NAMED_SOCKET, PANET_PROTO_UNIX_STREAM)) < 0) {
+	if ((runc.fd = panet_client_unix(runc.config.network.sock_named, PANET_PROTO_UNIX_STREAM)) < 0) {
 		errsv = errno;
 		log_crit("conn_client_init(): panet_client_unix(): %s\n", strerror(errno));
 		errno = errsv;

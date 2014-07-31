@@ -1,5 +1,5 @@
 v0.1:
- - Python bindings for Client Library
+ - Configuration Tree for Services
  - Cleanup code
 
 v0.2:
@@ -8,7 +8,6 @@ v0.2:
 
 v0.3:
  - PHP bindings for Client Library
- - Configuration File for Services
 
 v0.4:
  - Java bindings for Client Library

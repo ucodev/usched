@@ -98,6 +98,19 @@ static void *_exec_cmd(void *arg) {
 			exit(EXIT_FAILURE);
 		}
 
+		/* Paranoid mode */
+		if ((getuid() != uid) || (geteuid() != uid)) {
+			log_crit("PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", pid, getuid(), geteuid(), uid);
+
+			exit(EXIT_FAILURE);
+		}
+
+		if ((getgid() != gid) || (getegid() != gid)) {
+			log_crit("PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", pid, getgid(), getegid(), gid);
+
+			exit(EXIT_FAILURE);
+		}
+
 		/* Execute command. TODO: This should be done by execve() with '/bin/sh -c' as prefix args */
 		if ((status = system(cmd)) < 0) {
 			log_crit("PID[%u]: _exec_cmd(): system(\"%s\"): %s\n", pid, cmd, strerror(errno));

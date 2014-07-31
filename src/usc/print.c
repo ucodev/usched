@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "runtime.h"
 #include "entry.h"
 
 void print_result_error(void) {

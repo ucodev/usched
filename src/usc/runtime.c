@@ -60,6 +60,7 @@ int runtime_client_init(int argc, char **argv) {
 		return -1;
 	}
 
+	/* Initialize configuration interface */
 	if (config_client_init() < 0) {
 		errsv = errno;
 		log_crit("runtime_client_init(): config_client_init(): %s\n", strerror(errno));

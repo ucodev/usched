@@ -1,18 +1,16 @@
 v0.1:
- - Command Line Options
- - Remote Authentication
  - Cleanup code
 
 v0.2:
  - Java bindings for Client Library
+ - PHP bindings for Client Library
+ - Command Line Options
+ - Remote Authentication
 
 v0.3:
- - PHP bindings for Client Library
-
-v0.4:
  - Encrypted connections
 
-v0.5:
+v0.4:
  - Ruby bindings for Client Library (?)
  - C# bindings for Client Library (?)
 

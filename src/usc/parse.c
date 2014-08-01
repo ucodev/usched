@@ -51,7 +51,7 @@ static long _parse_req_arg(const struct usched_request *req, const char *arg) {
 	long val = strtol(arg, &endptr, 10);
 
 	/* Validate 'val' */
-	if ((endptr == arg) || (val < 0) || (errno == ERANGE))
+	if ((*endptr) || (endptr == arg) || (val < 0) || (errno == EINVAL) || (errno == ERANGE))
 		return -1;
 
 	memset(&tm, 0, sizeof(struct tm));
@@ -482,8 +482,10 @@ struct usched_request *parse_instruction_array(int argc, char **argv) {
 	struct usched_request *req = NULL;
 
 	/* We need at least 1 arg to consider the request */
-	if (argc < 1)
+	if (argc < 1) {
+		errno = EINVAL;
 		return NULL;
+	}
 
 	if (!(req = mm_alloc(sizeof(struct usched_request))))
 		return NULL;

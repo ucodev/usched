@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 31-07-2014
+ * Date: 01-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,7 @@
 #include <pall/cll.h>
 
 #define CONFIG_USCHED_DEBUG			0
+#define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/bash"
 #define CONFIG_USCHED_DIR_BASE			"/etc/usched"
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"

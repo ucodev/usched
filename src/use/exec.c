@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 29-07-2014
+ * Date: 01-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,95 +42,96 @@
 #include "log.h"
 #include "bitops.h"
 
+extern char **environ;
+
 static void *_exec_cmd(void *arg) {
-	char *buf = arg;	/* | uid (32 bits) | gid (32 bits) | cmd (dynnamic) ... | */
+	char *buf = arg;	/* | id (64 bits) | uid (32 bits) | gid (32 bits) | cmd (...) ... | */
+	uint64_t id = 0;
 	uint32_t uid = 0, gid = 0;
-	char *cmd = &buf[8];
+	char *cmd = &buf[16];
 	pid_t pid = 0;
 	int status = 0;
 
-	memcpy(&uid, buf, 4);
-	memcpy(&gid, buf + 4, 4);
+	memcpy(&id, buf, 8);
+	memcpy(&uid, buf + 8, 4);
+	memcpy(&gid, buf + 12, 4);
 
 	/* Create a new process, drop privileges to UID and GID and execute CMD */
 	if ((pid = fork()) == (pid_t) -1) {
 		/* Failure */
-		log_warn("_exec_cmd(): fork(): %s\n", strerror(errno));
+		log_warn("Entry[0x%016llX]: _exec_cmd(): fork(): %s\n", id, strerror(errno));
 	} else if (!pid) {
 		/* Child */
-
-		/* Cleanup child */
-		runtime_exec_quiet_destroy();
 
 		/* Get child pid */
 		pid = getpid();
 
-		debug_printf(DEBUG_INFO, "PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", pid, cmd, uid, gid);
+		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", id, pid, cmd, uid, gid);
 
 		/* Create a new session */
 		if (setsid() == (pid_t) -1)
-			log_warn("PID[%u]: _exec_cmd(): setsid(): %s\n", pid, strerror(errno));
+			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setsid(): %s\n", id, pid, strerror(errno));
 
 		/* Redirect standard files */
 		if (!freopen(CONFIG_SYS_DEV_ZERO, "r", stdin)) {
-			log_warn("PID[%u]: _exec_cmd(): freopen(\"%s\", \"r\", stdin): %s\n",
-				CONFIG_SYS_DEV_ZERO, pid, strerror(errno));
+			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"r\", stdin): %s\n", id, pid, CONFIG_SYS_DEV_ZERO, strerror(errno));
 		}
 
 		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stdout)) {
-			log_warn("PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stdout): %s\n",
-				CONFIG_SYS_DEV_NULL, pid, strerror(errno));
+			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stdout): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno));
 		}
 
 		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stderr)) {
-			log_warn("PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stderr): %s\n",
-				CONFIG_SYS_DEV_NULL, pid, strerror(errno));
+			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stderr): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno));
 		}
 
 		/* Drop privileges, if required */
 		if (setregid(gid, gid) < 0) {
-			log_crit("PID[%u]: _exec_cmd(): setregid(%u): %s\n", pid, gid, strerror(errno));
+			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setregid(%u): %s\n", id, pid, gid, strerror(errno));
+			mm_free(arg);
 			exit(EXIT_FAILURE);
 		}
 
 		if (setreuid(uid, uid) < 0) {
-			log_crit("PID[%u]: _exec_cmd(): setreuid(%u): %s\n", pid, uid, strerror(errno));
+			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setreuid(%u): %s\n", id, pid, uid, strerror(errno));
+			mm_free(arg);
 			exit(EXIT_FAILURE);
 		}
 
 		/* Paranoid mode */
 		if ((getuid() != uid) || (geteuid() != uid)) {
-			log_crit("PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", pid, getuid(), geteuid(), uid);
-
+			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", id, pid, getuid(), geteuid(), uid);
+			mm_free(arg);
 			exit(EXIT_FAILURE);
 		}
 
 		if ((getgid() != gid) || (getegid() != gid)) {
-			log_crit("PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", pid, getgid(), getegid(), gid);
-
+			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", id, pid, getgid(), getegid(), gid);
+			mm_free(arg);
 			exit(EXIT_FAILURE);
 		}
 
-		/* Execute command. TODO: This should be done by execve() with '/bin/sh -c' as prefix args */
-		if ((status = system(cmd)) < 0) {
-			log_crit("PID[%u]: _exec_cmd(): system(\"%s\"): %s\n", pid, cmd, strerror(errno));
-			exit(EXIT_FAILURE);
-		}
+		/* Cleanup child */
+		runtime_exec_quiet_destroy();
 
-		log_info("PID[%u]: Executed '%s'. Exit Status: %d\n", pid, cmd, WEXITSTATUS(status));
+		/* Execute command */
+		if (execlp(CONFIG_USCHED_SHELL_BIN_PATH, CONFIG_USCHED_SHELL_BIN_PATH, "-c", cmd, (char *) NULL) < 0)
+			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): execlp(\"%s\", \"-c\", \"%s\"): %s\n", id, pid, CONFIG_USCHED_SHELL_BIN_PATH, cmd, strerror(errno));
 
+		/* If reached, execlp() have failed */
 		mm_free(arg);
 
-		/* Exit child process with the exit status returned by system() */
-		exit(WEXITSTATUS(status));
+		exit(EXIT_FAILURE);
 	}
-
-	/* Parent */
-	mm_free(arg);
 
 	/* Wait for child to return */
 	if (waitpid(-1, &status, 0) < 0)
-		log_crit("_exec_cmd(): waitpid(): %s\n", strerror(errno));
+		log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
+
+	log_info("Entry[0x%016llX]: PID[%u]: Executed '%s' [uid: %u, gid: %u]. Exit Status: %d\n", id, pid, cmd, uid, gid, WEXITSTATUS(status));
+
+	/* Parent */
+	mm_free(arg);
 
 	/* Terminate this thread */
 	pthread_exit(NULL);

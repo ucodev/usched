@@ -1,7 +1,6 @@
 v0.1:
- - Configuration Tree for Services
- - Remote Authentication
  - Command Line Options
+ - Remote Authentication
  - Cleanup code
 
 v0.2:

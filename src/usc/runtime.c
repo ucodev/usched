@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 30-07-2014
+ * Date: 01-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -69,7 +69,9 @@ int runtime_client_init(int argc, char **argv) {
 
 	/* Parse requested command line instruction */
 	if (!(runc.req = parse_instruction_array(argc - 1, &argv[1]))) {
+		errsv = errno;
 		usage_client_show();
+		errno = errsv;
 		return -1;
 	}
 

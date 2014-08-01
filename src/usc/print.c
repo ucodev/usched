@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface
  *
- * Date: 30-07-2014
+ * Date: 01-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,14 +38,14 @@ void print_result_empty(void) {
 }
 
 void print_result_run(uint64_t entry_id) {
-	printf("Installed Entry ID: 0x%llX\n", (unsigned long long) entry_id);
+	printf("Installed Entry ID: 0x%016llX\n", (unsigned long long) entry_id);
 }
 
 void print_result_del(uint64_t *entry_list, size_t count) {
 	int i = 0;
 
 	for (i = 0; i < count; i ++)
-		printf("Deleted Entry ID: 0x%llX\n", (unsigned long long) entry_list[i]);
+		printf("Deleted Entry ID: 0x%016llX\n", (unsigned long long) entry_list[i]);
 }
 
 void print_result_show(struct usched_entry *entry_list, size_t count) {
@@ -55,7 +55,7 @@ void print_result_show(struct usched_entry *entry_list, size_t count) {
 
 	for (i = 0; i < count; i ++) {
 		printf(
-			" 0x%16llX | " \
+			" 0x%016llX | " \
 			"%8s | " \
 			"%5u | " \
 			"%5u | " \

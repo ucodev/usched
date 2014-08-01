@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 31-07-2014
+ * Date: 01-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,6 +32,7 @@
 #include <pall/cll.h>
 
 #include <fsop/path.h>
+#include <fsop/dir.h>
 
 #include "config.h"
 #include "mm.h"
@@ -52,6 +53,24 @@ static int _list_uint_compare(const void *d1, const void *d2) {
 
 static void _list_uint_destroy(void *data) {
 	mm_free(data);
+}
+
+static int _userinfo_compare(const void *d1, const void *d2) {
+	struct usched_config_userinfo *u1 = (struct usched_config_userinfo *) d1;
+	struct usched_config_userinfo *u2 = (struct usched_config_userinfo *) d2;
+
+	return strcmp(u1->username, u2->username);
+}
+
+static void _userinfo_destroy(void *data) {
+	struct usched_config_userinfo *userinfo = data;
+
+	memset(userinfo->username, 0, strlen(userinfo->username));
+	mm_free(userinfo->username);
+	memset(userinfo->password, 0, strlen(userinfo->password));
+	mm_free(userinfo->password);
+	memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+	mm_free(userinfo);
 }
 
 static int _list_init_uint_from_file(const char *file, struct cll_handler **list) {
@@ -84,7 +103,7 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 	/* Initialize gid blacklist */
 	if (!(*list = pall_cll_init(&_list_uint_compare, &_list_uint_destroy, NULL, NULL))) {
 		errsv = errno;
-		log_warn("_list_init_uint_from_file(): fopen(\"%s\", \"r\"): %s\n", file, strerror(errno));
+		log_warn("_list_init_uint_from_file(): pall_cll_init(): %s\n", strerror(errno));
 		fclose(fp);
 		errno = errsv;
 		return -1;
@@ -567,8 +586,193 @@ int config_init_network(struct usched_config_network *network) {
 	return 0;
 }
 
+static int _config_init_users_list_add_from_file(
+		struct usched_config_users *users,
+		const char *file,
+		const char *user) 
+{
+	int errsv = 0;
+	char *userinfo_raw = NULL, *ptr = NULL, *endptr = NULL;
+	struct usched_config_userinfo *userinfo = NULL;
+
+	/* Read file contents (one line only ) */
+	if (_value_init_string_from_file(file, &userinfo_raw) < 0) {
+		errsv = errno;
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): _value_init_string_from_file(\"%s\", ...): %s\n", file, user, file, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Initialize userinfo structure */
+	if (!(userinfo = mm_alloc(sizeof(struct usched_config_userinfo)))) {
+		errsv = errno;
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", strerror(errno));
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset userinfo memory */
+	memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+
+	/* Parse first field [UID] */
+	if (!(ptr = strtok(userinfo_raw, ":"))) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Unexpected value: %s.\n", file, user, userinfo_raw);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Get UID */
+	userinfo->uid = strtoul(ptr, &endptr, 0);
+
+	if ((*endptr) || (endptr == ptr) || (errno == ERANGE) || (errno == EINVAL)) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid UID value: %s.\n", file, user, ptr);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Parse second field [GID] */
+	if (!(ptr = strtok(NULL, ":"))) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: No ':' delimiter found (2 expected).\n", file, user);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Get GID */
+	userinfo->gid = strtoul(ptr, &endptr, 0);
+
+	if ((*endptr) || (endptr == ptr) || (errno == ERANGE) || (errno == EINVAL)) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid GID value: %s.\n", file, user, ptr);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Parse third field [password] */
+	if (!(ptr = strtok(NULL, ":"))) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Only one ':' delimiter found (2 expected).\n", file, user);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Check if password is empty */
+	if (!*ptr) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Password field is empty.\n", file, user);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Allocate password memory */
+	if (!(userinfo->password = mm_alloc(strlen(ptr) + 1))) {
+		errsv = errno;
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", file, user, strerror(errno));
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Copy password */
+	strcpy(userinfo->password, ptr);
+
+	/* Free userinfo raw string */
+	memset(userinfo_raw, 0, strlen(userinfo_raw));
+	mm_free(userinfo_raw);
+
+	/* Allocate username memory */
+	if (!(userinfo->username = mm_alloc(strlen(user) + 1))) {
+		errsv = errno;
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", file, user, strerror(errno));
+		memset(userinfo->password, 0, strlen(userinfo->password));
+		mm_free(userinfo->password);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Copy username */
+	strcpy(userinfo->username, user);
+
+	/* Insert userinfo structure into users list */
+	if (users->list->insert(users->list, userinfo) < 0) {
+		errsv = errno;
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): users->list->insert(): %s\n", file, user, strerror(errno));
+		memset(userinfo->username, 0, strlen(userinfo->username));
+		mm_free(userinfo->username);
+		memset(userinfo->password, 0, strlen(userinfo->password));
+		mm_free(userinfo->password);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Success */
+	return 0;
+}
+
+static int _config_init_users_action(int order, const char *fpath, const char *rpath, void *arg) {
+	struct usched_config_users *users = arg;
+
+	if (order != FSOP_WALK_INORDER)
+		return 0;
+
+	if (!fsop_path_isreg(fpath))
+		return 0;
+
+	if (_config_init_users_list_add_from_file(users, fpath, rpath) < 0) {
+		log_warn("_config_init_users_action(): _config_users_list_add_from_file(): %s\n", strerror(errno));
+	}
+
+	return 0;
+}
+
 int config_init_users(struct usched_config_users *users) {
-	/* TODO */
+	int errsv = 0;
+
+	/* Initialize users list */
+	if (!(users->list = pall_cll_init(&_userinfo_compare, &_userinfo_destroy, NULL, NULL))) {
+		errsv = errno;
+		log_warn("config_init_users(): pall_cll_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read all users from the files in the users configuration directory */
+	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, &_config_init_users_action, users) < 0) {
+		errsv = errno;
+		log_warn("config_init_users(): fsop_walkdir(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Success */
 	return 0;
 }
 
@@ -602,6 +806,8 @@ void config_destroy_network(struct usched_config_network *network) {
 }
 
 void config_destroy_users(struct usched_config_users *users) {
-	return ;
+	pall_cll_destroy(users->list);
+
+	memset(users, 0, sizeof(struct usched_config_users));
 }
 

@@ -153,6 +153,7 @@ struct usched_admin_request {
 	usched_op_t op;
 	usched_category_t category;
 	char **args;
+	size_t argc;
 };
 
 /* uSched Client Request Structure */

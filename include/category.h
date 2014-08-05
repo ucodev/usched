@@ -1,9 +1,9 @@
 /**
- * @file parse.h
+ * @file category.h
  * @brief uSched
- *        Parser interface header
+ *       Category processing interface header
  *
- * Date: 05-08-2014
+ * Date: 06-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,17 +24,15 @@
  *
  */
 
+#ifndef USCHED_CATEGORY_H
+#define USCHED_CATEGORY_H
 
-#ifndef USCHED_PARSE_H
-#define USCHED_PARSE_H
-
-#include "usched.h"
+#include <stdio.h>
 
 /* Prototypes */
-struct usched_admin_request *parse_admin_request_array(int argc, char **argv);
-void parse_admin_req_destroy(struct usched_admin_request *req);
-struct usched_client_request *parse_client_instruction_array(int argc, char **argv);
-struct usched_client_request *parse_client_instruction(const char *cmd);
-void parse_client_req_destroy(struct usched_client_request *req);
+int category_users_add(size_t argc, char **args);
+int category_users_delete(size_t argc, char **args);
+int category_users_change(size_t argc, char **args);
+int category_users_show(size_t argc, char **args);
 
 #endif

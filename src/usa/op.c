@@ -1,7 +1,7 @@
 /**
  * @file op.c
  * @brief uSched
- *        Operation Handling interface - Client
+ *        Operation Handling interface - Admin
  *
  * Date: 05-08-2014
  * 
@@ -32,42 +32,51 @@
 #include "log.h"
 #include "logic.h"
 
-int op_client_process(void) {
+int op_admin_process(void) {
 	int errsv = 0, ret = -1;
 
-	if (!runc.req) {
-		log_warn("op_client_process(): Unusable request.\n");
+	if (!runa.req) {
+		log_warn("op_admin_process(): Unusable request.\n");
 		errno = EINVAL;
 		return -1;
 	}
 
-	runc.op = runc.req->op;
+	runa.op = runa.req->op;
 
-	switch (runc.op) {
-		case USCHED_OP_RUN:
-			ret = logic_client_process_run();
+	switch (runa.op) {
+		case USCHED_OP_ADD:
+			ret = logic_admin_process_add();
 
 			if (ret < 0) {
 				errsv = errno;
-				log_warn("op_client_process(): logic_client_process_run(): %s\n", strerror(errno));
+				log_warn("op_admin_process(): logic_admin_process_add(): %s\n", strerror(errno));
 			}
 
 			break;
-		case USCHED_OP_STOP:
-			ret = logic_client_process_stop();
+		case USCHED_OP_DELETE:
+			ret = logic_admin_process_delete();
 
 			if (ret < 0) {
 				errsv = errno;
-				log_warn("op_client_process(): logic_client_process_run(): %s\n", strerror(errno));
+				log_warn("op_admin_process(): logic_admin_process_delete(): %s\n", strerror(errno));
+			}
+
+			break;
+		case USCHED_OP_CHANGE:
+			ret = logic_admin_process_change();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_admin_process(): logic_admin_process_change(): %s\n", strerror(errno));
 			}
 
 			break;
 		case USCHED_OP_SHOW:
-			ret = logic_client_process_show();
+			ret = logic_admin_process_show();
 
 			if (ret < 0) {
 				errsv = errno;
-				log_warn("op_client_process(): logic_client_process_run(): %s\n", strerror(errno));
+				log_warn("op_admin_process(): logic_admin_process_show(): %s\n", strerror(errno));
 			}
 
 			break;

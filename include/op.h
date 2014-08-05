@@ -29,6 +29,7 @@
 #define USCHED_OP_H
 
 /* Prototypes */
+int op_admin_process(void);
 int op_client_process(void);
 
 #endif

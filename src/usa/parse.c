@@ -72,9 +72,11 @@ static struct usched_admin_request *_parse_category_compound(struct usched_admin
 
 	debug_printf(DEBUG_INFO, "CATEGORY: %d\n", req->category);
 
-	/* TODO */
+	/* Set the argument vector and argument counter of the request */
+	req->args = &argv[1];
+	req->argc = argc - 1;
 
-	return NULL;
+	return req;
 
 _category_error:
 	parse_admin_req_destroy(req);

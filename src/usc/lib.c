@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 05-08-2014
+ * Date: 06-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -60,7 +60,7 @@ static int _do(char *req) {
 	 */
 	runc.req_str = req;
 
-	if (!(runc.req = parse_instruction(runc.req_str)))
+	if (!(runc.req = parse_client_instruction(runc.req_str)))
 		return -1;
 
 	if (pool_client_init() < 0)

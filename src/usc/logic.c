@@ -1,7 +1,7 @@
 /**
  * @file logic.c
  * @brief uSched
- *        Logic Analyzer interface
+ *        Logic Analyzer interface - Client
  *
  * Date: 05-08-2014
  * 
@@ -39,7 +39,7 @@
 #include "conn.h"
 
 
-int logic_process_run(void) {
+int logic_client_process_run(void) {
 	struct usched_client_request *cur = NULL;
 	struct usched_entry *entry = NULL;
 	time_t time_ref = runc.t;
@@ -115,7 +115,7 @@ int logic_process_run(void) {
 	return 0;
 }
 
-int logic_process_stop(void) {
+int logic_client_process_stop(void) {
 	int errsv = 0;
 	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
 	struct usched_client_request *cur = NULL;
@@ -195,7 +195,7 @@ int logic_process_stop(void) {
 	return 0;
 }
 
-int logic_process_show(void) {
+int logic_client_process_show(void) {
 	int errsv = 0;
 	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
 	struct usched_client_request *cur = NULL;

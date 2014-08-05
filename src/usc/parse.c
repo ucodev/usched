@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 05-08-2014
+ * Date: 06-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -481,7 +481,7 @@ _op_error:
 	return NULL;
 }
 
-struct usched_client_request *parse_instruction_array(int argc, char **argv) {
+struct usched_client_request *parse_client_instruction_array(int argc, char **argv) {
 	int errsv = 0;
 	struct usched_client_request *req = NULL;
 
@@ -493,7 +493,7 @@ struct usched_client_request *parse_instruction_array(int argc, char **argv) {
 
 	if (!(req = mm_alloc(sizeof(struct usched_client_request)))) {
 		errsv = errno;
-		log_warn("parse_instruction_array(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("parse_client_instruction_array(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return NULL;
 	}
@@ -516,7 +516,7 @@ struct usched_client_request *parse_instruction_array(int argc, char **argv) {
 	return req;
 }
 
-struct usched_client_request *parse_instruction(const char *cmd) {
+struct usched_client_request *parse_client_instruction(const char *cmd) {
 	int counter = 0;
 	char *ptr = NULL, *saveptr = NULL, *qarg = NULL, *cmd_s = NULL;
 	char **args = NULL;
@@ -571,7 +571,7 @@ struct usched_client_request *parse_instruction(const char *cmd) {
 		}
 	}
 
-	req = parse_instruction_array(counter, args);
+	req = parse_client_instruction_array(counter, args);
 
 _finish:
 	if (cmd_s)

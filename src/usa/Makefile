@@ -4,12 +4,15 @@ CCFLAGS=-fPIC -DUSE_LIBFSMA -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRA
 LDFLAGS=-g -pthread -lpall -lfsma -lfsop -lpsec
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/config.o ../common/debug.o ../common/log.o ../common/mm.o ../common/runtime.o
-OBJS=admin.o config.o parse.o print.o process.o runtime.o usage.o
+OBJS=admin.o category.o config.o logic.o op.o parse.o print.o process.o runtime.o usage.o
 TARGET=usa
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c admin.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c category.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c config.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c logic.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c op.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c parse.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c print.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c process.c

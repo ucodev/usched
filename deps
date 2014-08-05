@@ -44,6 +44,7 @@ mkdir build/libfsop
 mkdir build/libpall
 mkdir build/libpanet
 mkdir build/libpsched
+mkdir build/libpsec
 mkdir build/librtsaio
 cd build
 
@@ -53,6 +54,7 @@ install_lib "libfsop"
 install_lib "libpall"
 install_lib "libpanet"
 install_lib "libpsched"
+install_lib "libpsec"
 install_lib "librtsaio"
 
 # Cleanup

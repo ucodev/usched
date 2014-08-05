@@ -59,6 +59,7 @@
 #define CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED	"sock.named"
 #define CONFIG_USCHED_DAEMON_PID_FILE		"/var/run/usched_usd.pid"
 #define CONFIG_USCHED_EXEC_PID_FILE		"/var/run/usched_use.pid"
+#define CONFIG_USCHED_ADMIN_PROC_NAME		"usa"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"
 #define CONFIG_USCHED_EXEC_PROC_NAME		"use"
@@ -133,6 +134,8 @@ void config_destroy_auth(struct usched_config_auth *auth);
 void config_destroy_core(struct usched_config_core *core);
 void config_destroy_network(struct usched_config_network *network);
 void config_destroy_users(struct usched_config_users *users);
+int config_admin_init(void);
+void config_admin_destroy(void);
 int config_client_init(void);
 void config_client_destroy(void);
 int config_daemon_init(void);

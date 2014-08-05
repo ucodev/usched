@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 28-07-2014
+ * Date: 03-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "config.h"
 #include "debug.h"
 #include "runtime.h"
 #include "log.h"
@@ -150,6 +151,7 @@ void runtime_exec_quiet_destroy(void) {
 	pmq_exec_destroy();
 	thread_exec_behaviour_destroy();
 	sig_exec_destroy();
+	config_exec_destroy();
 	log_destroy();
 }
 

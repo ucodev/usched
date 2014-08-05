@@ -28,6 +28,7 @@
 #include "runtime.h"
 
 /* Globals */
+struct usched_runtime_admin runa;
 struct usched_runtime_client runc;
 struct usched_runtime_daemon rund;
 struct usched_runtime_exec rune;

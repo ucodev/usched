@@ -1,7 +1,7 @@
 /**
- * @file client.c
+ * @file print.c
  * @brief uSched
- *        Client interface
+ *        Printing interface - Admin
  *
  * Date: 05-08-2014
  * 
@@ -24,49 +24,12 @@
  *
  */
 
-
 #include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
+#include <stdint.h>
 
-#include "debug.h"
-#include "usched.h"
-#include "usage.h"
-#include "runtime.h"
-#include "log.h"
-#include "conn.h"
 #include "print.h"
 
-
-static void _init(int argc, char **argv) {
-	if (runtime_client_init(argc, argv) < 0) {
-		log_crit("_init(): runtime_client_init(): %s\n", strerror(errno));
-		print_client_result_error();
-		exit(EXIT_FAILURE);
-	}
-}
-
-static void _do(void) {
-	/* Transmit entries */
-	if (conn_client_process() < 0) {
-		log_crit("_do: conn_client_process(): %s\n", strerror(errno));
-		print_client_result_error();
-		exit(EXIT_FAILURE);
-	}
-}
-
-static void _destroy(void) {
-	runtime_client_destroy();
-}
-
-int main(int argc, char *argv[]) {
-	_init(argc, argv);
-
-	_do();
-
-	_destroy();
-
-	return 0;
+void print_admin_error(void) {
+	printf("An error occured. Check your syslog entries for more details.\n");
 }
 

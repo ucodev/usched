@@ -1,9 +1,9 @@
 /**
- * @file client.c
+ * @file admin.c
  * @brief uSched
- *        Client interface
+ *        Administration interface
  *
- * Date: 05-08-2014
+ * Date: 03-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,34 +30,26 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include "debug.h"
-#include "usched.h"
-#include "usage.h"
 #include "runtime.h"
 #include "log.h"
-#include "conn.h"
 #include "print.h"
 
 
 static void _init(int argc, char **argv) {
-	if (runtime_client_init(argc, argv) < 0) {
-		log_crit("_init(): runtime_client_init(): %s\n", strerror(errno));
-		print_client_result_error();
+	if (runtime_admin_init(argc, argv) < 0) {
+		log_crit("_init(): runtime_admin_init(): %s\n", strerror(errno));
+		print_admin_error();
 		exit(EXIT_FAILURE);
 	}
 }
 
 static void _do(void) {
-	/* Transmit entries */
-	if (conn_client_process() < 0) {
-		log_crit("_do: conn_client_process(): %s\n", strerror(errno));
-		print_client_result_error();
-		exit(EXIT_FAILURE);
-	}
+	/* TODO: Process request */
+	return;
 }
 
 static void _destroy(void) {
-	runtime_client_destroy();
+	runtime_admin_destroy();
 }
 
 int main(int argc, char *argv[]) {

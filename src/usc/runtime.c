@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 01-08-2014
+ * Date: 03-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 
 #include <pall/cll.h>
 
+#include "config.h"
 #include "debug.h"
 #include "runtime.h"
 #include "mm.h"
@@ -135,6 +136,9 @@ void runtime_client_destroy(void) {
 	parse_req_destroy(runc.req);
 	runc.req = NULL;
 
+	/* Destroy configuration */
+	config_client_destroy();
+
 	/* Destroy usage interface */
 	if (runc.usage_err_offending) {
 		mm_free(runc.usage_err_offending);
@@ -154,6 +158,7 @@ void runtime_client_lib_destroy(void) {
 
 	/* Destroy requests */
 	parse_req_destroy(runc.req);
+	runc.req = NULL;
 
 	/* Destroy configuration */
 	config_client_destroy();

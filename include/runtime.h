@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 30-07-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,19 @@ typedef enum USCHED_RUNTIME_FLAGS {
 } usched_runtime_flag_t;
 
 /* Structures */
+struct usched_runtime_admin {
+	int argc;
+	char **argv;
+
+	usched_usage_admin_err_t usage_err;
+	char *usage_err_offending;
+
+	usched_runtime_flag_t flags;
+	struct sigaction sa_save;
+
+	struct usched_config config;
+};
+
 struct usched_runtime_client {
 	int argc;
 	char **argv;
@@ -105,18 +118,22 @@ struct usched_runtime_exec {
 };
 
 /* External */
+extern struct usched_runtime_admin runa;
 extern struct usched_runtime_client runc;
 extern struct usched_runtime_daemon rund;
 extern struct usched_runtime_exec rune;
 
 /* Prototypes */
+int runtime_admin_init(int argc, char **argv);
 int runtime_client_init(int argc, char **argv);
 int runtime_client_lib_init(void);
 int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
+int runtime_admin_interrupted(void);
 int runtime_client_interrupted(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
+void runtime_admin_destroy(void);
 void runtime_client_destroy(void);
 void runtime_client_lib_destroy(void);
 void runtime_daemon_destroy(void);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logging interface
  *
- * Date: 24-06-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,12 @@
 #include "debug.h"
 #include "log.h"
 
+int log_admin_init(void) {
+	openlog(CONFIG_USCHED_ADMIN_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
+
+	return 0;
+}
+	
 int log_client_init(void) {
 	openlog(CONFIG_USCHED_CLIENT_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
 

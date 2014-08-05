@@ -1,9 +1,9 @@
 /**
- * @file print.h
+ * @file process.c
  * @brief uSched
- *        Printing interface header
+ *        Data Processing interface - Admin
  *
- * Date: 30-07-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,20 +24,11 @@
  *
  */
 
-#ifndef USCHED_PRINT_H
-#define USCHED_PRINT_H
+#include <errno.h>
 
-#include <stdint.h>
-
-#include "entry.h"
-
-/* Prototypes */
-void print_admin_error(void);
-void print_client_result_error(void);
-void print_client_result_empty(void);
-void print_client_result_run(uint64_t entry_id);
-void print_client_result_del(uint64_t *entry_list, size_t count);
-void print_client_result_show(struct usched_entry *entry_list, size_t count);
-
-#endif
+int process_admin_operation(void) {
+	/* TODO */
+	errno = ENOSYS;
+	return -1;
+}
 

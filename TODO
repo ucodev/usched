@@ -3,6 +3,7 @@ v0.1:
  - Cleanup code
 
 v0.2:
+ - uSched Administration Tools (usa)
  - Java bindings for Client Library
  - PHP bindings for Client Library
  - Command Line Options

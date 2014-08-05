@@ -1,9 +1,9 @@
 /**
  * @file usage.c
  * @brief uSched
- *        Usage handlers interface
+ *        Usage handlers interface - Client
  *
- * Date: 24-06-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 
 #include "mm.h"
 #include "runtime.h"
+#include "usage.h"
 
 /* usc run 'script' on day 30
  * 0      1   2        3  4   5

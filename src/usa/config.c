@@ -1,7 +1,7 @@
 /**
- * @file client.c
+ * @file config.c
  * @brief uSched
- *        Client interface
+ *        Configuration interface - Admin
  *
  * Date: 05-08-2014
  * 
@@ -24,49 +24,33 @@
  *
  */
 
-
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <stdlib.h>
 
-#include "debug.h"
-#include "usched.h"
-#include "usage.h"
+#include "config.h"
 #include "runtime.h"
 #include "log.h"
-#include "conn.h"
-#include "print.h"
 
+int config_admin_init(void) {
+	int errsv = 0;
+	struct usched_config *config = &runa.config;
 
-static void _init(int argc, char **argv) {
-	if (runtime_client_init(argc, argv) < 0) {
-		log_crit("_init(): runtime_client_init(): %s\n", strerror(errno));
-		print_client_result_error();
-		exit(EXIT_FAILURE);
+	memset(config, 0, sizeof(struct usched_config));
+
+	if (config_init_users(&config->users) < 0) {
+		errsv = errno;
+		log_warn("config_admin_init(): config_init_users(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
 	}
-}
-
-static void _do(void) {
-	/* Transmit entries */
-	if (conn_client_process() < 0) {
-		log_crit("_do: conn_client_process(): %s\n", strerror(errno));
-		print_client_result_error();
-		exit(EXIT_FAILURE);
-	}
-}
-
-static void _destroy(void) {
-	runtime_client_destroy();
-}
-
-int main(int argc, char *argv[]) {
-	_init(argc, argv);
-
-	_do();
-
-	_destroy();
 
 	return 0;
 }
 
+void config_admin_destroy(void) {
+	struct usched_config *config = &runa.config;
+
+	config_destroy_users(&config->users);
+
+	memset(config, 0, sizeof(struct usched_config));
+}

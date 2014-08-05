@@ -1,9 +1,9 @@
 /**
  * @file print.c
  * @brief uSched
- *        Printing interface
+ *        Printing interface - Client
  *
- * Date: 01-08-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,26 +29,26 @@
 
 #include "entry.h"
 
-void print_result_error(void) {
+void print_client_result_error(void) {
 	printf("An error ocurred. Check your syslog entries for more details.\n");
 }
 
-void print_result_empty(void) {
+void print_client_result_empty(void) {
 	printf("No results.\n");
 }
 
-void print_result_run(uint64_t entry_id) {
+void print_client_result_run(uint64_t entry_id) {
 	printf("Installed Entry ID: 0x%016llX\n", (unsigned long long) entry_id);
 }
 
-void print_result_del(uint64_t *entry_list, size_t count) {
+void print_client_result_del(uint64_t *entry_list, size_t count) {
 	int i = 0;
 
 	for (i = 0; i < count; i ++)
 		printf("Deleted Entry ID: 0x%016llX\n", (unsigned long long) entry_list[i]);
 }
 
-void print_result_show(struct usched_entry *entry_list, size_t count) {
+void print_client_result_show(struct usched_entry *entry_list, size_t count) {
 	int i = 0;
 
 	printf("                 id | username |   uid |   gid |     trigger |   step |      expire | cmd\n");

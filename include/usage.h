@@ -3,7 +3,7 @@
  * @brief uSched
  *        Usage handlers interface header
  *
- * Date: 24-06-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,6 +29,12 @@
 #define USCHED_USAGE_H
 
 /* Usage error type strings */
+#define USCHED_USAGE_ADMIN_ERR_INVALID_OP_STR			"Invalid operation"
+#define USCHED_USAGE_ADMIN_ERR_INVALID_CATEGORY_STR		"Invalid category"
+#define USCHED_USAGE_ADMIN_ERR_INVALID_ARG_STR			"Invalid argument"
+#define USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS_STR			"Insufficient arguments"
+#define USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS_STR			"Too many arguments"
+
 #define USCHED_USAGE_CLIENT_ERR_INVALID_OP_STR			"Invalid operation"
 #define USCHED_USAGE_CLIENT_ERR_INVALID_PREP_STR		"Invalid preposition"
 #define USCHED_USAGE_CLIENT_ERR_INVALID_ADVERB_STR		"Invalid adverbial of time"
@@ -40,6 +46,15 @@
 #define USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS_STR		"Too many arguments"
 
 /* Usage error type values */
+typedef enum USAGE_ADMIN_ERROR {
+	USCHED_USAGE_ADMIN_ERR_INVALID_OP = 1,
+	USCHED_USAGE_ADMIN_ERR_INVALID_CATEGORY,
+	USCHED_USAGE_ADMIN_ERR_INVALID_ARG,
+	USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS,
+	USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS
+} usched_usage_admin_err_t;
+
+
 typedef enum USAGE_CLIENT_ERROR {
 	USCHED_USAGE_CLIENT_ERR_INVALID_OP = 1,
 	USCHED_USAGE_CLIENT_ERR_INVALID_PREP,
@@ -54,6 +69,8 @@ typedef enum USAGE_CLIENT_ERROR {
 
 
 /* Prototypes */
+void usage_admin_show(void);
+void usage_admin_error_set(usched_usage_admin_err_t err, char *offending);
 void usage_client_show(void);
 void usage_client_error_set(usched_usage_client_err_t err, char *offending);
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 30-07-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -91,7 +91,7 @@ int process_client_recv_run(void) {
 		return _process_lib_result_add_run(entry_id);
 	} else {
 		/* Otherwise print the installed entry */
-		print_result_run(entry_id);
+		print_client_result_run(entry_id);
 	}
 
 	return 0;
@@ -115,7 +115,7 @@ int process_client_recv_stop(void) {
 
 	if (!entry_list_nmemb) {
 		log_info("process_client_recv_stop(): No entries were deleted.\n");
-		print_result_empty();
+		print_client_result_empty();
 		return 0;
 	}
 
@@ -148,7 +148,7 @@ int process_client_recv_stop(void) {
 		return _process_lib_result_set_stop(entry_list, entry_list_nmemb);
 	} else {
 		/* Otherwise print the deleted entries */
-		print_result_del(entry_list, entry_list_nmemb);
+		print_client_result_del(entry_list, entry_list_nmemb);
 	}
 
 	/* Free entry_list memory */
@@ -175,7 +175,7 @@ int process_client_recv_show(void) {
 
 	if (!entry_list_nmemb) {
 		log_info("process_client_recv_show(): No entries were found.\n");
-		print_result_empty();
+		print_client_result_empty();
 		return 0;
 	}
 
@@ -249,7 +249,7 @@ int process_client_recv_show(void) {
 		return _process_lib_result_set_show(entry_list, entry_list_nmemb);
 	} else {
 		/* Otherwise print the received entries */
-		print_result_show(entry_list, entry_list_nmemb);
+		print_client_result_show(entry_list, entry_list_nmemb);
 	}
 
 	ret = 0;

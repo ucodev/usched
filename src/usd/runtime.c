@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 28-07-2014
+ * Date: 03-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 
 #include <pall/cll.h>
 
+#include "config.h"
 #include "debug.h"
 #include "runtime.h"
 #include "mm.h"

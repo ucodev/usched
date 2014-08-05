@@ -53,8 +53,10 @@ struct usched_runtime_admin {
 	int argc;
 	char **argv;
 
+	usched_op_t op;
 	usched_usage_admin_err_t usage_err;
 	char *usage_err_offending;
+	struct usched_admin_request *req;
 
 	usched_runtime_flag_t flags;
 	struct sigaction sa_save;

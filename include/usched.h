@@ -151,6 +151,7 @@ typedef enum WEEKDAY {
 /* uSched Admin Request Structure */
 struct usched_admin_request {
 	usched_op_t op;
+	usched_category_t category;
 	char **args;
 };
 

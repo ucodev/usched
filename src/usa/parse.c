@@ -26,14 +26,90 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <errno.h>
 
+#include "debug.h"
 #include "runtime.h"
 #include "mm.h"
 #include "log.h"
+#include "parse.h"
 #include "usched.h"
 
+static usched_op_t _parse_get_op(const char *op) {
+	if (!strcasecmp(op, USCHED_OP_ADD_STR))
+		return USCHED_OP_ADD;
+
+	if (!strcasecmp(op, USCHED_OP_DELETE_STR))
+		return USCHED_OP_DELETE;
+
+	if (!strcasecmp(op, USCHED_OP_CHANGE_STR))
+		return USCHED_OP_CHANGE;
+
+	if (!strcasecmp(op, USCHED_OP_SHOW_STR))
+		return USCHED_OP_SHOW;
+
+	return -1;
+}
+
+static usched_category_t _parse_get_category(const char *category) {
+	if (!strcasecmp(category, USCHED_CATEGORY_USERS_STR))
+		return USCHED_CATEGORY_USERS;
+
+	return -1;
+}
+
+static struct usched_admin_request *_parse_category_compound(struct usched_admin_request *req, int argc, char **argv) {
+	int ret = 0;
+
+	if ((ret = _parse_get_category(argv[0])) < 0) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_CATEGORY, argv[0]);
+		goto _category_error;
+	} else {
+		req->category = ret;
+	}
+
+	debug_printf(DEBUG_INFO, "CATEGORY: %d\n", req->category);
+
+	/* TODO */
+
+	return NULL;
+
+_category_error:
+	parse_admin_req_destroy(req);
+
+	return NULL;
+}
+
+static struct usched_admin_request *_parse_op_compound(struct usched_admin_request *req, int argc, char **argv) {
+	int ret = 0;
+
+	if ((ret = _parse_get_op(argv[0])) < 0) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_OP, argv[0]);
+		goto _op_error;
+	} else {
+		req->op = ret;
+	}
+
+	debug_printf(DEBUG_INFO, "OP: %d\n", req->op);
+
+	/* Evaluate argument counter validity for each operation */
+	switch (req->op) {
+		case USCHED_OP_DELETE:
+		case USCHED_OP_ADD: if (argc < 4) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
+		case USCHED_OP_CHANGE: if (argc < 5) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
+		case USCHED_OP_SHOW: if (argc != 2) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
+		default: usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_OP, argv[0]); goto _op_error;
+	}
+
+	return _parse_category_compound(req, argc - 1, &argv[1]);
+
+_op_error:
+	parse_admin_req_destroy(req);
+
+	return NULL;
+}
 
 struct usched_admin_request *parse_admin_request_array(int argc, char **argv) {
 	int errsv = 0;
@@ -53,7 +129,15 @@ struct usched_admin_request *parse_admin_request_array(int argc, char **argv) {
 
 	memset(req, 0, sizeof(struct usched_admin_request));
 
-	/* TODO */
+	if (!_parse_op_compound(req, argc, argv))
+		return NULL;
+
+	/* All good */
 	return req;
+}
+
+void parse_admin_req_destroy(struct usched_admin_request *req) {
+	if (req)
+		mm_free(req);
 }
 

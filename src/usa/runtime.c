@@ -35,11 +35,19 @@
 #include "debug.h"
 #include "runtime.h"
 #include "usage.h"
+#include "parse.h"
+#include "print.h"
 #include "log.h"
 
 
 int runtime_admin_init(int argc, char **argv) {
 	int errsv = 0;
+
+	/* Pre-check */
+	if (getuid()) {
+		print_admin_no_priv();
+		return -1;
+	}
 
 	memset(&runa, 0, sizeof(struct usched_runtime_client));
 
@@ -58,6 +66,14 @@ int runtime_admin_init(int argc, char **argv) {
 	if (config_admin_init() < 0) {
 		errsv = errno;
 		log_crit("runtime_admin_init(): config_admin_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Parse requested command line operation */
+	if (!(runa.req = parse_admin_request_array(argc - 1, &argv[1]))) {
+		errsv = errno;
+		usage_admin_show();
 		errno = errsv;
 		return -1;
 	}

@@ -64,10 +64,10 @@ static void _usage_admin_error_print(void) {
 void usage_admin_show(void) {
 	_usage_admin_error_print();
 
-	fprintf(stderr, "Usage: %s CATEGORY OP [ ARG1 ARG2 ... ]\n", runa.argv[0]);
+	fprintf(stderr, "Usage: %s OP CATEGORY [ ARG1 ARG2 ... ]\n", runa.argv[0]);
 	fprintf(stderr, "\n");
-	fprintf(stderr, "\tCATEGORY\t\tuser\n");
 	fprintf(stderr, "\tOP\t\tadd | delete | change | show\n");
+	fprintf(stderr, "\tCATEGORY\tuser\n");
 	fprintf(stderr, "\n");
 }
 

@@ -30,6 +30,10 @@
 #include "print.h"
 
 void print_admin_error(void) {
-	printf("An error occured. Check your syslog entries for more details.\n");
+	fprintf(stderr, "An error occured. Check your syslog entries for more details.\n");
+}
+
+void print_admin_no_priv(void) {
+	fprintf(stderr, "Insufficient privileges. Make sure you're running this tool as root.\n");
 }
 

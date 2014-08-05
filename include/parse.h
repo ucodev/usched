@@ -32,6 +32,7 @@
 
 /* Prototypes */
 struct usched_admin_request *parse_admin_request_array(int argc, char **argv);
+void parse_admin_req_destroy(struct usched_admin_request *req);
 struct usched_client_request *parse_instruction_array(int argc, char **argv);
 struct usched_client_request *parse_instruction(const char *cmd);
 void parse_client_req_destroy(struct usched_client_request *req);

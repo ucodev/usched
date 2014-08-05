@@ -33,6 +33,7 @@
 
 /* Prototypes */
 void print_admin_error(void);
+void print_admin_no_priv(void);
 void print_client_result_error(void);
 void print_client_result_empty(void);
 void print_client_result_run(uint64_t entry_id);

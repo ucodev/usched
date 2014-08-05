@@ -1,9 +1,9 @@
 /**
  * @file parse.c
  * @brief uSched
- *        Parser interface
+ *        Parser interface - Client
  *
- * Date: 29-07-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,10 +41,11 @@
 #include "usched.h"
 #include "usage.h"
 #include "parse.h"
+#include "log.h"
 
-static struct usched_request *_parse_prep_compound(struct usched_request *req, int argc, char **argv);
+static struct usched_client_request *_parse_prep_compound(struct usched_client_request *req, int argc, char **argv);
 
-static long _parse_req_arg(const struct usched_request *req, const char *arg) {
+static long _parse_req_arg(const struct usched_client_request *req, const char *arg) {
 	char *ctf_str = NULL, *endptr = NULL;
 	size_t len = 0;
 	struct tm tm;
@@ -268,7 +269,7 @@ static usched_conj_t _parse_get_conj(const char *conj) {
 	return -1;
 }
 
-static struct usched_request *_parse_conj_compound(struct usched_request *req, int argc, char **argv) {
+static struct usched_client_request *_parse_conj_compound(struct usched_client_request *req, int argc, char **argv) {
 	int ret = 0;
 
 	/* Process conjuction */
@@ -301,10 +302,10 @@ static struct usched_request *_parse_conj_compound(struct usched_request *req, i
 	}
 
 	/* Allocate the next entry */
-	if (!(req->next = mm_alloc(sizeof(struct usched_request))))
+	if (!(req->next = mm_alloc(sizeof(struct usched_client_request))))
 		goto _conj_error;
 
-	memset(req->next, 0, sizeof(struct usched_request));
+	memset(req->next, 0, sizeof(struct usched_client_request));
 
 	/* Duplicate SUBJECT to the next entry. strdup() shall not be used to take advantage of libfsma */
 	if (!(req->next->subj = mm_alloc(strlen(req->subj) + 1)))
@@ -320,12 +321,12 @@ static struct usched_request *_parse_conj_compound(struct usched_request *req, i
 	return _parse_prep_compound(req->next, argc - 1, &argv[1]);
 
 _conj_error:
-	parse_req_destroy(req);
+	parse_client_req_destroy(req);
 
 	return NULL;
 }
 
-static struct usched_request *_parse_prep_compound(struct usched_request *req, int argc, char **argv) {
+static struct usched_client_request *_parse_prep_compound(struct usched_client_request *req, int argc, char **argv) {
 	int ret = 0;
 	int argc_delta = 1;
 
@@ -418,12 +419,12 @@ static struct usched_request *_parse_prep_compound(struct usched_request *req, i
 	return (argc - argc_delta) ? _parse_conj_compound(req, argc - argc_delta, &argv[argc_delta]) : req;
 
 _prep_error:
-	parse_req_destroy(req);
+	parse_client_req_destroy(req);
 
 	return NULL;
 }
 
-static struct usched_request *_parse_subj_compound(struct usched_request *req, int argc, char **argv) {
+static struct usched_client_request *_parse_subj_compound(struct usched_client_request *req, int argc, char **argv) {
 	int errsv = errno;
 
 	/* Process command */
@@ -440,17 +441,18 @@ static struct usched_request *_parse_subj_compound(struct usched_request *req, i
 		case USCHED_OP_RUN:  return (argc - 1) ? _parse_prep_compound(req, argc - 1, &argv[1]) : req;
 		case USCHED_OP_STOP: if (!(argc - 1)) { return req; } else break;
 		case USCHED_OP_SHOW: if (!(argc - 1)) { return req; } else break;
+		default: break; /* Invalid operation */
 	}
 
 _cmd_error:
-	parse_req_destroy(req);
+	parse_client_req_destroy(req);
 
 	errno = errsv;
 
 	return NULL;
 }
 
-static struct usched_request *_parse_op_compound(struct usched_request *req, int argc, char **argv) {
+static struct usched_client_request *_parse_op_compound(struct usched_client_request *req, int argc, char **argv) {
 	int ret = 0;
 
 	/* Process operation */
@@ -468,18 +470,20 @@ static struct usched_request *_parse_op_compound(struct usched_request *req, int
 		case USCHED_OP_RUN:  if (argc < 3)  { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
 		case USCHED_OP_STOP: if (argc != 2) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
 		case USCHED_OP_SHOW: if (argc != 2) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
+		default: usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INVALID_OP, argv[0]); goto _op_error;
 	}
 
 	return _parse_subj_compound(req, argc - 1, &argv[1]);
 
 _op_error:
-	parse_req_destroy(req);
+	parse_client_req_destroy(req);
 
 	return NULL;
 }
 
-struct usched_request *parse_instruction_array(int argc, char **argv) {
-	struct usched_request *req = NULL;
+struct usched_client_request *parse_instruction_array(int argc, char **argv) {
+	int errsv = 0;
+	struct usched_client_request *req = NULL;
 
 	/* We need at least 1 arg to consider the request */
 	if (argc < 1) {
@@ -487,10 +491,14 @@ struct usched_request *parse_instruction_array(int argc, char **argv) {
 		return NULL;
 	}
 
-	if (!(req = mm_alloc(sizeof(struct usched_request))))
+	if (!(req = mm_alloc(sizeof(struct usched_client_request)))) {
+		errsv = errno;
+		log_warn("parse_instruction_array(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
 		return NULL;
+	}
 
-	memset(req, 0, sizeof(struct usched_request));
+	memset(req, 0, sizeof(struct usched_client_request));
 
 	/* Get UID */
 	req->uid = getuid();
@@ -508,11 +516,11 @@ struct usched_request *parse_instruction_array(int argc, char **argv) {
 	return req;
 }
 
-struct usched_request *parse_instruction(const char *cmd) {
+struct usched_client_request *parse_instruction(const char *cmd) {
 	int counter = 0;
 	char *ptr = NULL, *saveptr = NULL, *qarg = NULL, *cmd_s = NULL;
 	char **args = NULL;
-	struct usched_request *req = NULL;
+	struct usched_client_request *req = NULL;
 
 	/* Duplicate the cmd string to allow safe const and take advantage of libfsma by avoiding strdup() */
 	if (!(cmd_s = mm_alloc(strlen(cmd) + 1)))
@@ -582,13 +590,13 @@ _finish:
 	return req;
 }
 
-void parse_req_destroy(struct usched_request *req) {
+void parse_client_req_destroy(struct usched_client_request *req) {
 	if (req) {
 		if (req->subj)
 			mm_free(req->subj);
 
 		if (req->next)
-			parse_req_destroy(req->next);
+			parse_client_req_destroy(req->next);
 
 		mm_free(req);
 	}

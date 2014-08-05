@@ -1,7 +1,7 @@
 /**
- * @file parse.h
+ * @file parse.c
  * @brief uSched
- *        Parser interface header
+ *        Parser interface - Admin
  *
  * Date: 05-08-2014
  * 
@@ -24,16 +24,36 @@
  *
  */
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
-#ifndef USCHED_PARSE_H
-#define USCHED_PARSE_H
-
+#include "runtime.h"
+#include "mm.h"
+#include "log.h"
 #include "usched.h"
 
-/* Prototypes */
-struct usched_admin_request *parse_admin_request_array(int argc, char **argv);
-struct usched_client_request *parse_instruction_array(int argc, char **argv);
-struct usched_client_request *parse_instruction(const char *cmd);
-void parse_client_req_destroy(struct usched_client_request *req);
 
-#endif
+struct usched_admin_request *parse_admin_request_array(int argc, char **argv) {
+	int errsv = 0;
+	struct usched_admin_request *req = NULL;
+
+	if (argc < 1) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (!(req = mm_alloc(sizeof(struct usched_admin_request)))) {
+		errsv = errno;
+		log_warn("parse_admin_request_array(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return NULL;
+	}
+
+	memset(req, 0, sizeof(struct usched_admin_request));
+
+	/* TODO */
+	return req;
+}
+

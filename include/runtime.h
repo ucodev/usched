@@ -70,7 +70,7 @@ struct usched_runtime_client {
 	usched_op_t op;
 	usched_usage_client_err_t usage_err;
 	char *usage_err_offending;
-	struct usched_request *req;
+	struct usched_client_request *req;
 	struct fifo_handler *epool;	/* Entries pool */
 	void *result;
 	size_t result_nmemb;

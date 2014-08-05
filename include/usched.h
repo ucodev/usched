@@ -1,3 +1,30 @@
+/**
+ * @file usched.h
+ * @brief uSched
+ *        uSched Common interface header
+ *
+ * Date: 05-08-2014
+ * 
+ * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ *
+ * This file is part of usched.
+ *
+ * usched is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * usched is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with usched.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+
 #ifndef USCHED_H
 #define USCHED_H
 
@@ -7,10 +34,16 @@
 
 #include "entry.h"
 
+/* Categorty - Human */
+#define USCHED_CATEGORY_USERS_STR	"users"
+
 /* Operations - Human */
 #define USCHED_OP_RUN_STR		"run"
 #define USCHED_OP_STOP_STR		"stop"
 #define USCHED_OP_SHOW_STR		"show"
+#define USCHED_OP_ADD_STR		"add"
+#define USCHED_OP_DELETE_STR		"delete"
+#define USCHED_OP_CHANGE_STR		"change"
 
 /* Prepositions - Human */
 #define USCHED_PREP_IN_STR		"in"
@@ -56,11 +89,19 @@
 #define USCHED_WEEKDAY_SATURDAY_STR	"saturday"
 #define USCHED_WEEKDAY_SUNDAY_STR	"sunday"
 
+/* Categories - Machine */
+typedef enum CATEGORY {
+	USCHED_CATEGORY_USERS = 1
+} usched_category_t;
+
 /* Operations - Machine */
 typedef enum OP {
 	USCHED_OP_RUN = 1,
 	USCHED_OP_STOP,
-	USCHED_OP_SHOW
+	USCHED_OP_SHOW,
+	USCHED_OP_ADD,		/* Used by administration tools only */
+	USCHED_OP_DELETE,	/* Used by administration tools only */
+	USCHED_OP_CHANGE	/* Used by administration tools only */
 } usched_op_t;
 
 /* Prepositions - Machine */
@@ -107,8 +148,14 @@ typedef enum WEEKDAY {
 	USCHED_WEEKDAY_SATURDAY
 } usched_weekday_t;
 
-/* uSched Request Structure */
-struct usched_request {
+/* uSched Admin Request Structure */
+struct usched_admin_request {
+	usched_op_t op;
+	char **args;
+};
+
+/* uSched Client Request Structure */
+struct usched_client_request {
 	usched_op_t op;
 	char *subj;
 	usched_prep_t prep;
@@ -117,8 +164,8 @@ struct usched_request {
 	long arg;
 	uid_t uid;
 	gid_t gid;
-	struct usched_request *next;
-	struct usched_request *prev;
+	struct usched_client_request *next;
+	struct usched_client_request *prev;
 };
 
 #endif

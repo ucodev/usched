@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface
  *
- * Date: 27-07-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,7 +40,7 @@
 
 
 int logic_process_run(void) {
-	struct usched_request *cur = NULL;
+	struct usched_client_request *cur = NULL;
 	struct usched_entry *entry = NULL;
 	time_t time_ref = runc.t;
 
@@ -118,7 +118,7 @@ int logic_process_run(void) {
 int logic_process_stop(void) {
 	int errsv = 0;
 	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
-	struct usched_request *cur = NULL;
+	struct usched_client_request *cur = NULL;
 	struct usched_entry *entry = NULL;
 	uint64_t *entry_list = NULL;
 	uint64_t entry_id = 0;
@@ -198,7 +198,7 @@ int logic_process_stop(void) {
 int logic_process_show(void) {
 	int errsv = 0;
 	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
-	struct usched_request *cur = NULL;
+	struct usched_client_request *cur = NULL;
 	struct usched_entry *entry = NULL;
 	uint64_t *entry_list = NULL;
 	uint64_t entry_id = 0;

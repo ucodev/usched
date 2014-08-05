@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 30-07-2014
+ * Date: 05-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,7 +45,7 @@ static int _do(char *req) {
 	pool_client_destroy();
 
 	if (runc.req)
-		parse_req_destroy(runc.req);
+		parse_client_req_destroy(runc.req);
 
 	if (runc.usage_err_offending) {
 		mm_free(runc.usage_err_offending);

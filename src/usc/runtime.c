@@ -133,7 +133,7 @@ void runtime_client_destroy(void) {
 	pool_client_destroy();
 
 	/* Destroy requests */
-	parse_req_destroy(runc.req);
+	parse_client_req_destroy(runc.req);
 	runc.req = NULL;
 
 	/* Destroy configuration */
@@ -157,7 +157,7 @@ void runtime_client_lib_destroy(void) {
 	pool_client_destroy();
 
 	/* Destroy requests */
-	parse_req_destroy(runc.req);
+	parse_client_req_destroy(runc.req);
 	runc.req = NULL;
 
 	/* Destroy configuration */

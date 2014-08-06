@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <fsop/path.h>
+
 #include <psec/encode.h>
 #include <psec/hash.h>
 #include <psec/kdf.h>
@@ -71,7 +73,6 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Get some (weak) random value, different than 0 */
 	while (!salt)
 		salt = (random() + 3) * (random() + 5) * (random() + 7) * (random() + 11);
-
 
 	/* Generate the password digest */
 	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, password, strlen(password), (const char *) &salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
@@ -146,6 +147,15 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Craft the filename path */
 	snprintf(path, len - 1, "%s/%s/%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
 
+	/* Check if file exists */
+	if (fsop_path_exists(path)) {
+		log_warn("users_admin_config_add(): User \'%s\' already exists.\n", username);
+		mm_free(result);
+		mm_free(path);
+		errno = EEXIST;
+		return -1;
+	}
+
 	/* Open the file for writting */
 	if (!(fp = fopen(path, "w"))) {
 		errsv = errno;
@@ -170,8 +180,8 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	debug_printf(DEBUG_INFO, "%s\n", result);
 
 	/* Free unused memory */
-	mm_free(path);
 	mm_free(result);
+	mm_free(path);
 
 	/* All good */
 	return 0;

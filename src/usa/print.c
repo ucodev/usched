@@ -38,7 +38,19 @@ void print_admin_no_priv(void) {
 	fprintf(stderr, "Insufficient privileges. Make sure you're running this tool as root.\n");
 }
 
-void print_admin_config_users(struct usched_config_users *users) {
+void print_admin_config_user_added(const char *username) {
+	printf("User \'%s\' successfuly added.\n", username);
+}
+
+void print_admin_config_user_deleted(const char *username) {
+	printf("User \'%s\' successfuly deleted.\n", username);
+}
+
+void print_admin_config_user_changed(const char *username) {
+	printf("User \'%s\' successfuly changed.\n", username);
+}
+
+void print_admin_config_users(const struct usched_config_users *users) {
 	struct usched_config_userinfo *user = NULL;
 
 	printf("         username |    uid |    gid\n");

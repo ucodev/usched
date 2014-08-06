@@ -35,12 +35,15 @@
 /* Prototypes */
 void print_admin_error(void);
 void print_admin_no_priv(void);
-void print_admin_config_users(struct usched_config_users *users);
+void print_admin_config_user_added(const char *username);
+void print_admin_config_user_deleted(const char *username);
+void print_admin_config_user_changed(const char *username);
+void print_admin_config_users(const struct usched_config_users *users);
 void print_client_result_error(void);
 void print_client_result_empty(void);
 void print_client_result_run(uint64_t entry_id);
-void print_client_result_del(uint64_t *entry_list, size_t count);
-void print_client_result_show(struct usched_entry *entry_list, size_t count);
+void print_client_result_del(const uint64_t *entry_list, size_t count);
+void print_client_result_show(const struct usched_entry *entry_list, size_t count);
 
 #endif
 

@@ -78,8 +78,6 @@ int runtime_admin_init(int argc, char **argv) {
 		return -1;
 	}
 
-	/* TODO */
-
 	/* All good */
 	return 0;
 }
@@ -89,15 +87,15 @@ int runtime_admin_interrupted(void) {
 }
 
 void runtime_admin_destroy(void) {
-	/* TODO */
+	/* Destroy request */
+	parse_admin_req_destroy(runa.req);
+
+	/* Destroy configuration interface */
+	config_admin_destroy();
 
 	/* Destroy usage interface */
 	if (runa.usage_err_offending)
 		mm_free(runa.usage_err_offending);
-
-
-	/* Destroy configuration interface */
-	config_admin_destroy();
 
 	/* Destroy logging interface */
 	log_destroy();

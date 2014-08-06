@@ -34,6 +34,7 @@
 #include "log.h"
 #include "users.h"
 #include "usage.h"
+#include "print.h"
 
 int category_users_add(size_t argc, char **args) {
 	int errsv = 0;
@@ -78,6 +79,9 @@ int category_users_add(size_t argc, char **args) {
 		return -1;
 	}
 
+	/* Print the result */
+	print_admin_config_user_added(username);
+
 	return 0;
 }
 
@@ -102,6 +106,9 @@ int category_users_delete(size_t argc, char **args) {
 		errno = errsv;
 		return -1;
 	}
+
+	/* Print the result */
+	print_admin_config_user_deleted(username);
 
 	return 0;
 }
@@ -148,6 +155,9 @@ int category_users_change(size_t argc, char **args) {
 		errno = errsv;
 		return -1;
 	}
+
+	/* Print the result */
+	print_admin_config_user_changed(username);
 
 	return 0;
 }

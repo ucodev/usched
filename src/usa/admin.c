@@ -45,9 +45,8 @@ static void _init(int argc, char **argv) {
 }
 
 static void _do(void) {
-	op_admin_process();
-	/* TODO: Process request */
-	return;
+	if (op_admin_process() < 0)
+		print_admin_error();
 }
 
 static void _destroy(void) {

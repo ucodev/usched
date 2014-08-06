@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "config.h"
 #include "print.h"
 
 void print_admin_error(void) {
@@ -35,5 +36,20 @@ void print_admin_error(void) {
 
 void print_admin_no_priv(void) {
 	fprintf(stderr, "Insufficient privileges. Make sure you're running this tool as root.\n");
+}
+
+void print_admin_config_users(struct usched_config_users *users) {
+	struct usched_config_userinfo *user = NULL;
+
+	printf("         username |    uid |    gid\n");
+
+	for (users->list->rewind(users->list, 0); (user = users->list->iterate(users->list)); ) {
+		printf(	" %16s | " \
+			"%6u | " \
+			"%6u\n",
+			user->username,
+			user->uid,
+			user->gid);
+	}
 }
 

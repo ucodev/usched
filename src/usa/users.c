@@ -41,6 +41,7 @@
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
+#include "print.h"
 
 int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const char *password) {
 	int errsv = 0, len = 0, rounds = 5000;
@@ -240,7 +241,8 @@ int users_admin_config_change(const char *username, uid_t uid, gid_t gid, const 
 }
 
 int users_admin_config_show(void) {
-	errno = ENOSYS;
-	return -1;
+	print_admin_config_users(&runa.config.users);
+
+	return 0;
 }
 

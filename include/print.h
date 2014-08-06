@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface header
  *
- * Date: 30-07-2014
+ * Date: 06-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,11 +29,13 @@
 
 #include <stdint.h>
 
+#include "config.h"
 #include "entry.h"
 
 /* Prototypes */
 void print_admin_error(void);
 void print_admin_no_priv(void);
+void print_admin_config_users(struct usched_config_users *users);
 void print_client_result_error(void);
 void print_client_result_empty(void);
 void print_client_result_run(uint64_t entry_id);

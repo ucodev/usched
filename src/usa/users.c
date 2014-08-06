@@ -168,20 +168,75 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	debug_printf(DEBUG_INFO, "%s\n", path);
 	debug_printf(DEBUG_INFO, "%s\n", result);
 
+	/* Free unused memory */
 	mm_free(path);
 	mm_free(result);
 
+	/* All good */
 	return 0;
 }
 
 int users_admin_config_delete(const char *username) {
-	errno = ENOSYS;
-	return -1;
+	int errsv = 0, len = 0;
+	char *path = NULL;
+
+	/* Allocate filename path memory */
+	len = sizeof(CONFIG_USCHED_DIR_BASE) + sizeof(CONFIG_USCHED_DIR_USERS) + strlen(username) + 1 + 1;
+	/*    CONFIG_USCHED_DIR_BASE         / CONFIG_USCHED_DIRS_USERS        / username           \0  \0 */
+
+	if (!(path = mm_alloc(len))) {
+		errsv = errno;
+		log_warn("users_admin_config_delete(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset path memory */
+	memset(path, 0, len);
+
+	/* Craft the filename path */
+	snprintf(path, len - 1, "%s/%s/%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
+
+	/* Delete the file */
+	if (unlink(path) < 0) {
+		errsv = errno;
+		log_warn("users_admin_config_delete(): mm_alloc(): %s\n", strerror(errno));
+		mm_free(path);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Debug info */
+	debug_printf(DEBUG_INFO, "%s\n", path);
+
+	/* Free unused memory */
+	mm_free(path);
+
+	/* All good */
+	return 0;
 }
 
 int users_admin_config_change(const char *username, uid_t uid, gid_t gid, const char *password) {
-	errno = ENOSYS;
-	return -1;
+	int errsv = 0;
+
+	/* Delete the user */
+	if (users_admin_config_delete(username) < 0) {
+		errsv = errno;
+		log_warn("users_admin_config_change(): users_admin_config_delete(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Add the user */
+	if (users_admin_config_add(username, uid, gid, password) < 0) {
+		errsv = errno;
+		log_warn("users_admin_config_change(): users_admin_config_add(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int users_admin_config_show(void) {

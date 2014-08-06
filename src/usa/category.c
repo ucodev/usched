@@ -46,7 +46,7 @@ int category_users_add(size_t argc, char **args) {
 	/* Usage: <username> <uid> <gid> <password> */
 	if (argc != 4) {
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "add users");
-		log_warn("category_users_add(): Insufficient arguments.");
+		log_warn("category_users_add(): Insufficient arguments.\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -70,6 +70,7 @@ int category_users_add(size_t argc, char **args) {
 		return -1;
 	}
 
+	/* Add the user */
 	if (users_admin_config_add(username, uid, gid, password) < 0) {
 		errsv = errno;
 		log_warn("category_users_add(): users_admin_config_add(): %s\n", strerror(errno));
@@ -81,16 +82,95 @@ int category_users_add(size_t argc, char **args) {
 }
 
 int category_users_delete(size_t argc, char **args) {
-	errno = ENOSYS;
-	return -1;
+	int errsv = 0;
+	char *username = NULL;
+
+	/* Usage: <username> */
+	if (argc != 1) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, "delete users");
+		log_warn("category_users_delete(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	username = args[0];
+
+	/* Delete the user */
+	if (users_admin_config_delete(username) < 0) {
+		errsv = errno;
+		log_warn("category_users_delete(): users_admin_config_delete(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_users_change(size_t argc, char **args) {
-	errno = ENOSYS;
-	return -1;
+	int errsv = 0;
+	char *endptr = NULL;
+	char *username = NULL;
+	char *password = NULL;
+	uid_t uid = (uid_t) -1;
+	gid_t gid = (gid_t) -1;
+
+	/* Usage: <username> <uid> <gid> <password> */
+	if (argc != 4) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "change users");
+		log_warn("category_users_change(): Insufficient arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	username = args[0];
+	password = args[3];
+
+	uid = strtoul(args[1], &endptr, 0);
+
+	if ((*endptr) || (endptr == args[1]) || (errno == EINVAL) || (errno == ERANGE)) {
+		log_warn("category_users_change(): Invalid UID: %s\n", args[1]);
+		errno = EINVAL;
+		return -1;
+	}
+
+	gid = strtoul(args[2], &endptr, 0);
+
+	if ((*endptr) || (endptr == args[1]) || (errno == EINVAL) || (errno == ERANGE)) {
+		log_warn("category_users_change(): Invalid GID: %s\n", args[1]);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Change the user */
+	if (users_admin_config_change(username, uid, gid, password) < 0) {
+		errsv = errno;
+		log_warn("category_users_change(): users_admin_config_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_users_show(size_t argc, char **args) {
-	errno = ENOSYS;
-	return -1;
+	int errsv = 0;
+
+	/* Usage: no arguments */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, "show users");
+		log_warn("category_users_change(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Show the users */
+	if (users_admin_config_show() < 0) {
+		errsv = errno;
+		log_warn("category_users_show(): users_admin_config_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
+

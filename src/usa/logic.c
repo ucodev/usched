@@ -36,6 +36,9 @@ int logic_admin_process_add(void) {
 	int errsv = 0;
 
 	if (runa.req->category == USCHED_CATEGORY_USERS) {
+		/* TODO: Grant that the user doesn't exist */
+
+		/* Add user */
 		if (category_users_add(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_add(): category_users_add(): %s\n", strerror(errno));

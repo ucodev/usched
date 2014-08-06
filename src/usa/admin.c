@@ -33,6 +33,7 @@
 #include "runtime.h"
 #include "log.h"
 #include "print.h"
+#include "op.h"
 
 
 static void _init(int argc, char **argv) {
@@ -44,6 +45,7 @@ static void _init(int argc, char **argv) {
 }
 
 static void _do(void) {
+	op_admin_process();
 	/* TODO: Process request */
 	return;
 }

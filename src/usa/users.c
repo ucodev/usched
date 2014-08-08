@@ -47,8 +47,9 @@
 
 int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const char *password) {
 	int errsv = 0, len = 0, rounds = 5000;
-	char digest[HASH_DIGEST_SIZE_SHA512];
-	char *encoded_digest = NULL, *result = NULL, *encoded_salt = NULL, *path = NULL;
+	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
+	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
+	char *result = NULL, *path = NULL;
 	uint64_t salt = 0;
 	size_t edigest_out_len = 0, esalt_out_len = 0;
 	FILE *fp = NULL;
@@ -75,7 +76,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 		salt = (random() + 3) * (random() + 5) * (random() + 7) * (random() + 11);
 
 	/* Generate the password digest */
-	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, password, strlen(password), (const char *) &salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
+	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (const unsigned char *) password, strlen(password), (const unsigned char *) &salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
 		errsv = errno;
 		log_warn("users_admin_config_add(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
 		errno = errsv;
@@ -83,7 +84,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Encode the salt */
-	if (!(encoded_salt = encode_buffer_base64(NULL, &esalt_out_len, (const char *) &salt, sizeof(salt)))) {
+	if (!(encoded_salt = encode_buffer_base64(NULL, &esalt_out_len, (const unsigned char *) &salt, sizeof(salt)))) {
 		errsv = errno;
 		log_warn("users_admin_config_add(): encode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -91,7 +92,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Remove the leading '=' from the encoded_salt */
-	while (encoded_salt[esalt_out_len - 1] == '=')
+	while (encoded_salt[esalt_out_len - 1] == (unsigned char ) '=')
 		encoded_salt[-- esalt_out_len] = 0;
 
 	/* Encode the digest */
@@ -103,7 +104,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Remove the leading '=' from the encoded_digest */
-	while (encoded_digest[edigest_out_len - 1] == '=')
+	while (encoded_digest[edigest_out_len - 1] == (unsigned char) '=')
 		encoded_digest[-- edigest_out_len] = 0;
 
 	/* Allocate enough memory for the final result */
@@ -123,7 +124,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	memset(result, 0, len);
 
 	/* Craft the result string */
-	snprintf(result, len - 1, "%u:%u:%s$%s", uid, gid, encoded_salt, encoded_digest);
+	snprintf(result, len - 1, "%u:%u:%s$%s", uid, gid, (char *) encoded_salt, (char *) encoded_digest);
 
 	/* Free unused memory */
 	encode_destroy(encoded_salt);

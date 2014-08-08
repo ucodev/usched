@@ -28,14 +28,13 @@
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <fsop/path.h>
 
 #include <psec/encode.h>
+#include <psec/generate.h>
 #include <psec/hash.h>
 #include <psec/kdf.h>
 
@@ -50,7 +49,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
 	char *result = NULL, *path = NULL;
-	uint64_t salt = 0;
+	unsigned char salt[8];
 	size_t edigest_out_len = 0, esalt_out_len = 0;
 	FILE *fp = NULL;
 
@@ -68,15 +67,16 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 		return -1;
 	}
 
-	/* Initialize (weak) random generator */
-	srandom((time(NULL) + 3) * (clock() + 5) * (getpid() + 7) * (getppid() + 11) + uid + gid + username[0] + username[1] + password[0] + password[1] + (strlen(username) * strlen(password)));
-
-	/* Get some (weak) random value, different than 0 */
-	while (!salt)
-		salt = (random() + 3) * (random() + 5) * (random() + 7) * (random() + 11);
+	/* Generate random salt */
+	if (!generate_bytes_random(salt, sizeof(salt))) {
+		errsv = errno;
+		log_warn("users_admin_config_add(): generate_bytes_random(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	/* Generate the password digest */
-	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (const unsigned char *) password, strlen(password), (const unsigned char *) &salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
+	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (const unsigned char *) password, strlen(password), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
 		errsv = errno;
 		log_warn("users_admin_config_add(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
 		errno = errsv;
@@ -84,7 +84,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Encode the salt */
-	if (!(encoded_salt = encode_buffer_base64(NULL, &esalt_out_len, (const unsigned char *) &salt, sizeof(salt)))) {
+	if (!(encoded_salt = encode_buffer_base64(NULL, &esalt_out_len, salt, sizeof(salt)))) {
 		errsv = errno;
 		log_warn("users_admin_config_add(): encode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -92,7 +92,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Remove the leading '=' from the encoded_salt */
-	while (encoded_salt[esalt_out_len - 1] == (unsigned char ) '=')
+	while (encoded_salt[esalt_out_len - 1] == (unsigned char) '=')
 		encoded_salt[-- esalt_out_len] = 0;
 
 	/* Encode the digest */

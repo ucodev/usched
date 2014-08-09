@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 30-07-2014
+ * Date: 09-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -112,14 +112,6 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	memcpy((void *) aop->data, (uint64_t [1]) { htonll(entry->id) }, sizeof(entry->id));
 
 	debug_printf(DEBUG_INFO, "Delivering entry id: %llu\n", entry->id);
-
-	/* Report the unique Entry ID back to the client */
-	if (rtsaio_write(aop) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_new(): rtsaio_write(): %s\n", strerror(errno));
-
-		goto _update_op_new_failure_2;
-	}
 
 	return 0;
 
@@ -244,18 +236,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that were successfully deleted.\n", entry_list_res_nmemb);
 
-	/* Report back the successfully deleted entries to the client */
-	if (rtsaio_write(aop) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_del(): rtsaio_write(): %s\n", strerror(errno));
-
-		mm_free(entry_list_res);
-
-		errno = errsv;
-
-		return -1;
-	}
-
+	/* Free entry list */
 	mm_free(entry_list_res);
 
 	return 0;
@@ -438,15 +419,6 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 	aop->data = buf;
 
-	/* Report back the successfully read entries to the client */
-	if (rtsaio_write(aop) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_get(): rtsaio_write(): %s\n", strerror(errno));
-		errno = errsv;
-
-		return -1;
-	}
-
 	return 0;
 }
 
@@ -485,7 +457,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 
 	/* Validate if this entry has at least one valid operation flag */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
-		log_warn("process_recv_create(): The requested operation is invalid.\n");
+		log_warn("process_daemon_recv_create(): The requested operation is invalid.\n");
 		entry_destroy(entry);
 		errno = EINVAL;
 		return NULL;
@@ -494,7 +466,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	/* Validate payload size */
 	if (!entry->psize) {
 		/* All entry requests expect a payload. If none is set, this entry request is invalid. */
-		log_warn("process_recv_create(): entry->psize == 0.\n");
+		log_warn("process_daemon_recv_create(): entry->psize == 0.\n");
 		entry_destroy(entry);
 		errno = EINVAL;
 		return NULL;
@@ -502,35 +474,50 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 
 	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
 
+	/* Set this entry state as in progress */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
+
+	/* TODO:
+	 * If this is a remote connection:
+	 *
+	 *  - Send a ciphered session token in the password field which the encryption key is the
+	 * hash of the user password in the users configuration structure. Append the user hash salt
+	 * to the head of the ciphered result.
+	 *
+	 * If this is a local connection:
+	 *
+	 *  - Set the password field to all zeros.
+	 */
+
+	if (conn_is_remote(entry->id)) {
+		/* TODO */
+	} else if (conn_is_local(entry->id)) {
+		memset(entry->password, 0, sizeof(entry->password));
+	} else {
+		log_warn("process_daemon_recv_create(): Unable to determine connection type.\n");
+		entry_destroy(entry);
+		errno = EINVAL;
+		return NULL;
+	}
+
 	/* Reuse 'aop' for next read request: Receive the entry command */
 	memset(aop, 0, sizeof(struct async_op));
 
 	aop->fd = entry->id;
-	aop->count = entry->psize;
+	aop->count = sizeof(entry->password);
 	aop->priority = 0;
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 	if (!(aop->data = mm_alloc(aop->count))) {
 		errsv = errno;
-		log_warn("process_recv_create(): aop->data = mm_alloc(): %s\n", strerror(errno));
+		log_warn("process_daemon_recv_create(): aop->data = mm_alloc(): %s\n", strerror(errno));
 		entry_destroy(entry);
 		errno = errsv;
 		return NULL;
 	}
 
-	memset((void *) aop->data, 0, aop->count);
-
-	/* Request the entry payload */
-	if (rtsaio_read(aop) < 0) {
-		errsv = errno;
-		log_warn("process_recv_create(): rtsaio_read(): %s\n", strerror(errno));
-		entry_destroy(entry);
-		errno = errsv;
-		return NULL;
-	}
-
-	/* Set the initialization flag as this is a new entry */
-	entry_set_flag(entry, USCHED_ENTRY_FLAG_INIT);
+	/* Copy the password field into aop data */
+	memcpy((void *) aop->data, entry->password, aop->count);
 
 	return entry;
 }
@@ -540,24 +527,28 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 
 	/* Check if the entry is initialized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_INIT)) {
-		log_warn("process_recv_update(): Trying to update an existing entry that wasn't initialized yet.\n");
+		log_warn("process_daemon_recv_update(): Trying to update an existing entry that wasn't initialized yet.\n");
 		entry_destroy(entry);
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Check if the entry is marked as complete */
-	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
-		log_warn("process_recv_update(): Trying to update an existing entry that is already complete.\n");
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE) || entry_has_flag(entry, USCHED_ENTRY_FLAG_FINISH)) {
+		log_warn("process_daemon_recv_update(): Trying to update an existing entry that is already in a finish or complete state.\n");
 		entry_destroy(entry);
 		errno = EINVAL;
 		return -1;
 	}
 
+	/* If this is a remote connection, copy the password into the entry->password field */
+	if (conn_is_remote(aop->fd))
+		memcpy(entry->password, (void *) aop->data, sizeof(entry->password));
+
 	/* Check if the entry is authorized. If not, authorize it and try to proceed. */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED) && (entry_authorize(entry, aop->fd) < 0)) {
 		errsv = errno;
-		log_warn("process_recv_update(): entry_authorize(): %s\n", strerror(errno));
+		log_warn("process_daemon_recv_update(): entry_authorize(): %s\n", strerror(errno));
 		entry_destroy(entry);
 
 		if (!errsv)
@@ -568,7 +559,7 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 
 	/* Check if the entry is on a finishing state */
 	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_FINISH)) {
-		log_warn("process_recv_update(): Trying to update an entry that's in a FINISH state.\n");
+		log_warn("process_daemon_recv_update(): Trying to update an entry that's in a FINISH state.\n");
 		entry_destroy(entry);
 		errno = EINVAL;
 		return -1;
@@ -580,7 +571,7 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	/* Re-validate authorization. If not authorized, discard this entry */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		errsv = errno;
-		log_warn("process_recv_update(): Unauthorized entry\n", strerror(errno));
+		log_warn("process_daemon_recv_update(): Unauthorized entry\n", strerror(errno));
 		entry_destroy(entry);
 		errno = errsv;
 		return -1;
@@ -589,18 +580,20 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
 
 	/* Grant that the received data does not exceed the expected size */
-	if (aop->count != entry->psize) {
+	if (aop->count != (sizeof(entry->password) + entry->psize)) {
 		errsv = errno;
-		log_warn("process_recv_update(): aop->count != entry->psize\n");
+		log_warn("process_daemon_recv_update(): aop->count != (sizeof(entry->password) + entry->psize)\n");
 		entry_destroy(entry);
 		errno = errsv;
 		return -1;
 	}
 
-	/* Set the received entry payload */
-	if (entry_set_payload(entry, (char *) aop->data, entry->psize) < 0) {
+	/* Set the received entry payload which is sizeof(entry->password) offset bytes from
+	 * aop->data base pointer
+	 */
+	if (entry_set_payload(entry, (char *) aop->data + sizeof(entry->password), entry->psize) < 0) {
 		errsv = errno;
-		log_warn("process_recv_update(): entry_set_payload(): %s\n", strerror(errno));
+		log_warn("process_daemon_recv_update(): entry_set_payload(): %s\n", strerror(errno));
 		entry_destroy(entry);
 		errno = errsv;
 		return -1;
@@ -610,7 +603,7 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW)) {
 		if (_process_recv_update_op_new(aop, entry) < 0) {
 			errsv = errno;
-			log_warn("process_recv_update(): _process_recv_update_op_new(): %s\n", strerror(errno));
+			log_warn("process_daemon_recv_update(): _process_recv_update_op_new(): %s\n", strerror(errno));
 
 			entry_destroy(entry);
 			errno = errsv;
@@ -619,7 +612,7 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL)) {
 		if (_process_recv_update_op_del(aop, entry) < 0) {
 			errsv = errno;
-			log_warn("process_recv_update(): _process_recv_update_op_del(): %s\n", strerror(errno));
+			log_warn("process_daemon_recv_update(): _process_recv_update_op_del(): %s\n", strerror(errno));
 			entry_destroy(entry);
 			errno = errsv;
 			return -1;
@@ -627,21 +620,18 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
 		if (_process_recv_update_op_get(aop, entry) < 0) {
 			errsv = errno;
-			log_warn("process_recv_update(): _process_recv_update_op_get(): %s\n", strerror(errno));
+			log_warn("process_daemon_recv_update(): _process_recv_update_op_get(): %s\n", strerror(errno));
 
 			entry_destroy(entry);
 			errno = errsv;
 			return -1;
 		}
 	} else {
-		log_warn("process_recv_update(): The requested operation is invalid.\n");
+		log_warn("process_daemon_recv_update(): The requested operation is invalid.\n");
 		entry_destroy(entry);
 		errno = EINVAL;
 		return -1;
 	}
-
-	/* Set the complete flag as this entry is now fully processed. */
-	entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
 
 	return 0;
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 27-07-2014
+ * Date: 09-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,7 @@ typedef enum USCHED_ENTRY_FLAGS {
 
 	/* Local flags - Allowed to be handled by daemon */
 	USCHED_ENTRY_FLAG_INIT,
+	USCHED_ENTRY_FLAG_PROGRESS,
 	USCHED_ENTRY_FLAG_AUTHORIZED,
 	USCHED_ENTRY_FLAG_FINISH,
 	USCHED_ENTRY_FLAG_COMPLETE

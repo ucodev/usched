@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 30-07-2014
+ * Date: 09-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -54,34 +54,63 @@ void notify_read(struct async_op *aop) {
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		if (entry) {
-			if (process_daemon_recv_update(aop, entry) < 0)
+			if (process_daemon_recv_update(aop, entry) < 0) {
+				log_warn("notify_read(): process_daemon_recv_update(): %s\n", strerror(errno));
 				goto _read_failure;
+			}
 		} else if (!(entry = process_daemon_recv_create(aop))) {
+			log_warn("notify_read(): process_daemon_recv_create(): %s\n", strerror(errno));
 			goto _read_failure;
 		}
 
-		/* If we've reached this point without errors, the 'entry' pointer is still valid
-		 * and now belongs to the rund.apool list.
+		/* Re-insert the entry into the rpool before any I/O */
+		pthread_mutex_lock(&rund.mutex_rpool);
+
+		if (rund.rpool->insert(rund.rpool, entry) < 0) {
+			log_warn("notify_read(): rund.rpool->insert(): %s\n", strerror(errno));
+			goto _read_failure;
+		}
+
+		pthread_mutex_unlock(&rund.mutex_rpool);
+
+		/* If we've reached this point without errors and the 'entry' pointer is still valid,
+		 * then it either bolongs to apool (completed) or it's in progress.
 		 */
-		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
-			/* Destroy this entry */
-			entry_destroy(entry);
+		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_FINISH)) {
+			/* If the entry is in finishing state and we reached this point, it means
+			 * it is now in a completed state.
+			 */
+			entry_unset_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
+			entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
 
-			/* This is a complete entry */
-			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
-		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_INIT) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
-			/* This is a newly created entry */
-			pthread_mutex_lock(&rund.mutex_rpool);
-
-			if (rund.rpool->insert(rund.rpool, entry) < 0) {
-				log_warn("notify_read(): rund.rpool->insert(): %s\n", strerror(errno));
-				pthread_mutex_unlock(&rund.mutex_rpool);
+			/* Write the aop */
+			if (rtsaio_write(aop) < 0) {
+				log_warn("notify_read(): rtsaio_write(): %s\n", strerror(errno));
 				goto _read_failure;
 			}
 
-			pthread_mutex_unlock(&rund.mutex_rpool);
+			/* This is a complete entry */
+			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
+		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_PROGRESS) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
+			/* This is another acceptable state. A new entry was received but is still
+			 * unauthenticated and is in progress. Authentication is performed during the
+			 * update stage of the entry, when relevant authorization data is received
+			 * along with the entry payload.
+			 *
+			 * At this point, we have nothing to do but accept the state and mark this
+			 * entry as initialized.
+			 */
+
+			entry_set_flag(entry, USCHED_ENTRY_FLAG_INIT);
+
+			/* Write the aop */
+			if (rtsaio_write(aop) < 0) {
+				log_warn("notify_read(): rtsaio_write(): %s\n", strerror(errno));
+				goto _read_failure;
+			}
 		} else {
 			/* Entry state not recognized. This is an error state. */
+			log_warn("notify_read(): Entry state not recognized.\n", strerror(errno));
 			goto _read_failure;
 		}
 
@@ -120,22 +149,60 @@ void notify_write(struct async_op *aop) {
 		if (aop->data)
 			mm_free((void *) aop->data);
 
-		/* Do another rtsaio_read() of usched_entry_hdr_size() bytes in order to wait for another entry */
+		/* Search for an existing entry. */
+		pthread_mutex_lock(&rund.mutex_rpool);
+		entry = rund.rpool->pope(rund.rpool, usched_entry_id(aop->fd));
+		pthread_mutex_unlock(&rund.mutex_rpool);
+
+		if (!entry)
+			goto _write_failure;
+
+		/* Prepare the aop for another read */
 		memset(aop, 0, sizeof(struct async_op));
 
 		aop->fd = cur_fd;
-		aop->count = usched_entry_hdr_size();
 		aop->priority = 0;
 		aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
+		/* Based on entry status, read the necessary amount of data */
+		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
+			/* As the entry is complete, we need to destroy it. */
+			entry_destroy(entry);
+
+			/* Do another rtsaio_read() of usched_entry_hdr_size() bytes in order
+			 * to wait for another entry
+			 */
+			aop->count = usched_entry_hdr_size();
+		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_PROGRESS)) {
+			/* Re-insert the entry into the rpool before any I/O */
+			pthread_mutex_lock(&rund.mutex_rpool);
+
+			if (rund.rpool->insert(rund.rpool, entry) < 0) {
+				log_warn("notify_write(): rund.rpool->insert(): %s\n", strerror(errno));
+				goto _write_failure;
+			}
+
+			pthread_mutex_unlock(&rund.mutex_rpool);
+
+			/* Request the amount of data present on entry->psize (payload size) */
+			aop->count = sizeof(entry->password) + entry->psize;
+		} else {
+			/* Unexpected entry state */
+			log_warn("notify_write(): Unexpected entry state.");
+			goto _write_failure;
+		}
+
+		/* Allocate enough memory on data buffer */
 		if (!(aop->data = mm_alloc(aop->count))) {
 			log_warn("notify_write(): aop->data = mm_alloc(): %s\n", strerror(errno));
 
 			goto _write_failure;
 		}
 
+		/* Reset the memory */
 		memset((void *) aop->data, 0, aop->count);
 
+		/* Perform the asynchronous read */
 		if (rtsaio_read(aop) < 0) {
 			log_warn("notify_write(): rtsaio_read(): %s\n", strerror(errno));
 

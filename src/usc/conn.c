@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 30-07-2014
+ * Date: 09-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,6 +59,7 @@ int conn_client_process(void) {
 	int errsv = 0, ret = 0;
 	struct usched_entry *cur = NULL;
 	size_t payload_len = 0;
+	char *aaa_payload_data = NULL;
 
 	while ((cur = runc.epool->pop(runc.epool))) {
 		payload_len = cur->psize;
@@ -81,13 +82,44 @@ int conn_client_process(void) {
 			return -1;
 		}
 
-		if (write(runc.fd, cur->payload, payload_len) != payload_len) {
+		/* Read the session token into the password field for further processing */
+		if (read(runc.fd, cur->password, sizeof(cur->password)) != sizeof(cur->password)) {
 			errsv = errno;
-			log_crit("conn_client_process(): write() != payload_len: %s\n", strerror(errno));
+			log_crit("conn_client_process(): read() != sizeof(cur->password): %s\n", strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
 		}
+
+		/* TODO: Read the password field, which contains session data, and rewrite it with
+		 * authentication information.
+		 */
+
+		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + payload_len))) {
+			errsv = errno;
+			log_crit("conn_client_process(): malloc(): %s\n", strerror(errno));
+			entry_destroy(cur);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Craft the authentication information along with the payload */
+		memcpy(aaa_payload_data, cur->password, sizeof(cur->password));
+		memcpy(aaa_payload_data + sizeof(cur->password), cur->payload, payload_len);
+
+		/* Send the authentication and authorization data along entry payload */
+		if (write(runc.fd, aaa_payload_data, sizeof(cur->password) + payload_len) != (sizeof(cur->password) + payload_len)) {
+			errsv = errno;
+			log_crit("conn_client_process(): write() != (sizeof(cur->password) + payload_len): %s\n", strerror(errno));
+			entry_destroy(cur);
+			mm_free(aaa_payload_data);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Reset and free aaa_payload_data */
+		memset(aaa_payload_data, 0, sizeof(cur->password) + payload_len);
+		mm_free(aaa_payload_data);
 
 		/* Revert endianness back to host byte order */
 		cur->id = ntohll(cur->id);

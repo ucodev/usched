@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 01-08-2014
+ * Date: 10-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -105,6 +105,14 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 	errno = ENOSYS;
 
 	return -1;	/* Not authorized. No authentication mechanism available */
+}
+
+int entry_authorize_remote_init(struct usched_entry *entry) {
+	return auth_remote_user_token_create(entry->username, entry->password, entry->token);
+}
+
+int entry_authorize_remote_verify(struct usched_entry *entry) {
+	return auth_remote_user_token_verify(entry->username, entry->password, entry->token);
 }
 
 void entry_pmq_dispatch(void *arg) {

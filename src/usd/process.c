@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 09-08-2014
+ * Date: 10-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -482,7 +482,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	 *
 	 *  - Send a ciphered session token in the password field which the encryption key is the
 	 * hash of the user password in the users configuration structure. Append the user hash salt
-	 * to the head of the ciphered result.
+	 * and encryption nonce value to the head of the ciphered result.
 	 *
 	 * If this is a local connection:
 	 *
@@ -490,7 +490,13 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	 */
 
 	if (conn_is_remote(entry->id)) {
-		/* TODO */
+		if (entry_authorize_remote_init(entry) < 0) {
+			errsv = errno;
+			log_warn("process_daemon_recv_create(): entry_authorize_remote_init(): %s\n", strerror(errno));
+			entry_destroy(entry);
+			errno = errsv;
+			return NULL;
+		}
 	} else if (conn_is_local(entry->id)) {
 		memset(entry->password, 0, sizeof(entry->password));
 	} else {

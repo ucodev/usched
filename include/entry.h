@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 09-08-2014
+ * Date: 10-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,8 @@
 #include <sys/types.h>
 
 #include <psched/sched.h>
+
+#include <psec/crypt.h>
 
 #include "config.h"
 #include "usched.h"
@@ -82,6 +84,7 @@ struct usched_entry {
 
 	/* Reserved */
 	pschedid_t psched_id;	/* The libpsched entry identifier */
+	char token[CRYPT_KEY_SIZE_XSALSA20];
 };
 #pragma pack(pop)
 
@@ -106,6 +109,8 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len);
 int entry_copy(struct usched_entry *dest, struct usched_entry *src);
 int entry_compare(const void *e1, const void *e2);
 int entry_authorize(struct usched_entry *entry, int fd);
+int entry_authorize_remote_init(struct usched_entry *entry);
+int entry_authorize_remote_verify(struct usched_entry *entry);
 void entry_pmq_dispatch(void *arg);
 void entry_destroy(void *elem);
 int entry_serialize(pall_fd_t fd, void *entry);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface header
  *
- * Date: 24-06-2014
+ * Date: 10-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,8 @@
 /* Prototypes */
 int auth_local(int fd, uid_t *uid, gid_t *gid);
 int auth_remote(int fd, const char *user, const char *passwd);
+int auth_remote_user_token_verify(const char *username, const char *password, const char *token);
+int auth_remote_user_token_create(const char *username, char *password, char *token);
 
 #endif
 

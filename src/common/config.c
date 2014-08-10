@@ -69,6 +69,8 @@ static void _userinfo_destroy(void *data) {
 	mm_free(userinfo->username);
 	memset(userinfo->password, 0, strlen(userinfo->password));
 	mm_free(userinfo->password);
+	memset(userinfo->salt, 0, strlen(userinfo->salt));
+	mm_free(userinfo->salt);
 	memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 	mm_free(userinfo);
 }
@@ -592,7 +594,7 @@ static int _config_init_users_list_add_from_file(
 		const char *user) 
 {
 	int errsv = 0;
-	char *userinfo_raw = NULL, *ptr = NULL, *endptr = NULL;
+	char *userinfo_raw = NULL, *ptr = NULL, *endptr = NULL, *pw_ptr = NULL;
 	struct usched_config_userinfo *userinfo = NULL;
 
 	/* Read file contents (one line only ) */
@@ -685,8 +687,30 @@ static int _config_init_users_list_add_from_file(
 		return -1;
 	}
 
+	/* Split salt from password */
+	if (!(pw_ptr = strchr(ptr, '$'))) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid syntax for password field: No salt found.\n", file, user);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Check if password field isn't empty */
+	if (!*(++ pw_ptr)) {
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid syntax for password field: Password is empty.\n", file, user);
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Allocate password memory */
-	if (!(userinfo->password = mm_alloc(strlen(ptr) + 1))) {
+	if (!(userinfo->password = mm_alloc(strlen(pw_ptr) + 1))) {
 		errsv = errno;
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", file, user, strerror(errno));
 		memset(userinfo_raw, 0, strlen(userinfo_raw));
@@ -698,7 +722,25 @@ static int _config_init_users_list_add_from_file(
 	}
 
 	/* Copy password */
-	strcpy(userinfo->password, ptr);
+	strcpy(userinfo->password, pw_ptr);
+
+	/* Set salt/password division */
+	*(pw_ptr - 1) = 0;
+
+	/* Allocate salt memory */
+	if (!(userinfo->salt = mm_alloc(strlen(ptr) + 1))) {
+		errsv = errno;
+		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", file, user, strerror(errno));
+		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		mm_free(userinfo_raw);
+		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
+		mm_free(userinfo);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Copy salt */
+	strcpy(userinfo->salt, ptr);
 
 	/* Free userinfo raw string */
 	memset(userinfo_raw, 0, strlen(userinfo_raw));

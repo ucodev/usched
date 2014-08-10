@@ -82,6 +82,7 @@
 struct usched_config_userinfo {
 	char *username;
 	char *password;
+	char *salt;
 	uid_t uid;
 	gid_t gid;
 };

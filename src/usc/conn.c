@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 09-08-2014
+ * Date: 11-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,7 @@
 #include "log.h"
 #include "print.h"
 #include "process.h"
+#include "auth.h"
 
 
 int conn_client_init(void) {
@@ -91,10 +92,19 @@ int conn_client_process(void) {
 			return -1;
 		}
 
-		/* TODO: Read the password field, which contains session data, and rewrite it with
-		 * authentication information.
+		/* If this a remote connection, read the password field, which contains session data,
+		 * and rewrite it with authentication information.
 		 */
+		if (conn_is_remote(runc.fd)) {
+			if (auth_client_remote_user_token_process(cur->password, "TODO") < 0) {
+				log_crit("conn_client_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
+				entry_destroy(cur);
+				errno = errsv;
+				return -1;
+			}
+		}
 
+		/* Craft the token and payload together */
 		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + payload_len))) {
 			errsv = errno;
 			log_crit("conn_client_process(): malloc(): %s\n", strerror(errno));

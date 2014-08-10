@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 10-08-2014
+ * Date: 11-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,7 +47,7 @@
 static int _entry_authorize_local(struct usched_entry *entry, int fd) {
 	int errsv = 0;
 
-	if (auth_local(fd, &entry->uid, &entry->gid) < 0) {
+	if (auth_daemon_local(fd, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
 		log_warn("entry_authorize_local(): auth_local(): %s\n", strerror(errno));
 		errno = errsv;
@@ -60,14 +60,19 @@ static int _entry_authorize_local(struct usched_entry *entry, int fd) {
 }
 
 static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
-	/* TODO: To be implemented */
+	int errsv = 0;
 
-	/* Read user/pass from entry->username and entry->password */
-	/* auth_remote() ... */
+	/* Validate session data and compare user password hash */
+	if (entry_authorize_remote_verify(entry) < 0) {
+		errsv = errno;
+		log_warn("_entry_authorize_remote(): entry_authorize_remote_verify(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
-	errno = ENOSYS;
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
 
-	return -1;
+	return 1;
 }
 
 int entry_authorize(struct usched_entry *entry, int fd) {
@@ -108,11 +113,11 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 }
 
 int entry_authorize_remote_init(struct usched_entry *entry) {
-	return auth_remote_user_token_create(entry->username, entry->password, entry->token);
+	return auth_daemon_remote_user_token_create(entry->username, entry->password, entry->token);
 }
 
 int entry_authorize_remote_verify(struct usched_entry *entry) {
-	return auth_remote_user_token_verify(entry->username, entry->password, entry->token);
+	return auth_daemon_remote_user_token_verify(entry->username, entry->password, entry->token, &entry->uid, &entry->gid);
 }
 
 void entry_pmq_dispatch(void *arg) {

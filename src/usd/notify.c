@@ -83,12 +83,6 @@ void notify_read(struct async_op *aop) {
 			entry_unset_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
 			entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
 
-			/* Write the aop */
-			if (rtsaio_write(aop) < 0) {
-				log_warn("notify_read(): rtsaio_write(): %s\n", strerror(errno));
-				goto _read_failure;
-			}
-
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
 		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_PROGRESS) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
@@ -102,15 +96,15 @@ void notify_read(struct async_op *aop) {
 			 */
 
 			entry_set_flag(entry, USCHED_ENTRY_FLAG_INIT);
-
-			/* Write the aop */
-			if (rtsaio_write(aop) < 0) {
-				log_warn("notify_read(): rtsaio_write(): %s\n", strerror(errno));
-				goto _read_failure;
-			}
 		} else {
 			/* Entry state not recognized. This is an error state. */
 			log_warn("notify_read(): Entry state not recognized.\n", strerror(errno));
+			goto _read_failure;
+		}
+
+		/* Write the aop */
+		if (rtsaio_write(aop) < 0) {
+			log_warn("notify_read(): rtsaio_write(): %s\n", strerror(errno));
 			goto _read_failure;
 		}
 
@@ -146,6 +140,7 @@ void notify_write(struct async_op *aop) {
 	int cur_fd = aop->fd;
 
 	if ((rtsaio_status(aop) == ASYNCOP_STATUS_COMPLETE) && (rtsaio_count(aop) == aop->count)) {
+		/* Free aop->data memory */
 		if (aop->data)
 			mm_free((void *) aop->data);
 

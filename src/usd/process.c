@@ -541,9 +541,8 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 		return -1;
 	}
 
-	/* If this is a remote connection, copy the password into the entry->password field */
-	if (conn_is_remote(aop->fd))
-		memcpy(entry->password, (void *) aop->data, sizeof(entry->password));
+	/* Copy the session authentication data into the entry->password field */
+	memcpy(entry->password, (void *) aop->data, sizeof(entry->password));
 
 	/* Check if the entry is authorized. If not, authorize it and try to proceed. */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED) && (entry_authorize(entry, aop->fd) < 0)) {

@@ -27,6 +27,8 @@
 
 #include <stdlib.h>
 
+#undef USE_LIBFSMA
+
 #ifdef USE_LIBFSMA
  #include <fsma/fsma.h>
 #endif

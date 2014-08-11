@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 01-08-2014
+ * Date: 11-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -76,7 +76,7 @@ static void _userinfo_destroy(void *data) {
 }
 
 static int _list_init_uint_from_file(const char *file, struct cll_handler **list) {
-	int errsv = 0;
+	int errsv = 0, len = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
 	char line[32];
@@ -120,7 +120,11 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 			continue;
 
 		/* Strip '\n' */
-		line[strlen(line) - 1] = 0;
+		len = strlen(line);
+
+		if (line[len - 1] == '\n')
+			line[-- len] = 0;
+
 
 		/* Allocate value memory */
 		if (!(val = mm_alloc(sizeof(unsigned int)))) {
@@ -163,7 +167,7 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 }
 
 static int _value_init_uint_from_file(const char *file, unsigned int *val) {
-	int errsv = 0;
+	int errsv = 0, len = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
 	char line[32];
@@ -208,7 +212,11 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 	}
 
 	/* Strip '\n' */
-	line[strlen(line) - 1] = 0;
+	len = strlen(line);
+
+	if (line[len - 1] == '\n')
+		line[-- len] = 0;
+
 
 	/* Retrieve line value */
 	*val = strtoul(line, &endptr, 0);
@@ -225,7 +233,7 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 }
 
 static int _value_init_int_from_file(const char *file, int *val) {
-	int errsv = 0;
+	int errsv = 0, len = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
 	char line[32];
@@ -270,7 +278,10 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	}
 
 	/* Strip '\n' */
-	line[strlen(line) - 1] = 0;
+	len = strlen(line);
+
+	if (line[len - 1] == '\n')
+		line[-- len] = 0;
 
 	/* Retrieve line value */
 	*val = strtol(line, &endptr, 0);
@@ -286,10 +297,10 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	return 0;
 }
 
-static int _value_init_string_from_file(const char *file, char **string) {
+static char *_value_init_string_from_file(const char *file) {
 	int errsv = 0;
 	FILE *fp = NULL;
-	char line[8192];
+	char line[8192], *string = NULL;
 	size_t len = 0;
 
 	/* Reset line buffer memory */
@@ -300,7 +311,7 @@ static int _value_init_string_from_file(const char *file, char **string) {
 		errsv = errno;
 		log_warn("_value_init_string_from_file(): fsop_path_isreg(\"%s\"): %s\n", file, strerror(errno));
 		errno = errsv;
-		return -1;
+		return NULL;
 	}
 
 	/* Try to open file */
@@ -308,7 +319,7 @@ static int _value_init_string_from_file(const char *file, char **string) {
 		errsv = errno;
 		log_warn("_value_init_string_from_file(): fopen(\"%s\", \"r\"): %s\n", file, strerror(errno));
 		errno = errsv;
-		return -1;
+		return NULL;
 	}
 
 	/* Retrieve value from file */
@@ -317,7 +328,7 @@ static int _value_init_string_from_file(const char *file, char **string) {
 		log_warn("_value_init_string_from_file(): fgets(): Unexpected EOF (%s).\n", file);
 		fclose(fp);
 		errno = errsv;
-		return -1;
+		return NULL;
 	}
 
 	/* Close file */
@@ -328,27 +339,27 @@ static int _value_init_string_from_file(const char *file, char **string) {
 		errsv = errno;
 		log_warn("_value_init_string_from_file(): First line of file %s is empty.\n", file);
 		errno = errsv;
-		return -1;
+		return NULL;
 	}
 
 	/* Strip '\n' */
 	len = strlen(line);
-	line[len - 1] = 0;
+
+	if (line[len - 1] == '\n')
+		line[-- len] = 0;
 
 	/* Allocate memory for string */
-	if (!(*string = mm_alloc(len))) {
+	if (!(string = mm_alloc(len + 1))) {
 		errsv = errno;
 		log_warn("_value_init_string_from_file(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
-		return -1;
+		return NULL;
 	}
 
-	memset(*string, 0, len);
-
-	memcpy(*string, line, len - 1);
+	strcpy(string, line);
 
 	/* Success */
-	return 0;
+	return string;
 }
 
 static int _config_init_auth_gid_blacklist(struct usched_config_auth *auth) {
@@ -443,7 +454,10 @@ int config_init_auth(struct usched_config_auth *auth) {
 }
 
 static int _config_init_core_file_serialize(struct usched_config_core *core) {
-	return _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE, &core->file_serialize);
+	if (!(core->file_serialize = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE)))
+		return -1;
+
+	return 0;
 }
 
 static int _config_init_core_pmq_msgmax(struct usched_config_core *core) {
@@ -455,7 +469,10 @@ static int _config_init_core_pmq_msgsize(struct usched_config_core *core) {
 }
 
 static int _config_init_core_pmq_name(struct usched_config_core *core) {
-	return _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME, &core->pmq_name);
+	if (!(core->pmq_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME)))
+		return -1;
+
+	return 0;
 }
 
 static int _config_init_core_thread_priority(struct usched_config_core *core) {
@@ -522,11 +539,17 @@ int config_init_core(struct usched_config_core *core) {
 }
 
 static int _config_init_network_bind_addr(struct usched_config_network *network) {
-	return _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, &network->bind_addr);
+	if (!(network->bind_addr = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR)))
+		return -1;
+
+	return 0;
 }
 
 static int _config_init_network_bind_port(struct usched_config_network *network) {
-	return _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT, &network->bind_port);
+	if (!(network->bind_port = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT)))
+		return -1;
+
+	return 0;
 }
 
 static int _config_init_network_conn_limit(struct usched_config_network *network) {
@@ -538,7 +561,10 @@ static int _config_init_network_conn_timeout(struct usched_config_network *netwo
 }
 
 static int _config_init_network_sock_named(struct usched_config_network *network) {
-	return _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED, &network->sock_named);
+	if (!(network->sock_named = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED)))
+		return -1;
+
+	return 0;
 }
 
 int config_init_network(struct usched_config_network *network) {
@@ -596,20 +622,24 @@ static int _config_init_users_list_add_from_file(
 	int errsv = 0;
 	char *userinfo_raw = NULL, *ptr = NULL, *endptr = NULL, *pw_ptr = NULL;
 	struct usched_config_userinfo *userinfo = NULL;
+	size_t userinfo_raw_len = 0;
 
 	/* Read file contents (one line only ) */
-	if (_value_init_string_from_file(file, &userinfo_raw) < 0) {
+	if (!(userinfo_raw = _value_init_string_from_file(file))) {
 		errsv = errno;
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): _value_init_string_from_file(\"%s\", ...): %s\n", file, user, file, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Set userinfo raw data length */
+	userinfo_raw_len = strlen(userinfo_raw);
+
 	/* Initialize userinfo structure */
 	if (!(userinfo = mm_alloc(sizeof(struct usched_config_userinfo)))) {
 		errsv = errno;
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", strerror(errno));
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		errno = errsv;
 		return -1;
@@ -621,7 +651,7 @@ static int _config_init_users_list_add_from_file(
 	/* Parse first field [UID] */
 	if (!(ptr = strtok(userinfo_raw, ":"))) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Unexpected value: %s.\n", file, user, userinfo_raw);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		mm_free(userinfo);
 		errno = EINVAL;
@@ -633,7 +663,7 @@ static int _config_init_users_list_add_from_file(
 
 	if ((*endptr) || (endptr == ptr) || (errno == ERANGE) || (errno == EINVAL)) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid UID value: %s.\n", file, user, ptr);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -644,7 +674,7 @@ static int _config_init_users_list_add_from_file(
 	/* Parse second field [GID] */
 	if (!(ptr = strtok(NULL, ":"))) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: No ':' delimiter found (2 expected).\n", file, user);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -657,7 +687,7 @@ static int _config_init_users_list_add_from_file(
 
 	if ((*endptr) || (endptr == ptr) || (errno == ERANGE) || (errno == EINVAL)) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid GID value: %s.\n", file, user, ptr);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -668,7 +698,7 @@ static int _config_init_users_list_add_from_file(
 	/* Parse third field [password] */
 	if (!(ptr = strtok(NULL, ":"))) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Only one ':' delimiter found (2 expected).\n", file, user);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -679,7 +709,7 @@ static int _config_init_users_list_add_from_file(
 	/* Check if password is empty */
 	if (!*ptr) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Password field is empty.\n", file, user);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -690,7 +720,7 @@ static int _config_init_users_list_add_from_file(
 	/* Split salt from password */
 	if (!(pw_ptr = strchr(ptr, '$'))) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid syntax for password field: No salt found.\n", file, user);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -701,7 +731,7 @@ static int _config_init_users_list_add_from_file(
 	/* Check if password field isn't empty */
 	if (!*(++ pw_ptr)) {
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): Parse error: Invalid syntax for password field: Password is empty.\n", file, user);
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -713,7 +743,7 @@ static int _config_init_users_list_add_from_file(
 	if (!(userinfo->password = mm_alloc(strlen(pw_ptr) + 1))) {
 		errsv = errno;
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", file, user, strerror(errno));
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -731,7 +761,7 @@ static int _config_init_users_list_add_from_file(
 	if (!(userinfo->salt = mm_alloc(strlen(ptr) + 1))) {
 		errsv = errno;
 		log_warn("_config_init_users_list_add_from_file(<struct usched_config_users *>, \"%s\", \"%s\"): mm_alloc(): %s\n", file, user, strerror(errno));
-		memset(userinfo_raw, 0, strlen(userinfo_raw));
+		memset(userinfo_raw, 0, userinfo_raw_len);
 		mm_free(userinfo_raw);
 		memset(userinfo, 0, sizeof(struct usched_config_userinfo));
 		mm_free(userinfo);
@@ -743,7 +773,7 @@ static int _config_init_users_list_add_from_file(
 	strcpy(userinfo->salt, ptr);
 
 	/* Free userinfo raw string */
-	memset(userinfo_raw, 0, strlen(userinfo_raw));
+	memset(userinfo_raw, 0, userinfo_raw_len);
 	mm_free(userinfo_raw);
 
 	/* Allocate username memory */

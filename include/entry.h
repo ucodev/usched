@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 10-08-2014
+ * Date: 11-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -72,8 +72,8 @@ struct usched_entry {
 	uint32_t psize;		/* Payload size */
 
 	/* Authentication Header */
-	char username[CONFIG_USCHED_AUTH_USERNAME_MAX];		/* TODO: Not yet implemented */
-	char password[CONFIG_USCHED_AUTH_PASSWORD_MAX];		/* TODO: Not yet implemented */
+	char username[CONFIG_USCHED_AUTH_USERNAME_MAX];
+	char password[CONFIG_USCHED_AUTH_PASSWORD_MAX];
 
 	/* Entry payload */
 	char *payload;

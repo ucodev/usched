@@ -91,7 +91,7 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 		}
 
 		return ret;	/* ret == 1: Authorized, ret == 0: Not authorized (connection will timeout) */
-	} else if ((ret = conn_is_remote(fd) < 0)) {
+	} else if ((ret = conn_is_remote(fd)) < 0) {
 		errsv = errno;
 		log_warn("entry_authorize(): conn_is_remote(): %s\n", strerror(errno));
 		errno = errsv;

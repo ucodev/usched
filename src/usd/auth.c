@@ -35,6 +35,7 @@
 #include <psec/generate.h>
 #include <psec/hash.h>
 
+#include "debug.h"
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
@@ -63,11 +64,11 @@ int auth_daemon_remote_user_token_verify(
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
 	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
-	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 1];
+	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 3];
 	size_t out_len = 0;
 
 	/* Get userinfo data from current configuration */
-	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (void *) username))) {
+	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (struct usched_config_userinfo [1]) { { (char *) username, NULL, NULL, 0, 0} }))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_verify(): No such username: %s\n", username);
 		errno = errsv;
@@ -85,8 +86,10 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
+	/* TODO: Grant that userinfo->password doesn't exceed the expected length */
+
 	/* Decode the base64 encoded password hash from current configuration */
-	if (!decode_buffer_base64(pwhash_s, (size_t [1]) { sizeof(pwhash_s) }, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
+	if (!decode_buffer_base64(pwhash_s, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_verify(): decode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -111,27 +114,31 @@ int auth_daemon_remote_user_token_verify(
 int auth_daemon_remote_user_token_create(const char *username, char *password, char *token) {
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
-	unsigned char salt[9], pwhash[HASH_DIGEST_SIZE_SHA512 + 1];
+	unsigned char salt[10], pwhash[HASH_DIGEST_SIZE_SHA512 + 3];
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20], nonce[CRYPT_NONCE_SIZE_XSALSA20];
 	size_t out_len = 0;
 
 	/* Get userinfo data from current configuration */
-	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (void *) username))) {
+	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (struct usched_config_userinfo [1]) { { (char *) username, NULL, NULL, 0, 0 } }))) {
 		log_warn("auth_daemon_remote_user_token_create(): No such username: %s\n", username);
 		errno = EINVAL;
 		return -1;
 	}
 
+	/* TODO: Grant that userinfo->salt doesn't exceed the expected length */
+
 	/* Decode user password salt from base64 */
-	if (!decode_buffer_base64(salt, (size_t [1]) { sizeof(salt) }, (unsigned char *) userinfo->salt, strlen(userinfo->salt))) {
+	if (!decode_buffer_base64(salt, &out_len, (unsigned char *) userinfo->salt, strlen(userinfo->salt))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): decode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* TODO: Grant that userinfo->password doesn't exceed the expected length */
+
 	/* Decode user password hash from base64 */
-	if (!decode_buffer_base64(pwhash, (size_t [1]) { sizeof(pwhash) }, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
+	if (!decode_buffer_base64(pwhash, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): decode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -155,7 +162,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Shrink the password hash with a blake2s digest in order to match the encryption key size */
-	if (!hash_buffer_blake2s(key, pwhash, sizeof(pwhash) - 1)) {
+	if (!hash_buffer_blake2s(key, pwhash, sizeof(pwhash) - 3)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): hash_buffer_blake2s(): %s\n", strerror(errno));
 		errno = errsv;
@@ -163,7 +170,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + (sizeof(salt) - 1) + sizeof(nonce)), &out_len, (unsigned char *) token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + (sizeof(salt) - 2) + sizeof(nonce)), &out_len, (unsigned char *) token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -171,8 +178,8 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Craft session password field */
-	memcpy(password, salt, sizeof(salt));
-	memcpy(password + sizeof(salt), nonce, sizeof(nonce));
+	memcpy(password, salt, sizeof(salt) - 2);
+	memcpy(password + sizeof(salt) - 2, nonce, sizeof(nonce));
 
 	/* Password contents: | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *

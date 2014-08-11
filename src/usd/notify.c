@@ -141,8 +141,10 @@ void notify_write(struct async_op *aop) {
 
 	if ((rtsaio_status(aop) == ASYNCOP_STATUS_COMPLETE) && (rtsaio_count(aop) == aop->count)) {
 		/* Free aop->data memory */
-		if (aop->data)
+		if (aop->data) {
 			mm_free((void *) aop->data);
+			aop->data = NULL;
+		}
 
 		/* Search for an existing entry. */
 		pthread_mutex_lock(&rund.mutex_rpool);

@@ -186,11 +186,15 @@ int entry_compare(const void *e1, const void *e2) {
 void entry_destroy(void *elem) {
 	struct usched_entry *entry = elem;
 
-	if (entry->payload)
+	if (entry->payload) {
 		mm_free(entry->payload);
+		entry->payload = NULL;
+	}
 
-	if (entry->subj)
+	if (entry->subj) {
 		mm_free(entry->subj);
+		entry->subj = NULL;
+	}
 
 	mm_free(entry);
 }

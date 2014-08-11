@@ -166,6 +166,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	 */
 	if ((entry_list_req_nmemb == 1) && (!entry_list_req[0])) {
 		mm_free(entry->payload);
+		entry->payload = NULL;
 		entry->psize = 0;
 		entry_list_req = NULL;
 
@@ -308,6 +309,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	 */
 	if ((entry_list_req_nmemb == 1) && (!entry_list_req[0])) {
 		mm_free(entry->payload);
+		entry->payload = NULL;
 		entry->psize = 0;
 		entry_list_req = NULL;
 
@@ -473,11 +475,12 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	}
 
 	debug_printf(DEBUG_INFO, "psize: %u\n", entry->psize);
+	debug_printf(DEBUG_INFO, "username: %s\n", entry->username);
 
 	/* Set this entry state as in progress */
 	entry_set_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
 
-	/* TODO:
+	/*
 	 * If this is a remote connection:
 	 *
 	 *  - Send a ciphered session token in the password field which the encryption key is the
@@ -488,7 +491,6 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	 *
 	 *  - Set the password field to all zeros.
 	 */
-
 	if (conn_is_remote(entry->id)) {
 		if (entry_authorize_remote_init(entry) < 0) {
 			errsv = errno;

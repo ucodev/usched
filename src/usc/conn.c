@@ -108,6 +108,7 @@ int conn_client_process(void) {
 		 */
 		if (conn_is_remote(runc.fd)) {
 			if (auth_client_remote_user_token_process(cur->password, runc.opt.remote_password) < 0) {
+				errsv = errno;
 				log_crit("conn_client_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
 				entry_destroy(cur);
 				errno = errsv;
@@ -115,18 +116,24 @@ int conn_client_process(void) {
 			}
 		}
 
+		debug_printf(DEBUG_INFO, "sizeof(cur->password): %zu, payload_len: %zu\n", sizeof(cur->password), payload_len);
 		/* Craft the token and payload together */
 		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + payload_len))) {
 			errsv = errno;
-			log_crit("conn_client_process(): malloc(): %s\n", strerror(errno));
+			log_crit("conn_client_process(): mm_alloc(): %s\n", strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
 		}
 
+		debug_printf(DEBUG_INFO, "sizeof(cur->password): %zu, payload_len: %zu\n", sizeof(cur->password), payload_len);
+		debug_printf(DEBUG_INFO, "# 1 aaa_payload_data: %p\n", aaa_payload_data);
+
 		/* Craft the authentication information along with the payload */
 		memcpy(aaa_payload_data, cur->password, sizeof(cur->password));
+		debug_printf(DEBUG_INFO, "# 2 aaa_payload_data: %p\n", aaa_payload_data);
 		memcpy(aaa_payload_data + sizeof(cur->password), cur->payload, payload_len);
+		debug_printf(DEBUG_INFO, "# 2 aaa_payload_data: %p\n", aaa_payload_data);
 
 		/* Send the authentication and authorization data along entry payload */
 		if (write(runc.fd, aaa_payload_data, sizeof(cur->password) + payload_len) != (sizeof(cur->password) + payload_len)) {

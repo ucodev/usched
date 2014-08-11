@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface
  *
- * Date: 16-07-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,6 +27,7 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <pthread.h>
 
 #include "runtime.h"
 #include "bitops.h"
@@ -35,14 +36,26 @@
 
 static void _sig_term_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE);
+
+	/* Cancel active threads */
+	pthread_cancel(rund.t_unix);
+	pthread_cancel(rund.t_remote);
 }
 
 static void _sig_hup_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD);
+
+	/* Cancel active threads */
+	pthread_cancel(rund.t_unix);
+	pthread_cancel(rund.t_remote);
 }
 
 static void _sig_usr1_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH);
+
+	/* Cancel active threads */
+	pthread_cancel(rund.t_unix);
+	pthread_cancel(rund.t_remote);
 }
 
 static void _sig_pipe_daemon_handler(int n) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Memory Management interface
  *
- * Date: 24-06-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -26,8 +26,6 @@
 
 
 #include <stdlib.h>
-
-#undef USE_LIBFSMA
 
 #ifdef USE_LIBFSMA
  #include <fsma/fsma.h>

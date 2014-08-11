@@ -131,7 +131,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 		}
 
 		if (_conn_daemon_process_fd(fd) < 0) {
-			log_warn("conn_daemon_process_accept_unix(): _conn_daemon_process(): %s\n", strerror(errno));
+			log_warn("conn_daemon_process_accept_unix(): _conn_daemon_process_fd(): %s\n", strerror(errno));
 			continue;
 		}
 	}
@@ -156,7 +156,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 		}
 
 		if (_conn_daemon_process_fd(fd) < 0) {
-			log_warn("conn_daemon_process_accept_remote(): _conn_daemon_process(): %s\n", strerror(errno));
+			log_warn("conn_daemon_process_accept_remote(): _conn_daemon_process_fd(): %s\n", strerror(errno));
 			continue;
 		}
 	}
@@ -168,24 +168,23 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 
 int conn_daemon_process_all(void) {
 	int errsv = 0;
-	pthread_t t_unix, t_remote;
 
-	if (pthread_create(&t_unix, NULL, _conn_daemon_process_accept_unix, NULL)) {
+	if (pthread_create(&rund.t_unix, NULL, _conn_daemon_process_accept_unix, NULL)) {
 		errsv = errno;
 		log_crit("conn_daemon_process_all(): pthread_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (pthread_create(&t_remote, NULL, _conn_daemon_process_accept_remote, NULL)) {
+	if (pthread_create(&rund.t_remote, NULL, _conn_daemon_process_accept_remote, NULL)) {
 		errsv = errno;
 		log_crit("conn_daemon_process_all(): pthread_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	pthread_join(t_unix, NULL);
-	pthread_join(t_remote, NULL);
+	pthread_join(rund.t_unix, NULL);
+	pthread_join(rund.t_remote, NULL);
 
 	return 0;
 }

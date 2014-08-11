@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 03-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -199,7 +199,7 @@ int runtime_daemon_init(int argc, char **argv) {
 }
 
 int runtime_daemon_interrupted(void) {
-	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD))
+	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH))
 		return 1;
 
 	return 0;

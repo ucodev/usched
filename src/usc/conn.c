@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 11-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -116,7 +116,6 @@ int conn_client_process(void) {
 			}
 		}
 
-		debug_printf(DEBUG_INFO, "sizeof(cur->password): %zu, payload_len: %zu\n", sizeof(cur->password), payload_len);
 		/* Craft the token and payload together */
 		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + payload_len))) {
 			errsv = errno;
@@ -126,14 +125,9 @@ int conn_client_process(void) {
 			return -1;
 		}
 
-		debug_printf(DEBUG_INFO, "sizeof(cur->password): %zu, payload_len: %zu\n", sizeof(cur->password), payload_len);
-		debug_printf(DEBUG_INFO, "# 1 aaa_payload_data: %p\n", aaa_payload_data);
-
 		/* Craft the authentication information along with the payload */
 		memcpy(aaa_payload_data, cur->password, sizeof(cur->password));
-		debug_printf(DEBUG_INFO, "# 2 aaa_payload_data: %p\n", aaa_payload_data);
 		memcpy(aaa_payload_data + sizeof(cur->password), cur->payload, payload_len);
-		debug_printf(DEBUG_INFO, "# 2 aaa_payload_data: %p\n", aaa_payload_data);
 
 		/* Send the authentication and authorization data along entry payload */
 		if (write(runc.fd, aaa_payload_data, sizeof(cur->password) + payload_len) != (sizeof(cur->password) + payload_len)) {

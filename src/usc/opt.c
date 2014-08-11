@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "usage.h"
 #include "opt.h"
 
@@ -140,6 +141,16 @@ int opt_client_process(int argc, char **argv, struct usched_opt_client *opt_clie
 			return -1;
 		}
 	}
+
+	/* If there are arguments, we must grant that they make sense */
+	if ((optind != 1) && (!opt_client->remote_hostname[0] || !opt_client->remote_username || !opt_client->remote_password)) {
+		usage_client_show();
+		return -1;
+	}
+
+	/* Set the default port if not defined */
+	if (!opt_client->remote_port[0])
+		memcpy(opt_client->remote_port, CONFIG_USCHED_NET_DEFAULT_PORT, sizeof(CONFIG_USCHED_NET_DEFAULT_PORT));
 
 	return optind;
 }

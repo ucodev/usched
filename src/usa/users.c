@@ -92,7 +92,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Remove the leading '=' from the encoded_salt */
-	while (encoded_salt[esalt_out_len - 1] == (unsigned char) '=')
+	for (-- esalt_out_len; encoded_salt[esalt_out_len - 1] == (unsigned char) '='; )
 		encoded_salt[-- esalt_out_len] = 0;
 
 	/* Encode the digest */
@@ -104,7 +104,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Remove the leading '=' from the encoded_digest */
-	while (encoded_digest[edigest_out_len - 1] == (unsigned char) '=')
+	for (-- edigest_out_len; encoded_digest[edigest_out_len - 1] == (unsigned char) '='; )
 		encoded_digest[-- edigest_out_len] = 0;
 
 	/* Allocate enough memory for the final result */

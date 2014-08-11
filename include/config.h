@@ -35,6 +35,7 @@
 #define CONFIG_USCHED_DEBUG			1
 #define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/bash"
 #define CONFIG_USCHED_DIR_BASE			"/etc/usched"
+#define CONFIG_USCHED_NET_DEFAULT_PORT		"7600"
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"
 #define CONFIG_USCHED_DIR_NETWORK		"network"

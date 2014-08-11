@@ -46,7 +46,14 @@
 int conn_client_init(void) {
 	int errsv = 0;
 
-	if ((runc.fd = panet_client_unix(runc.config.network.sock_named, PANET_PROTO_UNIX_STREAM)) < 0) {
+	if (runc.opt.remote_hostname[0]) {
+		if ((runc.fd = panet_client_ipv4(runc.opt.remote_hostname, runc.opt.remote_port, PANET_PROTO_TCP, 5)) < 0) {
+			errsv = errno;
+			log_crit("conn_client_init(): panet_client_ipv4(): %s\n", strerror(errno));
+			errsv = errno;
+			return -1;
+		}
+	} else if ((runc.fd = panet_client_unix(runc.config.network.sock_named, PANET_PROTO_UNIX_STREAM)) < 0) {
 		errsv = errno;
 		log_crit("conn_client_init(): panet_client_unix(): %s\n", strerror(errno));
 		errno = errsv;
@@ -75,6 +82,10 @@ int conn_client_process(void) {
 		cur->expire = htonl(cur->expire);
 		cur->psize = htonl(cur->psize);
 
+		/* Set username */
+		strcpy(cur->username, runc.opt.remote_username);
+
+		/* Send the first entry block */
 		if (write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
 			errsv = errno;
 			log_crit("conn_client_process(): write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
@@ -96,7 +107,7 @@ int conn_client_process(void) {
 		 * and rewrite it with authentication information.
 		 */
 		if (conn_is_remote(runc.fd)) {
-			if (auth_client_remote_user_token_process(cur->password, "TODO") < 0) {
+			if (auth_client_remote_user_token_process(cur->password, runc.opt.remote_password) < 0) {
 				log_crit("conn_client_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
 				entry_destroy(cur);
 				errno = errsv;

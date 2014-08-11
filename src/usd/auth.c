@@ -45,7 +45,7 @@ int auth_daemon_local(int fd, uid_t *uid, gid_t *gid) {
 
 	if (local_fd_peer_cred(fd, uid, gid) < 0) {
 		errsv = errno;
-		log_warn("auth_local(): local_fd_peer_cred(): %s\n", strerror(errno));
+		log_warn("auth_daemon_local(): local_fd_peer_cred(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -63,7 +63,7 @@ int auth_daemon_remote_user_token_verify(
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
 	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
-	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512];
+	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 1];
 	size_t out_len = 0;
 
 	/* Get userinfo data from current configuration */
@@ -86,7 +86,7 @@ int auth_daemon_remote_user_token_verify(
 	}
 
 	/* Decode the base64 encoded password hash from current configuration */
-	if (!decode_buffer_base64(pwhash_s, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
+	if (!decode_buffer_base64(pwhash_s, (size_t [1]) { sizeof(pwhash_s) }, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_verify(): decode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -111,7 +111,7 @@ int auth_daemon_remote_user_token_verify(
 int auth_daemon_remote_user_token_create(const char *username, char *password, char *token) {
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
-	unsigned char salt[8], pwhash[HASH_DIGEST_SIZE_SHA512];
+	unsigned char salt[9], pwhash[HASH_DIGEST_SIZE_SHA512 + 1];
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20], nonce[CRYPT_NONCE_SIZE_XSALSA20];
 	size_t out_len = 0;
 
@@ -123,7 +123,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Decode user password salt from base64 */
-	if (!decode_buffer_base64(salt, &out_len, (unsigned char *) userinfo->salt, strlen(userinfo->salt))) {
+	if (!decode_buffer_base64(salt, (size_t [1]) { sizeof(salt) }, (unsigned char *) userinfo->salt, strlen(userinfo->salt))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): decode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -131,7 +131,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Decode user password hash from base64 */
-	if (!decode_buffer_base64(pwhash, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
+	if (!decode_buffer_base64(pwhash, (size_t [1]) { sizeof(pwhash) }, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): decode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
@@ -155,7 +155,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Shrink the password hash with a blake2s digest in order to match the encryption key size */
-	if (!hash_buffer_blake2s(key, pwhash, sizeof(pwhash))) {
+	if (!hash_buffer_blake2s(key, pwhash, sizeof(pwhash) - 1)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): hash_buffer_blake2s(): %s\n", strerror(errno));
 		errno = errsv;
@@ -163,7 +163,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + sizeof(salt) + sizeof(nonce)), &out_len, (unsigned char *) token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + (sizeof(salt) - 1) + sizeof(nonce)), &out_len, (unsigned char *) token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;

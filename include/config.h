@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 01-08-2014
+ * Date: 11-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -66,7 +66,7 @@
 #define CONFIG_USCHED_MONITOR_PROC_NAME		"usm"
 #define CONFIG_USCHED_LOG_MSG_MAX_SIZE		1024
 #define CONFIG_USCHED_AUTH_USERNAME_MAX		32
-#define CONFIG_USCHED_AUTH_PASSWORD_MAX		128
+#define CONFIG_USCHED_AUTH_PASSWORD_MAX		80
 #define CONFIG_USCHED_HASH_FNV1A		1
 /* #define CONFIG_USCHED_HASH_DJB2		1 */
 

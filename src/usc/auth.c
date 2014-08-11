@@ -29,7 +29,6 @@
 #include <errno.h>
 
 #include <psec/crypt.h>
-#include <psec/decode.h>
 #include <psec/generate.h>
 #include <psec/hash.h>
 #include <psec/kdf.h>

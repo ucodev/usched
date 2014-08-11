@@ -69,7 +69,10 @@ static void _loop(int argc, char **argv) {
 
 	for (;;) {
 		/* Process connections */
-		conn_daemon_process();
+		if (conn_daemon_process_all() < 0) {
+			log_crit("_loop(): conn_daemon_process_all(): %s", strerror(errno));
+			break;
+		}
 
 		/* Check for runtime interruptions */
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE))

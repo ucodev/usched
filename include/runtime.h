@@ -92,7 +92,8 @@ struct usched_runtime_daemon {
 	int argc;
 	char **argv;
 
-	sock_t fd;
+	sock_t fd_unix;
+	sock_t fd_remote;
 	usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 

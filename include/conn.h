@@ -57,7 +57,7 @@ int conn_client_init(void);
 int conn_client_process(void);
 void conn_client_destroy(void);
 int conn_daemon_init(void);
-void conn_daemon_process(void);
+int conn_daemon_process_all(void);
 void conn_daemon_destroy(void);
 int conn_is_local(int fd);
 int conn_is_remote(int fd);

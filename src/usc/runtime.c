@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 06-08-2014
+ * Date: 11-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,7 +45,7 @@
 
 
 int runtime_client_init(int argc, char **argv) {
-	int errsv = 0;
+	int errsv = 0, opt_index = 0;
 
 	memset(&runc, 0, sizeof(struct usched_runtime_client));
 
@@ -69,8 +69,25 @@ int runtime_client_init(int argc, char **argv) {
 		return -1;
 	}
 
+	/* Parse command line options */
+	if ((opt_index = opt_client_process(argc, argv, &runc.opt)) < 0) {
+		errsv = errno;
+		log_crit("runtime_client_init(): opt_client_process(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check if this is a help request (opt_index is 0) */
+	if (!opt_index) {
+		config_client_destroy();
+		log_destroy();
+		exit(EXIT_SUCCESS);
+	}
+
+	debug_printf(DEBUG_INFO, "opt_index: %d\n", opt_index);
+
 	/* Parse requested command line instruction */
-	if (!(runc.req = parse_client_instruction_array(argc - 1, &argv[1]))) {
+	if (!(runc.req = parse_client_instruction_array(argc - opt_index, &argv[opt_index]))) {
 		errsv = errno;
 		usage_client_show();
 		errno = errsv;

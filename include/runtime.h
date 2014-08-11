@@ -39,6 +39,7 @@
 
 #include "usched.h"
 #include "usage.h"
+#include "opt.h"
 
 /* Flags */
 typedef enum USCHED_RUNTIME_FLAGS {
@@ -82,6 +83,9 @@ struct usched_runtime_client {
 	struct sigaction sa_save;
 
 	struct usched_config config;
+
+	/* Command line options */
+	struct usched_opt_client opt;
 };
 
 struct usched_runtime_daemon {

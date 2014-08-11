@@ -4,8 +4,8 @@ CCFLAGS=-fPIC -DUSE_LIBFSMA -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRA
 LDFLAGS=-g -pthread -lpall -lfsma -lfsop -lpanet -lpsec
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/sig.o ../common/thread.o
-OBJS_LIB=config.o conn.o entry.o lib.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
-OBJS_CLIENT=auth.o config.o client.o conn.o entry.o logic.o op.o parse.o pool.o print.o process.o runtime.o usage.o
+OBJS_LIB=config.o conn.o entry.o lib.o logic.o op.o opt.o parse.o pool.o print.o process.o runtime.o usage.o
+OBJS_CLIENT=auth.o config.o client.o conn.o entry.o logic.o op.o opt.o parse.o pool.o print.o process.o runtime.o usage.o
 TARGET_LIB=libusc.so
 TARGET_CLIENT=usc
 
@@ -18,6 +18,7 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c lib.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c logic.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c op.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c opt.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c parse.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c pool.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${INCLUDEDIRS} -c print.c

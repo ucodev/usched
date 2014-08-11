@@ -90,7 +90,14 @@ static void _usage_client_error_print(void) {
 void usage_client_show(void) {
 	_usage_client_error_print();
 		
-	fprintf(stderr, "Usage: %s OP SUBJ { PREP [ ADVERB ARG | ARG ADVERB ] [ CONJ ... ] }\n", runc.argv[0]);
+	fprintf(stderr, "Usage: %s [ OPTIONS ] OP SUBJ { PREP [ ADVERB ARG | ARG ADVERB ] [ CONJ ... ] }\n", runc.argv[0]);
+	fprintf(stderr, "\n");
+	fprintf(stderr, "\tOPTIONS\n");
+	fprintf(stderr, "\t\t-h\tShow this help.\n");
+	fprintf(stderr, "\t\t-H\tIP Address of the remote server.\n");
+	fprintf(stderr, "\t\t-p\tTCP port of the remote server.\n");
+	fprintf(stderr, "\t\t-U\tUsername for remote authentication.\n");
+	fprintf(stderr, "\t\t-P\tPassword for remote authentication.\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr,     "\tOP\t\trun     | stop     | show\n");
 	fprintf(stderr,   "\tPREP\t\tevery   | in       | now   | on    | to\n");

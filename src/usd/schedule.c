@@ -74,7 +74,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 	}
 
 	/* Install a new scheduling entry based on the current entry parameters */
-	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_pmq_dispatch, entry)) == (pschedid_t) -1) {
+	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 		errsv = errno;
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
 

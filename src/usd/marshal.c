@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 12-07-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -114,7 +114,7 @@ int marshal_daemon_unserialize_pools(void) {
 		}
 			
 		/* Install a new scheduling entry based on the current entry parameters */
-		if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_pmq_dispatch, entry)) == (pschedid_t) -1) {
+		if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 			rund.apool->del(rund.apool, entry);

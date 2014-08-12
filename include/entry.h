@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 11-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -84,12 +84,17 @@ struct usched_entry {
 
 	/* Reserved */
 	pschedid_t psched_id;	/* The libpsched entry identifier */
-	char token[CRYPT_KEY_SIZE_XSALSA20];
+
+	/* Cryptographic Data Context */
+	unsigned char token[CRYPT_KEY_SIZE_XSALSA20];
+	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
 };
 #pragma pack(pop)
 
 /* Prototypes */
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize);
+int entry_client_remote_session_process(struct usched_entry *entry, const char *password);
+int entry_client_payload_encrypt(struct usched_entry *entry);
 void entry_set_id(struct usched_entry *entry, uint32_t id);
 void entry_set_flags(struct usched_entry *entry, uint32_t flags);
 void entry_unset_flags_local(struct usched_entry *entry);
@@ -108,13 +113,14 @@ void entry_unset_payload(struct usched_entry *entry);
 int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len);
 int entry_copy(struct usched_entry *dest, struct usched_entry *src);
 int entry_compare(const void *e1, const void *e2);
-int entry_authorize(struct usched_entry *entry, int fd);
-int entry_authorize_remote_init(struct usched_entry *entry);
-int entry_authorize_remote_verify(struct usched_entry *entry);
-void entry_pmq_dispatch(void *arg);
+int entry_daemon_authorize(struct usched_entry *entry, int fd);
+int entry_daemon_authorize_remote_init(struct usched_entry *entry);
+int entry_daemon_authorize_remote_verify(struct usched_entry *entry);
+int entry_daemon_payload_decrypt(struct usched_entry *entry);
+void entry_daemon_pmq_dispatch(void *arg);
 void entry_destroy(void *elem);
-int entry_serialize(pall_fd_t fd, void *entry);
-void *entry_unserialize(pall_fd_t fd);
+int entry_daemon_serialize(pall_fd_t fd, void *entry);
+void *entry_daemon_unserialize(pall_fd_t fd);
 
 #endif
 

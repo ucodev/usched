@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 11-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,18 +36,21 @@
 #include "log.h"
 #include "auth.h"
 
-int auth_client_remote_user_token_process(char *session_passwd, const char *plain_passwd) {
+int auth_client_remote_user_token_process(
+	char *session_passwd,
+	const char *plain_passwd,
+	unsigned char *nonce,
+	unsigned char *token)
+{
 	int errsv = 0, rounds = 5000;
 	unsigned char salt[8];
 	unsigned char pwhash[HASH_DIGEST_SIZE_SHA512];
-	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
-	unsigned char token[CRYPT_KEY_SIZE_XSALSA20];
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20];
 	size_t out_len = 0;
 
 	/* Extract salt and nonce from session */
 	memcpy(salt, session_passwd, sizeof(salt));
-	memcpy(nonce, session_passwd + sizeof(salt), sizeof(nonce));
+	memcpy(nonce, session_passwd + sizeof(salt), CRYPT_NONCE_SIZE_XSALSA20);
 
 	/* Create a password hash with the same parameters as remote party */
 	if (!kdf_pbkdf2_hash(pwhash, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (unsigned char *) plain_passwd, strlen(plain_passwd), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512) < 0) {
@@ -66,7 +69,7 @@ int auth_client_remote_user_token_process(char *session_passwd, const char *plai
 	}
 
 	/* Decrypt the token value */
-	if (!crypt_decrypt_xsalsa20(token, &out_len, (unsigned char *) (session_passwd + sizeof(salt) + sizeof(nonce)), CRYPT_KEY_SIZE_XSALSA20 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_decrypt_xsalsa20(token, &out_len, (unsigned char *) (session_passwd + sizeof(salt) + CRYPT_NONCE_SIZE_XSALSA20), CRYPT_KEY_SIZE_XSALSA20 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_client_remote_user_token_process(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -74,7 +77,7 @@ int auth_client_remote_user_token_process(char *session_passwd, const char *plai
 	}
 
 	/* Generate a new nonce value */
-	if (!generate_bytes_random(nonce, sizeof(nonce))) {
+	if (!generate_bytes_random(nonce, CRYPT_NONCE_SIZE_XSALSA20)) {
 		errsv = errno;
 		log_warn("auth_client_remote_user_token_process(): generate_bytes_random(): %s\n", strerror(errno));
 		errno = errsv;
@@ -82,7 +85,7 @@ int auth_client_remote_user_token_process(char *session_passwd, const char *plai
 	}
 
 	/* Encrypt the user password hash with the session token as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (session_passwd + sizeof(nonce)), &out_len, pwhash, sizeof(pwhash), nonce, token)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (session_passwd + CRYPT_NONCE_SIZE_XSALSA20), &out_len, pwhash, sizeof(pwhash), nonce, token)) {
 		errsv = errno;
 		log_warn("auth_client_remote_user_token_process(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -90,7 +93,7 @@ int auth_client_remote_user_token_process(char *session_passwd, const char *plai
 	}
 
 	/* Set nonce value to the head of session */
-	memcpy(session_passwd, nonce, sizeof(nonce));
+	memcpy(session_passwd, nonce, CRYPT_NONCE_SIZE_XSALSA20);
 
 	return 0;
 }

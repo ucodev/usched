@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 10-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -491,10 +491,10 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	 *
 	 *  - Set the password field to all zeros.
 	 */
-	if (conn_is_remote(entry->id)) {
-		if (entry_authorize_remote_init(entry) < 0) {
+	if (conn_is_remote(aop->fd)) {
+		if (entry_daemon_authorize_remote_init(entry) < 0) {
 			errsv = errno;
-			log_warn("process_daemon_recv_create(): entry_authorize_remote_init(): %s\n", strerror(errno));
+			log_warn("process_daemon_recv_create(): entry_daemon_authorize_remote_init(): %s\n", strerror(errno));
 			entry_destroy(entry);
 			errno = errsv;
 			return NULL;
@@ -553,9 +553,9 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	memcpy(entry->password, (void *) aop->data, sizeof(entry->password));
 
 	/* Check if the entry is authorized. If not, authorize it and try to proceed. */
-	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED) && (entry_authorize(entry, aop->fd) < 0)) {
+	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED) && (entry_daemon_authorize(entry, aop->fd) < 0)) {
 		errsv = errno;
-		log_warn("process_daemon_recv_update(): entry_authorize(): %s\n", strerror(errno));
+		log_warn("process_daemon_recv_update(): entry_daemon_authorize(): %s\n", strerror(errno));
 		entry_destroy(entry);
 
 		if (!errsv)
@@ -604,6 +604,17 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 		entry_destroy(entry);
 		errno = errsv;
 		return -1;
+	}
+
+	/* Decrypt payload if this is a remote connection */
+	if (conn_is_remote(aop->fd)) {
+		if (entry_daemon_payload_decrypt(entry) < 0) {
+			errsv = errno;
+			log_warn("process_daemon_recv_update(): entry_daemon_payload_decrypt(): %s\n", strerror(errno));
+			entry_destroy(entry);
+			errno = errsv;
+			return -1;
+		}
 	}
 
 	/* Process specific operation types */

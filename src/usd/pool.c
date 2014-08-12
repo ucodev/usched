@@ -41,7 +41,7 @@ int pool_daemon_init(void) {
 	int errsv = 0;
 
 	/* Initialize active scheduling entries pool */
-	if (!(rund.apool = pall_cll_init(&entry_compare, &entry_destroy, &entry_serialize, &entry_unserialize))) {
+	if (!(rund.apool = pall_cll_init(&entry_compare, &entry_destroy, &entry_daemon_serialize, &entry_daemon_unserialize))) {
 		errsv = errno;
 		log_crit("pool_daemon_init(): rund.apool = pall_cll_init(): %s\n", strerror(errno));
 		errno = errsv;
@@ -52,7 +52,7 @@ int pool_daemon_init(void) {
 	rund.apool->set_config(rund.apool, CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD);
 
 	/* Initialize connection pool */
-	if (!(rund.rpool = pall_cll_init(&entry_compare, &entry_destroy, &entry_serialize, &entry_unserialize))) {
+	if (!(rund.rpool = pall_cll_init(&entry_compare, &entry_destroy, &entry_daemon_serialize, &entry_daemon_unserialize))) {
 		errsv = errno;
 		log_crit("pool_daemon_init(): rund.rpool = pall_cll_init(): %s\n", strerror(errno));
 		errno = errsv;

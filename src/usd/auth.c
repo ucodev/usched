@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 11-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,13 +57,13 @@ int auth_daemon_local(int fd, uid_t *uid, gid_t *gid) {
 int auth_daemon_remote_user_token_verify(
 	const char *username,
 	const char *password,
-	const char *token,
+	unsigned char *nonce,
+	const unsigned char *token,
 	uid_t *uid,
 	gid_t *gid)
 {
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
-	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
 	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 3];
 	size_t out_len = 0;
 
@@ -79,7 +79,7 @@ int auth_daemon_remote_user_token_verify(
 	memcpy(nonce, password, CRYPT_NONCE_SIZE_XSALSA20);
 
 	/* Decrypt client password hash with token as key */
-	if (!crypt_decrypt_xsalsa20(pwhash_c, &out_len, (unsigned char *) (password + CRYPT_NONCE_SIZE_XSALSA20), HASH_DIGEST_SIZE_SHA512 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, (unsigned char *) token)) {
+	if (!crypt_decrypt_xsalsa20(pwhash_c, &out_len, (unsigned char *) (password + CRYPT_NONCE_SIZE_XSALSA20), HASH_DIGEST_SIZE_SHA512 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, token)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_verify(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -111,11 +111,16 @@ int auth_daemon_remote_user_token_verify(
 	return 0;
 }
 
-int auth_daemon_remote_user_token_create(const char *username, char *password, char *token) {
+int auth_daemon_remote_user_token_create(
+	const char *username,
+	char *password,
+	unsigned char *nonce,
+	unsigned char *token)
+{
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
 	unsigned char salt[10], pwhash[HASH_DIGEST_SIZE_SHA512 + 3];
-	unsigned char key[CRYPT_KEY_SIZE_XSALSA20], nonce[CRYPT_NONCE_SIZE_XSALSA20];
+	unsigned char key[CRYPT_KEY_SIZE_XSALSA20];
 	size_t out_len = 0;
 
 	/* Get userinfo data from current configuration */
@@ -146,7 +151,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Generate a random session token */
-	if (!generate_bytes_random((unsigned char *) token, CRYPT_KEY_SIZE_XSALSA20)) {
+	if (!generate_bytes_random(token, CRYPT_KEY_SIZE_XSALSA20)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): generate_bytes_random(): %s\n", strerror(errno));
 		errno = errsv;
@@ -154,7 +159,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Generate a random nonce for encryption */
-	if (!generate_bytes_random(nonce, sizeof(nonce))) {
+	if (!generate_bytes_random(nonce, CRYPT_NONCE_SIZE_XSALSA20)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): generate_bytes_random(): %s\n", strerror(errno));
 		errno = errsv;
@@ -170,7 +175,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + (sizeof(salt) - 2) + sizeof(nonce)), &out_len, (unsigned char *) token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + (sizeof(salt) - 2) + CRYPT_NONCE_SIZE_XSALSA20), &out_len, token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -179,7 +184,7 @@ int auth_daemon_remote_user_token_create(const char *username, char *password, c
 
 	/* Craft session password field */
 	memcpy(password, salt, sizeof(salt) - 2);
-	memcpy(password + sizeof(salt) - 2, nonce, sizeof(nonce));
+	memcpy(password + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
 
 	/* Password contents: | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *

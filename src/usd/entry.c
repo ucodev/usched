@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 11-08-2014
+ * Date: 12-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,9 @@
 
 #include <sys/types.h>
 
+#include <psec/crypt.h>
+
+#include "debug.h"
 #include "config.h"
 #include "usched.h"
 #include "runtime.h"
@@ -44,12 +47,12 @@
 #include "conn.h"
 #include "schedule.h"
 
-static int _entry_authorize_local(struct usched_entry *entry, int fd) {
+static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 	int errsv = 0;
 
 	if (auth_daemon_local(fd, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
-		log_warn("entry_authorize_local(): auth_local(): %s\n", strerror(errno));
+		log_warn("entry_daemon_authorize_local(): auth_local(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -59,13 +62,13 @@ static int _entry_authorize_local(struct usched_entry *entry, int fd) {
 	return 1;
 }
 
-static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
+static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
 	int errsv = 0;
 
 	/* Validate session data and compare user password hash */
-	if (entry_authorize_remote_verify(entry) < 0) {
+	if (entry_daemon_authorize_remote_verify(entry) < 0) {
 		errsv = errno;
-		log_warn("_entry_authorize_remote(): entry_authorize_remote_verify(): %s\n", strerror(errno));
+		log_warn("_entry_daemon_authorize_remote(): entry_daemon_authorize_remote_verify(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -75,17 +78,17 @@ static int _entry_authorize_remote(struct usched_entry *entry, int fd) {
 	return 1;
 }
 
-int entry_authorize(struct usched_entry *entry, int fd) {
+int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	int errsv = 0;
 	int ret = -1;
 
 	if ((ret = conn_is_local(fd)) < 0) {
-		log_warn("entry_authorize(): conn_is_local(): %s\n", strerror(errno));
+		log_warn("entry_daemon_authorize(): conn_is_local(): %s\n", strerror(errno));
 		return -1;
 	} else if (ret == 1) {
-		if ((ret = _entry_authorize_local(entry, fd)) < 0) {
+		if ((ret = _entry_daemon_authorize_local(entry, fd)) < 0) {
 			errsv = errno;
-			log_warn("entry_authorize(): entry_authorize_local(): %s\n", strerror(errno));
+			log_warn("entry_daemon_authorize(): entry_daemon_authorize_local(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -93,13 +96,13 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 		return ret;	/* ret == 1: Authorized, ret == 0: Not authorized (connection will timeout) */
 	} else if ((ret = conn_is_remote(fd)) < 0) {
 		errsv = errno;
-		log_warn("entry_authorize(): conn_is_remote(): %s\n", strerror(errno));
+		log_warn("entry_daemon_authorize(): conn_is_remote(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	} else if (ret == 1) {
-		if ((ret = _entry_authorize_remote(entry, fd)) < 0) {
+		if ((ret = _entry_daemon_authorize_remote(entry, fd)) < 0) {
 			errsv = errno;
-			log_warn("entry_authorize(): entry_authorize_remote(): %s\n", strerror(errno));
+			log_warn("entry_daemon_authorize(): entry_daemon_authorize_remote(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -112,22 +115,48 @@ int entry_authorize(struct usched_entry *entry, int fd) {
 	return -1;	/* Not authorized. No authentication mechanism available */
 }
 
-int entry_authorize_remote_init(struct usched_entry *entry) {
-	return auth_daemon_remote_user_token_create(entry->username, entry->password, entry->token);
+int entry_daemon_authorize_remote_init(struct usched_entry *entry) {
+	return auth_daemon_remote_user_token_create(entry->username, entry->password, entry->nonce, entry->token);
 }
 
-int entry_authorize_remote_verify(struct usched_entry *entry) {
-	return auth_daemon_remote_user_token_verify(entry->username, entry->password, entry->token, &entry->uid, &entry->gid);
+int entry_daemon_authorize_remote_verify(struct usched_entry *entry) {
+	return auth_daemon_remote_user_token_verify(entry->username, entry->password, entry->nonce, entry->token, &entry->uid, &entry->gid);
 }
 
-void entry_pmq_dispatch(void *arg) {
+int entry_daemon_payload_decrypt(struct usched_entry *entry) {
+	int errsv = 0;
+	unsigned char *payload_dec = NULL;
+	size_t out_len = 0;
+
+	/* Decrypt payload */
+	if (!(payload_dec = crypt_decrypt_xsalsa20(NULL, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
+		errsv = errno;
+		log_warn("entry_daemon_payload_decrypt(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set payload size */
+	entry->psize = out_len;
+
+	/* Free encrypted payload */
+	mm_free(entry->payload);
+
+	/* Set the new payload */
+	entry->payload = (char *) payload_dec;
+
+	/* All good */
+	return 0;
+}
+
+void entry_daemon_pmq_dispatch(void *arg) {
 	int errsv = 0;
 	char *buf;
 	struct usched_entry *entry = arg;
 
 	if (!(buf = mm_alloc(rund.config.core.pmq_msgsize))) {
 		errsv = errno;
-		log_warn("entry_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("entry_daemon_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		goto _finish;
 	}
@@ -136,13 +165,13 @@ void entry_pmq_dispatch(void *arg) {
 
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
-		log_warn("entry_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
+		log_warn("entry_daemon_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
 		errno = EACCES;
 		goto _finish;
 	}
 
 	if ((strlen(entry->subj) + 17) > rund.config.core.pmq_msgsize) {
-		log_warn("entry_pmq_dispatch(): msg_size > sizeof(buf)\n");
+		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
 		errno = EMSGSIZE;
 		goto _finish;
 	}
@@ -154,7 +183,7 @@ void entry_pmq_dispatch(void *arg) {
 
 	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
 		errsv = errno;
-		log_warn("entry_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
+		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
 		errno = errsv;
 		/* TODO: We should not delete this entry from active pool if we're unable to write the pqueue of
 		 * the execution process. We should put this entries in some sort of local queue and wait for the
@@ -183,7 +212,7 @@ _finish:
 	mm_free(buf);
 }
 
-int entry_serialize(pall_fd_t fd, void *data) {
+int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	int errsv = 0;
 	struct usched_entry *entry = data;
 
@@ -219,7 +248,7 @@ int entry_serialize(pall_fd_t fd, void *data) {
 _serialize_error:
 	errsv = errno;
 
-	log_warn("entry_serialize(): write(): %s\n", strerror(errno));
+	log_warn("entry_daemon_serialize(): write(): %s\n", strerror(errno));
 
 	errno = errsv;
 
@@ -227,13 +256,13 @@ _serialize_error:
 
 }
 
-void *entry_unserialize(pall_fd_t fd) {
+void *entry_daemon_unserialize(pall_fd_t fd) {
 	int errsv = 0;
 	struct usched_entry *entry = NULL;
 
 	if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
 		errsv = errno;
-		log_warn("entry_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return NULL;
 	}
@@ -266,7 +295,7 @@ void *entry_unserialize(pall_fd_t fd) {
 
 	if (!(entry->subj = mm_alloc(entry->subj_size + 1))) {
 		errsv = errno;
-		log_warn("entry_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
 		entry_destroy(entry);
 		errno = errsv;
 		return NULL;
@@ -282,7 +311,7 @@ void *entry_unserialize(pall_fd_t fd) {
 _unserialize_error:
 	errsv = errno;
 
-	log_warn("entry_unserialize(): read(): %s\n", strerror(errno));
+	log_warn("entry_daemon_unserialize(): read(): %s\n", strerror(errno));
 
 	entry_destroy(entry);
 

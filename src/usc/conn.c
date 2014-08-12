@@ -32,6 +32,8 @@
 
 #include <panet/panet.h>
 
+#include <psec/crypt.h>
+
 #include "debug.h"
 #include "config.h"
 #include "mm.h"
@@ -40,7 +42,6 @@
 #include "log.h"
 #include "print.h"
 #include "process.h"
-#include "auth.h"
 
 
 int conn_client_init(void) {
@@ -66,11 +67,11 @@ int conn_client_init(void) {
 int conn_client_process(void) {
 	int errsv = 0, ret = 0;
 	struct usched_entry *cur = NULL;
-	size_t payload_len = 0;
 	char *aaa_payload_data = NULL;
 
 	while ((cur = runc.epool->pop(runc.epool))) {
-		payload_len = cur->psize;
+		if (conn_is_remote(runc.fd))
+			cur->psize += CRYPT_EXTRA_SIZE_XSALSA20,
 
 		/* Convert endianness to network byte order */
 		cur->id = htonll(cur->id);
@@ -94,6 +95,16 @@ int conn_client_process(void) {
 			return -1;
 		}
 
+		/* Convert endianness to host byte order */
+		cur->id = ntohll(cur->id);
+		cur->flags = ntohl(cur->flags);
+		cur->uid = ntohl(cur->uid);
+		cur->gid = ntohl(cur->gid);
+		cur->trigger = ntohl(cur->trigger);
+		cur->step = ntohl(cur->step);
+		cur->expire = ntohl(cur->expire);
+		cur->psize = ntohl(cur->psize);
+
 		/* Read the session token into the password field for further processing */
 		if (read(runc.fd, cur->password, sizeof(cur->password)) != sizeof(cur->password)) {
 			errsv = errno;
@@ -107,9 +118,21 @@ int conn_client_process(void) {
 		 * and rewrite it with authentication information.
 		 */
 		if (conn_is_remote(runc.fd)) {
-			if (auth_client_remote_user_token_process(cur->password, runc.opt.remote_password) < 0) {
+			/* Process remote session data */
+			if (entry_client_remote_session_process(cur, runc.opt.remote_password) < 0) {
 				errsv = errno;
-				log_crit("conn_client_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
+				log_crit("conn_client_process(): entry_client_remote_session__process(): %s\n", strerror(errno));
+				entry_destroy(cur);
+				errno = errsv;
+				return -1;
+			}
+
+			/* Encrypt payload */
+			cur->psize -= CRYPT_EXTRA_SIZE_XSALSA20; /* Set original payload size */
+
+			if (entry_client_payload_encrypt(cur) < 0) {
+				errsv = errno;	
+				log_crit("conn_client_process(): entry_client_payload_encrypt(): %s\n", strerror(errno));
 				entry_destroy(cur);
 				errno = errsv;
 				return -1;
@@ -117,7 +140,7 @@ int conn_client_process(void) {
 		}
 
 		/* Craft the token and payload together */
-		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + payload_len))) {
+		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + cur->psize))) {
 			errsv = errno;
 			log_crit("conn_client_process(): mm_alloc(): %s\n", strerror(errno));
 			entry_destroy(cur);
@@ -127,12 +150,12 @@ int conn_client_process(void) {
 
 		/* Craft the authentication information along with the payload */
 		memcpy(aaa_payload_data, cur->password, sizeof(cur->password));
-		memcpy(aaa_payload_data + sizeof(cur->password), cur->payload, payload_len);
+		memcpy(aaa_payload_data + sizeof(cur->password), cur->payload, cur->psize);
 
 		/* Send the authentication and authorization data along entry payload */
-		if (write(runc.fd, aaa_payload_data, sizeof(cur->password) + payload_len) != (sizeof(cur->password) + payload_len)) {
+		if (write(runc.fd, aaa_payload_data, sizeof(cur->password) + cur->psize) != (sizeof(cur->password) + cur->psize)) {
 			errsv = errno;
-			log_crit("conn_client_process(): write() != (sizeof(cur->password) + payload_len): %s\n", strerror(errno));
+			log_crit("conn_client_process(): write() != (sizeof(cur->password) + cur->psize): %s\n", strerror(errno));
 			entry_destroy(cur);
 			mm_free(aaa_payload_data);
 			errno = errsv;
@@ -140,18 +163,8 @@ int conn_client_process(void) {
 		}
 
 		/* Reset and free aaa_payload_data */
-		memset(aaa_payload_data, 0, sizeof(cur->password) + payload_len);
+		memset(aaa_payload_data, 0, sizeof(cur->password) + cur->psize);
 		mm_free(aaa_payload_data);
-
-		/* Revert endianness back to host byte order */
-		cur->id = ntohll(cur->id);
-		cur->flags = ntohl(cur->flags);
-		cur->uid = ntohl(cur->uid);
-		cur->gid = ntohl(cur->gid);
-		cur->trigger = ntohl(cur->trigger);
-		cur->step = ntohl(cur->step);
-		cur->expire = ntohl(cur->expire);
-		cur->psize = ntohl(cur->psize);
 
 		/* Process the response */
 		if (entry_has_flag(cur, USCHED_ENTRY_FLAG_NEW)) {
@@ -161,6 +174,7 @@ int conn_client_process(void) {
 		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_GET)) {
 			ret = process_client_recv_show();
 		} else {
+			log_warn("conn_client_process(): Unexpected value found in entry->flags\n");
 			errno = EINVAL;
 			ret = -1;
 		}

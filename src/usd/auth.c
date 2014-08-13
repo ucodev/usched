@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 12-08-2014
+ * Date: 13-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -86,7 +86,12 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
-	/* TODO: Grant that userinfo->password doesn't exceed the expected length */
+	/* Grant that userinfo->password doesn't exceed the expected length */
+	if (decode_size_base64(strlen(userinfo->password)) > sizeof(pwhash_s)) {
+		log_warn("auth_daemon_remote_user_token_verify(): pwhash_s buffer is too small to receive the decoded user password.\n");
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Decode the base64 encoded password hash from current configuration */
 	if (!decode_buffer_base64(pwhash_s, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
@@ -130,7 +135,12 @@ int auth_daemon_remote_user_token_create(
 		return -1;
 	}
 
-	/* TODO: Grant that userinfo->salt doesn't exceed the expected length */
+	/* Grant that userinfo->salt doesn't exceed the expected length */
+	if (decode_size_base64(strlen(userinfo->salt)) > sizeof(salt)) {
+		log_warn("auth_daemon_remote_user_token_verify(): salt buffer is too small to receive the decoded user salt.\n");
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Decode user password salt from base64 */
 	if (!decode_buffer_base64(salt, &out_len, (unsigned char *) userinfo->salt, strlen(userinfo->salt))) {
@@ -140,7 +150,12 @@ int auth_daemon_remote_user_token_create(
 		return -1;
 	}
 
-	/* TODO: Grant that userinfo->password doesn't exceed the expected length */
+	/* Grant that userinfo->password doesn't exceed the expected length */
+	if (decode_size_base64(strlen(userinfo->password)) > sizeof(pwhash)) {
+		log_warn("auth_daemon_remote_user_token_verify(): pwhash buffer is too small to receive the decoded user password.\n");
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Decode user password hash from base64 */
 	if (!decode_buffer_base64(pwhash, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 06-08-2014
+ * Date: 13-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -86,6 +86,50 @@ int usched_init(void) {
 
 int usched_request(char *req) {
 	return _do(req);
+}
+
+int usched_opt_set_remote_hostname(char *hostname) {
+	if (strlen(hostname) >= sizeof(runc.opt.remote_hostname)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	strcpy(runc.opt.remote_hostname, hostname);
+
+	return 0;
+}
+
+int usched_opt_set_remote_port(char *port) {
+	if (strlen(port) >= sizeof(runc.opt.remote_port)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	strcpy(runc.opt.remote_port, port);
+
+	return 0;
+}
+
+int usched_opt_set_remote_username(char *username) {
+	if (strlen(username) >= sizeof(runc.opt.remote_username)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	strcpy(runc.opt.remote_username, username);
+
+	return 0;
+}
+
+int usched_opt_set_remote_password(char *password) {
+	if (strlen(password) >= sizeof(runc.opt.remote_password)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	strcpy(runc.opt.remote_password, password);
+
+	return 0;
 }
 
 void usched_result_get_run(uint64_t **entry_list, size_t *nmemb) {

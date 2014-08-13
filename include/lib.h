@@ -3,7 +3,7 @@
  * @brief uSched
  *        Client Library interface header
  *
- * Date: 25-06-2014
+ * Date: 13-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,6 +36,10 @@
 /* Library Interface Prototypes */
 int usched_init(void);
 int usched_request(char *req);
+int usched_opt_set_remote_hostname(char *hostname);
+int usched_opt_set_remote_port(char *port);
+int usched_opt_set_remote_username(char *username);
+int usched_opt_set_remote_password(char *password);
 void usched_result_get_run(uint64_t **entry_list, size_t *nmemb);
 void usched_result_get_stop(uint64_t **entry_list, size_t *nmemb);
 void usched_result_get_show(struct usched_entry **entry_list, size_t *nmemb);

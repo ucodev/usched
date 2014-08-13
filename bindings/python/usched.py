@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched Python Library Module
 #
-# Date: 30-07-2014
+# Date: 13-08-2014
 # 
 # Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -34,6 +34,10 @@ libusc = CDLL("libusc.so")
 # C to Python bindings
 usched_init = libusc.usched_init
 usched_request = libusc.usched_request
+usched_opt_set_remote_hostname = libusc.usched_opt_set_remote_hostname
+usched_opt_set_remote_port = libusc.usched_opt_set_remote_port
+usched_opt_set_remote_username = libusc.usched_opt_set_remote_username
+usched_opt_set_remote_password = libusc.usched_opt_set_remote_password
 usched_result_get_run = libusc.usched_result_get_run
 usched_result_get_stop = libusc.usched_result_get_stop
 usched_result_get_show = libusc.usched_result_get_show

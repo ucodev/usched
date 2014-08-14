@@ -128,10 +128,19 @@ int entry_daemon_payload_decrypt(struct usched_entry *entry) {
 	unsigned char *payload_dec = NULL;
 	size_t out_len = 0;
 
+	/* Alloc memory for decrypted payload */
+	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_XSALSA20))) {
+		errsv = errno;
+		log_warn("entry_daemon_payload_decrypt(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Decrypt payload */
-	if (!(payload_dec = crypt_decrypt_xsalsa20(NULL, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
+	if (!(crypt_decrypt_xsalsa20(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
 		errsv = errno;
 		log_warn("entry_daemon_payload_decrypt(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
+		mm_free(payload_dec);
 		errno = errsv;
 		return -1;
 	}

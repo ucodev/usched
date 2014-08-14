@@ -1,7 +1,7 @@
 /**
- * @file opt.h
+ * @file input.h
  * @brief uSched
- *        Optional arguments interface header
+ *        Terminal input interface header
  *
  * Date: 14-08-2014
  * 
@@ -24,22 +24,10 @@
  *
  */
 
-#ifndef USCHED_OPT_H
-#define USCHED_OPT_H
+#ifndef USCHED_INPUT_H
+#define USCHED_INPUT_H
 
-struct usched_opt_client {
-	/* Command line options */
-	char remote_hostname[256];	/* IPv4 (15 bytes + 1 '\0')
-					 * IPv6 (39 bytes + 1 '\0')
-					 * Hostname (max 255 bytes + 1 '\0')
-					 */
-	char remote_port[6];		/* 5 digits (5 bytes + 1 '\0') */
-	char remote_username[32];	/* Max 32 bytes */
-	char remote_password[128];	/* Max 128 bytes */
-};
-
-/* Prototypes */
-int opt_client_process(int argc, char **argv, struct usched_opt_client *opt_client);
+int input_password(char *password, size_t max_len);
 
 #endif
 

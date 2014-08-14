@@ -1,7 +1,7 @@
 /**
- * @file opt.h
+ * @file term.h
  * @brief uSched
- *        Optional arguments interface header
+ *        Terminal attributes control interface header
  *
  * Date: 14-08-2014
  * 
@@ -24,22 +24,27 @@
  *
  */
 
-#ifndef USCHED_OPT_H
-#define USCHED_OPT_H
 
-struct usched_opt_client {
-	/* Command line options */
-	char remote_hostname[256];	/* IPv4 (15 bytes + 1 '\0')
-					 * IPv6 (39 bytes + 1 '\0')
-					 * Hostname (max 255 bytes + 1 '\0')
-					 */
-	char remote_port[6];		/* 5 digits (5 bytes + 1 '\0') */
-	char remote_username[32];	/* Max 32 bytes */
-	char remote_password[128];	/* Max 128 bytes */
-};
+#ifndef USCHED_TERM_H
+#define USCHED_TERM_H
 
 /* Prototypes */
-int opt_client_process(int argc, char **argv, struct usched_opt_client *opt_client);
+int term_input_igncr_set(void);
+int term_input_igncr_unset(void);
+int term_input_crtonl_set(void);
+int term_input_crtonl_unset(void);
+int term_output_nocr_set(void);
+int term_output_nocr_unset(void);
+int term_output_crtonl_set(void);
+int term_output_crtonl_unset(void);
+int term_ctrl_cread_set(void);
+int term_ctrl_cread_unset(void);
+int term_local_buffer_set(void);
+int term_local_buffer_unset(void);
+int term_local_echo_set(void);
+int term_local_echo_unset(void);
+int term_local_signals_set(void);
+int term_local_signals_unset(void);
 
 #endif
 

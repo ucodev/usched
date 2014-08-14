@@ -3,7 +3,7 @@
  * @brief uSched
  *        Optional arguments interface - Client
  *
- * Date: 11-08-2014
+ * Date: 14-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,6 +32,7 @@
 #include "config.h"
 #include "usage.h"
 #include "opt.h"
+#include "input.h"
 
 extern char *optarg;
 extern int optind, optopt;
@@ -142,8 +143,18 @@ int opt_client_process(int argc, char **argv, struct usched_opt_client *opt_clie
 		}
 	}
 
+	/* If a remote connection is required and no password is set, request it via terminal */
+	if (opt_client->remote_hostname[0] && opt_client->remote_username[0] && !opt_client->remote_password[0]) {
+		printf("Password: ");
+
+		if (input_password(opt_client->remote_password, sizeof(opt_client->remote_password)) < 0)
+			return -1;
+
+		puts("");
+	}
+
 	/* If there are arguments, we must grant that they make sense */
-	if ((optind != 1) && (!opt_client->remote_hostname[0] || !opt_client->remote_username || !opt_client->remote_password)) {
+	if ((optind != 1) && (!opt_client->remote_hostname[0] || !opt_client->remote_username[0] || !opt_client->remote_password[0])) {
 		usage_client_show();
 		return -1;
 	}

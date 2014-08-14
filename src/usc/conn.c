@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 12-08-2014
+ * Date: 15-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -105,23 +105,23 @@ int conn_client_process(void) {
 		cur->expire = ntohl(cur->expire);
 		cur->psize = ntohl(cur->psize);
 
-		/* Read the session token into the password field for further processing */
-		if (read(runc.fd, cur->password, sizeof(cur->password)) != sizeof(cur->password)) {
+		/* Read the session token into the session field for further processing */
+		if (read(runc.fd, cur->session, sizeof(cur->session)) != sizeof(cur->session)) {
 			errsv = errno;
-			log_crit("conn_client_process(): read() != sizeof(cur->password): %s\n", strerror(errno));
+			log_crit("conn_client_process(): read() != sizeof(cur->session): %s\n", strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
 		}
 
-		/* If this a remote connection, read the password field, which contains session data,
+		/* If this a remote connection, read the session field, which contains session data,
 		 * and rewrite it with authentication information.
 		 */
 		if (conn_is_remote(runc.fd)) {
 			/* Process remote session data */
 			if (entry_client_remote_session_process(cur, runc.opt.remote_password) < 0) {
 				errsv = errno;
-				log_crit("conn_client_process(): entry_client_remote_session__process(): %s\n", strerror(errno));
+				log_crit("conn_client_process(): entry_client_remote_session_process(): %s\n", strerror(errno));
 				entry_destroy(cur);
 				errno = errsv;
 				return -1;
@@ -140,7 +140,7 @@ int conn_client_process(void) {
 		}
 
 		/* Craft the token and payload together */
-		if (!(aaa_payload_data = mm_alloc(sizeof(cur->password) + cur->psize))) {
+		if (!(aaa_payload_data = mm_alloc(sizeof(cur->session) + cur->psize))) {
 			errsv = errno;
 			log_crit("conn_client_process(): mm_alloc(): %s\n", strerror(errno));
 			entry_destroy(cur);
@@ -148,14 +148,14 @@ int conn_client_process(void) {
 			return -1;
 		}
 
-		/* Craft the authentication information along with the payload */
-		memcpy(aaa_payload_data, cur->password, sizeof(cur->password));
-		memcpy(aaa_payload_data + sizeof(cur->password), cur->payload, cur->psize);
+		/* Craft the session/authentication information along with the payload */
+		memcpy(aaa_payload_data, cur->session, sizeof(cur->session));
+		memcpy(aaa_payload_data + sizeof(cur->session), cur->payload, cur->psize);
 
 		/* Send the authentication and authorization data along entry payload */
-		if (write(runc.fd, aaa_payload_data, sizeof(cur->password) + cur->psize) != (sizeof(cur->password) + cur->psize)) {
+		if (write(runc.fd, aaa_payload_data, sizeof(cur->session) + cur->psize) != (sizeof(cur->session) + cur->psize)) {
 			errsv = errno;
-			log_crit("conn_client_process(): write() != (sizeof(cur->password) + cur->psize): %s\n", strerror(errno));
+			log_crit("conn_client_process(): write() != (sizeof(cur->session) + cur->psize): %s\n", strerror(errno));
 			entry_destroy(cur);
 			mm_free(aaa_payload_data);
 			errno = errsv;
@@ -163,7 +163,7 @@ int conn_client_process(void) {
 		}
 
 		/* Reset and free aaa_payload_data */
-		memset(aaa_payload_data, 0, sizeof(cur->password) + cur->psize);
+		memset(aaa_payload_data, 0, sizeof(cur->session) + cur->psize);
 		mm_free(aaa_payload_data);
 
 		/* Process the response */

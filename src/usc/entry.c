@@ -73,7 +73,7 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 	int errsv = 0;
 
 	/* Process remote session data */
-	if (auth_client_remote_user_token_process(entry->password, password, entry->nonce, entry->token) < 0) {
+	if (auth_client_remote_user_token_process(entry->session, password, entry->nonce, entry->token) < 0) {
 		errsv = errno;
 		log_warn("entry_client_remote_session_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
 		errno = errsv;

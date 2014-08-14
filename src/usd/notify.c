@@ -182,7 +182,7 @@ void notify_write(struct async_op *aop) {
 			pthread_mutex_unlock(&rund.mutex_rpool);
 
 			/* Request the amount of data present on entry->psize (payload size) */
-			aop->count = sizeof(entry->password) + entry->psize;
+			aop->count = sizeof(entry->session) + entry->psize;
 		} else {
 			/* Unexpected entry state */
 			log_warn("notify_write(): Unexpected entry state.");

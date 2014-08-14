@@ -350,8 +350,8 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 			continue;
 		}
 
-		/* Clear entry password, so it won't be transmitted to client */
-		memset(entry_c->password, 0, CONFIG_USCHED_AUTH_PASSWORD_MAX);
+		/* Clear entry session data, so it won't be transmitted to client */
+		memset(entry_c->session, 0, CONFIG_USCHED_AUTH_SESSION_MAX);
 
 		/* Clear entry payload */
 		if (entry_c->payload) {
@@ -483,13 +483,13 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	/*
 	 * If this is a remote connection:
 	 *
-	 *  - Send a ciphered session token in the password field which the encryption key is the
+	 *  - Send a ciphered session token in the session field which the encryption key is the
 	 * hash of the user password in the users configuration structure. Append the user hash salt
 	 * and encryption nonce value to the head of the ciphered result.
 	 *
 	 * If this is a local connection:
 	 *
-	 *  - Set the password field to all zeros.
+	 *  - Set the session field to all zeros.
 	 */
 	if (conn_is_remote(aop->fd)) {
 		if (entry_daemon_authorize_remote_init(entry) < 0) {
@@ -500,7 +500,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 			return NULL;
 		}
 	} else if (conn_is_local(entry->id)) {
-		memset(entry->password, 0, sizeof(entry->password));
+		memset(entry->session, 0, sizeof(entry->session));
 	} else {
 		log_warn("process_daemon_recv_create(): Unable to determine connection type.\n");
 		entry_destroy(entry);
@@ -512,7 +512,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	memset(aop, 0, sizeof(struct async_op));
 
 	aop->fd = entry->id;
-	aop->count = sizeof(entry->password);
+	aop->count = sizeof(entry->session);
 	aop->priority = 0;
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
@@ -524,8 +524,8 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 		return NULL;
 	}
 
-	/* Copy the password field into aop data */
-	memcpy((void *) aop->data, entry->password, aop->count);
+	/* Copy the session field into aop data */
+	memcpy((void *) aop->data, entry->session, aop->count);
 
 	return entry;
 }
@@ -549,8 +549,8 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 		return -1;
 	}
 
-	/* Copy the session authentication data into the entry->password field */
-	memcpy(entry->password, (void *) aop->data, sizeof(entry->password));
+	/* Copy the session authentication data into the entry->session field */
+	memcpy(entry->session, (void *) aop->data, sizeof(entry->session));
 
 	/* Check if the entry is authorized. If not, authorize it and try to proceed. */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED) && (entry_daemon_authorize(entry, aop->fd) < 0)) {
@@ -587,18 +587,18 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
 
 	/* Grant that the received data does not exceed the expected size */
-	if (aop->count != (sizeof(entry->password) + entry->psize)) {
+	if (aop->count != (sizeof(entry->session) + entry->psize)) {
 		errsv = errno;
-		log_warn("process_daemon_recv_update(): aop->count != (sizeof(entry->password) + entry->psize)\n");
+		log_warn("process_daemon_recv_update(): aop->count != (sizeof(entry->session) + entry->psize)\n");
 		entry_destroy(entry);
 		errno = errsv;
 		return -1;
 	}
 
-	/* Set the received entry payload which is sizeof(entry->password) offset bytes from
+	/* Set the received entry payload which is sizeof(entry->session) offset bytes from
 	 * aop->data base pointer
 	 */
-	if (entry_set_payload(entry, (char *) aop->data + sizeof(entry->password), entry->psize) < 0) {
+	if (entry_set_payload(entry, (char *) aop->data + sizeof(entry->session), entry->psize) < 0) {
 		errsv = errno;
 		log_warn("process_daemon_recv_update(): entry_set_payload(): %s\n", strerror(errno));
 		entry_destroy(entry);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 13-08-2014
+ * Date: 15-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,7 +56,7 @@ int auth_daemon_local(int fd, uid_t *uid, gid_t *gid) {
 
 int auth_daemon_remote_user_token_verify(
 	const char *username,
-	const char *password,
+	const char *session,
 	unsigned char *nonce,
 	const unsigned char *token,
 	uid_t *uid,
@@ -75,11 +75,11 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
-	/* Extract nonce from the received password field */
-	memcpy(nonce, password, CRYPT_NONCE_SIZE_XSALSA20);
+	/* Extract nonce from the received session field */
+	memcpy(nonce, session, CRYPT_NONCE_SIZE_XSALSA20);
 
 	/* Decrypt client password hash with token as key */
-	if (!crypt_decrypt_xsalsa20(pwhash_c, &out_len, (unsigned char *) (password + CRYPT_NONCE_SIZE_XSALSA20), HASH_DIGEST_SIZE_SHA512 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, token)) {
+	if (!crypt_decrypt_xsalsa20(pwhash_c, &out_len, (unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), HASH_DIGEST_SIZE_SHA512 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, token)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_verify(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -118,7 +118,7 @@ int auth_daemon_remote_user_token_verify(
 
 int auth_daemon_remote_user_token_create(
 	const char *username,
-	char *password,
+	char *session,
 	unsigned char *nonce,
 	unsigned char *token)
 {
@@ -190,20 +190,20 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (password + (sizeof(salt) - 2) + CRYPT_NONCE_SIZE_XSALSA20), &out_len, token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (session + (sizeof(salt) - 2) + CRYPT_NONCE_SIZE_XSALSA20), &out_len, token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Craft session password field */
-	memcpy(password, salt, sizeof(salt) - 2);
-	memcpy(password + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
+	/* Craft session field */
+	memcpy(session, salt, sizeof(salt) - 2);
+	memcpy(session + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
 
-	/* Password contents: | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
+	/* Session contents: | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *
-	 * Total size of password: 80 bytes
+	 * Total size of session field: 80 bytes
 	 */
 
 	return 0;

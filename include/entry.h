@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 12-08-2014
+ * Date: 15-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -73,7 +73,7 @@ struct usched_entry {
 
 	/* Authentication Header */
 	char username[CONFIG_USCHED_AUTH_USERNAME_MAX];
-	char password[CONFIG_USCHED_AUTH_PASSWORD_MAX];
+	char session[CONFIG_USCHED_AUTH_SESSION_MAX];
 
 	/* Entry payload */
 	char *payload;
@@ -88,6 +88,10 @@ struct usched_entry {
 	/* Cryptographic Data Context */
 	unsigned char token[CRYPT_KEY_SIZE_XSALSA20];
 	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
+
+	unsigned char dh_prv[CONFIG_USCHED_SEC_PRVKEY_SIZE];
+	unsigned char dh_pub[CONFIG_USCHED_SEC_PUBKEY_SIZE];
+	unsigned char dh_shr[CONFIG_USCHED_SEC_PUBKEY_SIZE];
 };
 #pragma pack(pop)
 

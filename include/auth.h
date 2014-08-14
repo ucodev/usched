@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface header
  *
- * Date: 12-08-2014
+ * Date: 15-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,8 +32,8 @@
 
 /* Prototypes */
 int auth_daemon_local(int fd, uid_t *uid, gid_t *gid);
-int auth_daemon_remote_user_token_verify(const char *username, const char *password, unsigned char *nonce, const unsigned char *token, uid_t *uid, gid_t *gid);
-int auth_daemon_remote_user_token_create(const char *username, char *password, unsigned char *nonce, unsigned char *token);
+int auth_daemon_remote_user_token_verify(const char *username, const char *session, unsigned char *nonce, const unsigned char *token, uid_t *uid, gid_t *gid);
+int auth_daemon_remote_user_token_create(const char *username, char *session, unsigned char *nonce, unsigned char *token);
 int auth_client_remote_user_token_process(char *session_passwd, const char *plain_passwd, unsigned char *nonce, unsigned char *token);
 
 #endif

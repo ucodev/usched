@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 12-08-2014
+ * Date: 15-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,7 @@
 #include "usched.h"
 #include "usage.h"
 #include "opt.h"
+#include "sec.h"
 
 /* Flags */
 typedef enum USCHED_RUNTIME_FLAGS {
@@ -86,6 +87,9 @@ struct usched_runtime_client {
 
 	/* Command line options */
 	struct usched_opt_client opt;
+
+	/* Security data */
+	struct usched_sec sec;
 };
 
 struct usched_runtime_daemon {
@@ -110,6 +114,9 @@ struct usched_runtime_daemon {
 	pall_fd_t ser_fd;
 
 	struct usched_config config;
+
+	/* Security data */
+	struct usched_sec sec;
 
 	pthread_t t_unix, t_remote;
 };

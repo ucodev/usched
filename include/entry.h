@@ -89,9 +89,7 @@ struct usched_entry {
 	unsigned char token[CRYPT_KEY_SIZE_XSALSA20];
 	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
 
-	unsigned char dh_prv[CONFIG_USCHED_SEC_PRVKEY_SIZE];
-	unsigned char dh_pub[CONFIG_USCHED_SEC_PUBKEY_SIZE];
-	unsigned char dh_shr[CONFIG_USCHED_SEC_PUBKEY_SIZE];
+	unsigned char key_shr[CONFIG_USCHED_SEC_PUBKEY_SIZE];
 };
 #pragma pack(pop)
 

@@ -41,6 +41,7 @@ struct usched_sec {
 /* Prototypes */
 int sec_dh_keys_init(unsigned char *key_prv, size_t prv_size, unsigned char *key_pub, size_t pub_size);
 int sec_client_init(void);
+int sec_client_compute_shared_key(unsigned char *shared_key, unsigned char *public_key);
 void sec_client_destroy(void);
 int sec_daemon_init(void);
 int sec_daemon_compute_shared_key(unsigned char *shared_key, unsigned char *public_key);

@@ -112,8 +112,6 @@ int runtime_client_init(int argc, char **argv) {
 	}
 
 	/* Initialize security interface */
-	log_info("Initializing security interface...\n");
-
 	if (sec_client_init() < 0) {
 		errsv = errno;
 		log_crit("runtime_client_init(): sec_client_init(): %s\n", strerror(errno));

@@ -132,6 +132,7 @@ int auth_daemon_remote_user_token_create(
 {
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
+	char *session_pos = session + sizeof(rund.sec.key_pub);
 	unsigned char salt[10], pwhash[HASH_DIGEST_SIZE_SHA512 + 3];
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20];
 	size_t out_len = 0;
@@ -198,7 +199,7 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (session + (sizeof(salt) - 2) + CRYPT_NONCE_SIZE_XSALSA20), &out_len, token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (session_pos + (sizeof(salt) - 2) + CRYPT_NONCE_SIZE_XSALSA20), &out_len, token, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -206,14 +207,15 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Craft session field */
-	memcpy(session, salt, sizeof(salt) - 2);
-	memcpy(session + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
+	memcpy(session_pos, salt, sizeof(salt) - 2);
+	memcpy(session_pos + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
+	memcpy(session, rund.sec.key_pub, sizeof(rund.sec.key_pub));
 
 	/* Session contents:
 	 *
-	 * | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
+	 * | pubkey (512 bytes) | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *
-	 * Total size of session field: 80 bytes
+	 * Total size of session field: 592 bytes
 	 */
 
 	return 0;

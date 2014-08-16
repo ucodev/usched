@@ -44,22 +44,23 @@ int auth_client_remote_session_token_process(
 	unsigned char *token)
 {
 	int errsv = 0, rounds = 5000;
+	char *session_pos = session + sizeof(runc.sec.key_pub);
 	unsigned char salt[8];
 	unsigned char pwhash[HASH_DIGEST_SIZE_SHA512];
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20];
-	size_t out_len = 0;
+	size_t out_len = 0, session_size = 592;
 
 	/* Session contents:
 	 *
-	 * | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
+	 * | pubkey (512 bytes) | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *
-	 * Total session size: 80 bytes
+	 * Total session size: 592 bytes
 	 *
 	 */
 
 	/* Extract salt and nonce from session */
-	memcpy(salt, session, sizeof(salt));
-	memcpy(nonce, session + sizeof(salt), CRYPT_NONCE_SIZE_XSALSA20);
+	memcpy(salt, session_pos, sizeof(salt));
+	memcpy(nonce, session_pos + sizeof(salt), CRYPT_NONCE_SIZE_XSALSA20);
 
 	/* Create a password hash with the same parameters as remote party */
 	if (!kdf_pbkdf2_hash(pwhash, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (unsigned char *) plain_passwd, strlen(plain_passwd), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512) < 0) {
@@ -78,7 +79,7 @@ int auth_client_remote_session_token_process(
 	}
 
 	/* Decrypt the token value */
-	if (!crypt_decrypt_xsalsa20(token, &out_len, (unsigned char *) (session + sizeof(salt) + CRYPT_NONCE_SIZE_XSALSA20), CRYPT_KEY_SIZE_XSALSA20 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_decrypt_xsalsa20(token, &out_len, (unsigned char *) (session_pos + sizeof(salt) + CRYPT_NONCE_SIZE_XSALSA20), CRYPT_KEY_SIZE_XSALSA20 + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_client_remote_user_token_process(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -92,6 +93,9 @@ int auth_client_remote_session_token_process(
 		errno = errsv;
 		return -1;
 	}
+
+	/* Reset session data */
+	memset(session, 0, session_size);
 
 	/* Encrypt the user password hash with the session token as key */
 	if (!crypt_encrypt_xsalsa20((unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), &out_len, pwhash, sizeof(pwhash), nonce, token)) {

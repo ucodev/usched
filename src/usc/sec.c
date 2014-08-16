@@ -28,6 +28,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <psec/ke.h>
+
 #include "runtime.h"
 #include "log.h"
 #include "sec.h"
@@ -39,6 +41,21 @@ int sec_client_init(void) {
 	if (sec_dh_keys_init(runc.sec.key_prv, sizeof(runc.sec.key_prv), runc.sec.key_pub, sizeof(runc.sec.key_pub)) < 0) {
 		errsv = errno;
 		log_warn("sec_daemon_init(): sec_dh_keys_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int sec_client_compute_shared_key(unsigned char *shared_key, unsigned char *public_key) {
+	int errsv = 0;
+
+	/* Compute shared key based on remote public key*/
+	if (!ke_dh_shared(shared_key, public_key, sizeof(runc.sec.key_pub), runc.sec.key_prv, sizeof(runc.sec.key_prv))) {
+		errsv = errno;
+		log_warn("sec_client_compute_shared_key(): ke_dh_shared(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

@@ -41,6 +41,7 @@
 #include "entry.h"
 #include "log.h"
 #include "auth.h"
+#include "sec.h"
 
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize) {
 	int errsv = 0;
@@ -68,6 +69,31 @@ struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, voi
 	}
 
 	return entry;
+}
+
+static int _entry_client_remote_compute_shared_key(struct usched_entry *entry) {
+	int errsv = 0;
+
+	if (sec_client_compute_shared_key(entry->key_shr, entry->remote_key_pub) < 0) {
+		errsv = errno;
+		log_warn("_entry_client_remote_compute_shared_key(): sec_client_compute_shared_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+static int _entry_client_remote_session_to_pubkey(struct usched_entry *entry) {
+	if (sizeof(entry->session) < sizeof(entry->remote_key_pub)) {
+		log_warn("_entry_client_remote_session_from_pubkey(): sizeof(entry->session) < sizeof(remote_key_pub)\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	memcpy(entry->remote_key_pub, entry->session, sizeof(entry->remote_key_pub));
+
+	return 0;
 }
 
 static int _entry_client_remote_session_from_pubkey(struct usched_entry *entry) {
@@ -98,6 +124,21 @@ int entry_client_remote_session_create(struct usched_entry *entry) {
 
 int entry_client_remote_session_process(struct usched_entry *entry, const char *password) {
 	int errsv = 0;
+
+	/* Retrieve remote public key from session field */
+	if (_entry_client_remote_session_to_pubkey(entry) < 0) {
+		errsv = errno;
+		log_warn("entry_client_remote_session_process(): _entry_client_remote_session_to_pubkey(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (_entry_client_remote_compute_shared_key(entry) < 0) {
+		errsv = errno;
+		log_warn("entry_client_remote_session_process(): _entry_client_remote_compute_shared_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	/* Process remote session data */
 	if (auth_client_remote_session_token_process(entry->session, password, entry->nonce, entry->token) < 0) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Client
  *
- * Date: 12-08-2014
+ * Date: 16-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -67,6 +67,19 @@ struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, voi
 	}
 
 	return entry;
+}
+
+int entry_client_remote_session_create(struct usched_entry *entry) {
+	int errsv = 0;
+
+	if (auth_client_remote_user_token_create(entry->session) < 0) {
+		errsv = errno;
+		log_warn("entry_client_remote_session_create(): auth_client_remote_user_token_create(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int entry_client_remote_session_process(struct usched_entry *entry, const char *password) {

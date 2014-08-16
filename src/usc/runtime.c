@@ -42,6 +42,7 @@
 #include "log.h"
 #include "pool.h"
 #include "bitops.h"
+#include "sec.h"
 
 
 int runtime_client_init(int argc, char **argv) {
@@ -110,6 +111,16 @@ int runtime_client_init(int argc, char **argv) {
 		return -1;
 	}
 
+	/* Initialize security interface */
+	log_info("Initializing security interface...\n");
+
+	if (sec_client_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_client_init(): sec_client_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Initialize client connection handlers */
 	if (conn_client_init() < 0) {
 		errsv = errno;
@@ -169,6 +180,9 @@ void runtime_client_destroy(void) {
 void runtime_client_lib_destroy(void) {
 	/* Destroy connection interface */
 	conn_client_destroy();
+
+	/* Destroy security interface */
+	sec_client_destroy();
 
 	/* Destroy pools */
 	pool_client_destroy();

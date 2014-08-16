@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 12-08-2014
+ * Date: 16-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -492,9 +492,28 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	 *  - Set the session field to all zeros.
 	 */
 	if (conn_is_remote(aop->fd)) {
-		if (entry_daemon_authorize_remote_init(entry) < 0) {
+		/* Retrieve the remote client public key from entry->session field */
+		if (entry_daemon_remote_session_to_pubkey(entry) < 0) {
 			errsv = errno;
-			log_warn("process_daemon_recv_create(): entry_daemon_authorize_remote_init(): %s\n", strerror(errno));
+			log_warn("process_daemon_recv_create(): entry_daemon_remote_session_to_pubkey(): %s\n", strerror(errno));
+			entry_destroy(entry);
+			errno = errsv;
+			return NULL;
+		}
+
+		/* Compute the shared secret */
+		if (entry_daemon_remote_compute_shared_key(entry) < 0) {
+			errsv = errno;
+			log_warn("process_daemon_recv_create(): entry_daemon_remote_compute_shared_key(): %s\n", strerror(errno));
+			entry_destroy(entry);
+			errno = errsv;
+			return NULL;
+		}
+
+		/* Initialize a new entry->session field to be sent to the client */
+		if (entry_daemon_remote_authorize_init(entry) < 0) {
+			errsv = errno;
+			log_warn("process_daemon_recv_create(): entry_daemon_remote_authorize_init(): %s\n", strerror(errno));
 			entry_destroy(entry);
 			errno = errsv;
 			return NULL;

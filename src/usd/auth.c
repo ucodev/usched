@@ -67,6 +67,14 @@ int auth_daemon_remote_user_token_verify(
 	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 3];
 	size_t out_len = 0;
 
+	/* Session data contents:
+	 *
+	 * | nonce (24 bytes) | pwhash (16 + 64 bytes) |
+	 *
+	 * Total session size: 104 bytes
+	 *
+	 */
+
 	/* Get userinfo data from current configuration */
 	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (struct usched_config_userinfo [1]) { { (char *) username, NULL, NULL, 0, 0} }))) {
 		errsv = errno;
@@ -201,7 +209,9 @@ int auth_daemon_remote_user_token_create(
 	memcpy(session, salt, sizeof(salt) - 2);
 	memcpy(session + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
 
-	/* Session contents: | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
+	/* Session contents:
+	 *
+	 * | salt (8 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *
 	 * Total size of session field: 80 bytes
 	 */

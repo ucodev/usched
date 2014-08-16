@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 15-08-2014
+ * Date: 16-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -85,6 +85,17 @@ int conn_client_process(void) {
 
 		/* Set username */
 		strcpy(cur->username, runc.opt.remote_username);
+
+		/* Set session data if this is a remote connection */
+		if (conn_is_remote(runc.fd)) {
+			if (entry_client_remote_session_create(cur) < 0) {
+				errsv = errno;
+				log_crit("conn_client_process(): entry_client_remote_session_create(): %s\n", strerror(errno));
+				entry_destroy(cur);
+				errno = errsv;
+				return -1;
+			}
+		}
 
 		/* Send the first entry block */
 		if (write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {

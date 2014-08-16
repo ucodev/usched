@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 15-08-2014
+ * Date: 16-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,6 +38,7 @@
 #define CONFIG_USCHED_NET_DEFAULT_PORT		"7600"
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"
+#define CONFIG_USCHED_DIR_KEYS			"keys"
 #define CONFIG_USCHED_DIR_NETWORK		"network"
 #define CONFIG_USCHED_DIR_USERS			"users"
 #define CONFIG_USCHED_FILE_AUTH_GID_BL		"gid.blacklist"
@@ -53,6 +54,8 @@
 #define CONFIG_USCHED_FILE_CORE_PMQ_NAME	"pmq.name"
 #define CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY	"thread.priority"
 #define CONFIG_USCHED_FILE_CORE_THREAD_WORKERS	"thread.workers"
+#define CONFIG_USCHED_FILE_KEYS_PRIVATE		"usd.key"
+#define CONFIG_USCHED_FILE_KEYS_PUBLIC		"usd.pub"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_ADDR	"bind.addr"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_PORT	"bind.port"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"

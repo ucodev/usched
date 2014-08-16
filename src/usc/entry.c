@@ -35,6 +35,7 @@
 #include <psec/crypt.h>
 
 #include "debug.h"
+#include "runtime.h"
 #include "config.h"
 #include "mm.h"
 #include "entry.h"
@@ -69,12 +70,25 @@ struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, voi
 	return entry;
 }
 
+static int _entry_client_remote_session_from_pubkey(struct usched_entry *entry) {
+	if (sizeof(entry->session) < sizeof(runc.sec.key_pub)) {
+		log_warn("_entry_client_remote_session_from_pubkey(): sizeof(entry->session) < sizeof(runc.sec.key_pub)\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	memcpy(entry->session, runc.sec.key_pub, sizeof(runc.sec.key_pub));
+
+	return 0;
+}
+
 int entry_client_remote_session_create(struct usched_entry *entry) {
 	int errsv = 0;
 
-	if (auth_client_remote_user_token_create(entry->session) < 0) {
+	/* Assign public key to the entry->session field */
+	if (_entry_client_remote_session_from_pubkey(entry) < 0) {
 		errsv = errno;
-		log_warn("entry_client_remote_session_create(): auth_client_remote_user_token_create(): %s\n", strerror(errno));
+		log_warn("entry_client_remote_session_create(): _entry_client_remote_session_from_pubkey(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -86,7 +100,7 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 	int errsv = 0;
 
 	/* Process remote session data */
-	if (auth_client_remote_user_token_process(entry->session, password, entry->nonce, entry->token) < 0) {
+	if (auth_client_remote_session_token_process(entry->session, password, entry->nonce, entry->token) < 0) {
 		errsv = errno;
 		log_warn("entry_client_remote_session_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
 		errno = errsv;

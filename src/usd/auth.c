@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 15-08-2014
+ * Date: 16-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -69,7 +69,7 @@ int auth_daemon_remote_user_token_verify(
 
 	/* Session data contents:
 	 *
-	 * | nonce (24 bytes) | pwhash (16 + 64 bytes) |
+	 * | nonce (24 bytes) | encrypted pwhash (16 + 64 bytes) |
 	 *
 	 * Total session size: 104 bytes
 	 *

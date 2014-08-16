@@ -37,13 +37,7 @@
 #include "log.h"
 #include "auth.h"
 
-int auth_client_remote_user_token_create(char *session) {
-	memcpy(session, runc.sec.key_pub, sizeof(runc.sec.key_pub));
-
-	return 0;
-}
-	
-int auth_client_remote_user_token_process(
+int auth_client_remote_session_token_process(
 	char *session,
 	const char *plain_passwd,
 	unsigned char *nonce,
@@ -112,7 +106,7 @@ int auth_client_remote_user_token_process(
 
 	/* Session data contents:
 	 *
-	 * | nonce (24 bytes) | pwhash (16 + 64 bytes |
+	 * | nonce (24 bytes) | encrypted pwhash (16 + 64 bytes |
 	 *
 	 * Total session size: 104 bytes
 	 *

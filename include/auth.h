@@ -32,10 +32,9 @@
 
 /* Prototypes */
 int auth_daemon_local(int fd, uid_t *uid, gid_t *gid);
-int auth_daemon_remote_user_token_verify(const char *username, const char *session, unsigned char *nonce, const unsigned char *token, uid_t *uid, gid_t *gid);
 int auth_daemon_remote_user_token_create(const char *username, char *session, unsigned char *nonce, unsigned char *token);
-int auth_client_remote_user_token_create(char *session);
-int auth_client_remote_user_token_process(char *session, const char *plain_passwd, unsigned char *nonce, unsigned char *token);
+int auth_daemon_remote_user_token_verify(const char *username, const char *session, unsigned char *nonce, const unsigned char *token, uid_t *uid, gid_t *gid);
+int auth_client_remote_session_token_process(char *session, const char *plain_passwd, unsigned char *nonce, unsigned char *token);
 
 #endif
 

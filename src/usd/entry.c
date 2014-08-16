@@ -65,10 +65,10 @@ static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
 	int errsv = 0;
 
-	/* Validate session data and compare user password hash */
-	if (entry_daemon_remote_authorize_verify(entry) < 0) {
+	/* Validate session data and compare user password */
+	if (entry_daemon_remote_session_process(entry) < 0) {
 		errsv = errno;
-		log_warn("_entry_daemon_authorize_remote(): entry_daemon_remote_authorize_verify(): %s\n", strerror(errno));
+		log_warn("_entry_daemon_authorize_remote(): entry_daemon_remote_session_process(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -115,35 +115,9 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	return -1;	/* Not authorized. No authentication mechanism available */
 }
 
-int entry_daemon_remote_authorize_init(struct usched_entry *entry) {
-	int errsv = 0;
-
-	if (auth_daemon_remote_user_token_create(entry->username, entry->session, entry->nonce, entry->token) < 0) {
-		errsv = errno;
-		log_warn("entry_daemon_remoet_authorize_init(): auth_daemon_user_token_create(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-int entry_daemon_remote_authorize_verify(struct usched_entry *entry) {
-	int errsv = 0;
-
-	if (auth_daemon_remote_user_token_verify(entry->username, entry->session, entry->nonce, entry->token, &entry->uid, &entry->gid) < 0) {
-		errsv = errno;
-		log_warn("entry_daemon_remote_authorize_verify(): auth_daemon_remote_user_token_verify(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-int entry_daemon_remote_session_to_pubkey(struct usched_entry *entry) {
+static int _entry_daemon_remote_session_to_pubkey(struct usched_entry *entry) {
 	if (sizeof(entry->session) < sizeof(entry->remote_key_pub)) {
-		log_warn("entry_daemon_remote_session_to_pubkey(): sizeof(entry->session) < sizeof(entry->remote_key_pub)\n");
+		log_warn("_entry_daemon_remote_session_to_pubkey(): sizeof(entry->session) < sizeof(entry->remote_key_pub)\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -153,12 +127,55 @@ int entry_daemon_remote_session_to_pubkey(struct usched_entry *entry) {
 	return 0;
 }
 
-int entry_daemon_remote_compute_shared_key(struct usched_entry *entry) {
+static int _entry_daemon_remote_compute_shared_key(struct usched_entry *entry) {
 	int errsv = 0;
 
 	if (sec_daemon_compute_shared_key(entry->key_shr, entry->remote_key_pub) < 0) {
 		errsv = errno;
-		log_warn("entry_daemon_remote_compute_shared_key(): sec_daemon_compute_shared_key(): %s\n", strerror(errno));
+		log_warn("_entry_daemon_remote_compute_shared_key(): sec_daemon_compute_shared_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int entry_daemon_remote_session_create(struct usched_entry *entry) {
+	int errsv = 0;
+
+	/* Retrieve the remote client public key from entry->session field */
+	if (_entry_daemon_remote_session_to_pubkey(entry) < 0) {
+		errsv = errno;
+		log_warn("entry_daemon_remote_session_create(): entry_daemon_remote_session_to_pubkey(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Compute the shared secret */
+	if (_entry_daemon_remote_compute_shared_key(entry) < 0) {
+		errsv = errno;
+		log_warn("entry_daemon_remote_session_create(): entry_daemon_remote_compute_shared_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Initialize a new entry->session field to be sent to the client */
+	if (auth_daemon_remote_user_token_create(entry->username, entry->session, entry->nonce, entry->token) < 0) {
+		errsv = errno;
+		log_warn("entry_daemon_remote_session_create(): auth_daemon_user_token_create(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int entry_daemon_remote_session_process(struct usched_entry *entry) {
+	int errsv = 0;
+
+	if (auth_daemon_remote_user_token_verify(entry->username, entry->session, entry->nonce, entry->token, &entry->uid, &entry->gid) < 0) {
+		errsv = errno;
+		log_warn("entry_daemon_remote_session_process(): auth_daemon_remote_user_token_verify(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

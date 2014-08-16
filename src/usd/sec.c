@@ -53,6 +53,13 @@ static int _sec_dh_keys_from_file(void) {
 		return 0;
 	}
 
+	/* Check if the keys directory mode is acceptable */
+	if (fsop_path_mode(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS) != (S_IFDIR | S_IRWXU)) {
+		log_warn("_sec_dh_keys_from_file(): Directory \'%s\' mode is required to be 0700.\n", CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS);
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Open private key file */
 	if (!(fp = fopen(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS "/" CONFIG_USCHED_FILE_KEYS_PRIVATE, "r"))) {
 		errsv = errno;
@@ -64,12 +71,12 @@ static int _sec_dh_keys_from_file(void) {
 	/* Read private key from file */
 	if (fread(rund.sec.key_prv, sizeof(rund.sec.key_prv), 1, fp) != 1) {
 		log_warn("_sec_dh_keys_from_file(): Size of private key stored in file is lesser than expected.\n");
+		fclose(fp);
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Flush and close file */
-	fflush(fp);
 	fclose(fp);
 
 	/* Open public key file */
@@ -83,12 +90,12 @@ static int _sec_dh_keys_from_file(void) {
 	/* Read public key from file */
 	if (fread(rund.sec.key_pub, sizeof(rund.sec.key_pub), 1, fp) != 1) {
 		log_warn("_sec_dh_keys_from_file(): Size of private key stored in file is lesser than expected.\n");
+		fclose(fp);
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Flush and close file */
-	fflush(fp);
 	fclose(fp);
 
 
@@ -99,6 +106,20 @@ static int _sec_dh_keys_from_file(void) {
 static int _sec_dh_keys_to_file(void) {
 	int errsv = 0;
 	FILE *fp = NULL;
+
+	/* Check if keys directory exists */
+	if (fsop_path_isdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS) <= 0) {
+		log_warn("_sec_dh_keys_to_file(): No such directory: %s\n", CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Check if the keys directory mode is acceptable */
+	if (fsop_path_mode(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS) != (S_IFDIR | S_IRWXU)) {
+		log_warn("_sec_dh_keys_to_file(): Directory \'%s\' mode is required to be 0700.\n", CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS);
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Open private key file */
 	if (!(fp = fopen(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_KEYS "/" CONFIG_USCHED_FILE_KEYS_PRIVATE, "w"))) {
@@ -112,6 +133,7 @@ static int _sec_dh_keys_to_file(void) {
 	if (fwrite(rund.sec.key_prv, sizeof(rund.sec.key_prv), 1, fp) != 1) {
 		errsv = errno;
 		log_warn("_sec_dh_keys_to_file(): Unable to write private key to file: fwrite(): %s\n", strerror(errno));
+		fclose(fp);
 		errno = errsv;
 		return -1;
 	}
@@ -132,6 +154,7 @@ static int _sec_dh_keys_to_file(void) {
 	if (fwrite(rund.sec.key_pub, sizeof(rund.sec.key_pub), 1, fp) != 1) {
 		errsv = errno;
 		log_warn("_sec_dh_keys_from_file(): Unable to write public key to file: fwrite(): %s\n", strerror(errno));
+		fclose(fp);
 		errno = errsv;
 		return -1;
 	}

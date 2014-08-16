@@ -115,6 +115,18 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	return -1;	/* Not authorized. No authentication mechanism available */
 }
 
+static int _entry_daemon_remote_session_from_pubkey(struct usched_entry *entry) {
+	if (sizeof(entry->session) < sizeof(rund.sec.key_pub)) {
+		log_warn("_entry_daemon_remote_session_from_pubkey(): sizeof(entry->session) < sizeof(rund.sec.key_pub)\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	memcpy(entry->session, rund.sec.key_pub, sizeof(rund.sec.key_pub));
+
+	return 0;
+}
+
 static int _entry_daemon_remote_session_to_pubkey(struct usched_entry *entry) {
 	if (sizeof(entry->session) < sizeof(entry->remote_key_pub)) {
 		log_warn("_entry_daemon_remote_session_to_pubkey(): sizeof(entry->session) < sizeof(entry->remote_key_pub)\n");
@@ -146,7 +158,7 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 	/* Retrieve the remote client public key from entry->session field */
 	if (_entry_daemon_remote_session_to_pubkey(entry) < 0) {
 		errsv = errno;
-		log_warn("entry_daemon_remote_session_create(): entry_daemon_remote_session_to_pubkey(): %s\n", strerror(errno));
+		log_warn("entry_daemon_remote_session_create(): _entry_daemon_remote_session_to_pubkey(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -154,7 +166,15 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 	/* Compute the shared secret */
 	if (_entry_daemon_remote_compute_shared_key(entry) < 0) {
 		errsv = errno;
-		log_warn("entry_daemon_remote_session_create(): entry_daemon_remote_compute_shared_key(): %s\n", strerror(errno));
+		log_warn("entry_daemon_remote_session_create(): _entry_daemon_remote_compute_shared_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set the public key to the head of entry->session field */
+	if (_entry_daemon_remote_session_from_pubkey(entry) < 0) {
+		errsv = errno;
+		log_warn("entry_daemon_remote_session_create(): _entry_daemon_remote_session_from_pubkey(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

@@ -209,7 +209,6 @@ int auth_daemon_remote_user_token_create(
 	/* Craft session field */
 	memcpy(session_pos, salt, sizeof(salt) - 2);
 	memcpy(session_pos + sizeof(salt) - 2, nonce, CRYPT_NONCE_SIZE_XSALSA20);
-	memcpy(session, rund.sec.key_pub, sizeof(rund.sec.key_pub));
 
 	/* Session contents:
 	 *

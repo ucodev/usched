@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 18-08-2014
+ * Date: 19-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,7 +45,8 @@ int auth_client_remote_session_token_create(
 {
 	int errsv = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	char *session_pos = session + sizeof(runc.sec.key_pub);
-	unsigned char salt[CONFIG_USCHED_AUTH_USERNAME_MAX];
+	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	unsigned char pwhash[HASH_DIGEST_SIZE_SHA512];
 	unsigned char key[HASH_DIGEST_SIZE_BLAKE2S];
 	size_t out_len = 0;
@@ -57,9 +58,17 @@ int auth_client_remote_session_token_create(
 		return -1;
 	}
 
-	/* Craft salt */
-	memset(salt, 'x', sizeof(salt));
-	memcpy(salt, username, strlen(username));
+	/* Craft raw salt */
+	memset(salt_raw, 'x', sizeof(salt_raw));
+	memcpy(salt_raw, username, strlen(username));
+
+	/* Hash raw salt */
+	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
+		errsv = errno;
+		log_warn("auth_client_remote_session_token_create(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errno;
+		return -1;
+	}
 
 	/* Create a password hash with the same parameters as remote party */
 	if (!kdf_pbkdf2_hash(pwhash, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (unsigned char *) plain_passwd, strlen(plain_passwd), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512) < 0) {
@@ -101,7 +110,9 @@ int auth_client_remote_session_token_create(
 	 *
 	 */
 
-	/* TODO: Cleanup data by memset()ing all arrays to 0 */
+	/* Cleanup data */
+	memset(key, 0, sizeof(key));
+	memset(pwhash, 0, sizeof(pwhash));
 
 	/* All good */
 	return 0;
@@ -118,7 +129,8 @@ int auth_client_remote_session_token_process(
 {
 	int errsv = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	char *session_pos = session + sizeof(runc.sec.key_pub);
-	unsigned char salt[CONFIG_USCHED_AUTH_USERNAME_MAX];
+	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512];
 	unsigned char pwhash_s[HASH_DIGEST_SIZE_SHA512];
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20];
@@ -145,8 +157,16 @@ int auth_client_remote_session_token_process(
 	}
 
 	/* Craft salt */
-	memset(salt, 'x', sizeof(salt));
-	memcpy(salt, username, strlen(username));
+	memset(salt_raw, 'x', sizeof(salt_raw));
+	memcpy(salt_raw, username, strlen(username));
+
+	/* Hash raw salt */
+	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
+		errsv = errno;
+		log_warn("auth_client_remote_session_token_process(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errno;
+		return -1;
+	}
 
 	/* Extract nonce from session */
 	memcpy(nonce, session_pos, CRYPT_NONCE_SIZE_XSALSA20);
@@ -280,8 +300,17 @@ int auth_client_remote_session_token_process(
 	 *
 	 */
 
-	/* TODO: Cleanup data by memset()ing all arrays to 0 */
+	/* Cleanup data */
+	memset(key, 0, sizeof(key));
+	memset(pwhash_c, 0, sizeof(pwhash_c));
+	memset(pwhash_s, 0, sizeof(pwhash_c));
+	memset(client_hash, 0, sizeof(client_hash));
+	memset(client_hash_tmp, 0, sizeof(client_hash));
+	memset(server_token, 0, sizeof(client_hash));
+	memset(server_recvd_session, 0, sizeof(server_recvd_session));
+	memset(pw_payload, 0, sizeof(pw_payload));
 
+	/* All good */
 	return 0;
 }
 

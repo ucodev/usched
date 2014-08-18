@@ -48,7 +48,8 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
 	char *result = NULL, *path = NULL;
-	unsigned char salt[CONFIG_USCHED_AUTH_USERNAME_MAX];
+	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	size_t edigest_out_len = 0, esalt_out_len = 0;
 	FILE *fp = NULL;
 
@@ -66,6 +67,13 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 		return -1;
 	}
 
+	/* Check password length */
+	if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
+		log_warn("users_admon_config_add(): Password is too short (it must be at least 8 characters long).\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Check if username doesn't exceed the expected size */
 	if (strlen(username) > sizeof(salt)) {
 		log_warn("users_admin_config_add(): Username is too long.\n");
@@ -73,9 +81,17 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 		return -1;
 	}
 
-	/* Craft salt */
-	memset(salt, 'x', sizeof(salt));
-	memcpy(salt, username, strlen(username));
+	/* Craft raw salt */
+	memset(salt_raw, 'x', sizeof(salt_raw));
+	memcpy(salt_raw, username, strlen(username));
+
+	/* Hash raw salt */
+	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
+		errsv = errno;
+		log_warn("users_admin_config_add(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	/* Generate the password digest */
 	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (const unsigned char *) password, strlen(password), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {

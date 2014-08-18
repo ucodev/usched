@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 16-08-2014
+ * Date: 19-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -74,6 +74,7 @@
 #define CONFIG_USCHED_SEC_KDF_ROUNDS		5000
 #define CONFIG_USCHED_AUTH_USERNAME_MAX		32
 #define CONFIG_USCHED_AUTH_PASSWORD_MAX		256
+#define CONFIG_USCHED_AUTH_PASSWORD_MIN		8
 #define CONFIG_USCHED_AUTH_SESSION_MAX		CONFIG_USCHED_SEC_PUBKEY_SIZE + 24 + 16 + 1 + CONFIG_USCHED_AUTH_PASSWORD_MAX
 #define CONFIG_USCHED_HASH_FNV1A		1
 /* #define CONFIG_USCHED_HASH_DJB2		1 */

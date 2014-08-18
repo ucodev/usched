@@ -3,7 +3,7 @@
  * @brief uSched
  *        Optional arguments interface header
  *
- * Date: 14-08-2014
+ * Date: 19-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,6 +27,8 @@
 #ifndef USCHED_OPT_H
 #define USCHED_OPT_H
 
+#include "config.h"
+
 struct usched_opt_client {
 	/* Command line options */
 	char remote_hostname[256];	/* IPv4 (15 bytes + 1 '\0')
@@ -34,8 +36,8 @@ struct usched_opt_client {
 					 * Hostname (max 255 bytes + 1 '\0')
 					 */
 	char remote_port[6];		/* 5 digits (5 bytes + 1 '\0') */
-	char remote_username[32];	/* Max 32 bytes */
-	char remote_password[128];	/* Max 128 bytes */
+	char remote_username[CONFIG_USCHED_AUTH_USERNAME_MAX + 1];	/* Max 32 bytes */
+	char remote_password[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];	/* Max 256 bytes */
 };
 
 /* Prototypes */

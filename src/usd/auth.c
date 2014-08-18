@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 18-08-2014
+ * Date: 19-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -67,11 +67,12 @@ int auth_daemon_remote_user_token_verify(
 {
 	int errsv = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	struct usched_config_userinfo *userinfo = NULL;
-	unsigned char salt[CONFIG_USCHED_AUTH_USERNAME_MAX];
+	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 3];
 	unsigned char pw_payload[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	unsigned char key[HASH_DIGEST_SIZE_BLAKE2S];
-	char plain_passwd[CONFIG_USCHED_AUTH_PASSWORD_MAX];
+	char plain_passwd[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	size_t out_len = 0;
 
 	/* Session data contents:
@@ -89,10 +90,18 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
-	/* Craft salt */
-	memset(salt, 'x', sizeof(salt));
-	memcpy(salt, username, strlen(username));
-	
+	/* Craft raw salt */
+	memset(salt_raw, 'x', sizeof(salt_raw));
+	memcpy(salt_raw, username, strlen(username));
+
+	/* Hash raw salt */
+	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
+		errsv = errno;
+		log_warn("auth_daemon_remote_user_token_verify(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Get userinfo data from current configuration */
 	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (struct usched_config_userinfo [1]) { { (char *) username, NULL, NULL, 0, 0} }))) {
 		errsv = errno;
@@ -161,7 +170,11 @@ int auth_daemon_remote_user_token_verify(
 	*uid = userinfo->uid;
 	*gid = userinfo->gid;
 
-	/* TODO: Cleanup data by memset()ing all arrays to 0 */
+	/* Cleanup data */
+	memset(key, 0, sizeof(key));
+	memset(pwhash_c, 0, sizeof(pwhash_c));
+	memset(pw_payload, 0, sizeof(pw_payload));
+	memset(plain_passwd, 0, sizeof(plain_passwd));
 
 	/* All good */
 	return 0;
@@ -290,8 +303,15 @@ int auth_daemon_remote_user_token_create(
 	 * Total size of session field: 584 bytes
 	 */
 
-	/* TODO: Cleanup data by memset()ing all arrays to 0 */
+	/* Cleanup data */
+	memset(pwhash, 0, sizeof(pwhash));
+	memset(key, 0, sizeof(key));
+	memset(client_hash, 0, sizeof(client_hash));
+	memset(client_hash_tmp, 0, sizeof(client_hash_tmp));
+	memset(client_token, 0, sizeof(client_token));
+	memset(server_token, 0, sizeof(server_token));
 
+	/* All good */
 	return 0;
 }
 

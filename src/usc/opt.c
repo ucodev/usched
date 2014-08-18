@@ -3,7 +3,7 @@
  * @brief uSched
  *        Optional arguments interface - Client
  *
- * Date: 14-08-2014
+ * Date: 19-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,11 +39,13 @@ extern int optind, optopt;
 
 static int _opt_client_remote_host(const char *hostname, struct usched_opt_client *dest) {
 	if (!hostname || !hostname[0]) {
+		puts("Remote hostname value is empty.\n");
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (strlen(hostname) >= sizeof(dest->remote_hostname)) {
+		puts("Hostname too long.");
 		errno = EINVAL;
 		return -1;
 	}
@@ -57,11 +59,13 @@ static int _opt_client_remote_host(const char *hostname, struct usched_opt_clien
 
 static int _opt_client_remote_port(const char *port, struct usched_opt_client *dest) {
 	if (!port || !port[0]) {
+		puts("Remote port value is empty.");
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (strlen(port) >= sizeof(dest->remote_port)) {
+		puts("Remote port value is too long.");
 		errno = EINVAL;
 		return -1;
 	}
@@ -75,11 +79,13 @@ static int _opt_client_remote_port(const char *port, struct usched_opt_client *d
 
 static int _opt_client_remote_username(const char *username, struct usched_opt_client *dest) {
 	if (!username || !username[0]) {
+		puts("Username is empty.");
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (strlen(username) >= sizeof(dest->remote_username)) {
+		puts("Username too long.");
 		errno = EINVAL;
 		return -1;
 	}
@@ -93,11 +99,19 @@ static int _opt_client_remote_username(const char *username, struct usched_opt_c
 
 static int _opt_client_remote_password(const char *password, struct usched_opt_client *dest) {
 	if (!password || !password[0]) {
+		puts("Password is empty.");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
+		puts("Password too short.");
 		errno = EINVAL;
 		return -1;
 	}
 
 	if (strlen(password) >= sizeof(dest->remote_password)) {
+		puts("Password too long.");
 		errno = EINVAL;
 		return -1;
 	}
@@ -111,6 +125,7 @@ static int _opt_client_remote_password(const char *password, struct usched_opt_c
 
 int opt_client_process(int argc, char **argv, struct usched_opt_client *opt_client) {
 	int opt = 0;
+	char password[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 
 	/* Parse command line options */
 	while ((opt = getopt(argc, argv, "hH:p:U:P:")) != -1) {
@@ -145,12 +160,19 @@ int opt_client_process(int argc, char **argv, struct usched_opt_client *opt_clie
 
 	/* If a remote connection is required and no password is set, request it via terminal */
 	if (opt_client->remote_hostname[0] && opt_client->remote_username[0] && !opt_client->remote_password[0]) {
+		/* Request password from terminal */
 		printf("Password: ");
 
-		if (input_password(opt_client->remote_password, sizeof(opt_client->remote_password)) < 0)
+		if (input_password(password, sizeof(password)) < 0)
 			return -1;
 
 		puts("");
+
+		/* Set the password argument */
+		if (_opt_client_remote_password(password, opt_client) < 0) {
+			usage_client_show();
+			return -1;
+		}
 	}
 
 	/* If there are arguments, we must grant that they make sense */

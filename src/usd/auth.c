@@ -180,10 +180,10 @@ int auth_daemon_remote_user_token_create(
 	char *session_pos = session + sizeof(rund.sec.key_pub);
 	unsigned char pwhash[HASH_DIGEST_SIZE_SHA512 + 3];
 	unsigned char key[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char client_token[HASH_DIGEST_SIZE_BLAKE2S], client_hash[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char server_token1[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char server_token2[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char server_token3[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char client_hash[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char client_hash_tmp[HASH_DIGEST_SIZE_SHA512 * 2];
+	unsigned char client_token[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char server_token[HASH_DIGEST_SIZE_BLAKE2S];
 	size_t out_len = 0;
 
 	/* Session data contents
@@ -233,31 +233,23 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Compute a client hash */
-	if (!kdf_pbkdf2_hash(client_hash, hash_buffer_blake2s, HASH_DIGEST_SIZE_BLAKE2S, HASH_BLOCK_SIZE_BLAKE2S, client_token, sizeof(client_token), pwhash, sizeof(pwhash) - 3, rounds, HASH_DIGEST_SIZE_BLAKE2S) < 0) {
+	if (!kdf_pbkdf2_hash(client_hash_tmp, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, pwhash, sizeof(pwhash) - 3, client_token, sizeof(client_token), rounds, HASH_DIGEST_SIZE_SHA512 * 2) < 0) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Generate a random server token */
-	if (!generate_bytes_random(server_token1, HASH_DIGEST_SIZE_BLAKE2S)) {
+	/* Shrink the temporary client hash */
+	if (!hash_buffer_blake2s(client_hash, client_hash_tmp, HASH_DIGEST_SIZE_SHA512 * 2)) {
 		errsv = errno;
-		log_warn("auth_daemon_remote_user_token_create(): generate_bytes_random(): %s\n", strerror(errno));
+		log_warn("auth_daemon_remote_user_token_create(): hash_buffer_blake2s(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Encrypt server token1 with re-hashed version of pwhash */
-	if (!crypt_encrypt_otp(server_token2, &out_len, server_token1, HASH_DIGEST_SIZE_BLAKE2S, NULL, key)) {
-		errsv = errno;
-		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_otp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Encrypt server token2 with re-hashed version of client token */
-	if (!crypt_encrypt_otp(server_token3, &out_len, server_token2, HASH_DIGEST_SIZE_BLAKE2S, NULL, client_hash)) {
+	/* Encrypt pwhash with re-hashed version of client token */
+	if (!crypt_encrypt_otp(server_token, &out_len, key, HASH_DIGEST_SIZE_BLAKE2S, NULL, client_hash)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_otp(): %s\n", strerror(errno));
 		errno = errsv;
@@ -281,7 +273,7 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (session_pos + CRYPT_NONCE_SIZE_XSALSA20), &out_len, server_token3, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (session_pos + CRYPT_NONCE_SIZE_XSALSA20), &out_len, server_token, HASH_DIGEST_SIZE_BLAKE2S, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -293,7 +285,7 @@ int auth_daemon_remote_user_token_create(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | nonce (24 bytes) | encrypted token3 (16 + 32 bytes) |
+	 * | pubkey (512 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
 	 *
 	 * Total size of session field: 584 bytes
 	 */

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Users configuration interface
  *
- * Date: 06-08-2014
+ * Date: 18-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,7 +34,6 @@
 #include <fsop/path.h>
 
 #include <psec/encode.h>
-#include <psec/generate.h>
 #include <psec/hash.h>
 #include <psec/kdf.h>
 
@@ -45,11 +44,11 @@
 #include "print.h"
 
 int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const char *password) {
-	int errsv = 0, len = 0, rounds = 5000;
+	int errsv = 0, len = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
 	char *result = NULL, *path = NULL;
-	unsigned char salt[8];
+	unsigned char salt[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	size_t edigest_out_len = 0, esalt_out_len = 0;
 	FILE *fp = NULL;
 
@@ -67,13 +66,16 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 		return -1;
 	}
 
-	/* Generate random salt */
-	if (!generate_bytes_random(salt, sizeof(salt))) {
-		errsv = errno;
-		log_warn("users_admin_config_add(): generate_bytes_random(): %s\n", strerror(errno));
-		errno = errsv;
+	/* Check if username doesn't exceed the expected size */
+	if (strlen(username) > sizeof(salt)) {
+		log_warn("users_admin_config_add(): Username is too long.\n");
+		errno = EINVAL;
 		return -1;
 	}
+
+	/* Craft salt */
+	memset(salt, 'x', sizeof(salt));
+	memcpy(salt, username, strlen(username));
 
 	/* Generate the password digest */
 	if (!kdf_pbkdf2_hash(digest, hash_buffer_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (const unsigned char *) password, strlen(password), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {

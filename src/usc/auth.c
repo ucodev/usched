@@ -126,7 +126,6 @@ int auth_client_remote_session_token_process(
 	unsigned char client_hash_tmp[HASH_DIGEST_SIZE_SHA512 * 2];
 	unsigned char server_token[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char server_recvd_session[HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20];
-	/*unsigned char server_computed_session[HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20]; */
 	unsigned char pw_payload[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	size_t out_len = 0, pw_len = 0;
 

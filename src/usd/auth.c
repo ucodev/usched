@@ -61,7 +61,7 @@ int auth_daemon_remote_user_token_verify(
 	unsigned char *dh_shared,
 	size_t dh_shared_size,
 	unsigned char *nonce,
-	const unsigned char *token,
+	unsigned char *token,
 	uid_t *uid,
 	gid_t *gid)
 {
@@ -153,6 +153,9 @@ int auth_daemon_remote_user_token_verify(
 		errno = EINVAL;
 		return -1;
 	}
+
+	/* Set encryption/decryption token */
+	memcpy(token, key, HASH_DIGEST_SIZE_BLAKE2S);
 
 	/* Set uid and gid */
 	*uid = userinfo->uid;
@@ -254,7 +257,7 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Encrypt server token2 with re-hashed version of client token */
-	if (!crypt_encrypt_otp(server_token3, &out_len, server_token2, HASH_DIGEST_SIZE_BLAKE2S, NULL, client_token)) {
+	if (!crypt_encrypt_otp(server_token3, &out_len, server_token2, HASH_DIGEST_SIZE_BLAKE2S, NULL, client_hash)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_otp(): %s\n", strerror(errno));
 		errno = errsv;

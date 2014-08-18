@@ -44,8 +44,80 @@ static int _auth_client_remote_session_server_compute(
 	unsigned char *server_token3,
 	unsigned char *client_token,
 	unsigned char *pwhash,
-	unsigned char *dh_shared)
+	unsigned char *dh_shared,
+	size_t dh_shared_size,
+	unsigned char *nonce)
 {
+	int errsv = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
+	unsigned char key[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char client_hash[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char server_token2_local[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char server_token3_local[HASH_DIGEST_SIZE_BLAKE2S];
+	size_t out_len = 0;
+
+	/* Re-hash the pwhash to achieve the decryption key for client token */
+	if (!hash_buffer_blake2s(key, pwhash, HASH_DIGEST_SIZE_SHA512)) {
+		errsv = errno;
+		log_warn("_auth_client_remote_session_server_compute(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Compute server token2 */
+	if (!crypt_encrypt_otp(server_token2_local, &out_len, server_token1, HASH_DIGEST_SIZE_BLAKE2S, NULL, key)) {
+		errsv = errno;
+		log_warn("_auth_client_remote_session_server_compute(): crypt_encrypt_otp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Compare the computed server token 2 with the received server token 2 */
+	if (memcmp(server_token2, server_token2_local, HASH_DIGEST_SIZE_BLAKE2S)) {
+		log_warn("_auth_client_remote_session_server_compute(): The server token level 2 doesn't match the data received from server.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Compute a client hash */
+	if (!kdf_pbkdf2_hash(client_hash, hash_buffer_blake2s, HASH_DIGEST_SIZE_BLAKE2S, HASH_BLOCK_SIZE_BLAKE2S, client_token, HASH_DIGEST_SIZE_BLAKE2S, pwhash, HASH_DIGEST_SIZE_SHA512, rounds, HASH_DIGEST_SIZE_BLAKE2S) < 0) {
+		errsv = errno;
+		log_warn("_auth_client_remote_session_server_compute(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Compute server token3 */
+	if (!crypt_encrypt_otp(server_token3_local, &out_len, server_token2, HASH_DIGEST_SIZE_BLAKE2S, NULL, client_hash)) {
+		errsv = errno;
+		log_warn("_auth_client_remote_session_server_compute(): crypt_encrypt_otp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Compare the computed server token 3 with the received server token 3 */
+	if (memcmp(server_token3, server_token3_local, HASH_DIGEST_SIZE_BLAKE2S)) {
+		log_warn("_auth_client_remote_session_server_compute(): The server token level 3 doesn't match the data received from server.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Shrink the shared key with a blake2s digest in order to match the encryption key size */
+	if (!hash_buffer_blake2s(key, dh_shared, dh_shared_size)) {
+		errsv = errno;
+		log_warn("_auth_client_remote_session_server_compute(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Encrypt server token level 3 to create the final server session */
+	if (!crypt_encrypt_xsalsa20((unsigned char *) out, &out_len, server_token3, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+		errsv = errno;
+		log_warn("_auth_client_remote_session_server_compute(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
 	return 0;
 }
 
@@ -137,8 +209,8 @@ int auth_client_remote_session_token_process(
 	unsigned char server_token1[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char server_token2[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char server_token3[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char server_recvd_session[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char server_computed_session[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char server_recvd_session[HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20];
+	unsigned char server_computed_session[HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20];
 	unsigned char pw_payload[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	size_t out_len = 0, pw_len = 0;
 
@@ -163,7 +235,7 @@ int auth_client_remote_session_token_process(
 
 	/* Extract nonce from session */
 	memcpy(nonce, session_pos, CRYPT_NONCE_SIZE_XSALSA20);
-	memcpy(server_recvd_session, session_pos + CRYPT_NONCE_SIZE_XSALSA20, HASH_DIGEST_SIZE_BLAKE2S);
+	memcpy(server_recvd_session, session_pos + CRYPT_NONCE_SIZE_XSALSA20, HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20);
 
 	/* Shrink the shared key with a blake2s digest in order to match the encryption key size */
 	if (!hash_buffer_blake2s(key, dh_shared, dh_shared_size)) {
@@ -174,7 +246,7 @@ int auth_client_remote_session_token_process(
 	}
 
 	/* Decrypt server session */
-	if (!crypt_decrypt_xsalsa20(server_token3, &out_len, server_recvd_session, CRYPT_KEY_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_decrypt_xsalsa20(server_token3, &out_len, server_recvd_session, sizeof(server_token3) + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_session_token_process(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -222,7 +294,7 @@ int auth_client_remote_session_token_process(
 	}
 
 	/* Reconstruct server session */
-	if (_auth_client_remote_session_server_compute(server_computed_session, server_token1, server_token2, server_token3, token, pwhash, dh_shared) < 0) {
+	if (_auth_client_remote_session_server_compute(server_computed_session, server_token1, server_token2, server_token3, token, pwhash, dh_shared, dh_shared_size, nonce) < 0) {
 		errsv = errno;
 		log_warn("auth_client_remote_session_token_process(): _auth_client_remote_session_server_compute(): %s\n", strerror(errno));
 		errno = errsv;
@@ -230,7 +302,7 @@ int auth_client_remote_session_token_process(
 	}
 
 	/* Compare session values */
-	if (memcmp(server_recvd_session, server_computed_session, HASH_DIGEST_SIZE_BLAKE2S)) {
+	if (memcmp(server_recvd_session, server_computed_session, CRYPT_EXTRA_SIZE_XSALSA20 + HASH_DIGEST_SIZE_BLAKE2S)) {
 		log_warn("auth_client_remote_session_token_process(): Session data received from server doesn't match the local computed session.\n");
 		errno = EINVAL;
 		return -1;
@@ -289,6 +361,9 @@ int auth_client_remote_session_token_process(
 
 	/* Set nonce value to the head of session */
 	memcpy(session, nonce, CRYPT_NONCE_SIZE_XSALSA20);
+
+	/* Set encryption/decryption token */
+	memcpy(token, key, HASH_DIGEST_SIZE_BLAKE2S);
 
 	/* Session data contents:
 	 *

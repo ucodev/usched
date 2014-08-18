@@ -1,6 +1,9 @@
 =======================================
  PANKAKE v0.03 (being reviewed)
 
+ Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+
+
  Author:  Pedro A. Hortas
  Email:   pah@ucodev.org
  Date:    2014-08-18
@@ -17,13 +20,13 @@
 
  - Salt is known either by client and server.
  - If salt isn't known by client, it may be transfered from server in plain text.
- - When encryption keys exceed the permited size, blake2 should be used to shrink them.
  - Client hash derivation is blake2 based and should output a REALLY BIG hash (to avoid FPGA cracking).
- - Client may optionally send pwhash instead of plain text password in the last client step.
  - All xor() operations must be a OTP encryption (encryption key must be the same size of the data).
+ - When encryption keys exceed the permited size, blake2 should be used to shrink them.
  - All encrypt() operations should contain some sort of Message Authentication Code (MAC).
  - It is recommended to use Xsalsa20+Poly1305 for encrypt() and decrypt() operations.
  - It is recommended to use SHA-512 for key derivation of the plain text passwords.
+ - Client may optionally send pwhash instead of plain text password in the last client step.
 
 
 2. Goals
@@ -40,7 +43,7 @@
  - Resistant to FPGA based decryption.
 
 
-2. Diagram
+3. Diagram
 
 ______________________________________________________________________________________________
                                             |     |

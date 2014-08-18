@@ -16,7 +16,7 @@
 1. Notes
 
  - Salt is known either by client and server.
- - If salt isn't known by client, it mey be transfered from server in plain text.
+ - If salt isn't known by client, it may be transfered from server in plain text.
  - When encryption keys exceed the permited size, blake2 should be used to shrink them.
  - Client hash derivation is blake2 based and should output a REALLY BIG hash (to avoid FPGA cracking).
  - Client may optionally send pwhash instead of plain text password in the last client step.

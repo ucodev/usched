@@ -22,6 +22,19 @@
  - Client may optionally send pwhash instead of plain text password in the last client step.
 
 
+2. Goals
+
+ - Open protocol.
+ - Authenticate both parties in only 3 communications (client -> server -> client).
+ - Client grants that server is legit before revealing critical data.
+ - Server grants that client is legit without revealing critical data.
+ - Server only stores the client's password hash and NOT the plain-text password.
+ - Resistant to replay attacks.
+ - Resistant to eavesdropping in all communications.
+ - Resistant to man-in-the-middle packet mangling in all communications.
+ - Resistant to dictionary attacks.
+ - Resistant to FPGA based decryption.
+
 
 2. Diagram
 

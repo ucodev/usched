@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Client
  *
- * Date: 16-08-2014
+ * Date: 18-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -108,13 +108,21 @@ static int _entry_client_remote_session_from_pubkey(struct usched_entry *entry) 
 	return 0;
 }
 
-int entry_client_remote_session_create(struct usched_entry *entry) {
+int entry_client_remote_session_create(struct usched_entry *entry, const char *password) {
 	int errsv = 0;
 
 	/* Assign public key to the entry->session field */
 	if (_entry_client_remote_session_from_pubkey(entry) < 0) {
 		errsv = errno;
 		log_warn("entry_client_remote_session_create(): _entry_client_remote_session_from_pubkey(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Insert client session token into session data */
+	if (auth_client_remote_session_token_create(entry->session, entry->username, password, entry->token) < 0) {
+		errsv = errno;
+		log_warn("entry_client_remote_session_create(): auth_client_remote_session_token_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -141,7 +149,7 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 	}
 
 	/* Process remote session data */
-	if (auth_client_remote_session_token_process(entry->session, password, entry->nonce, entry->token) < 0) {
+	if (auth_client_remote_session_token_process(entry->session, entry->username, password, entry->key_shr, sizeof(entry->key_shr), entry->nonce, entry->token) < 0) {
 		errsv = errno;
 		log_warn("entry_client_remote_session_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
 		errno = errsv;

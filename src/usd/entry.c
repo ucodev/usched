@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 16-08-2014
+ * Date: 18-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -180,7 +180,7 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 	}
 
 	/* Initialize a new entry->session field to be sent to the client */
-	if (auth_daemon_remote_user_token_create(entry->username, entry->session, entry->nonce, entry->token) < 0) {
+	if (auth_daemon_remote_user_token_create(entry->username, entry->session, entry->key_shr, sizeof(entry->key_shr), entry->nonce, entry->token) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_remote_session_create(): auth_daemon_user_token_create(): %s\n", strerror(errno));
 		errno = errsv;
@@ -193,7 +193,7 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	int errsv = 0;
 
-	if (auth_daemon_remote_user_token_verify(entry->username, entry->session, entry->nonce, entry->token, &entry->uid, &entry->gid) < 0) {
+	if (auth_daemon_remote_user_token_verify(entry->username, entry->session, entry->key_shr, sizeof(entry->key_shr), entry->nonce, entry->token, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_remote_session_process(): auth_daemon_remote_user_token_verify(): %s\n", strerror(errno));
 		errno = errsv;

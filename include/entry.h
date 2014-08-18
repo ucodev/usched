@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 16-08-2014
+ * Date: 18-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -96,7 +96,7 @@ struct usched_entry {
 
 /* Prototypes */
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize);
-int entry_client_remote_session_create(struct usched_entry *entry);
+int entry_client_remote_session_create(struct usched_entry *entry, const char *password);
 int entry_client_remote_session_process(struct usched_entry *entry, const char *password);
 int entry_client_payload_encrypt(struct usched_entry *entry);
 void entry_set_id(struct usched_entry *entry, uint32_t id);

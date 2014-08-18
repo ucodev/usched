@@ -1,5 +1,5 @@
 =======================================
- PANKAKE v0.03 (being reviewed)
+ PANKAKE v0.04 (being reviewed)
 
  Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
 
@@ -20,7 +20,7 @@
 
  - Salt is known either by client and server.
  - If salt isn't known by client, it may be transfered from server in plain text.
- - Client hash derivation is sha512 based and should output a REALLY BIG hash (to avoid FPGA cracking).
+ - Client hash derivation is SHA-512 based and should output a BIG hash (not only 64 bytes).
  - All xor() operations must be a OTP encryption (encryption key must be the same size of the data).
  - When encryption keys exceed the permited size, blake2 should be used to shrink them.
  - All encrypt() operations should contain some sort of Message Authentication Code (MAC).

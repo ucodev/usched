@@ -20,12 +20,16 @@
  - When encryption keys exceed the permited size, blake2 should be used to shrink them.
  - Client hash derivation is blake2 based and should output a REALLY BIG hash (to avoid FPGA cracking).
  - Client may optionally send pwhash instead of plain text password in the last client step.
+ - All xor() operations must be a OTP encryption (encryption key must be the same size of the data).
+ - All encrypt() operations should contain some sort of Message Authentication Code (MAC).
+ - It is recommended to use Xsalsa20+Poly1305 for encrypt() and decrypt() operations.
+ - It is recommended to use SHA-512 for key derivation of the plain text passwords.
 
 
 2. Goals
 
  - Open protocol.
- - Authenticate both parties in only 3 communications (client -> server -> client).
+ - Authenticate both parties in only 3 communications (client -> server -> client -> server).
  - Client grants that server is legit before revealing critical data.
  - Server grants that client is legit without revealing critical data.
  - Server only stores the client's password hash and NOT the plain-text password.

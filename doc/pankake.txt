@@ -4,15 +4,19 @@
 
  Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
 
+ Initial Release Date: 2014-08-17
 
  Author:  Pedro A. Hortas
  Email:   pah@ucodev.org
  Date:    2014-08-18
  License: Public Domain
 
- uSched Authentication Protocol
 
- URL: https://github.com/ucodev/usched
+ Current Implementations:
+
+   Project: uSched
+   Module:  uSched Authentication Protocol
+   URL:     https://github.com/ucodev/usched
 
 =======================================
 

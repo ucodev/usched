@@ -69,9 +69,12 @@ int auth_daemon_remote_user_token_verify(
 	struct usched_config_userinfo *userinfo = NULL;
 	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
-	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512], pwhash_s[HASH_DIGEST_SIZE_SHA512 + 3];
+	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512];
+	unsigned char pwhash_s[HASH_DIGEST_SIZE_SHA512 + 3];
+	unsigned char pwrehash[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char pw_payload[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	unsigned char key[HASH_DIGEST_SIZE_BLAKE2S];
+	unsigned char key_agreed[HASH_DIGEST_SIZE_BLAKE2S];
 	char plain_passwd[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	size_t out_len = 0;
 
@@ -110,6 +113,21 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
+	/* Grant that userinfo->password doesn't exceed the expected length */
+	if (decode_size_base64(strlen(userinfo->password)) > sizeof(pwhash_s)) {
+		log_warn("auth_daemon_remote_user_token_verify(): pwhash_s buffer is too small to receive the decoded user password.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Decode the base64 encoded password hash from current configuration */
+	if (!decode_buffer_base64(pwhash_s, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
+		errsv = errno;
+		log_warn("auth_daemon_remote_user_token_verify(): decode_buffer_base64(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Extract nonce from the received session field */
 	memcpy(nonce, session, CRYPT_NONCE_SIZE_XSALSA20);
 
@@ -121,8 +139,24 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
+	/* Shrink the pwhash with a blake2s digest in order to match the encryption key size */
+	if (!hash_buffer_blake2s(pwrehash, pwhash_s, sizeof(pwhash_s) - 3)) {
+		errsv = errno;
+		log_warn("auth_daemon_remote_user_token_verify(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Encrypt the re-hashed DH shared key with the re-hashed pwhash to obain the agreed key */
+	if (!crypt_encrypt_otp(key_agreed, &out_len, pwrehash, sizeof(pwrehash), NULL, key)) {
+		errsv = errno;
+		log_warn("auth_daemon_remote_user_token_verify(): crypt_encrypt_otp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Decrypt client password with DH shared as key */
-	if (!crypt_decrypt_xsalsa20(pw_payload, &out_len, (unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), sizeof(pw_payload) + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_decrypt_xsalsa20(pw_payload, &out_len, (unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), sizeof(pw_payload) + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key_agreed)) {
 		errsv = errno;
 		log_warn("auth_daemon_remote_user_token_verify(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -141,21 +175,6 @@ int auth_daemon_remote_user_token_verify(
 		return -1;
 	}
 
-	/* Grant that userinfo->password doesn't exceed the expected length */
-	if (decode_size_base64(strlen(userinfo->password)) > sizeof(pwhash_s)) {
-		log_warn("auth_daemon_remote_user_token_verify(): pwhash_s buffer is too small to receive the decoded user password.\n");
-		errno = EINVAL;
-		return -1;
-	}
-
-	/* Decode the base64 encoded password hash from current configuration */
-	if (!decode_buffer_base64(pwhash_s, &out_len, (unsigned char *) userinfo->password, strlen(userinfo->password))) {
-		errsv = errno;
-		log_warn("auth_daemon_remote_user_token_verify(): decode_buffer_base64(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
 	/* Check if password hashes match */
 	if (memcmp(pwhash_s, pwhash_c, HASH_DIGEST_SIZE_SHA512)) {
 		log_warn("auth_daemon_remote_user_token_verify(): Server and Client password hashes do not match.\n");
@@ -164,7 +183,7 @@ int auth_daemon_remote_user_token_verify(
 	}
 
 	/* Set encryption/decryption token */
-	memcpy(token, key, HASH_DIGEST_SIZE_BLAKE2S);
+	memcpy(token, key_agreed, HASH_DIGEST_SIZE_BLAKE2S);
 
 	/* Set uid and gid */
 	*uid = userinfo->uid;
@@ -172,7 +191,10 @@ int auth_daemon_remote_user_token_verify(
 
 	/* Cleanup data */
 	memset(key, 0, sizeof(key));
+	memset(key_agreed, 0, sizeof(key));
 	memset(pwhash_c, 0, sizeof(pwhash_c));
+	memset(pwhash_s, 0, sizeof(pwhash_s));
+	memset(pwrehash, 0, sizeof(pwrehash));
 	memset(pw_payload, 0, sizeof(pw_payload));
 	memset(plain_passwd, 0, sizeof(plain_passwd));
 

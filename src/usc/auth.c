@@ -132,8 +132,9 @@ int auth_client_remote_session_token_process(
 	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	unsigned char pwhash_c[HASH_DIGEST_SIZE_SHA512];
-	unsigned char pwhash_s[HASH_DIGEST_SIZE_SHA512];
+	unsigned char pwhash_s[HASH_DIGEST_SIZE_BLAKE2S]; /* Server pwhash is a re-hashed version */
 	unsigned char key[CRYPT_KEY_SIZE_XSALSA20];
+	unsigned char key_agreed[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char client_hash[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char client_hash_tmp[HASH_DIGEST_SIZE_SHA512 * 2];
 	unsigned char server_token[HASH_DIGEST_SIZE_BLAKE2S];
@@ -243,6 +244,14 @@ int auth_client_remote_session_token_process(
 		return -1;
 	}
 
+	/* Encrypt the re-hashed DH shared key with the re-hashed pwhash to obain the agreed key */
+	if (!crypt_encrypt_otp(key_agreed, &out_len, pwhash_s, sizeof(pwhash_s), NULL, key)) {
+		errsv = errno;
+		log_warn("auth_client_remote_session_token_process(): crypt_encrypt_otp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Generate a new nonce value */
 	if (!generate_bytes_random(nonce, CRYPT_NONCE_SIZE_XSALSA20)) {
 		errsv = errno;
@@ -279,7 +288,7 @@ int auth_client_remote_session_token_process(
 	memcpy(pw_payload + 1, plain_passwd, pw_len);
 
 	/* Encrypt the user password hash with the session token as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), &out_len, pw_payload, sizeof(pw_payload), nonce, key)) {
+	if (!crypt_encrypt_xsalsa20((unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), &out_len, pw_payload, sizeof(pw_payload), nonce, key_agreed)) {
 		errsv = errno;
 		log_warn("auth_client_remote_session_token_process(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
 		errno = errsv;
@@ -290,7 +299,7 @@ int auth_client_remote_session_token_process(
 	memcpy(session, nonce, CRYPT_NONCE_SIZE_XSALSA20);
 
 	/* Set encryption/decryption token */
-	memcpy(token, key, HASH_DIGEST_SIZE_BLAKE2S);
+	memcpy(token, key_agreed, HASH_DIGEST_SIZE_BLAKE2S);
 
 	/* Session data contents:
 	 *
@@ -302,6 +311,7 @@ int auth_client_remote_session_token_process(
 
 	/* Cleanup data */
 	memset(key, 0, sizeof(key));
+	memset(key_agreed, 0, sizeof(key_agreed));
 	memset(pwhash_c, 0, sizeof(pwhash_c));
 	memset(pwhash_s, 0, sizeof(pwhash_c));
 	memset(client_hash, 0, sizeof(client_hash));

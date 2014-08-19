@@ -1,5 +1,5 @@
 =======================================
- PANKAKE v0.04 (being reviewed)
+ PANKAKE v0.05 (being reviewed)
  Password Authentication N' Key Agreement with Key Exchange
 
  Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
@@ -8,7 +8,7 @@
 
  Author:  Pedro A. Hortas
  Email:   pah@ucodev.org
- Date:    2014-08-18
+ Changed: 2014-08-19
  License: Public Domain
 
 
@@ -33,7 +33,8 @@
  - It is recommended to use Xsalsa20+Poly1305 for encrypt() and decrypt() operations.
  - It is recommended to use SHA-512 for key derivation of the plain text passwords.
  - Client may optionally send pwhash instead of plain text password in the last client step.
- - All communications after the authentication procedures MUST use the DH shared key for encryption.
+ - All communications after successful authentication may use the Agreed Key for encryption.
+ - None of the exchanged tokens between the parties should be beyond the authentication procedures.
  - All the exchanged tokens between the parties should be destroyed after authentication is performed.
 
 
@@ -190,19 +191,33 @@ ________________________________________________________________________________
             +---------+                     |     |
     +----------------+ +----------------+   |     |
     |                | |                |   |     |
-    |  DH shared key | | plain password |   |     |
+    |  DH shared key | |     pwhash     |   |     |
     |                | |                |   |     |
     +----------------+ +----------------+   |     |
             |                  |            |     |
             +------------------+            |     |
                       |                     |     |
-                 ___________                |     |
-                / encrypt() \               |     |
-                \___________/               |     |
+                  __________                |     |
+                 /   xor()  \               |     |
+                 \__________/               |     |
                       |                     |     |
+            +---------+                     |     |   +----------------+ +----------------+
+            |                               |     |   |                | |                |
+    +----------------+ +----------------+   |     |   |     pwhash     | |  DH shared key |
+    |                | |                |   |     |   |                | |                |
+    |   Agreed Key   | | plain password |   |     |   +----------------+ +----------------+
+    |                | |                |   |     |            |                  |
+    +----------------+ +----------------+   |     |            +------------------+
+            |                  |            |     |                     |
+            +------------------+            |     |                 __________
+                      |                     |     |                /   xor()  \
+                 ___________                |     |                \__________/
+                / encrypt() \               |     |                     |
+                \___________/               |     |                     +---------+
+                      |                     |     |                               |
               +----------------+            |     |   +----------------+ +----------------+
               |                |            |     |   |                | |                |
-              |  client auth   |--------------------->|  client auth   | |  DH shared key |
+              |  client auth   |--------------------->|  client auth   | |   Agreed Key   |
               |                |            |     |   |                | |                |
               +----------------+            |     |   +----------------+ +----------------+
                                             |     |            |                  |

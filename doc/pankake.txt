@@ -8,11 +8,15 @@
 
  Author:  Pedro A. Hortas
  Email:   pah@ucodev.org
- Changed: 2014-08-19
+ Changed: 2014-08-20
  License: Public Domain
 
 
- Current Implementations:
+ Current usages and implementations:
+
+   Project: PSEC Library
+   Module:  Key Exchange
+   URL:     https://github.com/ucodev/libpsec
 
    Project: uSched
    Module:  uSched Authentication Protocol
@@ -26,15 +30,16 @@
  - Salt is known either by client and server.
  - If salt isn't known by client, it may be transfered from server in plain text.
  - Deffie-Hellman public key exchange is performed in the first two flows (client -> server -> client).
+ - Client token must be a random value with a minimum length of 256 bits.
  - Client hash derivation is SHA-512 based and should output a BIG hash (not only 64 bytes).
  - All xor() operations must be a OTP encryption (encryption key must be the same size of the data).
  - When encryption keys exceed the permited size, Blake2 should be used to shrink them.
  - All encrypt() operations should contain some sort of Message Authentication Code (MAC).
  - It is recommended to use Xsalsa20+Poly1305 for encrypt() and decrypt() operations.
- - It is recommended to use SHA-512 for key derivation of the plain text passwords.
+ - It is recommended to use PBKDF2-SHA-512 for key derivation of the plain text passwords.
  - All communications after successful authentication may use the Agreed Key for encryption.
  - None of the exchanged tokens between the parties should live beyond the authentication procedures.
- - PBKDF2 rounds should be at least 5000.
+ - PBKDF2 iterations should be at least 5000.
  - The client auth must have the same size in all authentications regardless of the password size.
  - Client may optionally send pwhash instead of plain text password in the last client step.
 

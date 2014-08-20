@@ -166,7 +166,7 @@ int entry_client_payload_encrypt(struct usched_entry *entry) {
 	size_t out_len = 0;
 
 	/* Alloc memory for encrypted payload */
-	if (!(payload_enc = mm_alloc(entry->psize + CRYPT_EXTRA_SIZE_XSALSA20))) {
+	if (!(payload_enc = mm_alloc(entry->psize + CRYPT_EXTRA_SIZE_XSALSA20POLY1305))) {
 		errsv = errno;
 		log_warn("entry_client_payload_encrypt(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
@@ -174,9 +174,9 @@ int entry_client_payload_encrypt(struct usched_entry *entry) {
 	}
 
 	/* Encrypt payload */
-	if (!(crypt_encrypt_xsalsa20(payload_enc, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
+	if (!(crypt_encrypt_xsalsa20poly1305(payload_enc, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
 		errsv = errno;
-		log_warn("entry_client_payload_encrypt(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
+		log_warn("entry_client_payload_encrypt(): crypt_encrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		mm_free(payload_enc);
 		errno = errsv;
 		return -1;

@@ -156,9 +156,9 @@ int auth_daemon_remote_user_token_verify(
 	}
 
 	/* Decrypt client password with DH shared as key */
-	if (!crypt_decrypt_xsalsa20(pw_payload, &out_len, (unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), sizeof(pw_payload) + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key_agreed)) {
+	if (!crypt_decrypt_xsalsa20poly1305(pw_payload, &out_len, (unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), sizeof(pw_payload) + CRYPT_EXTRA_SIZE_XSALSA20POLY1305, nonce, key_agreed)) {
 		errsv = errno;
-		log_warn("auth_daemon_remote_user_token_verify(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
+		log_warn("auth_daemon_remote_user_token_verify(): crypt_decrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -308,9 +308,9 @@ int auth_daemon_remote_user_token_create(
 	}
 
 	/* Encrypt the session token with the resulting blake2s digest as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (session_pos + CRYPT_NONCE_SIZE_XSALSA20), &out_len, server_token, HASH_DIGEST_SIZE_BLAKE2S, nonce, key)) {
+	if (!crypt_encrypt_xsalsa20poly1305((unsigned char *) (session_pos + CRYPT_NONCE_SIZE_XSALSA20), &out_len, server_token, HASH_DIGEST_SIZE_BLAKE2S, nonce, key)) {
 		errsv = errno;
-		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
+		log_warn("auth_daemon_remote_user_token_create(): crypt_encrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

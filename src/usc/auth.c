@@ -138,7 +138,7 @@ int auth_client_remote_session_token_process(
 	unsigned char client_hash[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char client_hash_tmp[HASH_DIGEST_SIZE_SHA512 * 2];
 	unsigned char server_token[HASH_DIGEST_SIZE_BLAKE2S];
-	unsigned char server_recvd_session[HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20];
+	unsigned char server_recvd_session[HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20POLY1305];
 	unsigned char pw_payload[CONFIG_USCHED_AUTH_PASSWORD_MAX + 1];
 	size_t out_len = 0, pw_len = 0;
 
@@ -171,7 +171,7 @@ int auth_client_remote_session_token_process(
 
 	/* Extract nonce from session */
 	memcpy(nonce, session_pos, CRYPT_NONCE_SIZE_XSALSA20);
-	memcpy(server_recvd_session, session_pos + CRYPT_NONCE_SIZE_XSALSA20, HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20);
+	memcpy(server_recvd_session, session_pos + CRYPT_NONCE_SIZE_XSALSA20, HASH_DIGEST_SIZE_BLAKE2S + CRYPT_EXTRA_SIZE_XSALSA20POLY1305);
 
 	/* Shrink the shared key with a blake2s digest in order to match the encryption key size */
 	if (!hash_buffer_blake2s(key, dh_shared, dh_shared_size)) {
@@ -182,9 +182,9 @@ int auth_client_remote_session_token_process(
 	}
 
 	/* Decrypt server session */
-	if (!crypt_decrypt_xsalsa20(server_token, &out_len, server_recvd_session, sizeof(server_token) + CRYPT_EXTRA_SIZE_XSALSA20, nonce, key)) {
+	if (!crypt_decrypt_xsalsa20poly1305(server_token, &out_len, server_recvd_session, sizeof(server_token) + CRYPT_EXTRA_SIZE_XSALSA20POLY1305, nonce, key)) {
 		errsv = errno;
-		log_warn("auth_daemon_remote_session_token_process(): crypt_decrypt_xsalsa20(): %s\n", strerror(errno));
+		log_warn("auth_daemon_remote_session_token_process(): crypt_decrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -288,9 +288,9 @@ int auth_client_remote_session_token_process(
 	memcpy(pw_payload + 1, plain_passwd, pw_len);
 
 	/* Encrypt the user password hash with the session token as key */
-	if (!crypt_encrypt_xsalsa20((unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), &out_len, pw_payload, sizeof(pw_payload), nonce, key_agreed)) {
+	if (!crypt_encrypt_xsalsa20poly1305((unsigned char *) (session + CRYPT_NONCE_SIZE_XSALSA20), &out_len, pw_payload, sizeof(pw_payload), nonce, key_agreed)) {
 		errsv = errno;
-		log_warn("auth_client_remote_session_token_process(): crypt_encrypt_xsalsa20(): %s\n", strerror(errno));
+		log_warn("auth_client_remote_session_token_process(): crypt_encrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

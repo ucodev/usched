@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 12-08-2014
+ * Date: 21-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,7 +44,6 @@
 #include "sig.h"
 #include "bitops.h"
 #include "marshal.h"
-#include "sec.h"
 
 
 int runtime_daemon_init(int argc, char **argv) {
@@ -112,18 +111,6 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Thread mutexes initialized.\n");
-
-	/* Initialize security interface */
-	log_info("Initializing security interface...\n");
-
-	if (sec_daemon_init() < 0) {
-		errsv = errno;
-		log_crit("runtime_daemon_init(): sec_daemon_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	log_info("Security interface initialized.\n");
 
 	/* Initialize pools */
 	log_info("Initializing pools...\n");
@@ -243,11 +230,6 @@ void runtime_daemon_destroy(void) {
 	log_info("Destroying pools...\n");
 	pool_daemon_destroy();
 	log_info("Pools destroyed.\n");
-
-	/* Destroy security interface */
-	log_info("Destroying security interface...\n");
-	sec_daemon_destroy();
-	log_info("Security interface destroyed.\n");
 
 	/* Destroy mutexes */
 	log_info("Destroying thread mutexes...\n");

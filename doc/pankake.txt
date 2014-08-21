@@ -34,8 +34,9 @@
  - Client hash derivation is SHA-512 based and should output a BIG hash (not only 64 bytes).
  - All xor() operations must be a OTP encryption (encryption key must be the same size of the data).
  - When encryption keys exceed the permited size, Blake2 should be used to shrink them.
- - All encrypt() operations should contain some sort of Message Authentication Code (MAC).
- - It is recommended to use Xsalsa20+Poly1305 for encrypt() and decrypt() operations.
+ - All encrypt() operations should NOT add any sort of Message Authentication Code (MAC).
+ - All encrypt() operations should use a nonce based feature.
+ - It is recommended to use Xsalsa20 for encrypt() and decrypt() operations.
  - It is recommended to use PBKDF2-SHA-512 for key derivation of the plain text passwords.
  - All communications after successful authentication may use the Agreed Key for encryption.
  - None of the exchanged tokens between the parties should live beyond the authentication procedures.

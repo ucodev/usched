@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Client
  *
- * Date: 18-08-2014
+ * Date: 21-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,7 @@
 #include <sys/types.h>
 
 #include <psec/crypt.h>
+#include <psec/generate.h>
 
 #include "debug.h"
 #include "runtime.h"
@@ -41,7 +42,6 @@
 #include "entry.h"
 #include "log.h"
 #include "auth.h"
-#include "sec.h"
 
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize) {
 	int errsv = 0;
@@ -71,58 +71,13 @@ struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, voi
 	return entry;
 }
 
-static int _entry_client_remote_compute_shared_key(struct usched_entry *entry) {
-	int errsv = 0;
-
-	if (sec_client_compute_shared_key(entry->key_shr, entry->remote_key_pub) < 0) {
-		errsv = errno;
-		log_warn("_entry_client_remote_compute_shared_key(): sec_client_compute_shared_key(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-static int _entry_client_remote_session_to_pubkey(struct usched_entry *entry) {
-	if (sizeof(entry->session) < sizeof(entry->remote_key_pub)) {
-		log_warn("_entry_client_remote_session_from_pubkey(): sizeof(entry->session) < sizeof(remote_key_pub)\n");
-		errno = EINVAL;
-		return -1;
-	}
-
-	memcpy(entry->remote_key_pub, entry->session, sizeof(entry->remote_key_pub));
-
-	return 0;
-}
-
-static int _entry_client_remote_session_from_pubkey(struct usched_entry *entry) {
-	if (sizeof(entry->session) < sizeof(runc.sec.key_pub)) {
-		log_warn("_entry_client_remote_session_from_pubkey(): sizeof(entry->session) < sizeof(runc.sec.key_pub)\n");
-		errno = EINVAL;
-		return -1;
-	}
-
-	memcpy(entry->session, runc.sec.key_pub, sizeof(runc.sec.key_pub));
-
-	return 0;
-}
-
 int entry_client_remote_session_create(struct usched_entry *entry, const char *password) {
 	int errsv = 0;
 
-	/* Assign public key to the entry->session field */
-	if (_entry_client_remote_session_from_pubkey(entry) < 0) {
-		errsv = errno;
-		log_warn("entry_client_remote_session_create(): _entry_client_remote_session_from_pubkey(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
 	/* Insert client session token into session data */
-	if (auth_client_remote_session_token_create(entry->session, entry->username, password, entry->token) < 0) {
+	if (auth_client_remote_session_create(entry->session, entry->username, password, entry->context) < 0) {
 		errsv = errno;
-		log_warn("entry_client_remote_session_create(): auth_client_remote_session_token_create(): %s\n", strerror(errno));
+		log_warn("entry_client_remote_session_create(): auth_client_remote_session_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -133,25 +88,10 @@ int entry_client_remote_session_create(struct usched_entry *entry, const char *p
 int entry_client_remote_session_process(struct usched_entry *entry, const char *password) {
 	int errsv = 0;
 
-	/* Retrieve remote public key from session field */
-	if (_entry_client_remote_session_to_pubkey(entry) < 0) {
-		errsv = errno;
-		log_warn("entry_client_remote_session_process(): _entry_client_remote_session_to_pubkey(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (_entry_client_remote_compute_shared_key(entry) < 0) {
-		errsv = errno;
-		log_warn("entry_client_remote_session_process(): _entry_client_remote_compute_shared_key(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
 	/* Process remote session data */
-	if (auth_client_remote_session_token_process(entry->session, entry->username, password, entry->key_shr, sizeof(entry->key_shr), entry->nonce, entry->token) < 0) {
+	if (auth_client_remote_session_process(entry->session, entry->username, password, entry->context, entry->agreed_key) < 0) {
 		errsv = errno;
-		log_warn("entry_client_remote_session_process(): auth_client_remote_user_token_process(): %s\n", strerror(errno));
+		log_warn("entry_client_remote_session_process(): auth_client_remote_session_process(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -163,18 +103,30 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 int entry_client_payload_encrypt(struct usched_entry *entry) {
 	int errsv = 0;
 	unsigned char *payload_enc = NULL;
+	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
 	size_t out_len = 0;
 
 	/* Alloc memory for encrypted payload */
-	if (!(payload_enc = mm_alloc(entry->psize + CRYPT_EXTRA_SIZE_XSALSA20POLY1305))) {
+	if (!(payload_enc = mm_alloc(CRYPT_NONCE_SIZE_XSALSA20 + entry->psize + CRYPT_EXTRA_SIZE_XSALSA20POLY1305))) {
 		errsv = errno;
 		log_warn("entry_client_payload_encrypt(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Generate a random nonce */
+	if (!generate_bytes_random(nonce, sizeof(nonce))) {
+		errsv = errno;
+		log_warn("entry_client_payload_encrypt(): generate_bytes_random(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Craft nonce */
+	memcpy(payload_enc, nonce, sizeof(nonce));
+
 	/* Encrypt payload */
-	if (!(crypt_encrypt_xsalsa20poly1305(payload_enc, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
+	if (!(crypt_encrypt_xsalsa20poly1305(payload_enc + sizeof(nonce), &out_len, (unsigned char *) entry->payload, entry->psize, nonce, entry->agreed_key))) {
 		errsv = errno;
 		log_warn("entry_client_payload_encrypt(): crypt_encrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		mm_free(payload_enc);
@@ -183,7 +135,7 @@ int entry_client_payload_encrypt(struct usched_entry *entry) {
 	}
 
 	/* Set the psize */
-	entry->psize = out_len;
+	entry->psize = sizeof(nonce) + out_len;
 
 	/* Free plaintext payload */
 	mm_free(entry->payload);

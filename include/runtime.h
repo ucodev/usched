@@ -40,7 +40,6 @@
 #include "usched.h"
 #include "usage.h"
 #include "opt.h"
-#include "sec.h"
 
 /* Flags */
 typedef enum USCHED_RUNTIME_FLAGS {
@@ -87,9 +86,6 @@ struct usched_runtime_client {
 
 	/* Command line options */
 	struct usched_opt_client opt;
-
-	/* Security data */
-	struct usched_sec sec;
 };
 
 struct usched_runtime_daemon {
@@ -114,9 +110,6 @@ struct usched_runtime_daemon {
 	pall_fd_t ser_fd;
 
 	struct usched_config config;
-
-	/* Security data */
-	struct usched_sec sec;
 
 	pthread_t t_unix, t_remote;
 };

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 18-08-2014
+ * Date: 21-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -115,74 +115,13 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	return -1;	/* Not authorized. No authentication mechanism available */
 }
 
-static int _entry_daemon_remote_session_from_pubkey(struct usched_entry *entry) {
-	if (sizeof(entry->session) < sizeof(rund.sec.key_pub)) {
-		log_warn("_entry_daemon_remote_session_from_pubkey(): sizeof(entry->session) < sizeof(rund.sec.key_pub)\n");
-		errno = EINVAL;
-		return -1;
-	}
-
-	memcpy(entry->session, rund.sec.key_pub, sizeof(rund.sec.key_pub));
-
-	return 0;
-}
-
-static int _entry_daemon_remote_session_to_pubkey(struct usched_entry *entry) {
-	if (sizeof(entry->session) < sizeof(entry->remote_key_pub)) {
-		log_warn("_entry_daemon_remote_session_to_pubkey(): sizeof(entry->session) < sizeof(entry->remote_key_pub)\n");
-		errno = EINVAL;
-		return -1;
-	}
-
-	memcpy(entry->remote_key_pub, entry->session, sizeof(entry->remote_key_pub));
-
-	return 0;
-}
-
-static int _entry_daemon_remote_compute_shared_key(struct usched_entry *entry) {
-	int errsv = 0;
-
-	if (sec_daemon_compute_shared_key(entry->key_shr, entry->remote_key_pub) < 0) {
-		errsv = errno;
-		log_warn("_entry_daemon_remote_compute_shared_key(): sec_daemon_compute_shared_key(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
 int entry_daemon_remote_session_create(struct usched_entry *entry) {
 	int errsv = 0;
 
-	/* Retrieve the remote client public key from entry->session field */
-	if (_entry_daemon_remote_session_to_pubkey(entry) < 0) {
-		errsv = errno;
-		log_warn("entry_daemon_remote_session_create(): _entry_daemon_remote_session_to_pubkey(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Compute the shared secret */
-	if (_entry_daemon_remote_compute_shared_key(entry) < 0) {
-		errsv = errno;
-		log_warn("entry_daemon_remote_session_create(): _entry_daemon_remote_compute_shared_key(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Set the public key to the head of entry->session field */
-	if (_entry_daemon_remote_session_from_pubkey(entry) < 0) {
-		errsv = errno;
-		log_warn("entry_daemon_remote_session_create(): _entry_daemon_remote_session_from_pubkey(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
 	/* Initialize a new entry->session field to be sent to the client */
-	if (auth_daemon_remote_user_token_create(entry->username, entry->session, entry->key_shr, sizeof(entry->key_shr), entry->nonce, entry->token) < 0) {
+	if (auth_daemon_remote_session_create(entry->username, entry->session, entry->context) < 0) {
 		errsv = errno;
-		log_warn("entry_daemon_remote_session_create(): auth_daemon_user_token_create(): %s\n", strerror(errno));
+		log_warn("entry_daemon_remote_session_create(): auth_daemon_remote_session_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -193,9 +132,9 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	int errsv = 0;
 
-	if (auth_daemon_remote_user_token_verify(entry->username, entry->session, entry->key_shr, sizeof(entry->key_shr), entry->nonce, entry->token, &entry->uid, &entry->gid) < 0) {
+	if (auth_daemon_remote_session_verify(entry->username, entry->session, entry->context, entry->agreed_key, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
-		log_warn("entry_daemon_remote_session_process(): auth_daemon_remote_user_token_verify(): %s\n", strerror(errno));
+		log_warn("entry_daemon_remote_session_process(): auth_daemon_remote_session_verify(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -209,7 +148,7 @@ int entry_daemon_payload_decrypt(struct usched_entry *entry) {
 	size_t out_len = 0;
 
 	/* Alloc memory for decrypted payload */
-	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_XSALSA20POLY1305))) {
+	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_XSALSA20POLY1305 - CRYPT_NONCE_SIZE_XSALSA20))) {
 		errsv = errno;
 		log_warn("entry_daemon_payload_decrypt(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
@@ -217,7 +156,7 @@ int entry_daemon_payload_decrypt(struct usched_entry *entry) {
 	}
 
 	/* Decrypt payload */
-	if (!(crypt_decrypt_xsalsa20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, entry->nonce, entry->token))) {
+	if (!(crypt_decrypt_xsalsa20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload + CRYPT_NONCE_SIZE_XSALSA20, entry->psize - CRYPT_NONCE_SIZE_XSALSA20, (unsigned char *) entry->payload, entry->agreed_key))) {
 		errsv = errno;
 		log_warn("entry_daemon_payload_decrypt(): crypt_decrypt_xsalsa20poly1305(): %s\n", strerror(errno));
 		mm_free(payload_dec);

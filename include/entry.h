@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 18-08-2014
+ * Date: 21-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,6 +36,7 @@
 #include <psched/sched.h>
 
 #include <psec/crypt.h>
+#include <psec/ke.h>
 
 #include "config.h"
 #include "usched.h"
@@ -73,7 +74,7 @@ struct usched_entry {
 
 	/* Authentication Header */
 	char username[CONFIG_USCHED_AUTH_USERNAME_MAX];
-	char session[CONFIG_USCHED_AUTH_SESSION_MAX];
+	unsigned char session[CONFIG_USCHED_AUTH_SESSION_MAX];
 
 	/* Entry payload */
 	char *payload;
@@ -86,11 +87,8 @@ struct usched_entry {
 	pschedid_t psched_id;	/* The libpsched entry identifier */
 
 	/* Cryptographic Data Context */
-	unsigned char token[CRYPT_KEY_SIZE_XSALSA20];
-	unsigned char nonce[CRYPT_NONCE_SIZE_XSALSA20];
-
-	unsigned char remote_key_pub[CONFIG_USCHED_SEC_PUBKEY_SIZE];
-	unsigned char key_shr[CONFIG_USCHED_SEC_PUBKEY_SIZE];
+	unsigned char context[KE_CONTEXT_SIZE_PANKAKE];
+	unsigned char agreed_key[KE_KEY_SIZE_PANKAKE];
 };
 #pragma pack(pop)
 

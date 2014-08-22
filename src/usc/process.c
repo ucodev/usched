@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 05-08-2014
+ * Date: 23-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -70,7 +70,7 @@ static int _process_lib_result_set_show(struct usched_entry *entry_list, size_t 
 	return 0;
 }
 
-int process_client_recv_run(void) {
+int process_client_recv_run(struct usched_entry *entry) {
 	int errsv = 0;
 	uint64_t entry_id = 0;
 
@@ -97,7 +97,7 @@ int process_client_recv_run(void) {
 	return 0;
 }
 
-int process_client_recv_stop(void) {
+int process_client_recv_stop(struct usched_entry *entry) {
 	int i = 0, errsv = 0;
 	uint32_t entry_list_nmemb = 0;
 	uint64_t *entry_list = NULL;
@@ -157,18 +157,59 @@ int process_client_recv_stop(void) {
 	return 0;
 }
 
-int process_client_recv_show(void) {
+int process_client_recv_show(struct usched_entry *entry) {
 	int i = 0, errsv = 0, ret = -1;
-	uint32_t entry_list_nmemb = 0;
+	uint32_t entry_list_nmemb = 0, data_len = 0;
 	struct usched_entry *entry_list = NULL;
+	size_t p_offset = 0;
 
-	/* Read te number of elements to receive */
-	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
+	/* Cleanup entry payload if required */
+	if (entry->payload) {
+		mm_free(entry->payload);
+		entry->payload = NULL;
+		entry->psize = 0;
+	}
+
+	/* Read data size */
+	if (read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
+		log_crit("process_client_recv_show(): read(, &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	/* Set the entry payload size */
+	entry->psize = ntohl(data_len) - 4;
+
+	/* Allocate enough memory to receive the payload */
+	if (!(entry->payload = mm_alloc(entry->psize))) {
+		errsv = errno;
+		log_crit("process_client_recv_show(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Receive the payload */
+	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+		errsv = errno;
+		log_crit("process_client_recv_show(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Decrypt the payload */
+	if (entry_payload_decrypt(entry) < 0) {
+		errsv = errno;
+		log_crit("process_client_recv_show(): entry_payload_decrypt(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set the entry_list_size */
+	memcpy(&entry_list_nmemb, entry->payload, sizeof(entry_list_nmemb));
+
+	/* Update payload offset */
+	p_offset += sizeof(entry_list_nmemb);
 
 	/* Network to Host byte order */
 	entry_list_nmemb = ntohl(entry_list_nmemb);
@@ -192,12 +233,9 @@ int process_client_recv_show(void) {
 
 	/* Receive the entries */
 	for (i = 0; i < entry_list_nmemb; i ++) {
-		/* Read the first block of the entry */
-		if (read(runc.fd, &entry_list[i], offsetof(struct usched_entry, psize)) != offsetof(struct usched_entry, psize)) {
-			errsv = errno;
-			log_crit("process_client_recv_show(): read() != %zu: %s\n", offsetof(struct usched_entry, psize), strerror(errno));
-			goto _recv_show_finish;
-		}
+		/* Read the next entry */
+		memcpy(&entry_list[i], entry->payload + p_offset, offsetof(struct usched_entry, psize));
+		p_offset += offsetof(struct usched_entry, psize);
 
 		/* Convert Network to Host byte order */
 		entry_list[i].id = ntohll(entry_list[i].id);
@@ -209,18 +247,12 @@ int process_client_recv_show(void) {
 		entry_list[i].expire = ntohl(entry_list[i].expire);
 
 		/* Read the entry username */
-		if (read(runc.fd, entry_list[i].username, CONFIG_USCHED_AUTH_USERNAME_MAX) != CONFIG_USCHED_AUTH_USERNAME_MAX) {
-			errsv = errno;
-			log_crit("process_client_recv_show(): read() != %zu: %s\n", CONFIG_USCHED_AUTH_USERNAME_MAX, strerror(errno));
-			goto _recv_show_finish;
-		}
+		memcpy(entry_list[i].username, entry->payload + p_offset, CONFIG_USCHED_AUTH_USERNAME_MAX);
+		p_offset += CONFIG_USCHED_AUTH_USERNAME_MAX;
 
 		/* Read the subject size */
-		if (read(runc.fd, &entry_list[i].subj_size, 4) != 4) {
-			errsv = errno;
-			log_crit("process_client_recv_show(): read() != 4: %s\n", strerror(errno));
-			goto _recv_show_finish;
-		}
+		memcpy(&entry_list[i].subj_size, entry->payload + p_offset, 4);
+		p_offset += 4;
 
 		/* Convert Network to Host byte order */
 		entry_list[i].subj_size = ntohl(entry_list[i].subj_size);
@@ -236,11 +268,8 @@ int process_client_recv_show(void) {
 		memset(entry_list[i].subj, 0, entry_list[i].subj_size + 1);
 
 		/* Read the subject contents */
-		if (read(runc.fd, entry_list[i].subj, entry_list[i].subj_size + 1) != (entry_list[i].subj_size + 1)) {
-			errsv = errno;
-			log_crit("process_client_recv_show(): read() != %d: %s\n", entry_list[i].subj_size + 1, strerror(errno));
-			goto _recv_show_finish;
-		}
+		memcpy(entry_list[i].subj, entry->payload + p_offset, entry_list[i].subj_size + 1);
+		p_offset += entry_list[i].subj_size + 1;
 	}
 
 	/* Check if this is a library call */

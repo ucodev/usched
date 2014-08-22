@@ -33,11 +33,14 @@
 
 #include <sys/types.h>
 
+#include <psec/crypt.h>
+
 #include "config.h"
 #include "mm.h"
 #include "entry.h"
 #include "bitops.h"
 #include "log.h"
+#include "conn.h"
 
 void entry_set_id(struct usched_entry *entry, uint32_t id) {
 	entry->id = id;
@@ -110,6 +113,83 @@ int entry_set_payload(struct usched_entry *entry, const char *payload, size_t le
 
 	entry_set_psize(entry, len);
 
+	return 0;
+}
+
+int entry_payload_decrypt(struct usched_entry *entry) {
+	int errsv = 0;
+	unsigned char *payload_dec = NULL;
+	size_t out_len = 0;
+
+	/* Alloc memory for decrypted payload */
+	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_CHACHA20POLY1305))) {
+		errsv = errno;
+		log_warn("entry_payload_decrypt(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Increment nonce */
+	entry->nonce ++;
+
+	/* Decrypt payload */
+	if (!(crypt_decrypt_chacha20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
+		errsv = errno;
+		log_warn("entry_payload_decrypt(): crypt_decrypt_chacha20poly1305(): %s\n", strerror(errno));
+		mm_free(payload_dec);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set payload size */
+	entry->psize = out_len;
+
+	/* Free encrypted payload */
+	mm_free(entry->payload);
+
+	/* Set the new payload */
+	entry->payload = (char *) payload_dec;
+
+	/* All good */
+	return 0;
+}
+
+
+int entry_payload_encrypt(struct usched_entry *entry, size_t lpad) {
+	int errsv = 0;
+	unsigned char *payload_enc = NULL;
+	size_t out_len = 0;
+
+	/* Alloc memory for encrypted payload */
+	if (!(payload_enc = mm_alloc(lpad + entry->psize + CRYPT_EXTRA_SIZE_CHACHA20POLY1305))) {
+		errsv = errno;
+		log_warn("entry_payload_encrypt(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Increment nonce */
+	entry->nonce ++;
+
+	/* Encrypt payload */
+	if (!(crypt_encrypt_chacha20poly1305(payload_enc + lpad, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
+		errsv = errno;
+		log_warn("entry_payload_encrypt(): crypt_encrypt_chacha20poly1305(): %s\n", strerror(errno));
+		mm_free(payload_enc);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set the psize */
+	entry->psize = out_len + lpad;
+
+	/* Free plaintext payload */
+	mm_free(entry->payload);
+
+	/* Set new payload */
+	entry->payload = (char *) payload_enc;
+
+	/* All good */
 	return 0;
 }
 

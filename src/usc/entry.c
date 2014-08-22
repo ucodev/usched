@@ -42,7 +42,6 @@
 #include "entry.h"
 #include "log.h"
 #include "auth.h"
-#include "conn.h"
 
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize) {
 	int errsv = 0;
@@ -99,44 +98,6 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 
 	/* Set nonce to 0 */
 	entry->nonce = 0;
-
-	/* All good */
-	return 0;
-}
-
-int entry_client_payload_encrypt(struct usched_entry *entry) {
-	int errsv = 0;
-	unsigned char *payload_enc = NULL;
-	size_t out_len = 0;
-
-	/* Alloc memory for encrypted payload */
-	if (!(payload_enc = mm_alloc(entry->psize + CRYPT_EXTRA_SIZE_CHACHA20POLY1305))) {
-		errsv = errno;
-		log_warn("entry_client_payload_encrypt(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Increment nonce */
-	entry->nonce ++;
-
-	/* Encrypt payload */
-	if (!(crypt_encrypt_chacha20poly1305(payload_enc, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
-		errsv = errno;
-		log_warn("entry_client_payload_encrypt(): crypt_encrypt_chacha20poly1305(): %s\n", strerror(errno));
-		mm_free(payload_enc);
-		errno = errsv;
-		return -1;
-	}
-
-	/* Set the psize */
-	entry->psize = out_len;
-
-	/* Free plaintext payload */
-	mm_free(entry->payload);
-
-	/* Set new payload */
-	entry->payload = (char *) payload_enc;
 
 	/* All good */
 	return 0;

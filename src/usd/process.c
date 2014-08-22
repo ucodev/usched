@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 16-08-2014
+ * Date: 23-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -410,17 +410,40 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	/* Update buffer header with the current number of entries */
 	memcpy(buf, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
 
+	/* Setup the payload to be encrypted */
+	entry->payload = buf;
+	entry->psize = buf_offset;
+
+	/* Encrypt the payload */
+	if (entry_payload_encrypt(entry, 4) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_get(): entry_payload_encrypt(): %s\n", strerror(errno));
+		mm_free(entry->payload);
+		entry->payload = NULL;
+		entry->psize = 0;
+		errno = errsv;
+		return -1;
+	}
+
+	/* Prepend the payload size to the payload itself */
+	memcpy(entry->payload, (uint32_t [1]) { htonl(entry->psize) }, 4);
+
 	/* Reuse 'aop' to reply the contents of the requested entries */
 	mm_free((void *) aop->data);
 
 	memset(aop, 0, sizeof(struct async_op));
 
 	aop->fd = cur_fd;
-	aop->count = buf_offset;
+	aop->count = entry->psize;
 	aop->priority = 0;
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
-	aop->data = buf;
+	aop->data = entry->payload;
 
+	/* Unset the payload */
+	entry->payload = NULL;
+	entry->psize = 0;
+
+	/* All good */
 	return 0;
 }
 
@@ -611,9 +634,9 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 
 	/* Decrypt payload if this is a remote connection */
 	if (conn_is_remote(aop->fd)) {
-		if (entry_daemon_payload_decrypt(entry) < 0) {
+		if (entry_payload_decrypt(entry) < 0) {
 			errsv = errno;
-			log_warn("process_daemon_recv_update(): entry_daemon_payload_decrypt(): %s\n", strerror(errno));
+			log_warn("process_daemon_recv_update(): entry_payload_decrypt(): %s\n", strerror(errno));
 			entry_destroy(entry);
 			errno = errsv;
 			return -1;

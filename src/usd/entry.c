@@ -147,44 +147,6 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	return 0;
 }
 
-int entry_daemon_payload_decrypt(struct usched_entry *entry) {
-	int errsv = 0;
-	unsigned char *payload_dec = NULL;
-	size_t out_len = 0;
-
-	/* Alloc memory for decrypted payload */
-	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_CHACHA20POLY1305))) {
-		errsv = errno;
-		log_warn("entry_daemon_payload_decrypt(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Increment nonce */
-	entry->nonce ++;
-
-	/* Decrypt payload */
-	if (!(crypt_decrypt_chacha20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
-		errsv = errno;
-		log_warn("entry_daemon_payload_decrypt(): crypt_decrypt_chacha20poly1305(): %s\n", strerror(errno));
-		mm_free(payload_dec);
-		errno = errsv;
-		return -1;
-	}
-
-	/* Set payload size */
-	entry->psize = out_len;
-
-	/* Free encrypted payload */
-	mm_free(entry->payload);
-
-	/* Set the new payload */
-	entry->payload = (char *) payload_dec;
-
-	/* All good */
-	return 0;
-}
-
 void entry_daemon_pmq_dispatch(void *arg) {
 	int errsv = 0;
 	char *buf;

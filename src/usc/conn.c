@@ -141,9 +141,9 @@ int conn_client_process(void) {
 			/* Encrypt payload */
 			cur->psize -= CRYPT_EXTRA_SIZE_CHACHA20POLY1305; /* Set original payload size */
 
-			if (entry_client_payload_encrypt(cur) < 0) {
+			if (entry_payload_encrypt(cur, 0) < 0) {
 				errsv = errno;	
-				log_crit("conn_client_process(): entry_client_payload_encrypt(): %s\n", strerror(errno));
+				log_crit("conn_client_process(): entry_payload_encrypt(): %s\n", strerror(errno));
 				entry_destroy(cur);
 				errno = errsv;
 				return -1;
@@ -179,11 +179,11 @@ int conn_client_process(void) {
 
 		/* Process the response */
 		if (entry_has_flag(cur, USCHED_ENTRY_FLAG_NEW)) {
-			ret = process_client_recv_run();
+			ret = process_client_recv_run(cur);
 		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_DEL)) {
-			ret = process_client_recv_stop();
+			ret = process_client_recv_stop(cur);
 		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_GET)) {
-			ret = process_client_recv_show();
+			ret = process_client_recv_show(cur);
 		} else {
 			log_warn("conn_client_process(): Unexpected value found in entry->flags\n");
 			errno = EINVAL;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 21-08-2014
+ * Date: 22-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -132,6 +132,7 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	int errsv = 0;
 
+	/* Verify remote client authentication */
 	if (auth_daemon_remote_session_verify(entry->username, entry->session, entry->context, entry->agreed_key, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_remote_session_process(): auth_daemon_remote_session_verify(): %s\n", strerror(errno));
@@ -139,6 +140,10 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 		return -1;
 	}
 
+	/* Set nonce to 0 */
+	entry->nonce = 0;
+
+	/* All good */
 	return 0;
 }
 
@@ -148,17 +153,20 @@ int entry_daemon_payload_decrypt(struct usched_entry *entry) {
 	size_t out_len = 0;
 
 	/* Alloc memory for decrypted payload */
-	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_XSALSA20POLY1305 - CRYPT_NONCE_SIZE_XSALSA20))) {
+	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_CHACHA20POLY1305))) {
 		errsv = errno;
 		log_warn("entry_daemon_payload_decrypt(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Increment nonce */
+	entry->nonce ++;
+
 	/* Decrypt payload */
-	if (!(crypt_decrypt_xsalsa20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload + CRYPT_NONCE_SIZE_XSALSA20, entry->psize - CRYPT_NONCE_SIZE_XSALSA20, (unsigned char *) entry->payload, entry->agreed_key))) {
+	if (!(crypt_decrypt_chacha20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
 		errsv = errno;
-		log_warn("entry_daemon_payload_decrypt(): crypt_decrypt_xsalsa20poly1305(): %s\n", strerror(errno));
+		log_warn("entry_daemon_payload_decrypt(): crypt_decrypt_chacha20poly1305(): %s\n", strerror(errno));
 		mm_free(payload_dec);
 		errno = errsv;
 		return -1;

@@ -89,6 +89,7 @@ struct usched_entry {
 	/* Cryptographic Data Context */
 	unsigned char context[KE_CONTEXT_SIZE_PANKAKE];
 	unsigned char agreed_key[KE_KEY_SIZE_PANKAKE];
+	uint64_t nonce;
 };
 #pragma pack(pop)
 

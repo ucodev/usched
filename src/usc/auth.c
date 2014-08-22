@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 19-08-2014
+ * Date: 22-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -73,7 +73,7 @@ int auth_client_remote_session_create(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | encrypted token (32 bytes) |
+	 * | pubkey (512 bytes) | encrypted client token (32 bytes) |
 	 *
 	 * Total session size: 544 bytes
 	 *
@@ -97,9 +97,9 @@ int auth_client_remote_session_process(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | nonce (24 bytes) | encrypted server token (16 + 32 bytes) |
+	 * | pubkey (512 bytes) | encrypted server token (32 bytes) |
 	 *
-	 * Total session size: 584 bytes
+	 * Total session size: 544 bytes
 	 *
 	 */
 
@@ -134,9 +134,9 @@ int auth_client_remote_session_process(
 
 	/* Session data contents:
 	 *
-	 * | nonce (24 bytes) | encrypted pw payload (16 bytes + 1 byte + 256 bytes) |
+	 * | encrypted password payload (1 byte + 256 bytes) |
 	 *
-	 * Total session size: 297 bytes
+	 * Total session size: 257 bytes
 	 *
 	 */
 

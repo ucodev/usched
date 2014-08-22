@@ -71,7 +71,7 @@ int conn_client_process(void) {
 
 	while ((cur = runc.epool->pop(runc.epool))) {
 		if (conn_is_remote(runc.fd))
-			cur->psize += CRYPT_NONCE_SIZE_XSALSA20 + CRYPT_EXTRA_SIZE_XSALSA20POLY1305;
+			cur->psize += CRYPT_EXTRA_SIZE_CHACHA20POLY1305;
 
 		/* Convert endianness to network byte order */
 		cur->id = htonll(cur->id);
@@ -139,7 +139,7 @@ int conn_client_process(void) {
 			}
 
 			/* Encrypt payload */
-			cur->psize -= (CRYPT_NONCE_SIZE_XSALSA20 + CRYPT_EXTRA_SIZE_XSALSA20POLY1305); /* Set original payload size */
+			cur->psize -= CRYPT_EXTRA_SIZE_CHACHA20POLY1305; /* Set original payload size */
 
 			if (entry_client_payload_encrypt(cur) < 0) {
 				errsv = errno;	

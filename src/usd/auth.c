@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 21-08-2014
+ * Date: 22-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -72,9 +72,9 @@ int auth_daemon_remote_session_verify(
 
 	/* Session data contents:
 	 *
-	 * | nonce (24 bytes) | encrypted plain password (16 bytes + 1 byte + 256 bytes) |
+	 * | encrypted plain password (1 byte + 256 bytes) |
 	 *
-	 * Total session size: 297 bytes
+	 * Total session size: 257 bytes
 	 *
 	 */
 
@@ -186,9 +186,9 @@ int auth_daemon_remote_session_create(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | nonce (24 bytes) | encrypted token (16 + 32 bytes) |
+	 * | pubkey (512 bytes) | encrypted server token (32 bytes) |
 	 *
-	 * Total size of session field: 584 bytes
+	 * Total size of session field: 544 bytes
 	 */
 
 	/* All good */

@@ -92,24 +92,40 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 	/* NOTE: After schedule_entry_create() success, a new and unique entry->id is now set. */
 
+	/* Set payload */
+	if (entry_set_payload(entry, (const char *) (uint64_t [1]) { htonll(entry->id) }, 8) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_new(): entry_set_payload(): %s\n", strerror(errno));
+		errno = errsv;
+		goto _update_op_new_failure_2;
+	}
+
+	/* Encrypt the payload */
+	if (entry_payload_encrypt(entry, 4) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_new(): entry_payload_encrypt(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		goto _update_op_new_failure_2;
+	}
+
+	/* Prepend the payload size */
+	memcpy(entry->payload, (uint32_t [1]) { htonl(entry->psize) }, 4);
+
 	/* Reuse 'aop' to reply the entry->id to the client */
 	mm_free((void *) aop->data);
 
 	memset(aop, 0, sizeof(struct async_op));
 
 	aop->fd = cur_fd;
-	aop->count = sizeof(entry->id);
+	aop->count = entry->psize;
 	aop->priority = 0;
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
+	aop->data = entry->payload;
 
-	if (!(aop->data = mm_alloc(sizeof(entry->id)))) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_new(): aop->data = mm_alloc(%zu): %s\n", sizeof(entry->id), strerror(errno));
-
-		goto _update_op_new_failure_2;
-	}
-
-	memcpy((void *) aop->data, (uint64_t [1]) { htonll(entry->id) }, sizeof(entry->id));
+	/* Unset the payload without free()ing it */
+	entry->payload = NULL;
+	entry->psize = 0;
 
 	debug_printf(DEBUG_INFO, "Delivering entry id: %llu\n", entry->id);
 
@@ -418,9 +434,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	if (entry_payload_encrypt(entry, 4) < 0) {
 		errsv = errno;
 		log_warn("_process_recv_update_op_get(): entry_payload_encrypt(): %s\n", strerror(errno));
-		mm_free(entry->payload);
-		entry->payload = NULL;
-		entry->psize = 0;
+		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
 	}
@@ -439,7 +453,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 	aop->data = entry->payload;
 
-	/* Unset the payload */
+	/* Unset the payload without free()ing it */
 	entry->payload = NULL;
 	entry->psize = 0;
 

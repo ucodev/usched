@@ -73,16 +73,58 @@ static int _process_lib_result_set_show(struct usched_entry *entry_list, size_t 
 int process_client_recv_run(struct usched_entry *entry) {
 	int errsv = 0;
 	uint64_t entry_id = 0;
+	uint32_t data_len = 0;
 
-	/* Read the response in order to obtain the entry id */
-	if (read(runc.fd, &entry_id, sizeof(entry_id)) != sizeof(entry_id)) {
+	/* Free payload memory */
+	if (entry->payload) {
+		mm_free(entry->payload);
+		entry->payload = NULL;
+		entry->psize = 0;
+	}
+
+	/* Read the payload size */
+	if (read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_run(): read() != %zu: %s\n", sizeof(entry_id), strerror(errno));
+		log_crit("process_client_recv_run(): read(..., &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Set entry payload size */
+	entry->psize = ntohl(data_len) - 4;
+
+	/* Allocate payload memory */
+	if (!(entry->payload = mm_alloc(entry->psize))) {
+		errsv = errno;
+		log_crit("process_client_recv_run(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read the payload data */
+	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+		errsv = errno;
+		log_crit("process_client_recv_run(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Decrypt payload */
+	if (entry_payload_decrypt(entry) < 0) {
+		errsv = errno;
+		log_crit("process_client_recv_run(): entry_payload_decrypt(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set the entry id */
+	memcpy(&entry_id, entry->payload, 8);
 	entry_id = ntohll(entry_id);
+
+	/* Unset entry payload */
+	entry_unset_payload(entry);
 
 	debug_printf(DEBUG_INFO, "Received Entry ID: 0x%llX\n", entry_id);
 
@@ -193,6 +235,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
 	}
@@ -201,6 +244,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 	if (entry_payload_decrypt(entry) < 0) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): entry_payload_decrypt(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
 	}
@@ -216,6 +260,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 
 	if (!entry_list_nmemb) {
 		log_info("process_client_recv_show(): No entries were found.\n");
+		entry_unset_payload(entry);
 		print_client_result_empty();
 		return 0;
 	}
@@ -224,6 +269,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(struct usched_entry)))) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): mm_alloc(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
 	}
@@ -272,8 +318,12 @@ int process_client_recv_show(struct usched_entry *entry) {
 		p_offset += entry_list[i].subj_size + 1;
 	}
 
+
 	/* Check if this is a library call */
 	if (bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB)) {
+		/* Unset entry payload */
+		entry_unset_payload(entry);
+
 		/* This is from library */
 		return _process_lib_result_set_show(entry_list, entry_list_nmemb);
 	} else {
@@ -291,6 +341,9 @@ _recv_show_finish:
 	}
 
 	mm_free(entry_list);
+
+	/* Unset entry payload */
+	entry_unset_payload(entry);
 
 	errno = errsv;
 

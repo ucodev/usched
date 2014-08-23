@@ -222,40 +222,55 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 	/* Report back the deleted entries. */
 
+	/* Allocate enough memory to craft the payload */
+	entry->psize = (sizeof(entry->id) * entry_list_res_nmemb) + sizeof(entry_list_res_nmemb);
+
+	if (!(entry->payload = mm_alloc(entry->psize))) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_del(): mm_alloc(): %s\n", strerror(errno));
+		mm_free(entry_list_res);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Craft the payload */
+	memcpy(entry->payload + sizeof(entry_list_res_nmemb), entry_list_res, sizeof(entry->id) * entry_list_res_nmemb);
+	memcpy(entry->payload, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
+
+	/* Encrypt the payload */
+	if (entry_payload_encrypt(entry, 4) < 0) {
+		errsv = errno;
+		log_warn("_process_recv_update_op_get(): entry_payload_encrypt(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		mm_free(entry_list_res);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Prepend the payload size to the payload itself */
+	memcpy(entry->payload, (uint32_t [1]) { htonl(entry->psize) }, 4);
+
 	/* Reuse 'aop' to reply the deleted entries to the client */
 	mm_free((void *) aop->data);
 
 	memset(aop, 0, sizeof(struct async_op));
 
 	aop->fd = cur_fd;
-	aop->count = (sizeof(entry->id) * entry_list_res_nmemb) + sizeof(entry_list_res_nmemb);
+	aop->count = entry->psize;
 	aop->priority = 0;
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
+	aop->data = entry->payload;
 
-	if (!(aop->data = mm_alloc(aop->count))) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_del(): aop->data = mm_alloc(%zu): %s\n", aop->count, strerror(errno));
-
-		mm_free(entry_list_res);
-
-		errno = errsv;
-
-		return -1;
-	}
-
-	/* Craft the list size at the head of the packet. */
-	memcpy((void *) aop->data, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
-
-	if (entry_list_res_nmemb) {
-		/* Append the list contents right after the list size field */
-		memcpy((void *) (((char *) aop->data) + 4), entry_list_res, aop->count - 4);
-	}
+	/* Unset the payload without free()ing it */
+	entry->payload = NULL;
+	entry->psize = 0;
 
 	debug_printf(DEBUG_INFO, "Delivering %lu entry ID's that were successfully deleted.\n", entry_list_res_nmemb);
 
 	/* Free entry list */
 	mm_free(entry_list_res);
 
+	/* All good */
 	return 0;
 }
 

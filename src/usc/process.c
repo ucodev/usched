@@ -143,39 +143,81 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	int i = 0, errsv = 0;
 	uint32_t entry_list_nmemb = 0;
 	uint64_t *entry_list = NULL;
+	size_t data_len = 0, p_offset = 0;
 
-	/* Read te number of elements to receive */
-	if (read(runc.fd, &entry_list_nmemb, sizeof(entry_list_nmemb)) != sizeof(entry_list_nmemb)) {
+	/* Cleanup entry payload if required */
+	if (entry->payload) {
+		mm_free(entry->payload);
+		entry->payload = NULL;
+		entry->psize = 0;
+	}
+
+	/* Read data size */
+	if (read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_stop(): read() != %zu: %s\n", sizeof(entry_list_nmemb), strerror(errno));
+		log_crit("process_client_recv_show(): read(, &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	/* Set the entry payload size */
+	entry->psize = ntohl(data_len) - 4;
+
+	/* Allocate enough memory to receive the payload */
+	if (!(entry->payload = mm_alloc(entry->psize))) {
+		errsv = errno;
+		log_crit("process_client_recv_show(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Receive the payload */
+	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+		errsv = errno;
+		log_crit("process_client_recv_show(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Decrypt the payload */
+	if (entry_payload_decrypt(entry) < 0) {
+		errsv = errno;
+		log_crit("process_client_recv_show(): entry_payload_decrypt(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read te number of elements to process */
+	memcpy(&entry_list_nmemb, entry->payload, sizeof(entry_list_nmemb));
+	p_offset += sizeof(entry_list_nmemb);
 
 	/* Network to Host byte order */
 	entry_list_nmemb = ntohl(entry_list_nmemb);
 
 	if (!entry_list_nmemb) {
 		log_info("process_client_recv_stop(): No entries were deleted.\n");
+		entry_unset_payload(entry);
 		print_client_result_empty();
 		return 0;
 	}
 
-	/* Alloc sufficient memory to receive the deleted entries list */
+	/* Alloc sufficient memory to process the deleted entries list */
 	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(uint64_t)))) {
 		errsv = errno;
 		log_crit("process_client_recv_stop(): mm_alloc(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
 	}
 
-	/* Receive the deleted entries list */
-	if (read(runc.fd, entry_list, entry_list_nmemb * sizeof(uint64_t)) != (entry_list_nmemb * sizeof(uint64_t))) {
-		errsv = errno;
-		log_crit("process_client_recv_stop(): read() != %zu: %s\n", entry_list_nmemb * sizeof(uint64_t), strerror(errno));
-		errno = errsv;
-		return -1;
-	}
+	/* Read the deleted entries list */
+	memcpy(entry_list, entry->payload + p_offset, entry_list_nmemb * sizeof(uint64_t));
+	p_offset += entry_list_nmemb * sizeof(uint64_t);
+
+	/* Unset entry payload */
+	entry_unset_payload(entry);
 
 	/* Iterate the received entries list */
 	for (i = 0; i < entry_list_nmemb; i ++) {

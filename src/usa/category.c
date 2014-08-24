@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 18-08-2014
+ * Date: 24-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -86,16 +86,18 @@ int category_users_add(size_t argc, char **args) {
 
 		puts("");
 
-		if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
-			puts("Password is too short (it must be at least 8 characters long).\n");
-			log_warn("category_users_add(): Password is too short (it must be at least 8 characters long).\n");
-			errno = EINVAL;
-			return -1;
-		}
-
 		password = pw_input;
+
 	} else {
 		password = args[3];
+	}
+
+	/* Check if password is too short */
+	if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
+		puts("Password is too short (it must be at least 8 characters long).\n");
+		log_warn("category_users_add(): Password is too short (it must be at least 8 characters long).\n");
+		errno = EINVAL;
+		return -1;
 	}
 
 	username = args[0];
@@ -212,6 +214,14 @@ int category_users_change(size_t argc, char **args) {
 		password = pw_input;
 	} else {
 		password = args[3];
+	}
+
+	/* Check if password is too short */
+	if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
+		puts("Password is too short (it must be at least 8 characters long).\n");
+		log_warn("category_users_add(): Password is too short (it must be at least 8 characters long).\n");
+		errno = EINVAL;
+		return -1;
 	}
 
 	username = args[0];

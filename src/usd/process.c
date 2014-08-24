@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 23-08-2014
+ * Date: 24-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -234,7 +234,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	}
 
 	/* Craft the payload */
-	memcpy(entry->payload + sizeof(entry_list_res_nmemb), entry_list_res, sizeof(entry->id) * entry_list_res_nmemb);
+	if (entry_list_res)
+		memcpy(entry->payload + sizeof(entry_list_res_nmemb), entry_list_res, sizeof(entry->id) * entry_list_res_nmemb);
+
 	memcpy(entry->payload, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
 
 	/* Encrypt the payload */

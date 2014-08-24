@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 18-08-2014
+ * Date: 24-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,7 +51,7 @@ int conn_client_init(void) {
 		if ((runc.fd = panet_client_ipv4(runc.opt.remote_hostname, runc.opt.remote_port, PANET_PROTO_TCP, 5)) < 0) {
 			errsv = errno;
 			log_crit("conn_client_init(): panet_client_ipv4(): %s\n", strerror(errno));
-			errsv = errno;
+			errno = errsv;
 			return -1;
 		}
 	} else if ((runc.fd = panet_client_unix(runc.config.network.sock_named, PANET_PROTO_UNIX_STREAM)) < 0) {

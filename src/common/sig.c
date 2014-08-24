@@ -72,7 +72,7 @@ static void _sig_hup_exec_handler(int n) {
 }
 
 int sig_daemon_init(void) {
-	int errsv = errno;
+	int errsv = 0;
 	struct sigaction sa;
 
 	memset(&sa, 0, sizeof(struct sigaction));
@@ -134,7 +134,7 @@ _failure:
 }
 
 int sig_exec_init(void) {
-	int errsv = errno;
+	int errsv = 0;
 	struct sigaction sa;
 
 	memset(&sa, 0, sizeof(struct sigaction));

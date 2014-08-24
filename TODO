@@ -1,5 +1,5 @@
 v0.1:
- - Encrypt 'show' data
+ - Implement all variables defined by config/
  - Documentation
  - Cleanup code
 

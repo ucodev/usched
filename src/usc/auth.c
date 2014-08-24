@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 22-08-2014
+ * Date: 24-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -60,7 +60,7 @@ int auth_client_remote_session_create(
 	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
 		errsv = errno;
 		log_warn("auth_client_remote_session_create(): hash_buffer_blake2s(): %s\n", strerror(errno));
-		errno = errno;
+		errno = errsv;
 		return -1;
 	}
 
@@ -118,7 +118,7 @@ int auth_client_remote_session_process(
 	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
 		errsv = errno;
 		log_warn("auth_client_remote_session_process(): hash_buffer_blake2s(): %s\n", strerror(errno));
-		errno = errno;
+		errno = errsv;
 		return -1;
 	}
 

@@ -11,6 +11,14 @@ else
 	exit 1
 fi
 
+## Test features ##
+mkdir -p build
+rm -f .l*
+. test.inc
+
+test_lib "crypt"
+test_lib "gmp"
+
 make
 
 if [ $? -ne 0 ]; then

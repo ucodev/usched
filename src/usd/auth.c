@@ -145,9 +145,9 @@ int auth_daemon_remote_session_create(
 
 	/* Session data contents
 	 *
-	 * | pubkey (512 bytes) | encrypted token (32 bytes) |
+	 * | pubkey (32 bytes) | encrypted token (32 bytes) |
 	 *
-	 * Total session size: 544 bytes
+	 * Total session size: 64 bytes
 	 *
 	 */
 
@@ -186,9 +186,9 @@ int auth_daemon_remote_session_create(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | encrypted server token (32 bytes) |
+	 * | pubkey (32 bytes) | encrypted server token (32 bytes) |
 	 *
-	 * Total size of session field: 544 bytes
+	 * Total size of session field: 64 bytes
 	 */
 
 	/* All good */

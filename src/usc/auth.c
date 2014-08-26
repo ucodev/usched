@@ -73,9 +73,9 @@ int auth_client_remote_session_create(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | encrypted client token (32 bytes) |
+	 * | pubkey (32 bytes) | encrypted client token (32 bytes) |
 	 *
-	 * Total session size: 544 bytes
+	 * Total session size: 64 bytes
 	 *
 	 */
 
@@ -97,9 +97,9 @@ int auth_client_remote_session_process(
 
 	/* Session contents:
 	 *
-	 * | pubkey (512 bytes) | encrypted server token (32 bytes) |
+	 * | pubkey (32 bytes) | encrypted server token (32 bytes) |
 	 *
-	 * Total session size: 544 bytes
+	 * Total session size: 64 bytes
 	 *
 	 */
 

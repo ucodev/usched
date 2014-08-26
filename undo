@@ -7,8 +7,10 @@ fi
 
 make clean
 
+rm -rf build
 rm -f .compiler
 rm -f .ecflags
 rm -f .elflags
 rm -f .done
+rm -f .l*
 

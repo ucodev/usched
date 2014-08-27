@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 15-08-2014
+ * Date: 28-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -108,6 +108,8 @@ struct usched_runtime_daemon {
 	mqd_t pmqd;
 
 	pall_fd_t ser_fd;
+
+	size_t conn_cur;
 
 	struct usched_config config;
 

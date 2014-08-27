@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 09-08-2014
+ * Date: 27-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -127,11 +127,12 @@ _read_failure:
 
 	pthread_mutex_unlock(&rund.mutex_rpool);
 
-	panet_safe_close(aop->fd);
+	conn_daemon_client_close(aop->fd);
 
 	if (aop->data)
 		mm_free((void *) aop->data);
 
+	/* TODO: 'aop' pointer should not be free()'d inside the notification function */
 	mm_free(aop);
 }
 
@@ -225,11 +226,12 @@ _write_failure:
 
 	pthread_mutex_unlock(&rund.mutex_rpool);
 
-	panet_safe_close(aop->fd);
+	conn_daemon_client_close(aop->fd);
 
 	if (aop->data)
 		mm_free((void *) aop->data);
 
+	/* TODO: 'aop' pointer should not be free()'d inside the notification function */
 	mm_free(aop);
 }
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface header
  *
- * Date: 11-08-2014
+ * Date: 27-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -58,6 +58,7 @@ int conn_client_process(void);
 void conn_client_destroy(void);
 int conn_daemon_init(void);
 int conn_daemon_process_all(void);
+void conn_daemon_client_close(int fd);
 void conn_daemon_destroy(void);
 int conn_is_local(int fd);
 int conn_is_remote(int fd);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 22-08-2014
+ * Date: 28-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,6 +36,8 @@
 
 #include <psec/crypt.h>
 
+#include <pall/cll.h>
+
 #include "debug.h"
 #include "config.h"
 #include "usched.h"
@@ -57,8 +59,6 @@ static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 		return -1;
 	}
 
-	entry_set_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
-
 	return 1;
 }
 
@@ -73,17 +73,18 @@ static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
 		return -1;
 	}
 
-	entry_set_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
-
 	return 1;
 }
 
 int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	int errsv = 0;
 	int ret = -1;
+	struct cll_handler *bl = NULL, *wl = NULL;
 
 	if ((ret = conn_is_local(fd)) < 0) {
+		errsv = errno;
 		log_warn("entry_daemon_authorize(): conn_is_local(): %s\n", strerror(errno));
+		errno = errsv;
 		return -1;
 	} else if (ret == 1) {
 		if ((ret = _entry_daemon_authorize_local(entry, fd)) < 0) {
@@ -93,7 +94,7 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 			return -1;
 		}
 
-		return ret;	/* ret == 1: Authorized, ret == 0: Not authorized (connection will timeout) */
+		/* ret == 1: Authorized, ret == 0: Not authorized (connection will timeout) */
 	} else if ((ret = conn_is_remote(fd)) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_authorize(): conn_is_remote(): %s\n", strerror(errno));
@@ -107,12 +108,54 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 			return -1;
 		}
 
-		return ret;	/* ret == 1: Authorized, ret == 0: Not yet authorized (More data expected) */
+		/* ret == 1: Authorized, ret == 0: Not yet authorized (More data expected) */
+	} else {
+		/* Not authorized. No authentication mechanism available */
+		errno = ENOSYS;
+		return -1;
 	}
 
-	errno = ENOSYS;
+	/* If unauthorized here, just quit */
+	if (ret <= 0) {
+		errno = errsv;
+		return ret;
+	}
 
-	return -1;	/* Not authorized. No authentication mechanism available */
+	/* Check if UID is whitelisted or blacklisted */
+	bl = rund.config.auth.uid_blacklist;
+	wl = rund.config.auth.uid_whitelist;
+
+	/* Blacklists always take precedence over whitelists */
+	if (bl->count(bl)) {
+		if (bl->search(bl, (unsigned int [1]) { entry->uid }))
+			ret = 0;
+	} else if (!bl->count(bl) && wl->count(wl)) {
+		if (!wl->search(wl, (unsigned int [1]) { entry->uid }))
+			ret = 0;
+	}
+
+	/* Check if GID is whitelisted or blacklisted */
+	bl = rund.config.auth.gid_blacklist;
+	wl = rund.config.auth.gid_whitelist;
+
+	/* Blacklists always take precedence over whitelists */
+	if (bl->count(bl)) {
+		if (bl->search(bl, (unsigned int [1]) { entry->gid }))
+			ret = 0;
+	} else if (!bl->count(bl) && wl->count(wl)) {
+		if (!wl->search(wl, (unsigned int [1]) { entry->gid }))
+			ret = 0;
+	}
+
+	/* Set/Unset Authorization flag */
+	if (ret == 1) {
+		entry_set_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
+	} else {
+		entry_unset_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
+	}
+
+	/* Return authentication status */
+	return ret;
 }
 
 int entry_daemon_remote_session_create(struct usched_entry *entry) {

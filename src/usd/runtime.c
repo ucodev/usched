@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 21-08-2014
+ * Date: 29-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,6 +44,7 @@
 #include "sig.h"
 #include "bitops.h"
 #include "marshal.h"
+#include "gc.h"
 
 
 int runtime_daemon_init(int argc, char **argv) {
@@ -75,6 +76,18 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Configuration interface initialized.\n");
+
+	/* Initialize garbage collector interface */
+	log_info("Initializing garbage collector interface...\n");
+
+	if (gc_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): gc_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Garbage collector interface initialized.\n");
 
 	/* Initialize signals interface */
 	log_info("Initializing signals interface...\n");
@@ -245,6 +258,11 @@ void runtime_daemon_destroy(void) {
 	log_info("Destroying signals interface...\n");
 	sig_daemon_destroy();
 	log_info("Signals interface destroyed.\n");
+
+	/* Destroy garbage collector interface */
+	log_info("Destroying garbage collector interface...\n");
+	gc_destroy();
+	log_info("Garbage collector interface destroyed.\n");
 
 	/* Destroy configuration interface */
 	log_info("Destroying configuration interface...\n");

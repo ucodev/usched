@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 27-08-2014
+ * Date: 29-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,6 +41,7 @@
 #include "entry.h"
 #include "conn.h"
 #include "process.h"
+#include "gc.h"
 
 void notify_read(struct async_op *aop) {
 	struct usched_entry *entry = NULL;
@@ -132,8 +133,10 @@ _read_failure:
 	if (aop->data)
 		mm_free((void *) aop->data);
 
-	/* TODO: 'aop' pointer should not be free()'d inside the notification function */
-	mm_free(aop);
+	/* 'aop' pointer should not be free()'d inside the notification function.
+	 * It will be inserted into the garbage collector.
+	 */
+	gc_insert(aop);
 }
 
 void notify_write(struct async_op *aop) {
@@ -231,7 +234,9 @@ _write_failure:
 	if (aop->data)
 		mm_free((void *) aop->data);
 
-	/* TODO: 'aop' pointer should not be free()'d inside the notification function */
-	mm_free(aop);
+	/* 'aop' pointer should not be free()'d inside the notification function.
+	 * It will be inserted into the garbage collector.
+	 */
+	gc_insert(aop);
 }
 

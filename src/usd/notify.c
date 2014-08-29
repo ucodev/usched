@@ -133,10 +133,19 @@ _read_failure:
 	if (aop->data)
 		mm_free((void *) aop->data);
 
-	/* 'aop' pointer should not be free()'d inside the notification function.
-	 * It will be inserted into the garbage collector.
+	/* 'aop' pointer should not be free()'d inside the notification function to avoid issues
+	 * with early free()'d while calling rtsaio_cancel().
+	 * 
+	 * The 'aop' pointer will be inserted into a garbage collector that will prevent the release
+	 * of these pointers while the rtsaio_cancel() is being executed.
+	 * 
 	 */
-	gc_insert(aop);
+	if (gc_insert(aop) < 0) {
+		/* Ooppss... this will cause a memory leak... but it is preferable to leak memory
+		 * than causing the rtsaio_cancel() to access some invalid memory region.
+		 */
+		log_warn("notify_read(): gc_insert(): %s\n", strerror(errno));
+	}
 }
 
 void notify_write(struct async_op *aop) {
@@ -234,9 +243,18 @@ _write_failure:
 	if (aop->data)
 		mm_free((void *) aop->data);
 
-	/* 'aop' pointer should not be free()'d inside the notification function.
-	 * It will be inserted into the garbage collector.
+	/* 'aop' pointer should not be free()'d inside the notification function to avoid issues
+	 * with early free()'d while calling rtsaio_cancel().
+	 * 
+	 * The 'aop' pointer will be inserted into a garbage collector that will prevent the release
+	 * of these pointers while the rtsaio_cancel() is being executed.
+	 * 
 	 */
-	gc_insert(aop);
+	if (gc_insert(aop) < 0) {
+		/* Ooppss... this will cause a memory leak... but it is preferable to leak memory
+		 * than causing the rtsaio_cancel() to access some invalid memory region.
+		 */
+		log_warn("notify_read(): gc_insert(): %s\n", strerror(errno));
+	}
 }
 

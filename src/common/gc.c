@@ -33,14 +33,14 @@
 #include "mm.h"
 #include "log.h"
 
-/* TODO: Cleanup procedure isn't yet being called. */
-
+/* Statics */
 static struct lifo_handler *_gc = NULL;
 
-void _gc_data_destroy(void *data) {
+static void _gc_data_destroy(void *data) {
 	mm_free(data);
 }
 
+/* Globals */
 int gc_insert(void *data) {
 	return _gc->push(_gc, data);
 }
@@ -66,6 +66,7 @@ int gc_init(void) {
 }
 
 void gc_destroy(void) {
+	/* This call will also safely destroy all the entries still present in the LIFO */
 	pall_lifo_destroy(_gc);
 }
 

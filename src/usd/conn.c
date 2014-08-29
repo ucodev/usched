@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 27-08-2014
+ * Date: 29-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -44,6 +44,7 @@
 #include "notify.h"
 #include "conn.h"
 #include "log.h"
+#include "gc.h"
 
 static int _conn_daemon_unix_init(void) {
 	int errsv = 0;
@@ -175,6 +176,9 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 	sock_t fd = 0;
 
 	for (;;) {
+		/* Empty garbage collector */
+		gc_cleanup();
+
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted())
 			break;
@@ -205,6 +209,9 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 		pthread_exit(NULL);
 
 	for (;;) {
+		/* Empty garbage collector */
+		gc_cleanup();
+
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted())
 			break;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 28-07-2014
+ * Date: 30-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -160,6 +160,7 @@ static void _file_pid_create(const char *file) {
 		if (unlink(file) < 0)
 			_failure("unlink");
 	} else if (config.fd_pidf >= 0) {
+		log_crit("_file_pid_create(): PID file %s already exists\n", file);
 		fprintf(stderr, "PID file %s already exists.\n", file);
 		_config_destroy();
 		exit(EXIT_FAILURE);
@@ -168,6 +169,7 @@ static void _file_pid_create(const char *file) {
 	_close_safe(config.fd_pidf);
 
 	if ((config.fd_pidf = open(file, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)) < 0) {
+		log_crit("_file_pid_create(): open(): Cannot create PID file %s: %s.\n", file, strerror(errno));
 		fprintf(stderr, "Cannot create PID file %s.\n", file);
 		_failure("open");
 	}
@@ -221,15 +223,21 @@ static int _bexec(
 	int status = 0;
 
 	if ((config.cpid = fork()) > 0) {
-		if ((config.flags & CONFIG_FL_PIDF_CREATE) && (_file_pid_write(config.cpid) < 0))
+		if ((config.flags & CONFIG_FL_PIDF_CREATE) && (_file_pid_write(config.cpid) < 0)) {
+			log_crit("_bexec(): _file_pid_write(): %s\n", strerror(errno));
 			return -1;
+		}
 
 		/* SA_RESTART set */
-		if ((config.cpid = wait(&status)) == (pid_t) -1)
+		if ((config.cpid = wait(&status)) == (pid_t) -1) {
+			log_crit("_bexec(): wait(): %s\n", strerror(errno));
 			return -1;
+		}
 
 		if (WEXITSTATUS(status) == EXIT_SUCCESS)
 			return 0;
+
+		log_crit("_bexec(): Execution of '%s' terminated with error status code %d.\n", WEXITSTATUS(status));
 	} else if (!config.cpid) {
 		_config_destroy();
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 23-08-2014
+ * Date: 30-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -214,7 +214,7 @@ int process_client_recv_stop(struct usched_entry *entry) {
 
 	/* Read the deleted entries list */
 	memcpy(entry_list, entry->payload + p_offset, entry_list_nmemb * sizeof(uint64_t));
-	p_offset += entry_list_nmemb * sizeof(uint64_t);
+	/* p_offset += entry_list_nmemb * sizeof(uint64_t); */
 
 	/* Unset entry payload */
 	entry_unset_payload(entry);

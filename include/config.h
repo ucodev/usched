@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 19-08-2014
+ * Date: 30-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,7 +47,6 @@
 #define CONFIG_USCHED_FILE_AUTH_UID_BL		"uid.blacklist"
 #define CONFIG_USCHED_FILE_AUTH_UID_WL		"uid.whitelist"
 #define CONFIG_USCHED_FILE_AUTH_USE_LOCAL	"use.local"
-#define CONFIG_USCHED_FILE_AUTH_USE_PAM		"use.pam"
 #define CONFIG_USCHED_FILE_AUTH_USERS_REMOTE	"users.remote"
 #define CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE	"file.serialize"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"

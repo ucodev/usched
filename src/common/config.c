@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 11-08-2014
+ * Date: 30-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -382,10 +382,6 @@ static int _config_init_auth_use_local(struct usched_config_auth *auth) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_USE_LOCAL, &auth->use_local);
 }
 
-static int _config_init_auth_use_pam(struct usched_config_auth *auth) {
-	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_USE_PAM, &auth->use_pam);
-}
-
 static int _config_init_auth_users_remote(struct usched_config_auth *auth) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_USERS_REMOTE, &auth->users_remote);
 }
@@ -429,14 +425,6 @@ int config_init_auth(struct usched_config_auth *auth) {
 	if (_config_init_auth_use_local(auth) < 0) {
 		errsv = errno;
 		log_warn("_config_init_auth(): _config_init_auth_use_local(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Read use pam */
-	if (_config_init_auth_use_pam(auth) < 0) {
-		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_use_pam(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

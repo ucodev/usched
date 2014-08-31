@@ -17,6 +17,13 @@ if [ $? -ne 0 ]; then
 	exit 1;
 fi
 
+make install_doc
+
+if [ $? -ne 0 ]; then
+	echo "The installation of the documentation has failed."
+	exit 1;
+fi
+
 ldconfig
 
 if [ $? -ne 0 ]; then

@@ -38,6 +38,16 @@ install_redhat:
 install_ubuntu:
 	make -C scripts/ install_ubuntu
 
+install_doc:
+	mkdir -p /usr/share/doc/usched/doc
+	cp AUTHOR /usr/share/doc/usched/
+	cp COPYING /usr/share/doc/usched/
+	cp INSTALL /usr/share/doc/usched/
+	cp README /usr/share/doc/usched/
+	cp TODO /usr/share/doc/usched/
+	cp VERSION /usr/share/doc/usched/
+	cp doc/* /usr/share/doc/usched/doc/
+
 clean:
 	make -C src/ clean
 	make -C scripts/ clean

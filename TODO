@@ -1,4 +1,5 @@
 v0.1:
+ - uSched Executer shall process everything in the pqueue before taking any action caused by signals.
  - Documentation
  - Cleanup code
 

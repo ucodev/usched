@@ -10,6 +10,15 @@
 
 2. Installation
 
+  # cd /usr/src
+  # mkdir usched
+  # wget https://github.com/ucodev/usched/archive/master.zip
+  # unzip -d usched master.zip
+  # cd usched
+  # ./deploy
+
+  or
+
   See INSTALL
 
 

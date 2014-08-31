@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 28-08-2014
+ * Date: 31-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -226,11 +226,18 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
 		errno = errsv;
-		/* TODO: We should not delete this entry from active pool if we're unable to write the pqueue of
-		 * the execution process. We should put this entries in some sort of local queue and wait for the
-		 * pqueue to become available.
+
+		/* NOTE:
+		 *
+		 * We should not delete this entry from active pool if we're unable to write to
+		 * the pqueue of the execution process.
+		 *
+		 * We should continue processing the scheduled entries as it nothing happened, and
+		 * notify the user with a critical log entry. 
+		 *
 		 */
-		goto _finish;
+
+		log_crit("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
 	}
 
 	/* Update trigger, step and expire parameters of the entry based on psched library data */

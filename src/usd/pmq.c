@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Daemon
  *
- * Date: 31-07-2014
+ * Date: 01-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,11 +45,6 @@ int pmq_daemon_init(void) {
 		errno = errsv;
 		return -1;
 	}
-
-	/* TODO: Consume everything that might exist in this newly created queue before returning from
-	 * this initialization. This will prevent any of the listening processes to process outdated
-	 * events.
-	 */
 
 	return 0;
 }

@@ -1,5 +1,4 @@
 v0.1:
- - uSched Executer shall process everything in the pqueue before taking any action caused by signals.
  - Documentation
  - Cleanup code
 
@@ -8,9 +7,6 @@ v0.2:
  - PHP bindings for Client Library
 
 v0.3:
- - Encrypted connections
-
-v0.4:
  - Ruby bindings for Client Library (?)
  - C# bindings for Client Library (?)
 

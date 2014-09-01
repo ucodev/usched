@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 01-08-2014
+ * Date: 01-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -142,11 +142,21 @@ static void *_exec_cmd(void *arg) {
 static void _exec_process(void) {
 	pthread_t ptid;
 	char *tbuf = NULL;
+	struct mq_attr mqattr;
 
 	for (;;) {
 		/* Check for rutime interruptions */
-		if (runtime_exec_interrupted())
-			break;
+		if (runtime_exec_interrupted()) {
+			/* Get posix queue attributes */
+			if (mq_getattr(rune.pmqd, &mqattr) < 0) {
+				log_warn("_exec_process(): mq_getattr(): %s\n", strerror(errno));
+				break;
+			}
+
+			/* Interrupt execution only when there are no messages in the queue */
+			if (!mqattr.mq_curmsgs)
+				break;
+		}
 
 		if (!(tbuf = mm_alloc(rune.config.core.pmq_msgsize))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));

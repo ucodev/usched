@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 30-08-2014
+ * Date: 01-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "mm.h"
 
 extern char *optarg;
 extern int optind, optopt;
@@ -128,16 +129,16 @@ static inline void _config_set_opt(char *const *argv, int optind) {
 
 static void _config_destroy(void) {
 	if (config.flags & CONFIG_FL_PIDF_CREATE)
-		free(config.pidf_name);
+		mm_free(config.pidf_name);
 
 	if (config.flags & CONFIG_FL_REDIR_ERR)
-		free(config.errf_name);
+		mm_free(config.errf_name);
 
 	if (config.flags & CONFIG_FL_REDIR_OUT) 
-		free(config.outf_name);
+		mm_free(config.outf_name);
 
 	if (config.flags & CONFIG_FL_REDIR_IN)
-		free(config.inf_name);
+		mm_free(config.inf_name);
 
 	_close_safe(config.fd_pidf);
 
@@ -304,25 +305,25 @@ static void _cmdline_process(int argc, char *const *argv) {
 			config.gid = strtoul(optarg, NULL, 10);
 		} else if (opt == 'i') {
 			config.flags |= CONFIG_FL_REDIR_IN;
-			if (!(config.inf_name = malloc(strlen(optarg) + 1)))
+			if (!(config.inf_name = mm_alloc(strlen(optarg) + 1)))
 				_failure("malloc");
 
 			strcpy(config.inf_name, optarg);
 		} else if (opt == 'o') {
 			config.flags |= CONFIG_FL_REDIR_OUT;
-			if (!(config.outf_name = malloc(strlen(optarg) + 1)))
+			if (!(config.outf_name = mm_alloc(strlen(optarg) + 1)))
 				_failure("malloc");
 
 			strcpy(config.outf_name, optarg);
 		} else if (opt == 'e') {
 			config.flags |= CONFIG_FL_REDIR_ERR;
-			if (!(config.errf_name = malloc(strlen(optarg) + 1)))
+			if (!(config.errf_name = mm_alloc(strlen(optarg) + 1)))
 				_failure("malloc");
 
 			strcpy(config.errf_name, optarg);
 		} else if (opt == 'p') {
 			config.flags |= CONFIG_FL_PIDF_CREATE;
-			if (!(config.pidf_name = malloc(strlen(optarg) + 1)))
+			if (!(config.pidf_name = mm_alloc(strlen(optarg) + 1)))
 				_failure("malloc");
 
 			strcpy(config.pidf_name, optarg);

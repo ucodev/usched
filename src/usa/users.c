@@ -3,7 +3,7 @@
  * @brief uSched
  *        Users configuration interface
  *
- * Date: 03-09-2014
+ * Date: 04-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -95,7 +95,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	}
 
 	/* Generate the password digest */
-	if (!kdf_pbkdf2_hash(digest, mac_hmac_sha512, HASH_DIGEST_SIZE_SHA512, HASH_BLOCK_SIZE_SHA512, (const unsigned char *) password, strlen(password), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
+	if (!kdf_pbkdf2_sha512(digest, (const unsigned char *) password, strlen(password), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
 		errsv = errno;
 		log_warn("users_admin_config_add(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
 		errno = errsv;

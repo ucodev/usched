@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 22-08-2014
+ * Date: 14-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -121,9 +121,9 @@ int auth_daemon_remote_session_verify(
 	}
 
 	/* Authorize */
-	if (ke_pankake_server_authorize(context, agreed_key, session, salt, sizeof(salt)) < 0) {
+	if (ke_chreke_server_authorize(context, agreed_key, session, salt, sizeof(salt)) < 0) {
 		errsv = errno;
-		log_warn("auth_daemon_remote_session_verify(): ke_pankake_server_authorize(): %s\n", strerror(errno));
+		log_warn("auth_daemon_remote_session_verify(): ke_chreke_server_authorize(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -140,7 +140,7 @@ int auth_daemon_remote_session_create(
 	int errsv = 0;
 	struct usched_config_userinfo *userinfo = NULL;
 	unsigned char pwhash[HASH_DIGEST_SIZE_SHA512 + 3];
-	unsigned char server_session[KE_SERVER_SESSION_SIZE_PANKAKE];
+	unsigned char server_session[KE_SERVER_SESSION_SIZE_CHREKE];
 	size_t out_len = 0;
 
 	/* Session data contents
@@ -173,10 +173,10 @@ int auth_daemon_remote_session_create(
 		return -1;
 	}
 
-	/* Initialize pankake server authentication */
-	if (!ke_pankake_server_init(server_session, context, session, pwhash)) {
+	/* Initialize chreke server authentication */
+	if (!ke_chreke_server_init(server_session, context, session, pwhash)) {
 		errsv = errno;
-		log_warn("auth_daemon_remote_session_create(): ke_pankake_server_init(): %s\n", strerror(errno));
+		log_warn("auth_daemon_remote_session_create(): ke_chreke_server_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

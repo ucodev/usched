@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 24-08-2014
+ * Date: 14-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -64,9 +64,9 @@ int auth_client_remote_session_create(
 		return -1;
 	}
 
-	if (!ke_pankake_client_init(session, context, plain_passwd, salt, sizeof(salt))) {
+	if (!ke_chreke_client_init(session, context, plain_passwd, salt, sizeof(salt))) {
 		errsv = errno;
-		log_warn("auth_client_remote_session_create(): ke_pankake_client_init(): %s\n", strerror(errno));
+		log_warn("auth_client_remote_session_create(): ke_chreke_client_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -93,7 +93,7 @@ int auth_client_remote_session_process(
 	int errsv = 0;
 	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
-	unsigned char auth[KE_CLIENT_AUTH_SIZE_PANKAKE];
+	unsigned char auth[KE_CLIENT_AUTH_SIZE_CHREKE];
 
 	/* Session contents:
 	 *
@@ -122,9 +122,9 @@ int auth_client_remote_session_process(
 		return -1;
 	}
 
-	if (!ke_pankake_client_authorize(auth, context, agreed_key, session)) {
+	if (!ke_chreke_client_authorize(auth, context, agreed_key, session)) {
 		errsv = errno;
-		log_warn("auth_client_remote_session_process(): ke_pankake_client_authorize(): %s\n", strerror(errno));
+		log_warn("auth_client_remote_session_process(): ke_chreke_client_authorize(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

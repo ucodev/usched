@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 21-08-2014
+ * Date: 14-09-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -87,8 +87,8 @@ struct usched_entry {
 	pschedid_t psched_id;	/* The libpsched entry identifier */
 
 	/* Cryptographic Data Context */
-	unsigned char context[KE_CONTEXT_SIZE_PANKAKE];
-	unsigned char agreed_key[KE_KEY_SIZE_PANKAKE];
+	unsigned char context[KE_CONTEXT_SIZE_CHREKE];
+	unsigned char agreed_key[KE_KEY_SIZE_CHREKE];
 	uint64_t nonce;
 };
 #pragma pack(pop)

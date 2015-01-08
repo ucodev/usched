@@ -11,7 +11,6 @@ install_all:
 	chown -R root:root /etc/usched
 	chmod 700 /etc/usched/auth
 	chmod 700 /etc/usched/core
-	chmod 700 /etc/usched/keys
 	chmod 755 /etc/usched/network
 	chmod 700 /etc/usched/users
 	mkdir -p /usr/include/usched

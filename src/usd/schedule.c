@@ -173,11 +173,8 @@ int schedule_entry_get_by_uid(uid_t uid, uint64_t **entry_list, uint32_t *count)
 
 	pthread_mutex_unlock(&rund.mutex_apool);
 
-	if (!*entry_list) {
-		log_warn("schedule_entry_get_by_uid(): entry_list is empty.\n");
-		errno = EINVAL;
-		return -1;
-	}
+	if (!*entry_list)
+		*count = 0;
 
 	return 0;
 }

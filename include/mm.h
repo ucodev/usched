@@ -28,7 +28,9 @@
 #ifndef USCHED_MM_H
 #define USCHED_MM_H
 
-#ifdef USE_LIBFSMA
+#include "config.h"
+
+#if CONFIG_USE_LIBFSMA == 1
  #include <fsma/fsma.h>
 #endif
 

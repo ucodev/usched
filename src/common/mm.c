@@ -27,13 +27,15 @@
 
 #include <stdlib.h>
 
-#ifdef USE_LIBFSMA
+#include "config.h"
+
+#if CONFIG_USE_LIBFSMA == 1
  #include <fsma/fsma.h>
 #endif
 
 void *mm_alloc(size_t size) {
 	return
-#ifdef USE_LIBFSMA
+#if CONFIG_USE_LIBFSMA == 1
 	fsma_malloc(size);
 #else
 	malloc(size);
@@ -41,7 +43,7 @@ void *mm_alloc(size_t size) {
 }
 
 void mm_free(void *ptr) {
-#ifdef USE_LIBFSMA
+#if CONFIG_USE_LIBFSMA == 1
 	fsma_free(ptr);
 #else
 	free(ptr);
@@ -50,7 +52,7 @@ void mm_free(void *ptr) {
 
 void *mm_realloc(void *ptr, size_t size) {
 	return
-#ifdef USE_LIBFSMA
+#if CONFIG_USE_LIBFSMA == 1
 	fsma_realloc(ptr, size);
 #else
 	realloc(ptr, size);
@@ -59,7 +61,7 @@ void *mm_realloc(void *ptr, size_t size) {
 
 void *mm_calloc(size_t nmemb, size_t size) {
 	return
-#ifdef USE_LIBFSMA
+#if CONFIG_USE_LIBFSMA == 1
 	fsma_calloc(nmemb, size);
 #else
 	calloc(nmemb, size);

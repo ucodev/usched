@@ -7,7 +7,7 @@ install_lib()
 	wget https://github.com/ucodev/${lib}/archive/master.zip
 	unzip master.zip
 	cd ${lib}-master
-	./do fsma && ./install
+	./do && ./install
 
 	if [ ${?} -ne 0 ]; then
 		echo "Unable to install ${lib}"

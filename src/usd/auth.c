@@ -3,9 +3,9 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 14-09-2014
+ * Date: 09-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -128,6 +128,10 @@ int auth_daemon_remote_session_verify(
 		return -1;
 	}
 
+	/* Set effective UID and GID */
+	*uid = userinfo->uid;
+	*gid = userinfo->gid;
+	
 	/* All good */
 	return 0;
 }

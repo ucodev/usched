@@ -3,9 +3,9 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 24-08-2014
+ * Date: 09-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -311,7 +311,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	 *
 	 */
 
-	/* Check if the payload size if aligned with the entry->id size */
+	/* Check if the payload size is aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
 		log_warn("_process_recv_update_op_get(): entry->psize %% sizeof(entry->id) != 0\n");
 		errno = EINVAL;

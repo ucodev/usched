@@ -268,10 +268,10 @@ int conn_daemon_process_all(void) {
 }
 
 void conn_daemon_client_close(int fd) {
-	panet_safe_close(fd);
-
 	if (conn_is_remote(fd))
 		rund.conn_cur --;
+
+	panet_safe_close(fd);
 }
 
 void conn_daemon_destroy(void) {

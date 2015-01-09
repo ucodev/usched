@@ -39,6 +39,9 @@
    # ./install
    # ./undo
 
+ For Raspberry PI deployment, set the build target before any of the commands above:
+
+   # ./target rpi
 
 
 3. Specific Add-ons

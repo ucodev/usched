@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "Usage: ${0} <special target>"
+	echo ""
+	echo "Special targets: rpi"
+	echo ""
+	exit 1
+fi
+
+echo -ne ${1} > .target

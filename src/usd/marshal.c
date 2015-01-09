@@ -170,8 +170,7 @@ void marshal_daemon_destroy(void) {
 	if (syncfs(rund.ser_fd) < 0)
 		log_warn("marshal_daemon_destroy(): syncfs(): %s\n", strerror(errno));
 #else
-	if (sync() < 0)
-		log_warn("marshal_daemon_destroy(): syncfs(): %s\n", strerror(errno));
+	sync();
 #endif
 
 	if (close(rund.ser_fd) < 0)

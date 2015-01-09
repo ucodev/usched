@@ -3,9 +3,9 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 26-07-2014
+ * Date: 09-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *

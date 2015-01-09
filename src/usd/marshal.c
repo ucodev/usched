@@ -166,8 +166,13 @@ void marshal_daemon_wipe(void) {
 }
 
 void marshal_daemon_destroy(void) {
+#if CONFIG_USE_SYNCFS == 1
 	if (syncfs(rund.ser_fd) < 0)
 		log_warn("marshal_daemon_destroy(): syncfs(): %s\n", strerror(errno));
+#else
+	if (sync() < 0)
+		log_warn("marshal_daemon_destroy(): syncfs(): %s\n", strerror(errno));
+#endif
 
 	if (close(rund.ser_fd) < 0)
 		log_warn("marshal_daemon_destroy(): close(): %s\n", strerror(errno));

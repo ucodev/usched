@@ -3,9 +3,9 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 29-08-2014
+ * Date: 09-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -227,7 +227,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 
 		/* Check if the current active connections exceeds the configuration limit */
 		if (rund.conn_cur > rund.config.network.conn_limit) {
-			log_warn("conn_daemon_process_accept_remote(): Maximum number of active connections exceedeed.\n");
+			log_warn("conn_daemon_process_accept_remote(): Maximum number of active connections exceedeed (current: %lu, maximum: %lu).\n", rund.conn_cur, rund.config.network.conn_limit);
 			conn_daemon_client_close(fd);
 			continue;
 		}
@@ -270,7 +270,8 @@ int conn_daemon_process_all(void) {
 void conn_daemon_client_close(int fd) {
 	panet_safe_close(fd);
 
-	rund.conn_cur --;
+	if (conn_is_remote(fd))
+		rund.conn_cur --;
 }
 
 void conn_daemon_destroy(void) {

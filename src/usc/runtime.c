@@ -3,9 +3,9 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 21-08-2014
+ * Date: 10-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -123,9 +123,27 @@ int runtime_client_init(int argc, char **argv) {
 }
 
 int runtime_client_lib_init(void) {
+	int errsv = 0;
+
 	memset(&runc, 0, sizeof(struct usched_runtime_client));
 
 	runc.t = time(NULL);
+
+	/* Initialize logging interface */
+	if (log_client_init() < 0) {
+		errsv = errno;
+		debug_printf(DEBUG_CRIT, "runtime_client_lib_init(): log_client_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Initialize configuration interface */
+	if (config_client_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_client_lib_init(): config_client_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	/* This is a client library */
 	bit_set(&runc.flags, USCHED_RUNTIME_FLAG_LIB);

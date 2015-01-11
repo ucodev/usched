@@ -3,9 +3,9 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 30-08-2014
+ * Date: 11-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -51,7 +51,7 @@ static int _process_lib_result_add_run(uint64_t entry_id) {
 		return -1;
 	}
 
-	memcpy(&((uint64_t *) runc.result)[++ runc.result_nmemb], &entry_id, sizeof(uint64_t));
+	memcpy(&((uint64_t *) runc.result)[runc.result_nmemb ++], &entry_id, sizeof(uint64_t));
 
 	return 0;
 }

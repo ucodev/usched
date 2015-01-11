@@ -3,9 +3,9 @@
  * @brief uSched
  *        uSched Basic Library Request Example
  *
- * Date: 30-07-2014
+ * Date: 11-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -24,15 +24,38 @@
  *
  */
 
+#include <stdio.h>
+#include <stdint.h>
 
 #include <usched/lib.h>
 
 int main(void) {
+	int i = 0;
+	uint64_t *v = NULL;
+	size_t nmemb = 0;
+
+	/* Initialize uSched engine */
 	usched_init();
+
+	/* Perform the uSched request */
 	usched_request("run 'ls -lah /' in 10 seconds then every 5 seconds");
+
+	/* Fetch the results */
+	usched_result_get_run(&v, &nmemb);
+
+	/* Show the results */
+	puts("Installed entries:");
+
+	for (i = 0; i < nmemb; i ++)
+		printf("  0x%016llX\n", (unsigned long long) v[i]);
+
+	/* Free result resources */
 	usched_result_free_run();
+
+	/* Destroy the uSched engine */
 	usched_destroy();
 
+	/* All good */
 	return 0;
 }
 

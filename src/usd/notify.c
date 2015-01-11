@@ -3,9 +3,9 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 29-08-2014
+ * Date: 11-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -68,6 +68,7 @@ void notify_read(struct async_op *aop) {
 		pthread_mutex_lock(&rund.mutex_rpool);
 
 		if (rund.rpool->insert(rund.rpool, entry) < 0) {
+			pthread_mutex_unlock(&rund.mutex_rpool);
 			log_warn("notify_read(): rund.rpool->insert(): %s\n", strerror(errno));
 			goto _read_failure;
 		}
@@ -188,6 +189,7 @@ void notify_write(struct async_op *aop) {
 			pthread_mutex_lock(&rund.mutex_rpool);
 
 			if (rund.rpool->insert(rund.rpool, entry) < 0) {
+				pthread_mutex_unlock(&rund.mutex_rpool);
 				log_warn("notify_write(): rund.rpool->insert(): %s\n", strerror(errno));
 				goto _write_failure;
 			}

@@ -152,6 +152,31 @@ int runtime_client_lib_init(void) {
 	return 0;
 }
 
+int runtime_client_lib_reset(void) {
+	/* Destroy connection interface */
+	conn_client_destroy();
+
+	/* Clear data from previous request, if any */
+	pool_client_destroy();
+
+	/* Destroy last request, if any */
+	if (runc.req)
+		parse_client_req_destroy(runc.req);
+
+	/* Destroy last error, if any */
+	if (runc.usage_err_offending) {
+		mm_free(runc.usage_err_offending);
+		runc.usage_err_offending = NULL;
+		runc.usage_err = 0;
+	}
+
+	/* Reset base timer */
+	runc.t = time(NULL);
+
+	/* All good */
+	return 0;
+}
+
 int runtime_client_interrupted(void) {
 	return 0;
 }

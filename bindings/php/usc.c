@@ -51,7 +51,7 @@ static zend_function_entry usc_functions[] = {
 	PHP_FE(usc_result_free_show, NULL)
 	PHP_FE(usc_usage_error, NULL)
 	PHP_FE(usc_usage_error_str, NULL)
-	{ NULL, NULL, NULL}
+	{ NULL, NULL, NULL }
 };
 
 zend_module_entry usc_module_entry = {

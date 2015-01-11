@@ -41,20 +41,9 @@ static int _init(void) {
 }
 
 static int _do(char *req) {
-	/* Destroy connection interface */
-	conn_client_destroy();
-
-	/* Clear data from previous request, if any */
-	pool_client_destroy();
-
-	if (runc.req)
-		parse_client_req_destroy(runc.req);
-
-	if (runc.usage_err_offending) {
-		mm_free(runc.usage_err_offending);
-		runc.usage_err_offending = NULL;
-		runc.usage_err = 0;
-	}
+	/* Reset runtime data */
+	if (runtime_client_lib_reset() < 0)
+		return -1;
 
 	/* Parse and process data
 	 *

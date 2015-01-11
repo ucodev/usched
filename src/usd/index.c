@@ -3,9 +3,9 @@
  * @brief uSched
  *        Indexing interface
  *
- * Date: 12-07-2014
+ * Date: 11-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -29,6 +29,7 @@
 #include <string.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 
 #include "mm.h"
 #include "entry.h"
@@ -38,7 +39,7 @@
 int index_entry_create(struct usched_entry *e) {
 	int errsv = 0;
 	char *str = NULL;
-	size_t len = strlen(e->subj) + 1 + 60 + 1;
+	size_t len = strlen(e->subj) + 1 + 80 + 1;
 
 	if (!(str = mm_alloc(len))) {
 		errsv = errno;
@@ -49,7 +50,7 @@ int index_entry_create(struct usched_entry *e) {
 
 	memset(str, 0, len);
 
-	snprintf(str, len - 1, "%s%u%u%u", e->subj, e->trigger, e->step, e->expire);
+	snprintf(str, len - 1, "%s%u%u%u%llu", e->subj, e->trigger, e->step, e->expire, (unsigned long long) clock());
 
 	e->id = hash_string_create(str);
 

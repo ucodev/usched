@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 09-01-2015
+ * Date: 11-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -63,15 +63,23 @@ void schedule_daemon_destroy(void) {
 int schedule_entry_create(struct usched_entry *entry) {
 	int errsv = 0;
 
-	/* Create the unique index key for this entry */
-	if (index_entry_create(entry) < 0) {
-		errsv = errno;
-		log_warn("schedule_entry_create(): index_entry_create(): %s\n", strerror(errno));
+	pthread_mutex_lock(&rund.mutex_apool);
 
-		errno = errsv;
+	/* Grant a unique entry->id */
+	do {
+		/* Create the unique index key for this entry */
+		if (index_entry_create(entry) < 0) {
+			errsv = errno;
+			log_warn("schedule_entry_create(): index_entry_create(): %s\n", strerror(errno));
+			errno = errsv;
 
-		return -1;
-	}
+			pthread_mutex_unlock(&rund.mutex_apool);
+
+			return -1;
+		}
+	} while (rund.apool->search(rund.apool, entry));
+
+	pthread_mutex_unlock(&rund.mutex_apool);
 
 	/* Install a new scheduling entry based on the current entry parameters */
 	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {

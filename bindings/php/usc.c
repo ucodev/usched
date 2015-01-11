@@ -93,8 +93,9 @@ PHP_FUNCTION(usc_test) {
 
 PHP_FUNCTION(usc_opt_set_remote_hostname) {
 	char *hostname;
+	int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname, &len) == FAILURE)
 		RETURN_BOOL(0);
 
 	if (usched_opt_set_remote_hostname(hostname) < 0)
@@ -104,9 +105,10 @@ PHP_FUNCTION(usc_opt_set_remote_hostname) {
 }
 
 PHP_FUNCTION(usc_opt_set_remote_port) {
-	char *port;
+	char *port = NULL;
+	int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &port) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &port, &len) == FAILURE)
 		RETURN_BOOL(0);
 
 	if (usched_opt_set_remote_port(port) < 0)
@@ -116,9 +118,10 @@ PHP_FUNCTION(usc_opt_set_remote_port) {
 }
 
 PHP_FUNCTION(usc_opt_set_remote_username) {
-	char *username;
+	char *username = NULL;
+	int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &username) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &username, &len) == FAILURE)
 		RETURN_BOOL(0);
 
 	if (usched_opt_set_remote_username(username) < 0)
@@ -128,9 +131,10 @@ PHP_FUNCTION(usc_opt_set_remote_username) {
 }
 
 PHP_FUNCTION(usc_opt_set_remote_password) {
-	char *password;
+	char *password = NULL;
+	int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &password) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &password, &len) == FAILURE)
 		RETURN_BOOL(0);
 
 	if (usched_opt_set_remote_password(password) < 0)
@@ -140,9 +144,10 @@ PHP_FUNCTION(usc_opt_set_remote_password) {
 }
 
 PHP_FUNCTION(usc_request) {
-	char *req;
+	char *req = NULL;
+	int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &req) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &req, &len) == FAILURE)
 		RETURN_BOOL(0);
 
 	if (usched_request(req) < 0)

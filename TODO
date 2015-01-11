@@ -5,7 +5,6 @@ v0.1:
 
 v0.2:
  - Java bindings for Client Library
- - PHP bindings for Client Library
 
 v0.3:
  - Ruby bindings for Client Library (?)

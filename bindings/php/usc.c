@@ -178,7 +178,7 @@ PHP_FUNCTION(usc_result_get_stop) {
 	size_t nmemb;
 	char v[17];
 
-	usched_result_get_run(&entry_list, &nmemb);
+	usched_result_get_stop(&entry_list, &nmemb);
 
 	array_init(return_value);
 
@@ -189,7 +189,33 @@ PHP_FUNCTION(usc_result_get_stop) {
 }
 
 PHP_FUNCTION(usc_result_get_show) {
-	/* TODO */
+	int i;
+	struct usched_entry *entry_list;
+	size_t nmemb;
+	char v[17];
+	zval *arr_entry;
+
+	usched_result_get_show(&entry_list, &nmemb);
+
+	array_init(return_value);
+
+	for (i = 0; i < nmemb; i ++) {
+		sprintf(v, "%016llX", (unsigned long long) entry_list[i].id);
+
+		ALLOC_INIT_ZVAL(arr_entry);
+
+		array_init(arr_entry);
+
+		add_assoc_long(arr_entry, "uid", entry_list[i].uid);
+		add_assoc_long(arr_entry, "gid", entry_list[i].gid);
+		add_assoc_long(arr_entry, "trigger", entry_list[i].trigger);
+		add_assoc_long(arr_entry, "step", entry_list[i].step);
+		add_assoc_long(arr_entry, "expire", entry_list[i].expire);
+		add_assoc_string(arr_entry, "username", entry_list[i].username, 1);
+		add_assoc_string(arr_entry, "cmd", entry_list[i].subj, 1);
+
+		add_assoc_zval(return_value, v, arr_entry);
+	}
 }
 
 PHP_FUNCTION(usc_result_free_run) {

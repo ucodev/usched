@@ -3,9 +3,9 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 13-08-2014
+ * Date: 11-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -41,6 +41,9 @@ static int _init(void) {
 }
 
 static int _do(char *req) {
+	/* Destroy connection interface */
+	conn_client_destroy();
+
 	/* Clear data from previous request, if any */
 	pool_client_destroy();
 
@@ -61,6 +64,10 @@ static int _do(char *req) {
 	runc.req_str = req;
 
 	if (!(runc.req = parse_client_instruction(runc.req_str)))
+		return -1;
+
+	/* Initialize client connection handlers */
+	if (conn_client_init() < 0)
 		return -1;
 
 	if (pool_client_init() < 0)

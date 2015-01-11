@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 10-01-2015
+ * Date: 11-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -147,10 +147,6 @@ int runtime_client_lib_init(void) {
 
 	/* This is a client library */
 	bit_set(&runc.flags, USCHED_RUNTIME_FLAG_LIB);
-
-	/* Initialize client connection handlers */
-	if (conn_client_init() < 0)
-		return -1;
 
 	/* All good */
 	return 0;

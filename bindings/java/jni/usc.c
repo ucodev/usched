@@ -115,10 +115,89 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeRequest(
 	const char *n_request = (*env)->GetStringUTFChars(env, request, 0);
 
 	if (usched_request((char *) n_request) < 0)
-		return 0;
+		return JNI_FALSE;
 
 	(*env)->ReleaseStringUTFChars(env, request, n_request);
 
-	return 1;
+	return JNI_TRUE;
+}
+
+JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetRun(
+		JNIEnv *env,
+		jobject obj)
+{
+	uint64_t *entry_list;
+	size_t nmemb;
+	jlongArray result;
+
+	usched_result_get_run(&entry_list, &nmemb);
+
+	result = (*env)->NewLongArray(env, nmemb);
+
+	(*env)->SetLongArrayRegion(env, result, 0, nmemb, (jlong *) entry_list);
+
+	return result;
+}
+
+JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetStop(
+		JNIEnv *env,
+		jobject obj)
+{
+	uint64_t *entry_list;
+	size_t nmemb;
+	jlongArray result;
+
+	usched_result_get_stop(&entry_list, &nmemb);
+
+	result = (*env)->NewLongArray(env, nmemb);
+
+	(*env)->SetLongArrayRegion(env, result, 0, nmemb, (jlong *) entry_list);
+
+	return result;
+}
+
+JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetShow(
+		JNIEnv *env,
+		jobject obj)
+{
+	/* TODO */
+	jlongArray result;
+
+	result = (*env)->NewLongArray(env, 1);
+
+	return result;
+}
+
+JNIEXPORT void JNICALL Java_JNIUsc_nativeResultFreeRun(
+		JNIEnv *env,
+		jobject obj)
+{
+	usched_result_free_run();
+}
+
+JNIEXPORT void JNICALL Java_JNIUsc_nativeResultFreeStop(
+		JNIEnv *env,
+		jobject obj)
+{
+	usched_result_free_stop();
+}
+
+JNIEXPORT void JNICALL Java_JNIUsc_nativeResultFreeShow(
+		JNIEnv *env,
+		jobject obj)
+{
+	usched_result_free_show();
+}
+
+JNIEXPORT jstring JNICALL Java_JNIUsc_nativeUsageErrorStr(
+		JNIEnv *env,
+		jobject obj,
+		jint error)
+{
+	jstring result = NULL;
+
+	result = (*env)->NewStringUTF(env, usched_usage_error_str((int) error));
+
+	return result;
 }
 

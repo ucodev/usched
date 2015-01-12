@@ -25,14 +25,21 @@
  */
 
 public class JNIUsc {
-	public native void nativeInit();
-	public native void nativeDestroy();
-	public native String nativeTest();
-	public native boolean nativeOptSetRemoteHostname(String hostname);
-	public native boolean nativeOptSetRemotePort(String port);
-	public native boolean nativeOptSetRemoteUsername(String username);
-	public native boolean nativeOptSetRemotePassword(String password);
-	public native boolean nativeRequest(String request);
+	private native void nativeInit();
+	private native void nativeDestroy();
+	private native String nativeTest();
+	private native boolean nativeOptSetRemoteHostname(String hostname);
+	private native boolean nativeOptSetRemotePort(String port);
+	private native boolean nativeOptSetRemoteUsername(String username);
+	private native boolean nativeOptSetRemotePassword(String password);
+	private native boolean nativeRequest(String request);
+	private native long[] nativeResultGetRun();
+	private native long[] nativeResultGetStop();
+	private native long[] nativeResultGetShow();
+	private native void nativeResultFreeRun();
+	private native void nativeResultFreeStop();
+	private native void nativeResultFreeShow();
+	private native String nativeUsageErrorStr(int error);
 
 	static {
 		System.loadLibrary("usc");
@@ -69,6 +76,34 @@ public class JNIUsc {
 
 	public boolean request(String request) {
 		return nativeRequest(request);
+	}
+
+	public long[] resultGetRun() {
+		return nativeResultGetRun();
+	}
+
+	public long[] resultGetStop() {
+		return nativeResultGetStop();
+	}
+
+	public long[] resultGetShow() {
+		return nativeResultGetShow();
+	}
+
+	public void resultFreeRun() {
+		nativeResultFreeRun();
+	}
+
+	public void resultFreeStop() {
+		nativeResultFreeStop();
+	}
+
+	public void resultFreeShow() {
+		nativeResultFreeShow();
+	}
+
+	public String usageErrorStr(int error) {
+		return nativeUsageErrorStr(error);
 	}
 
 	public static void main(String[] args) {

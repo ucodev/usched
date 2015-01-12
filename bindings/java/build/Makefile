@@ -1,6 +1,2 @@
-all:
-	./build.sh
-
-clean:
-	./cleanup.sh
-
+test:
+	./run.sh

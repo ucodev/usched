@@ -31,6 +31,10 @@
 
 #include <usched/lib.h>
 
+/* Static globals */
+static struct usched_entry *_usc_entry_list = NULL;
+static size_t _usc_nmemb = 0, _usc_cur = 0;
+
 JNIEXPORT void JNICALL Java_JNIUsc_nativeInit(JNIEnv *env, jobject obj) {
 	usched_init();
 }
@@ -156,14 +160,108 @@ JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetStop(
 	return result;
 }
 
-JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetShow(
+JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowInit(
 		JNIEnv *env,
 		jobject obj)
 {
-	/* TODO */
-	jlongArray result;
+	usched_result_get_show(&_usc_entry_list, &_usc_nmemb);
 
-	result = (*env)->NewLongArray(env, 1);
+	_usc_cur = 0;
+}
+
+JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowDestroy(
+		JNIEnv *env,
+		jobject obj)
+{
+	_usc_entry_list = NULL;
+	_usc_nmemb = 0;
+	_usc_cur = 0;
+}
+
+JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowNext(
+		JNIEnv *env,
+		jobject obj)
+{
+	if (_usc_cur >= _usc_nmemb)
+		return JNI_FALSE;
+
+	_usc_cur ++;
+
+	return JNI_TRUE;
+}
+
+JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowPrev(
+		JNIEnv *env,
+		jobject obj)
+{
+	if (_usc_cur <= 0)
+		return JNI_FALSE;
+
+	_usc_cur --;
+
+	return JNI_TRUE;
+}
+
+JNIEXPORT jlong JNICALL Java_JNIUsc_nativeResultGetShowId(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jlong) _usc_entry_list[_usc_cur].id;
+}
+
+JNIEXPORT jstring JNICALL Java_JNIUsc_nativeResultGetShowUsername(
+		JNIEnv *env,
+		jobject obj)
+{
+	jstring result = NULL;
+
+	result = (*env)->NewStringUTF(env, _usc_entry_list[_usc_cur].username);
+
+	return result;
+}
+
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowUID(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_entry_list[_usc_cur].uid;
+}
+
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowGID(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_entry_list[_usc_cur].gid;
+}
+
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowTrigger(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_entry_list[_usc_cur].trigger;
+}
+
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowStep(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_entry_list[_usc_cur].step;
+}
+
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowExpire(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_entry_list[_usc_cur].expire;
+}
+
+JNIEXPORT jstring JNICALL Java_JNIUsc_nativeResultGetShowCmd(
+		JNIEnv *env,
+		jobject obj)
+{
+	jstring result = NULL;
+
+	result = (*env)->NewStringUTF(env, _usc_entry_list[_usc_cur].subj);
 
 	return result;
 }

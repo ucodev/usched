@@ -36,6 +36,18 @@ public class JNIUsc {
 	private native long[] nativeResultGetRun();
 	private native long[] nativeResultGetStop();
 	private native long[] nativeResultGetShow();
+	private native void nativeResultGetShowInit();
+	private native void nativeResultGetShowDestroy();
+	private native boolean nativeResultGetShowNext();
+	private native boolean nativeResultGetShowPrev();
+	private native long nativeResultGetShowId();
+	private native String nativeResultGetShowUsername();
+	private native int nativeResultGetShowUID();
+	private native int nativeResultGetShowGID();
+	private native int nativeResultGetShowTrigger();
+	private native int nativeResultGetShowStep();
+	private native int nativeResultGetShowExpire();
+	private native String nativeResultGetShowCmd();
 	private native void nativeResultFreeRun();
 	private native void nativeResultFreeStop();
 	private native void nativeResultFreeShow();
@@ -87,7 +99,9 @@ public class JNIUsc {
 	}
 
 	public long[] resultGetShow() {
-		return nativeResultGetShow();
+		/* TODO */
+		long[] todo = new long[0];
+		return todo;
 	}
 
 	public void resultFreeRun() {

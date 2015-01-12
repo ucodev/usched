@@ -149,7 +149,7 @@ public class JNIUsc {
 
 		long[] entry = usc.resultGetRun();
 
-		System.out.println(entry[0]);
+		System.out.println("Installed Entry ID: 0x" + Long.toHexString(entry[0]) + "\n");
 
 		usc.resultFreeRun();
 
@@ -157,14 +157,18 @@ public class JNIUsc {
 
 		JNIUscEntry[] entries = usc.resultGetShow();
 
-		System.out.println(entries[0].id);
-		System.out.println(entries[0].username);
-		System.out.println(entries[0].uid);
-		System.out.println(entries[0].gid);
-		System.out.println(entries[0].trigger);
-		System.out.println(entries[0].step);
-		System.out.println(entries[0].expire);
-		System.out.println(entries[0].cmd);
+		for (int i = 0; i < entries.length; i ++) {
+			System.out.println("-----------------------------");
+			System.out.println("Entry ID: 0x" + Long.toHexString(entries[i].id));
+			System.out.println("Username: " + entries[i].username);
+			System.out.println("UID: " + entries[i].uid);
+			System.out.println("GID: " + entries[i].gid);
+			System.out.println("Trigger: " + entries[i].trigger);
+			System.out.println("Step: " + entries[i].step);
+			System.out.println("Expire: " + entries[i].expire);
+			System.out.println("Command: " + entries[i].cmd);
+			System.out.println("-----------------------------\n");
+		}
 
 		usc.resultFreeShow();
 

@@ -178,6 +178,20 @@ JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowDestroy(
 	_usc_cur = 0;
 }
 
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowNmemb(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_nmemb;
+}
+
+JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowCur(
+		JNIEnv *env,
+		jobject obj)
+{
+	return (jint) _usc_cur;
+}
+
 JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowNext(
 		JNIEnv *env,
 		jobject obj)

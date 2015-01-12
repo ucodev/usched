@@ -35,9 +35,10 @@ public class JNIUsc {
 	private native boolean nativeRequest(String request);
 	private native long[] nativeResultGetRun();
 	private native long[] nativeResultGetStop();
-	private native long[] nativeResultGetShow();
 	private native void nativeResultGetShowInit();
 	private native void nativeResultGetShowDestroy();
+	private native int nativeResultGetShowNmemb();
+	private native int nativeResultGetShowCur();
 	private native boolean nativeResultGetShowNext();
 	private native boolean nativeResultGetShowPrev();
 	private native long nativeResultGetShowId();
@@ -98,10 +99,25 @@ public class JNIUsc {
 		return nativeResultGetStop();
 	}
 
-	public long[] resultGetShow() {
-		/* TODO */
-		long[] todo = new long[0];
-		return todo;
+	public JNIUscEntry[] resultGetShow() {
+		nativeResultGetShowInit();
+
+		JNIUscEntry[] entries = new JNIUscEntry[nativeResultGetShowNmemb()];
+
+		do {
+			entries[nativeResultGetShowCur()].id = nativeResultGetShowId();
+			entries[nativeResultGetShowCur()].username = nativeResultGetShowUsername();
+			entries[nativeResultGetShowCur()].uid = nativeResultGetShowUID();
+			entries[nativeResultGetShowCur()].gid = nativeResultGetShowGID();
+			entries[nativeResultGetShowCur()].trigger = nativeResultGetShowTrigger();
+			entries[nativeResultGetShowCur()].step = nativeResultGetShowStep();
+			entries[nativeResultGetShowCur()].expire = nativeResultGetShowExpire();
+			entries[nativeResultGetShowCur()].cmd = nativeResultGetShowCmd();
+		} while (nativeResultGetShowNext());
+
+		nativeResultGetShowDestroy();
+
+		return entries;
 	}
 
 	public void resultFreeRun() {

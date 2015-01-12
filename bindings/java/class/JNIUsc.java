@@ -3,7 +3,7 @@
  * @brief uSched JAVA Library
  *        uSched JAVA Library interface - Client
  *
- * Date: 11-01-2015
+ * Date: 12-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,21 +25,62 @@
  */
 
 public class JNIUsc {
-	public native String nativeUsc();
+	public native void nativeInit();
+	public native void nativeDestroy();
+	public native String nativeTest();
+	public native boolean nativeOptSetRemoteHostname(String hostname);
+	public native boolean nativeOptSetRemotePort(String port);
+	public native boolean nativeOptSetRemoteUsername(String username);
+	public native boolean nativeOptSetRemotePassword(String password);
+	public native boolean nativeRequest(String request);
 
 	static {
 		System.loadLibrary("usc");
 	}
 
+	public void init() {
+		nativeInit();
+	}
+
+	public void destroy() {
+		nativeDestroy();
+	}
+
 	public void test() {
-		String str = nativeUsc();
+		String str = nativeTest();
 		System.out.println(str);
+	}
+
+	public boolean setRemoteHostname(String hostname) {
+		return nativeOptSetRemoteHostname(hostname);
+	}
+
+	public boolean setRemotePort(String port) {
+		return nativeOptSetRemotePort(port);
+	}
+
+	public boolean setRemoteUsername(String username) {
+		return nativeOptSetRemoteUsername(username);
+	}
+
+	public boolean setRemotePassword(String password) {
+		return nativeOptSetRemotePassword(password);
+	}
+
+	public boolean request(String request) {
+		return nativeRequest(request);
 	}
 
 	public static void main(String[] args) {
 		JNIUsc usc = new JNIUsc();
 
+		usc.init();
+
 		usc.test();
+
+		usc.request("run '/bin/ls -lah /' in 10 seconds then every 5 seconds");
+
+		usc.destroy();
 	}
 }
 

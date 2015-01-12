@@ -40,12 +40,12 @@
       $ usc run '/bin/sync' now then every 45 seconds until to time '12:00:00'
 
 
-  Show all scheduled entries for the user running the following command:
+  Show all scheduled entries for the user by running the following command:
 
       $ usc show all
 
 
-  Stop all scheduled entries for the user running the following command:
+  Stop all scheduled entries for the user by running the following command:
 
       $ usc stop all
 

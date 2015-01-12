@@ -55,11 +55,11 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteHostname(
 	const char *n_hostname = (*env)->GetStringUTFChars(env, hostname, 0);
 
 	if (usched_opt_set_remote_hostname((char *) n_hostname) < 0)
-		return 0;
+		return JNI_FALSE;
 
 	(*env)->ReleaseStringUTFChars(env, hostname, n_hostname);
 
-	return 1;
+	return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePort(
@@ -70,11 +70,11 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePort(
 	const char *n_port = (*env)->GetStringUTFChars(env, port, 0);
 
 	if (usched_opt_set_remote_port((char *) n_port) < 0)
-		return 0;
+		return JNI_FALSE;
 
 	(*env)->ReleaseStringUTFChars(env, port, n_port);
 
-	return 1;
+	return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteUsername(
@@ -85,11 +85,11 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteUsername(
 	const char *n_username = (*env)->GetStringUTFChars(env, username, 0);
 
 	if (usched_opt_set_remote_username((char *) n_username) < 0)
-		return 0;
+		return JNI_FALSE;
 
 	(*env)->ReleaseStringUTFChars(env, username, n_username);
 
-	return 1;
+	return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePassword(
@@ -100,11 +100,11 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePassword(
 	const char *n_password = (*env)->GetStringUTFChars(env, password, 0);
 
 	if (usched_opt_set_remote_password((char *) n_password) < 0)
-		return 0;
+		return JNI_FALSE;
 
 	(*env)->ReleaseStringUTFChars(env, password, n_password);
 
-	return 1;
+	return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeRequest(

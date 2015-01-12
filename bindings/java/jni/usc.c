@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <jni.h>
 
-#include "JNIUsc.h"
+#include "Usched.h"
 
 #include <usched/lib.h>
 
@@ -35,15 +35,15 @@
 static struct usched_entry *_usc_entry_list = NULL;
 static size_t _usc_nmemb = 0, _usc_cur = 0;
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeInit(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_Usched_nativeInit(JNIEnv *env, jobject obj) {
 	usched_init();
 }
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeDestroy(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_Usched_nativeDestroy(JNIEnv *env, jobject obj) {
 	usched_destroy();
 }
 
-JNIEXPORT jstring JNICALL Java_JNIUsc_nativeTest(JNIEnv *env, jobject obj) {
+JNIEXPORT jstring JNICALL Java_Usched_nativeTest(JNIEnv *env, jobject obj) {
 	jstring result = NULL;
 
 	result = (*env)->NewStringUTF(env, "Testing uSched interface...");
@@ -51,7 +51,7 @@ JNIEXPORT jstring JNICALL Java_JNIUsc_nativeTest(JNIEnv *env, jobject obj) {
 	return result;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteHostname(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeOptSetRemoteHostname(
 		JNIEnv *env,
 		jobject obj,
 		jstring hostname)
@@ -66,7 +66,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteHostname(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePort(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeOptSetRemotePort(
 		JNIEnv *env,
 		jobject obj,
 		jstring port)
@@ -81,7 +81,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePort(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteUsername(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeOptSetRemoteUsername(
 		JNIEnv *env,
 		jobject obj,
 		jstring username)
@@ -96,7 +96,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemoteUsername(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePassword(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeOptSetRemotePassword(
 		JNIEnv *env,
 		jobject obj,
 		jstring password)
@@ -111,7 +111,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeOptSetRemotePassword(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeRequest(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeRequest(
 		JNIEnv *env,
 		jobject obj,
 		jstring request)
@@ -126,7 +126,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeRequest(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetRun(
+JNIEXPORT jlongArray JNICALL Java_Usched_nativeResultGetRun(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -143,7 +143,7 @@ JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetRun(
 	return result;
 }
 
-JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetStop(
+JNIEXPORT jlongArray JNICALL Java_Usched_nativeResultGetStop(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -160,7 +160,7 @@ JNIEXPORT jlongArray JNICALL Java_JNIUsc_nativeResultGetStop(
 	return result;
 }
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowInit(
+JNIEXPORT void JNICALL Java_Usched_nativeResultGetShowInit(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -169,7 +169,7 @@ JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowInit(
 	_usc_cur = 0;
 }
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowDestroy(
+JNIEXPORT void JNICALL Java_Usched_nativeResultGetShowDestroy(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -178,21 +178,21 @@ JNIEXPORT void JNICALL Java_JNIUsc_nativeResultGetShowDestroy(
 	_usc_cur = 0;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowNmemb(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowNmemb(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_nmemb;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowCur(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowCur(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_cur;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowNext(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeResultGetShowNext(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -204,7 +204,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowNext(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowPrev(
+JNIEXPORT jboolean JNICALL Java_Usched_nativeResultGetShowPrev(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -216,14 +216,14 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowPrev(
 	return JNI_TRUE;
 }
 
-JNIEXPORT jlong JNICALL Java_JNIUsc_nativeResultGetShowId(
+JNIEXPORT jlong JNICALL Java_Usched_nativeResultGetShowId(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jlong) _usc_entry_list[_usc_cur].id;
 }
 
-JNIEXPORT jstring JNICALL Java_JNIUsc_nativeResultGetShowUsername(
+JNIEXPORT jstring JNICALL Java_Usched_nativeResultGetShowUsername(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -234,42 +234,42 @@ JNIEXPORT jstring JNICALL Java_JNIUsc_nativeResultGetShowUsername(
 	return result;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowUID(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowUID(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_entry_list[_usc_cur].uid;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowGID(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowGID(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_entry_list[_usc_cur].gid;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowTrigger(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowTrigger(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_entry_list[_usc_cur].trigger;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowStep(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowStep(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_entry_list[_usc_cur].step;
 }
 
-JNIEXPORT jint JNICALL Java_JNIUsc_nativeResultGetShowExpire(
+JNIEXPORT jint JNICALL Java_Usched_nativeResultGetShowExpire(
 		JNIEnv *env,
 		jobject obj)
 {
 	return (jint) _usc_entry_list[_usc_cur].expire;
 }
 
-JNIEXPORT jstring JNICALL Java_JNIUsc_nativeResultGetShowCmd(
+JNIEXPORT jstring JNICALL Java_Usched_nativeResultGetShowCmd(
 		JNIEnv *env,
 		jobject obj)
 {
@@ -280,28 +280,28 @@ JNIEXPORT jstring JNICALL Java_JNIUsc_nativeResultGetShowCmd(
 	return result;
 }
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeResultFreeRun(
+JNIEXPORT void JNICALL Java_Usched_nativeResultFreeRun(
 		JNIEnv *env,
 		jobject obj)
 {
 	usched_result_free_run();
 }
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeResultFreeStop(
+JNIEXPORT void JNICALL Java_Usched_nativeResultFreeStop(
 		JNIEnv *env,
 		jobject obj)
 {
 	usched_result_free_stop();
 }
 
-JNIEXPORT void JNICALL Java_JNIUsc_nativeResultFreeShow(
+JNIEXPORT void JNICALL Java_Usched_nativeResultFreeShow(
 		JNIEnv *env,
 		jobject obj)
 {
 	usched_result_free_show();
 }
 
-JNIEXPORT jstring JNICALL Java_JNIUsc_nativeUsageErrorStr(
+JNIEXPORT jstring JNICALL Java_Usched_nativeUsageErrorStr(
 		JNIEnv *env,
 		jobject obj,
 		jint error)

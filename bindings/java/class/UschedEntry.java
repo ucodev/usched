@@ -1,5 +1,5 @@
 /**
- * @file JNIUscEntry.java
+ * @file UschedEntry.java
  * @brief uSched Entry JAVA Library
  *        uSched Entry JAVA Library interface - Client
  *
@@ -24,7 +24,7 @@
  *
  */
 
-public class JNIUscEntry {
+public class UschedEntry {
 	public long id;
 	public String username;
 	public int uid;

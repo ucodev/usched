@@ -1,5 +1,5 @@
 /**
- * @file JNIUsc.java
+ * @file Usched.java
  * @brief uSched JAVA Library
  *        uSched JAVA Library interface - Client
  *
@@ -24,7 +24,7 @@
  *
  */
 
-public class JNIUsc {
+public class Usched {
 	private native void nativeInit();
 	private native void nativeDestroy();
 	private native String nativeTest();
@@ -55,7 +55,7 @@ public class JNIUsc {
 	private native String nativeUsageErrorStr(int error);
 
 	static {
-		System.loadLibrary("usc");
+		System.loadLibrary("usched");
 	}
 
 	public void init() {
@@ -99,13 +99,13 @@ public class JNIUsc {
 		return nativeResultGetStop();
 	}
 
-	public JNIUscEntry[] resultGetShow() {
+	public UschedEntry[] resultGetShow() {
 		nativeResultGetShowInit();
 
-		JNIUscEntry[] entries = new JNIUscEntry[nativeResultGetShowNmemb()];
+		UschedEntry[] entries = new UschedEntry[nativeResultGetShowNmemb()];
 
 		do {
-			entries[nativeResultGetShowCur()] = new JNIUscEntry();
+			entries[nativeResultGetShowCur()] = new UschedEntry();
 
 			entries[nativeResultGetShowCur()].id = nativeResultGetShowId();
 			entries[nativeResultGetShowCur()].username = nativeResultGetShowUsername();
@@ -136,43 +136,6 @@ public class JNIUsc {
 
 	public String usageErrorStr(int error) {
 		return nativeUsageErrorStr(error);
-	}
-
-	public static void main(String[] args) {
-		JNIUsc usc = new JNIUsc();
-
-		usc.init();
-
-		usc.test();
-
-		usc.request("run '/bin/ls -lah /' in 10 seconds then every 5 seconds");
-
-		long[] entry = usc.resultGetRun();
-
-		System.out.println("Installed Entry ID: 0x" + Long.toHexString(entry[0]) + "\n");
-
-		usc.resultFreeRun();
-
-		usc.request("show all");
-
-		JNIUscEntry[] entries = usc.resultGetShow();
-
-		for (int i = 0; i < entries.length; i ++) {
-			System.out.println("-----------------------------");
-			System.out.println("Entry ID: 0x" + Long.toHexString(entries[i].id));
-			System.out.println("Username: " + entries[i].username);
-			System.out.println("UID: " + entries[i].uid);
-			System.out.println("GID: " + entries[i].gid);
-			System.out.println("Trigger: " + entries[i].trigger);
-			System.out.println("Step: " + entries[i].step);
-			System.out.println("Expire: " + entries[i].expire);
-			System.out.println("Command: " + entries[i].cmd);
-			System.out.println("-----------------------------\n");
-		}
-
-		usc.resultFreeShow();
-
-		usc.destroy();
 	}
 }
 

@@ -1,4 +1,4 @@
 #/bin/bash
 
 cd ../class
-java -Djava.library.path=../jni JNIUsc
+java -Djava.library.path=../jni UschedTest

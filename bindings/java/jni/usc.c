@@ -196,7 +196,7 @@ JNIEXPORT jboolean JNICALL Java_JNIUsc_nativeResultGetShowNext(
 		JNIEnv *env,
 		jobject obj)
 {
-	if (_usc_cur >= _usc_nmemb)
+	if ((_usc_cur + 1) >= _usc_nmemb)
 		return JNI_FALSE;
 
 	_usc_cur ++;

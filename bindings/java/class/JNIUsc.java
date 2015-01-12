@@ -105,6 +105,8 @@ public class JNIUsc {
 		JNIUscEntry[] entries = new JNIUscEntry[nativeResultGetShowNmemb()];
 
 		do {
+			entries[nativeResultGetShowCur()] = new JNIUscEntry();
+
 			entries[nativeResultGetShowCur()].id = nativeResultGetShowId();
 			entries[nativeResultGetShowCur()].username = nativeResultGetShowUsername();
 			entries[nativeResultGetShowCur()].uid = nativeResultGetShowUID();
@@ -144,6 +146,27 @@ public class JNIUsc {
 		usc.test();
 
 		usc.request("run '/bin/ls -lah /' in 10 seconds then every 5 seconds");
+
+		long[] entry = usc.resultGetRun();
+
+		System.out.println(entry[0]);
+
+		usc.resultFreeRun();
+
+		usc.request("show all");
+
+		JNIUscEntry[] entries = usc.resultGetShow();
+
+		System.out.println(entries[0].id);
+		System.out.println(entries[0].username);
+		System.out.println(entries[0].uid);
+		System.out.println(entries[0].gid);
+		System.out.println(entries[0].trigger);
+		System.out.println(entries[0].step);
+		System.out.println(entries[0].expire);
+		System.out.println(entries[0].cmd);
+
+		usc.resultFreeShow();
 
 		usc.destroy();
 	}

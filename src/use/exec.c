@@ -3,9 +3,9 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 01-09-2014
+ * Date: 15-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -122,13 +122,13 @@ static void *_exec_cmd(void *arg) {
 		mm_free(arg);
 
 		exit(EXIT_FAILURE);
+	} else {
+		/* Wait for child to return */
+		if (waitpid(-1, &status, 0) < 0)
+			log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
+
+		log_info("Entry[0x%016llX]: PID[%u]: Executed '%s' [uid: %u, gid: %u]. Exit Status: %d\n", id, pid, cmd, uid, gid, WEXITSTATUS(status));
 	}
-
-	/* Wait for child to return */
-	if (waitpid(-1, &status, 0) < 0)
-		log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
-
-	log_info("Entry[0x%016llX]: PID[%u]: Executed '%s' [uid: %u, gid: %u]. Exit Status: %d\n", id, pid, cmd, uid, gid, WEXITSTATUS(status));
 
 	/* Parent */
 	mm_free(arg);

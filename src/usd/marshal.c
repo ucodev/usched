@@ -109,7 +109,7 @@ int marshal_daemon_unserialize_pools(void) {
 		}
 
 		/* If the trigger time is lesser than current time and no step is defined, invalidate this entry. */
-		if ((entry->trigger < time(NULL)) && !entry->step) {
+		if ((entry->trigger <= time(NULL)) && !entry->step) {
 			log_info("marshal_daemon_unserialize_pools(): Found an invalid entry (ID: 0x%llX).\n", entry->id);
 
 			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */

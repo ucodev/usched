@@ -3,9 +3,9 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 31-08-2014
+ * Date: 15-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -222,6 +222,8 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	memcpy(buf + 12, &entry->gid, 4);
 	memcpy(buf + 16, entry->subj, strlen(entry->subj));
 
+	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
+
 	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
@@ -240,17 +242,29 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		log_crit("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
 	}
 
+	/* TODO: Evaluate the need of this lock. This only makes sense if an iteration over the
+	 * active pool is performed concurrently with the schedule_entry_update(), and the values
+	 * of this entry could affect that iteration.
+	 */
+	pthread_mutex_lock(&rund.mutex_apool);
+
 	/* Update trigger, step and expire parameters of the entry based on psched library data */
 	if (schedule_entry_update(entry) == 1) {
+		pthread_mutex_unlock(&rund.mutex_apool);
+
 		mm_free(buf);
 		/* Entry was successfully updated. */
 		return;
 	}
 
+	pthread_mutex_unlock(&rund.mutex_apool);
+
 	/* Entry was not found. This means that it wasn't a recurrent entry (no step).
 	 * It should be deleted from the active pool.
 	 */
-		
+
+	log_info("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX isn't recurrent and will be deleted from the active pool.", entry->id);
+
 _finish:
 	/* Remove the entry from active pool */
 	pthread_mutex_lock(&rund.mutex_apool);

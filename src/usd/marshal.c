@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 09-01-2015
+ * Date: 15-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,7 @@
 #include <fsop/file.h>
 
 #include "config.h"
+#include "debug.h"
 #include "runtime.h"
 #include "marshal.h"
 #include "log.h"
@@ -82,7 +83,6 @@ int marshal_daemon_serialize_pools(void) {
 int marshal_daemon_unserialize_pools(void) {
 	int ret = -1, errsv = errno;
 	struct usched_entry *entry = NULL;
-	time_t t = time(NULL);
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
@@ -96,27 +96,34 @@ int marshal_daemon_unserialize_pools(void) {
 	/* Activate all the unserialized entries through libpsched */
 	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
 		/* Update the trigger value based on step and current time */
-		while (entry->step && (entry->trigger < t))
+		while (entry->step && (entry->trigger <= time(NULL)))
 			entry->trigger += entry->step;
 
 		/* Check if the trigger remains valid, i.e., does not exceed the expiration time */
 		if (entry->expire && (entry->trigger > entry->expire)) {
 			log_info("marshal_daemon_unserialize_pools(): An entry is expired (ID: 0x%llX).\n", entry->id);
+
+			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */
 			rund.apool->del(rund.apool, entry);
 			continue;
 		}
 
 		/* If the trigger time is lesser than current time and no step is defined, invalidate this entry. */
-		if ((entry->trigger < t) && !entry->step) {
+		if ((entry->trigger < time(NULL)) && !entry->step) {
 			log_info("marshal_daemon_unserialize_pools(): Found an invalid entry (ID: 0x%llX).\n", entry->id);
+
+			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */
 			rund.apool->del(rund.apool, entry);
 			continue;
 		}
-			
+
+		debug_printf(DEBUG_INFO, "[TIME: %lu]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", time(NULL), entry->id, entry->trigger, entry->step, entry->expire);
+
 		/* Install a new scheduling entry based on the current entry parameters */
 		if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
+			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */
 			rund.apool->del(rund.apool, entry);
 
 			continue;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 11-01-2015
+ * Date: 15-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -290,6 +290,8 @@ int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid) {
 int schedule_entry_update(struct usched_entry *entry) {
 	struct timespec trigger, step, expire;
 
+	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE BEGIN]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
+
 	if (psched_search(rund.psched, entry->psched_id, &trigger, &step, &expire) < 0) {
 		/* Entry not found */
 		return 0;
@@ -298,6 +300,8 @@ int schedule_entry_update(struct usched_entry *entry) {
 	entry->trigger = trigger.tv_sec;
 	entry->step = step.tv_sec;
 	entry->expire = expire.tv_sec;
+
+	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE END]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
 
 	return 1;
 }

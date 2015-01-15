@@ -4,9 +4,6 @@ v0.1:
  - Cleanup code
 
 v0.2:
- - Java bindings for Client Library
-
-v0.3:
  - Ruby bindings for Client Library (?)
  - C# bindings for Client Library (?)
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 15-01-2015
+ * Date: 16-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,8 +56,11 @@ static void *_exec_cmd(void *arg) {
 	memcpy(&uid, buf + 8, 4);
 	memcpy(&gid, buf + 12, 4);
 
+	/* Create child */
+	pid = fork();
+
 	/* Create a new process, drop privileges to UID and GID and execute CMD */
-	if ((pid = fork()) == (pid_t) -1) {
+	if (pid == (pid_t) -1) {
 		/* Failure */
 		log_warn("Entry[0x%016llX]: _exec_cmd(): fork(): %s\n", id, strerror(errno));
 	} else if (!pid) {
@@ -88,26 +91,38 @@ static void *_exec_cmd(void *arg) {
 		/* Drop privileges, if required */
 		if (setregid(gid, gid) < 0) {
 			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setregid(%u): %s\n", id, pid, gid, strerror(errno));
+
+			/* Free argument resources */
 			mm_free(arg);
+
 			exit(EXIT_FAILURE);
 		}
 
 		if (setreuid(uid, uid) < 0) {
 			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setreuid(%u): %s\n", id, pid, uid, strerror(errno));
+
+			/* Free argument resources */
 			mm_free(arg);
+
 			exit(EXIT_FAILURE);
 		}
 
 		/* Paranoid mode */
 		if ((getuid() != uid) || (geteuid() != uid)) {
 			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", id, pid, getuid(), geteuid(), uid);
+
+			/* Free argument resources */
 			mm_free(arg);
+
 			exit(EXIT_FAILURE);
 		}
 
 		if ((getgid() != gid) || (getegid() != gid)) {
 			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", id, pid, getgid(), getegid(), gid);
+
+			/* Free argument resources */
 			mm_free(arg);
+
 			exit(EXIT_FAILURE);
 		}
 
@@ -118,24 +133,29 @@ static void *_exec_cmd(void *arg) {
 		if (execlp(CONFIG_USCHED_SHELL_BIN_PATH, CONFIG_USCHED_SHELL_BIN_PATH, "-c", cmd, (char *) NULL) < 0)
 			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): execlp(\"%s\", \"-c\", \"%s\"): %s\n", id, pid, CONFIG_USCHED_SHELL_BIN_PATH, cmd, strerror(errno));
 
-		/* If reached, execlp() have failed */
+		/* Free argument resources */
 		mm_free(arg);
 
+		/* If reached, execlp() have failed */
 		exit(EXIT_FAILURE);
 	} else {
+		/* Parent */
+		log_info("Entry[0x%016llX]: PID[%u]: Executing '%s' [uid: %u, gid: %u]. Waiting for child to exit...", id, pid, cmd, uid, gid);
+
 		/* Wait for child to return */
-		if (waitpid(-1, &status, 0) < 0)
+		if (waitpid(pid, &status, 0) < 0)
 			log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
 
-		log_info("Entry[0x%016llX]: PID[%u]: Executed '%s' [uid: %u, gid: %u]. Exit Status: %d\n", id, pid, cmd, uid, gid, WEXITSTATUS(status));
+		log_info("Entry[0x%016llX]: PID[%u]: Child exited. Exit Status: %d\n", id, pid, WEXITSTATUS(status));
 	}
 
-	/* Parent */
+	/* Free argument resources */
 	mm_free(arg);
 
 	/* Terminate this thread */
 	pthread_exit(NULL);
 
+	/* All good */
 	return NULL;
 }
 
@@ -178,6 +198,12 @@ static void _exec_process(void) {
 			mm_free(tbuf);
 			continue;
 		}
+
+		/* Detach the newly created thread as the resources should be automatically free'd
+		 * upon thread termination.
+		 */
+		if (pthread_detach(ptid))
+			log_crit("_exec_process(): pthread_detach(): %s. (Possible memory leak)\n", strerror(errno));
 	}
 }
 

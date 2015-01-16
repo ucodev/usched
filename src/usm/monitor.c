@@ -3,9 +3,9 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 01-09-2014
+ * Date: 16-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -238,7 +238,7 @@ static int _bexec(
 		if (WEXITSTATUS(status) == EXIT_SUCCESS)
 			return 0;
 
-		log_crit("_bexec(): Execution of '%s' terminated with error status code %d.\n", WEXITSTATUS(status));
+		log_crit("_bexec(): Execution of '%s' terminated with error status code %d.\n", file, WEXITSTATUS(status));
 	} else if (!config.cpid) {
 		_config_destroy();
 
@@ -409,6 +409,8 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		ret = _bexec(config.binary, config.args, envp);
 
+		log_info("main(): _bexec(): Execution of '%s' terminated.\n", config.binary);
+
 		if (!(config.flags & CONFIG_FL_PROC_RESTART) || !ret) {
 			if (!(config.flags & CONFIG_FL_PROC_RSTIGN))
 				break;
@@ -418,6 +420,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			if (unlink(config.pidf_name) < 0)
 				_failure("unlink");
 		}
+
+		log_info("main(): Restarting '%s'...\n", config.binary);
 	}
 
 	if (ret < 0)

@@ -3,9 +3,9 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 03-08-2014
+ * Date: 16-01-2014
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -152,6 +152,18 @@ void runtime_exec_quiet_destroy(void) {
 	thread_exec_behaviour_destroy();
 	sig_exec_destroy();
 	config_exec_destroy();
-	log_destroy();
+
+	/* NOTE:
+	 *
+	 * closelog() isn't required here as the execpl() call will automatically close the logging
+	 * interface.
+	 * Anyway, closelog() is commented here due to the unprecditable results it was causing.
+	 * Multiple child processes were unable to acquire a futex, causing them to hang. The common
+	 * hanging point was this closelog() call. It was acting like a race condition on the
+	 * closelog(), as 99% of the processes were acting normally, i.e., not hanging here.
+	 *
+	 */
+
+	/* log_destroy(); */
 }
 

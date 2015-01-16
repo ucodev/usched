@@ -73,24 +73,24 @@ static void *_exec_cmd(void *arg) {
 
 		/* Create a new session */
 		if (setsid() == (pid_t) -1)
-			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setsid(): %s\n", id, pid, strerror(errno));
+			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setsid(): %s\n", id, pid, strerror(errno)) */;
 
 		/* Redirect standard files */
 		if (!freopen(CONFIG_SYS_DEV_ZERO, "r", stdin)) {
-			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"r\", stdin): %s\n", id, pid, CONFIG_SYS_DEV_ZERO, strerror(errno));
+			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"r\", stdin): %s\n", id, pid, CONFIG_SYS_DEV_ZERO, strerror(errno)) */;
 		}
 
 		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stdout)) {
-			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stdout): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno));
+			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stdout): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno)) */;
 		}
 
 		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stderr)) {
-			log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stderr): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno));
+			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stderr): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno)) */;
 		}
 
 		/* Drop privileges, if required */
 		if (setregid(gid, gid) < 0) {
-			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setregid(%u): %s\n", id, pid, gid, strerror(errno));
+			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setregid(%u): %s\n", id, pid, gid, strerror(errno)) */;
 
 			/* Free argument resources */
 			mm_free(arg);
@@ -99,7 +99,7 @@ static void *_exec_cmd(void *arg) {
 		}
 
 		if (setreuid(uid, uid) < 0) {
-			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setreuid(%u): %s\n", id, pid, uid, strerror(errno));
+			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setreuid(%u): %s\n", id, pid, uid, strerror(errno)) */;
 
 			/* Free argument resources */
 			mm_free(arg);
@@ -109,7 +109,7 @@ static void *_exec_cmd(void *arg) {
 
 		/* Paranoid mode */
 		if ((getuid() != uid) || (geteuid() != uid)) {
-			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", id, pid, getuid(), geteuid(), uid);
+			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", id, pid, getuid(), geteuid(), uid) */;
 
 			/* Free argument resources */
 			mm_free(arg);
@@ -118,7 +118,7 @@ static void *_exec_cmd(void *arg) {
 		}
 
 		if ((getgid() != gid) || (getegid() != gid)) {
-			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", id, pid, getgid(), getegid(), gid);
+			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", id, pid, getgid(), getegid(), gid) */;
 
 			/* Free argument resources */
 			mm_free(arg);
@@ -131,7 +131,7 @@ static void *_exec_cmd(void *arg) {
 
 		/* Execute command */
 		if (execlp(CONFIG_USCHED_SHELL_BIN_PATH, CONFIG_USCHED_SHELL_BIN_PATH, "-c", cmd, (char *) NULL) < 0)
-			log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): execlp(\"%s\", \"-c\", \"%s\"): %s\n", id, pid, CONFIG_USCHED_SHELL_BIN_PATH, cmd, strerror(errno));
+			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): execlp(\"%s\", \"-c\", \"%s\"): %s\n", id, pid, CONFIG_USCHED_SHELL_BIN_PATH, cmd, strerror(errno)) */;
 
 		/* Free argument resources */
 		mm_free(arg);

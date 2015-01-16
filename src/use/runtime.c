@@ -157,13 +157,12 @@ void runtime_exec_quiet_destroy(void) {
 	 *
 	 * closelog() isn't required here as the execpl() call will automatically close the logging
 	 * interface.
-	 * Anyway, closelog() is commented here due to the unprecditable results it was causing.
-	 * Multiple child processes were unable to acquire a futex, causing them to hang. The common
-	 * hanging point was this closelog() call. It was acting like a race condition on the
-	 * closelog(), as 99% of the processes were acting normally, i.e., not hanging here.
+	 *
+	 * FIXME: Check if this automatic close isn't dangerous (eg, it doesn't internally call the
+	 * closelog() as this will be UB due to the AS-Unsafe of that function.
 	 *
 	 */
 
-	/* log_destroy(); */
+	/* FIXME (AS-Unsafe): log_destroy(); */
 }
 

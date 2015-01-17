@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 11-01-2015
+ * Date: 17-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -26,6 +26,7 @@
 
 #include <errno.h>
 
+#include "config.h"
 #include "runtime.h"
 #include "conn.h"
 #include "usage.h"
@@ -76,14 +77,23 @@ static void _destroy(void) {
 }
 
 /* Library Interface */
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 int usched_init(void) {
 	return _init();
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 int usched_request(char *req) {
 	return _do(req);
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 int usched_opt_set_remote_hostname(char *hostname) {
 	if (strlen(hostname) >= sizeof(runc.opt.remote_hostname)) {
 		errno = EINVAL;
@@ -95,6 +105,9 @@ int usched_opt_set_remote_hostname(char *hostname) {
 	return 0;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 int usched_opt_set_remote_port(char *port) {
 	if (strlen(port) >= sizeof(runc.opt.remote_port)) {
 		errno = EINVAL;
@@ -106,6 +119,9 @@ int usched_opt_set_remote_port(char *port) {
 	return 0;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 int usched_opt_set_remote_username(char *username) {
 	if (strlen(username) >= sizeof(runc.opt.remote_username)) {
 		errno = EINVAL;
@@ -117,6 +133,9 @@ int usched_opt_set_remote_username(char *username) {
 	return 0;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 int usched_opt_set_remote_password(char *password) {
 	if (strlen(password) >= sizeof(runc.opt.remote_password)) {
 		errno = EINVAL;
@@ -128,33 +147,51 @@ int usched_opt_set_remote_password(char *password) {
 	return 0;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_result_get_run(uint64_t **entry_list, size_t *nmemb) {
 	*entry_list = runc.result;
 	*nmemb = runc.result_nmemb;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_result_get_stop(uint64_t **entry_list, size_t *nmemb) {
 	*entry_list = runc.result;
 	*nmemb = runc.result_nmemb;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_result_get_show(struct usched_entry **entry_list, size_t *nmemb) {
 	*entry_list = runc.result;
 	*nmemb = runc.result_nmemb;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_result_free_run(void) {
 	mm_free(runc.result);
 	runc.result = NULL;
 	runc.result_nmemb = 0;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_result_free_stop(void) {
 	mm_free(runc.result);
 	runc.result = NULL;
 	runc.result_nmemb = 0;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_result_free_show(void) {
 	int i = 0;
 	struct usched_entry *entry_list = runc.result;
@@ -170,11 +207,16 @@ void usched_result_free_show(void) {
 	runc.result_nmemb = 0;
 }
 
-
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 usched_usage_client_err_t usched_usage_error(void) {
 	return runc.usage_err;
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 char *usched_usage_error_str(usched_usage_client_err_t error) {
 	switch (error) {
 		case USCHED_USAGE_CLIENT_ERR_INVALID_OP: return USCHED_USAGE_CLIENT_ERR_INVALID_OP_STR;
@@ -191,6 +233,9 @@ char *usched_usage_error_str(usched_usage_client_err_t error) {
 	return "Success";
 }
 
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 void usched_destroy(void) {
 	_destroy();
 }

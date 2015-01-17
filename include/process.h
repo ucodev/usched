@@ -3,9 +3,9 @@
  * @brief uSched
  *        Data Processing interface header
  *
- * Date: 23-08-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -28,11 +28,18 @@
 #ifndef USCHED_PROCESS_H
 #define USCHED_PROCESS_H
 
+#include "config.h"
+
+#if CONFIG_CLIENT_ONLY == 0
 #include <rtsaio/rtsaio.h>
+#endif /* CONFIG_CLIENT_ONLY == 0 */
+
 
 /* Prototypes */
+#if CONFIG_CLIENT_ONLY == 0
 struct usched_entry *process_daemon_recv_create(struct async_op *aop);
 int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry);
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 int process_client_recv_run(struct usched_entry *entry);
 int process_client_recv_stop(struct usched_entry *entry);
 int process_client_recv_show(struct usched_entry *entry);

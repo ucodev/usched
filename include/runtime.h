@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 11-01-2015
+ * Date: 17-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,8 +29,13 @@
 #define USCHED_RUNTIME_H
 
 #include <time.h>
+
+#include "config.h"
+
+#ifndef COMPILE_WIN32
 #include <pthread.h>
 #include <mqueue.h>
+#endif
 #include <signal.h>
 
 #include <pall/fifo.h>
@@ -50,21 +55,6 @@ typedef enum USCHED_RUNTIME_FLAGS {
 } usched_runtime_flag_t;
 
 /* Structures */
-struct usched_runtime_admin {
-	int argc;
-	char **argv;
-
-	usched_op_t op;
-	usched_usage_admin_err_t usage_err;
-	char *usage_err_offending;
-	struct usched_admin_request *req;
-
-	usched_runtime_flag_t flags;
-	struct sigaction sa_save;
-
-	struct usched_config config;
-};
-
 struct usched_runtime_client {
 	int argc;
 	char **argv;
@@ -86,6 +76,22 @@ struct usched_runtime_client {
 
 	/* Command line options */
 	struct usched_opt_client opt;
+};
+
+#if CONFIG_CLIENT_ONLY == 0
+struct usched_runtime_admin {
+	int argc;
+	char **argv;
+
+	usched_op_t op;
+	usched_usage_admin_err_t usage_err;
+	char *usage_err_offending;
+	struct usched_admin_request *req;
+
+	usched_runtime_flag_t flags;
+	struct sigaction sa_save;
+
+	struct usched_config config;
 };
 
 struct usched_runtime_daemon {
@@ -127,30 +133,37 @@ struct usched_runtime_exec {
 
 	struct usched_config config;
 };
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* External */
-extern struct usched_runtime_admin runa;
 extern struct usched_runtime_client runc;
+#if CONFIG_CLIENT_ONLY == 0
+extern struct usched_runtime_admin runa;
 extern struct usched_runtime_daemon rund;
 extern struct usched_runtime_exec rune;
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* Prototypes */
-int runtime_admin_init(int argc, char **argv);
 int runtime_client_init(int argc, char **argv);
 int runtime_client_lib_init(void);
 int runtime_client_lib_reset(void);
+int runtime_client_interrupted(void);
+#if CONFIG_CLIENT_ONLY == 0
+int runtime_admin_init(int argc, char **argv);
 int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
 int runtime_admin_interrupted(void);
-int runtime_client_interrupted(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
-void runtime_admin_destroy(void);
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 void runtime_client_destroy(void);
 void runtime_client_lib_destroy(void);
+#if CONFIG_CLIENT_ONLY == 0
+void runtime_admin_destroy(void);
 void runtime_daemon_destroy(void);
 void runtime_exec_destroy(void);
 void runtime_exec_quiet_destroy(void);
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 
 #endif
 

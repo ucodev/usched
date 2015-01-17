@@ -3,9 +3,9 @@
  * @brief uSched
  *        Authentication and Authorization interface header
  *
- * Date: 21-08-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -30,10 +30,14 @@
 
 #include <unistd.h>
 
+#include "config.h"
+
 /* Prototypes */
+#if CONFIG_CLIENT_ONLY == 0
 int auth_daemon_local(int fd, uid_t *uid, gid_t *gid);
 int auth_daemon_remote_session_create(const char *username, unsigned char *session, unsigned char *context);
 int auth_daemon_remote_session_verify(const char *username, const unsigned char *session, unsigned char *context, unsigned char *agreed_key, uid_t *uid, gid_t *gid);
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 int auth_client_remote_session_create(unsigned char *session, const char *username, const char *plain_passwd, unsigned char *context);
 int auth_client_remote_session_process(unsigned char *session, const char *username, const char *plain_passwd, unsigned char *context, unsigned char *agreed_key);
 

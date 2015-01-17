@@ -3,9 +3,9 @@
  * @brief uSched
  *        Runtime handlers interface - Common
  *
- * Date: 28-07-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -25,11 +25,14 @@
  */
 
 
+#include "config.h"
 #include "runtime.h"
 
 /* Globals */
-struct usched_runtime_admin runa;
 struct usched_runtime_client runc;
+#if CONFIG_CLIENT_ONLY == 0
+struct usched_runtime_admin runa;
 struct usched_runtime_daemon rund;
 struct usched_runtime_exec rune;
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 

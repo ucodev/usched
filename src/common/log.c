@@ -3,9 +3,9 @@
  * @brief uSched
  *        Logging interface
  *
- * Date: 05-08-2014
+ * Date: 17-01-2014
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -34,14 +34,18 @@
 #include "debug.h"
 #include "log.h"
 
-int log_admin_init(void) {
-	openlog(CONFIG_USCHED_ADMIN_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
+
+int log_client_init(void) {
+#ifndef COMPILE_WIN32
+	openlog(CONFIG_USCHED_CLIENT_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
+#endif
 
 	return 0;
 }
 	
-int log_client_init(void) {
-	openlog(CONFIG_USCHED_CLIENT_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
+#ifndef COMPILE_WIN32
+int log_admin_init(void) {
+	openlog(CONFIG_USCHED_ADMIN_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_LOCAL0);
 
 	return 0;
 }
@@ -63,12 +67,20 @@ int log_monitor_init(void) {
 
 	return 0;
 }
+#endif
 
 static void _log_msg(int priority, const char *msg) {
+#ifdef COMPILE_WIN32
+	return ;
+#else
 	syslog(priority, "%s", msg);
+#endif
 }
 
 void log_info(const char *fmt, ...) {
+#ifdef COMPILE_WIN32
+	return ;
+#else
 	va_list ap;
 	char msg[CONFIG_USCHED_LOG_MSG_MAX_SIZE + 1];
 
@@ -83,9 +95,13 @@ void log_info(const char *fmt, ...) {
 	debug_printf(DEBUG_INFO, "== DEBUG INFO == %s", msg);
 
 	_log_msg(LOG_INFO, msg);
+#endif
 }
 
 void log_warn(const char *fmt, ...) {
+#ifdef COMPILE_WIN32
+	return ;
+#else
 	va_list ap;
 	char msg[CONFIG_USCHED_LOG_MSG_MAX_SIZE + 1];
 
@@ -100,9 +116,13 @@ void log_warn(const char *fmt, ...) {
 	debug_printf(DEBUG_WARN, "== DEBUG WARN == %s", msg);
 
 	_log_msg(LOG_WARNING, msg);
+#endif
 }
 
 void log_crit(const char *fmt, ...) {
+#ifdef COMPILE_WIN32
+	return ;
+#else
 	va_list ap;
 	char msg[CONFIG_USCHED_LOG_MSG_MAX_SIZE + 1];
 
@@ -117,9 +137,12 @@ void log_crit(const char *fmt, ...) {
 	debug_printf(DEBUG_CRIT, "== DEBUG CRIT == %s", msg);
 
 	_log_msg(LOG_CRIT, msg);
+#endif
 }
 
 void log_destroy(void) {
+#ifndef COMPILE_WIN32
 	closelog();
+#endif
 }
 

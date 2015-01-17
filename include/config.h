@@ -82,14 +82,17 @@
 /* #define CONFIG_SYS_NETBSD			0 */
 /* #define CONFIG_SYS_BSD			0 */
 /* #define CONFIG_SYS_SOLARIS			0 */
+/* #define CONFIG_SYS_WINDOWS			0 */
 #define CONFIG_SYS_DEV_ZERO			"/dev/zero"
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
 
 /* Windows */
-#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined(CONFIG_SYS_WINDOWS)
  #ifndef COMPILE_WIN32
   #define COMPILE_WIN32 1
  #endif
+ #undef CONFIG_CLIENT_ONLY
+ #define CONFIG_CLIENT_ONLY 1
 #endif
 
 #ifdef COMPILE_WIN32

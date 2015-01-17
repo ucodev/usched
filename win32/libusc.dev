@@ -4,7 +4,7 @@ Name=libusc
 Type=3
 Ver=2
 ObjFiles=
-Includes=../include
+Includes=../include;./
 Libs=
 PrivateResource=
 ResourceIncludes=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=59
+UnitCount=60
 
 [VersionInfo]
 Major=1
@@ -630,8 +630,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit61]
-FileName=..\src\common\thread.c
+[Unit59]
+FileName=..\src\common\term.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -640,10 +640,10 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit59]
-FileName=..\src\common\term.c
+[Unit60]
+FileName=strptime.c
 CompileCpp=0
-Folder=src/common
+Folder=
 Compile=1
 Link=1
 Priority=1000

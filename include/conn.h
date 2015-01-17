@@ -3,9 +3,9 @@
  * @brief uSched
  *        Connections interface header
  *
- * Date: 27-08-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -30,7 +30,11 @@
 
 #include <string.h>
 
+#include "config.h"
+
+#ifndef COMPILE_WIN32
 #include <arpa/inet.h>
+#endif
 
 /* Macros */
 #define ntohll(netlonglong)	(htonll(netlonglong))
@@ -56,10 +60,12 @@ static inline uint64_t htonll(uint64_t hostlonglong) {
 int conn_client_init(void);
 int conn_client_process(void);
 void conn_client_destroy(void);
+#if CONFIG_CLIENT_ONLY == 0
 int conn_daemon_init(void);
 int conn_daemon_process_all(void);
 void conn_daemon_client_close(int fd);
 void conn_daemon_destroy(void);
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 int conn_is_local(int fd);
 int conn_is_remote(int fd);
 

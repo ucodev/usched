@@ -3,9 +3,9 @@
  * @brief uSched
  *        Connections interface - Common
  *
- * Date: 28-07-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -29,13 +29,17 @@
 #include <string.h>
 #include <errno.h>
 
+#include "config.h"
+
+#ifndef COMPILE_WIN32
 #include <sys/socket.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <panet/panet.h>
 
-#include "config.h"
 #include "conn.h"
 #include "log.h"
 

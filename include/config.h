@@ -93,6 +93,7 @@
 #endif
 
 #ifdef COMPILE_WIN32
+ #include <winsock2.h>
  #include <windows.h>
 
  #if BUILDING_DLL
@@ -100,6 +101,12 @@
  #else
   #define DLLIMPORT __declspec(dllimport)
  #endif
+ 
+ typedef unsigned long uid_t, gid_t;
+ typedef unsigned char uint8_t;
+ typedef unsigned short uint16_t;
+ typedef unsigned int uint32_t;
+ typedef unsigned long long uint64_t;
 #endif
 
 /* Configuration structures */

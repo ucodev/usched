@@ -3,9 +3,9 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 14-09-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -33,12 +33,15 @@
 
 #include <sys/types.h>
 
+#include "config.h"
+
+#if CONFIG_CLIENT_ONLY == 0
 #include <psched/sched.h>
+#endif /* CONFIG_CLIENT_ONLY == 0 */
 
 #include <psec/crypt.h>
 #include <psec/ke.h>
 
-#include "config.h"
 #include "usched.h"
 
 /* Entry flags */
@@ -83,8 +86,10 @@ struct usched_entry {
 	uint32_t subj_size;
 	char *subj;
 
+#if CONFIG_CLIENT_ONLY == 0
 	/* Reserved */
 	pschedid_t psched_id;	/* The libpsched entry identifier */
+#endif
 
 	/* Cryptographic Data Context */
 	unsigned char context[KE_CONTEXT_SIZE_CHREKE];

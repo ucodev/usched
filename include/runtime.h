@@ -40,7 +40,9 @@
 
 #include <pall/fifo.h>
 #include <panet/panet.h>
+#if CONFIG_CLIENT_ONLY == 0
 #include <psched/sched.h>
+#endif
 
 #include "usched.h"
 #include "usage.h"
@@ -70,7 +72,6 @@ struct usched_runtime_client {
 
 	sock_t fd;
 	usched_runtime_flag_t flags;
-	struct sigaction sa_save;
 
 	struct usched_config config;
 

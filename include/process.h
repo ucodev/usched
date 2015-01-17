@@ -34,6 +34,7 @@
 #include <rtsaio/rtsaio.h>
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
+#include "entry.h"
 
 /* Prototypes */
 #if CONFIG_CLIENT_ONLY == 0

@@ -3,9 +3,9 @@
  * @brief uSched
  *        Entry handling interface - Common
  *
- * Date: 28-07-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -31,11 +31,12 @@
 #include <errno.h>
 #include <time.h>
 
+#include "config.h"
+
 #include <sys/types.h>
 
 #include <psec/crypt.h>
 
-#include "config.h"
 #include "mm.h"
 #include "entry.h"
 #include "bitops.h"

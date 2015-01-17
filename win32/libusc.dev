@@ -11,7 +11,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=-DBUILDING_DLL=1_@@_-DCOMPILE_WIN32=1_@@_
 CppCompiler=-DBUILDING_DLL=1_@@_-DCOMPILE_WIN32_@@_
-Linker=
+Linker=-lpsec_@@_-lpall_@@_-lfsop_@@_-lpanet_@@_-lws2_32_@@_
 IsCpp=0
 Icon=
 ExeOutput=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=61
+UnitCount=59
 
 [VersionInfo]
 Major=1
@@ -630,28 +630,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit59]
-FileName=..\src\common\sig.c
-CompileCpp=0
-Folder=src/common
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit60]
-FileName=..\src\common\term.c
-CompileCpp=0
-Folder=src/common
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit61]
 FileName=..\src\common\thread.c
+CompileCpp=0
+Folder=src/common
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit59]
+FileName=..\src\common\term.c
 CompileCpp=0
 Folder=src/common
 Compile=1

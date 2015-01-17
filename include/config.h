@@ -28,12 +28,6 @@
 #ifndef USCHED_CONFIG_H
 #define USCHED_CONFIG_H
 
-#include <sys/types.h>
-
-#include <pall/cll.h>
-
-#include <psec/ke.h>
-
 #define CONFIG_USCHED_DEBUG			0
 #define CONFIG_USE_LIBFSMA			0
 #define CONFIG_USE_SYNCFS			0
@@ -110,7 +104,17 @@
  typedef unsigned short uint16_t;
  typedef unsigned int uint32_t;
  typedef unsigned long long uint64_t;
+ 
+ #define strtok_r strtok_s
+ #define getuid() 0
+ #define getgid() 0
 #endif
+
+#include <sys/types.h>
+
+#include <pall/cll.h>
+
+#include <psec/ke.h>
 
 /* Configuration structures */
 struct usched_config_userinfo {

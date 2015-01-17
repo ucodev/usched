@@ -28,9 +28,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include <syslog.h>
 
 #include "config.h"
+
+#ifndef COMPILE_WIN32
+#include <syslog.h>
+#endif
+
 #include "debug.h"
 #include "log.h"
 

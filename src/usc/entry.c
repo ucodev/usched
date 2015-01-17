@@ -3,9 +3,9 @@
  * @brief uSched
  *        Entry handling interface - Client
  *
- * Date: 22-08-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -29,6 +29,8 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+
+#include "config.h"
 
 #include <sys/types.h>
 

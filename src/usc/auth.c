@@ -3,9 +3,9 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 14-09-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+#include "config.h"
 
 #include <psec/hash.h>
 #include <psec/ke.h>

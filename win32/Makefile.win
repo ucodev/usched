@@ -4,9 +4,9 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = dllmain.o ../src/usc/auth.o ../src/usc/client.o ../src/usc/config.o ../src/usc/conn.o ../src/usc/entry.o ../src/usc/lib.o ../src/usc/logic.o ../src/usc/op.o ../src/usc/opt.o ../src/usc/parse.o ../src/usc/pool.o ../src/usc/print.o ../src/usc/process.o ../src/usc/runtime.o ../src/usc/usage.o ../src/common/bitops.o ../src/common/config.o ../src/common/conn.o ../src/common/debug.o ../src/common/entry.o ../src/common/input.o ../src/common/log.o ../src/common/mm.o ../src/common/runtime.o ../src/common/sig.o ../src/common/term.o ../src/common/thread.o
-LINKOBJ  = dllmain.o ../src/usc/auth.o ../src/usc/client.o ../src/usc/config.o ../src/usc/conn.o ../src/usc/entry.o ../src/usc/lib.o ../src/usc/logic.o ../src/usc/op.o ../src/usc/opt.o ../src/usc/parse.o ../src/usc/pool.o ../src/usc/print.o ../src/usc/process.o ../src/usc/runtime.o ../src/usc/usage.o ../src/common/bitops.o ../src/common/config.o ../src/common/conn.o ../src/common/debug.o ../src/common/entry.o ../src/common/input.o ../src/common/log.o ../src/common/mm.o ../src/common/runtime.o ../src/common/sig.o ../src/common/term.o ../src/common/thread.o
-LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+OBJ      = dllmain.o ../src/usc/auth.o ../src/usc/client.o ../src/usc/config.o ../src/usc/conn.o ../src/usc/entry.o ../src/usc/lib.o ../src/usc/logic.o ../src/usc/op.o ../src/usc/opt.o ../src/usc/parse.o ../src/usc/pool.o ../src/usc/print.o ../src/usc/process.o ../src/usc/runtime.o ../src/usc/usage.o ../src/common/bitops.o ../src/common/config.o ../src/common/conn.o ../src/common/debug.o ../src/common/entry.o ../src/common/input.o ../src/common/log.o ../src/common/mm.o ../src/common/runtime.o ../src/common/term.o
+LINKOBJ  = dllmain.o ../src/usc/auth.o ../src/usc/client.o ../src/usc/config.o ../src/usc/conn.o ../src/usc/entry.o ../src/usc/lib.o ../src/usc/logic.o ../src/usc/op.o ../src/usc/opt.o ../src/usc/parse.o ../src/usc/pool.o ../src/usc/print.o ../src/usc/process.o ../src/usc/runtime.o ../src/usc/usage.o ../src/common/bitops.o ../src/common/config.o ../src/common/conn.o ../src/common/debug.o ../src/common/entry.o ../src/common/input.o ../src/common/log.o ../src/common/mm.o ../src/common/runtime.o ../src/common/term.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -lpsec -lpall -lfsop -lpanet -lws2_32
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"../include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++" -I"../include"
 BIN      = libusc.dll
@@ -101,11 +101,5 @@ dllmain.o: dllmain.c
 ../src/common/runtime.o: ../src/common/runtime.c
 	$(CC) -c ../src/common/runtime.c -o ../src/common/runtime.o $(CFLAGS)
 
-../src/common/sig.o: ../src/common/sig.c
-	$(CC) -c ../src/common/sig.c -o ../src/common/sig.o $(CFLAGS)
-
 ../src/common/term.o: ../src/common/term.c
 	$(CC) -c ../src/common/term.c -o ../src/common/term.o $(CFLAGS)
-
-../src/common/thread.o: ../src/common/thread.c
-	$(CC) -c ../src/common/thread.c -o ../src/common/thread.o $(CFLAGS)

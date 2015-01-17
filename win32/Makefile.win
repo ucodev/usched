@@ -1,0 +1,111 @@
+# Project: libusc
+# Makefile created by Dev-C++ 5.8.3
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = dllmain.o ../src/usc/auth.o ../src/usc/client.o ../src/usc/config.o ../src/usc/conn.o ../src/usc/entry.o ../src/usc/lib.o ../src/usc/logic.o ../src/usc/op.o ../src/usc/opt.o ../src/usc/parse.o ../src/usc/pool.o ../src/usc/print.o ../src/usc/process.o ../src/usc/runtime.o ../src/usc/usage.o ../src/common/bitops.o ../src/common/config.o ../src/common/conn.o ../src/common/debug.o ../src/common/entry.o ../src/common/input.o ../src/common/log.o ../src/common/mm.o ../src/common/runtime.o ../src/common/sig.o ../src/common/term.o ../src/common/thread.o
+LINKOBJ  = dllmain.o ../src/usc/auth.o ../src/usc/client.o ../src/usc/config.o ../src/usc/conn.o ../src/usc/entry.o ../src/usc/lib.o ../src/usc/logic.o ../src/usc/op.o ../src/usc/opt.o ../src/usc/parse.o ../src/usc/pool.o ../src/usc/print.o ../src/usc/process.o ../src/usc/runtime.o ../src/usc/usage.o ../src/common/bitops.o ../src/common/config.o ../src/common/conn.o ../src/common/debug.o ../src/common/entry.o ../src/common/input.o ../src/common/log.o ../src/common/mm.o ../src/common/runtime.o ../src/common/sig.o ../src/common/term.o ../src/common/thread.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"../include"
+CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++" -I"../include"
+BIN      = libusc.dll
+CXXFLAGS = $(CXXINCS) -DBUILDING_DLL=1 -DCOMPILE_WIN32
+CFLAGS   = $(INCS) -DBUILDING_DLL=1 -DCOMPILE_WIN32=1
+RM       = rm.exe -f
+DEF      = liblibusc.def
+STATIC   = liblibusc.a
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN) $(DEF) $(STATIC)
+
+$(BIN): $(LINKOBJ)
+	$(CC) -shared $(LINKOBJ) -o $(BIN) $(LIBS) -Wl,--output-def,$(DEF),--out-implib,$(STATIC),--add-stdcall-alias
+
+dllmain.o: dllmain.c
+	$(CC) -c dllmain.c -o dllmain.o $(CFLAGS)
+
+../src/usc/auth.o: ../src/usc/auth.c
+	$(CC) -c ../src/usc/auth.c -o ../src/usc/auth.o $(CFLAGS)
+
+../src/usc/client.o: ../src/usc/client.c
+	$(CC) -c ../src/usc/client.c -o ../src/usc/client.o $(CFLAGS)
+
+../src/usc/config.o: ../src/usc/config.c
+	$(CC) -c ../src/usc/config.c -o ../src/usc/config.o $(CFLAGS)
+
+../src/usc/conn.o: ../src/usc/conn.c
+	$(CC) -c ../src/usc/conn.c -o ../src/usc/conn.o $(CFLAGS)
+
+../src/usc/entry.o: ../src/usc/entry.c
+	$(CC) -c ../src/usc/entry.c -o ../src/usc/entry.o $(CFLAGS)
+
+../src/usc/lib.o: ../src/usc/lib.c
+	$(CC) -c ../src/usc/lib.c -o ../src/usc/lib.o $(CFLAGS)
+
+../src/usc/logic.o: ../src/usc/logic.c
+	$(CC) -c ../src/usc/logic.c -o ../src/usc/logic.o $(CFLAGS)
+
+../src/usc/op.o: ../src/usc/op.c
+	$(CC) -c ../src/usc/op.c -o ../src/usc/op.o $(CFLAGS)
+
+../src/usc/opt.o: ../src/usc/opt.c
+	$(CC) -c ../src/usc/opt.c -o ../src/usc/opt.o $(CFLAGS)
+
+../src/usc/parse.o: ../src/usc/parse.c
+	$(CC) -c ../src/usc/parse.c -o ../src/usc/parse.o $(CFLAGS)
+
+../src/usc/pool.o: ../src/usc/pool.c
+	$(CC) -c ../src/usc/pool.c -o ../src/usc/pool.o $(CFLAGS)
+
+../src/usc/print.o: ../src/usc/print.c
+	$(CC) -c ../src/usc/print.c -o ../src/usc/print.o $(CFLAGS)
+
+../src/usc/process.o: ../src/usc/process.c
+	$(CC) -c ../src/usc/process.c -o ../src/usc/process.o $(CFLAGS)
+
+../src/usc/runtime.o: ../src/usc/runtime.c
+	$(CC) -c ../src/usc/runtime.c -o ../src/usc/runtime.o $(CFLAGS)
+
+../src/usc/usage.o: ../src/usc/usage.c
+	$(CC) -c ../src/usc/usage.c -o ../src/usc/usage.o $(CFLAGS)
+
+../src/common/bitops.o: ../src/common/bitops.c
+	$(CC) -c ../src/common/bitops.c -o ../src/common/bitops.o $(CFLAGS)
+
+../src/common/config.o: ../src/common/config.c
+	$(CC) -c ../src/common/config.c -o ../src/common/config.o $(CFLAGS)
+
+../src/common/conn.o: ../src/common/conn.c
+	$(CC) -c ../src/common/conn.c -o ../src/common/conn.o $(CFLAGS)
+
+../src/common/debug.o: ../src/common/debug.c
+	$(CC) -c ../src/common/debug.c -o ../src/common/debug.o $(CFLAGS)
+
+../src/common/entry.o: ../src/common/entry.c
+	$(CC) -c ../src/common/entry.c -o ../src/common/entry.o $(CFLAGS)
+
+../src/common/input.o: ../src/common/input.c
+	$(CC) -c ../src/common/input.c -o ../src/common/input.o $(CFLAGS)
+
+../src/common/log.o: ../src/common/log.c
+	$(CC) -c ../src/common/log.c -o ../src/common/log.o $(CFLAGS)
+
+../src/common/mm.o: ../src/common/mm.c
+	$(CC) -c ../src/common/mm.c -o ../src/common/mm.o $(CFLAGS)
+
+../src/common/runtime.o: ../src/common/runtime.c
+	$(CC) -c ../src/common/runtime.c -o ../src/common/runtime.o $(CFLAGS)
+
+../src/common/sig.o: ../src/common/sig.c
+	$(CC) -c ../src/common/sig.c -o ../src/common/sig.o $(CFLAGS)
+
+../src/common/term.o: ../src/common/term.c
+	$(CC) -c ../src/common/term.c -o ../src/common/term.o $(CFLAGS)
+
+../src/common/thread.o: ../src/common/thread.c
+	$(CC) -c ../src/common/thread.c -o ../src/common/thread.o $(CFLAGS)

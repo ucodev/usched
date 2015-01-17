@@ -3,9 +3,9 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 30-08-2014
+ * Date: 17-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -84,6 +84,16 @@
 #define CONFIG_SYS_DEV_ZERO			"/dev/zero"
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
 
+/* Windows */
+#ifdef COMPILE_WIN32
+ #include <windows.h>
+
+ #if BUILDING_DLL
+  #define DLLIMPORT __declspec(dllexport)
+ #else
+  #define DLLIMPORT __declspec(dllimport)
+ #endif
+#endif
 
 /* Configuration structures */
 struct usched_config_userinfo {

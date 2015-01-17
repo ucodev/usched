@@ -124,7 +124,7 @@ int term_input_igncr_set(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_input_op(IGNCR, 1)
+	return _term_flag_mode_input_op(IGNCR, 1);
 #endif
 }
 
@@ -140,7 +140,7 @@ int term_input_crtonl_set(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_input_op(ICRNL, 1)
+	return _term_flag_mode_input_op(ICRNL, 1);
 #endif
 }
 
@@ -148,7 +148,7 @@ int term_input_crtonl_unset(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_input_op(ICRNL, 0)
+	return _term_flag_mode_input_op(ICRNL, 0);
 #endif
 }
 
@@ -157,7 +157,7 @@ int term_output_nocr_set(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_output_op(ONLRET, 1)
+	return _term_flag_mode_output_op(ONLRET, 1);
 #endif
 }
 
@@ -165,7 +165,7 @@ int term_output_nocr_unset(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_output_op(ONLRET, 0)
+	return _term_flag_mode_output_op(ONLRET, 0);
 #endif
 }
 
@@ -181,9 +181,8 @@ int term_output_crtonl_unset(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_output_op(OCRNL, 0)
+	return _term_flag_mode_output_op(OCRNL, 0);
 #endif
-	;
 }
 
 /* Control ops */
@@ -191,18 +190,16 @@ int term_ctrl_cread_set(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_control_op(CREAD, 1)
+	return _term_flag_mode_control_op(CREAD, 1);
 #endif
-	;
 }
 
 int term_ctrl_cread_unset(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_control_op(CREAD, 0)
+	return _term_flag_mode_control_op(CREAD, 0);
 #endif
-	;
 }
 
 /* Local ops */
@@ -210,7 +207,7 @@ int term_local_buffer_set(void) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
-	return _term_flag_mode_local_op(ICANON, 1)
+	return _term_flag_mode_local_op(ICANON, 1);
 #endif
 }
 

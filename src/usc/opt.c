@@ -3,9 +3,9 @@
  * @brief uSched
  *        Optional arguments interface - Client
  *
- * Date: 19-08-2014
+ * Date: 18-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -27,9 +27,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
 
 #include "config.h"
+
+#ifndef COMPILE_WIN32
+#include <unistd.h>
+#endif
+
 #include "usage.h"
 #include "opt.h"
 #include "input.h"

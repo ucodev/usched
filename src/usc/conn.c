@@ -28,13 +28,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+#include "config.h"
+
+#ifndef COMPILE_WIN32
 #include <unistd.h>
+#endif
 
 #include <panet/panet.h>
 
 #include <psec/crypt.h>
 
-#include "config.h"
 #include "debug.h"
 #include "mm.h"
 #include "runtime.h"

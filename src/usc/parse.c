@@ -3,9 +3,9 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 06-08-2014
+ * Date: 18-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -30,8 +30,13 @@
 #include <strings.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
 #include <time.h>
+
+#include "config.h"
+
+#ifndef COMPILE_WIN32
+#include <unistd.h>
+#endif
 
 #include <sys/types.h>
 

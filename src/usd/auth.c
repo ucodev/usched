@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 09-01-2015
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -79,8 +79,8 @@ int auth_daemon_remote_session_verify(
 	 */
 
 	/* Check if username doesn't exceed the expected size */
-	if (strlen(username) > sizeof(salt)) {
-		log_warn("auth_daemon_remote_session_verify(): strlen(username) > sizeof(salt)\n");
+	if (strlen(username) > sizeof(salt_raw)) {
+		log_warn("auth_daemon_remote_session_verify(): strlen(username) > sizeof(salt_raw)\n");
 		errno = EINVAL;
 		return -1;
 	}

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Client
  *
- * Date: 17-01-2015
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -48,8 +48,8 @@ int auth_client_remote_session_create(
 	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 
 	/* Check if username doesn't exceed the expected size */
-	if (strlen(username) > sizeof(salt)) {
-		log_warn("auth_client_remote_session_create(): strlen(username) > sizeof(salt)\n");
+	if (strlen(username) > sizeof(salt_raw)) {
+		log_warn("auth_client_remote_session_create(): strlen(username) > sizeof(salt_raw)\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -106,8 +106,8 @@ int auth_client_remote_session_process(
 	 */
 
 	/* Check if username doesn't exceed the expected size */
-	if (strlen(username) > sizeof(salt)) {
-		log_warn("auth_client_remote_session_process(): strlen(username) > sizeof(salt)\n");
+	if (strlen(username) > sizeof(salt_raw)) {
+		log_warn("auth_client_remote_session_process(): strlen(username) > sizeof(salt_raw)\n");
 		errno = EINVAL;
 		return -1;
 	}

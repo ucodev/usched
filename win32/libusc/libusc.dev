@@ -4,7 +4,7 @@ Name=libusc
 Type=3
 Ver=2
 ObjFiles=
-Includes=../include;./
+Includes=../../include;./
 Libs=
 PrivateResource=
 ResourceIncludes=
@@ -61,7 +61,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit2]
-FileName=..\include\auth.h
+FileName=..\..\include\auth.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -71,7 +71,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit3]
-FileName=..\include\bitops.h
+FileName=..\..\include\bitops.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -81,7 +81,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit4]
-FileName=..\include\category.h
+FileName=..\..\include\category.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -91,7 +91,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit5]
-FileName=..\include\config.h
+FileName=..\..\include\config.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -101,7 +101,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit6]
-FileName=..\include\conn.h
+FileName=..\..\include\conn.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -111,7 +111,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit7]
-FileName=..\include\debug.h
+FileName=..\..\include\debug.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -121,7 +121,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit8]
-FileName=..\include\entry.h
+FileName=..\..\include\entry.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -131,7 +131,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit9]
-FileName=..\include\gc.h
+FileName=..\..\include\gc.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -141,7 +141,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit10]
-FileName=..\include\hash.h
+FileName=..\..\include\hash.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -151,7 +151,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit11]
-FileName=..\include\index.h
+FileName=..\..\include\index.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -161,7 +161,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit12]
-FileName=..\include\input.h
+FileName=..\..\include\input.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -171,7 +171,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit13]
-FileName=..\include\lib.h
+FileName=..\..\include\lib.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -181,7 +181,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit14]
-FileName=..\include\local.h
+FileName=..\..\include\local.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -191,7 +191,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit15]
-FileName=..\include\log.h
+FileName=..\..\include\log.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -201,7 +201,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit16]
-FileName=..\include\logic.h
+FileName=..\..\include\logic.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -211,7 +211,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit17]
-FileName=..\include\marshal.h
+FileName=..\..\include\marshal.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -221,7 +221,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit18]
-FileName=..\include\mm.h
+FileName=..\..\include\mm.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -231,7 +231,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit19]
-FileName=..\include\notify.h
+FileName=..\..\include\notify.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -241,7 +241,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit20]
-FileName=..\include\op.h
+FileName=..\..\include\op.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -251,7 +251,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit21]
-FileName=..\include\opt.h
+FileName=..\..\include\opt.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -261,7 +261,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit22]
-FileName=..\include\parse.h
+FileName=..\..\include\parse.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -271,7 +271,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit23]
-FileName=..\include\pmq.h
+FileName=..\..\include\pmq.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -281,7 +281,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit24]
-FileName=..\include\pool.h
+FileName=..\..\include\pool.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -291,7 +291,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit25]
-FileName=..\include\print.h
+FileName=..\..\include\print.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -301,7 +301,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit26]
-FileName=..\include\process.h
+FileName=..\..\include\process.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -311,7 +311,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit27]
-FileName=..\include\runtime.h
+FileName=..\..\include\runtime.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -321,7 +321,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit28]
-FileName=..\include\schedule.h
+FileName=..\..\include\schedule.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -331,7 +331,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit29]
-FileName=..\include\sig.h
+FileName=..\..\include\sig.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -341,7 +341,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit30]
-FileName=..\include\term.h
+FileName=..\..\include\term.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -351,7 +351,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit31]
-FileName=..\include\thread.h
+FileName=..\..\include\thread.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -361,7 +361,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit32]
-FileName=..\include\usage.h
+FileName=..\..\include\usage.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -371,7 +371,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit33]
-FileName=..\include\usched.h
+FileName=..\..\include\usched.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -381,7 +381,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit34]
-FileName=..\include\users.h
+FileName=..\..\include\users.h
 CompileCpp=0
 Folder=include
 Compile=1
@@ -391,7 +391,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit35]
-FileName=..\src\usc\auth.c
+FileName=..\..\src\usc\auth.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -401,7 +401,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit36]
-FileName=..\src\usc\client.c
+FileName=..\..\src\usc\client.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -411,7 +411,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit37]
-FileName=..\src\usc\config.c
+FileName=..\..\src\usc\config.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -421,7 +421,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit38]
-FileName=..\src\usc\conn.c
+FileName=..\..\src\usc\conn.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -431,7 +431,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit39]
-FileName=..\src\usc\entry.c
+FileName=..\..\src\usc\entry.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -441,7 +441,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit40]
-FileName=..\src\usc\lib.c
+FileName=..\..\src\usc\lib.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -451,7 +451,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit41]
-FileName=..\src\usc\logic.c
+FileName=..\..\src\usc\logic.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -461,7 +461,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit42]
-FileName=..\src\usc\op.c
+FileName=..\..\src\usc\op.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -471,7 +471,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit43]
-FileName=..\src\usc\opt.c
+FileName=..\..\src\usc\opt.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -481,7 +481,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit44]
-FileName=..\src\usc\parse.c
+FileName=..\..\src\usc\parse.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -491,7 +491,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit45]
-FileName=..\src\usc\pool.c
+FileName=..\..\src\usc\pool.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -501,7 +501,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit46]
-FileName=..\src\usc\print.c
+FileName=..\..\src\usc\print.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -511,7 +511,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit47]
-FileName=..\src\usc\process.c
+FileName=..\..\src\usc\process.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -521,7 +521,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit48]
-FileName=..\src\usc\runtime.c
+FileName=..\..\src\usc\runtime.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -531,7 +531,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit49]
-FileName=..\src\usc\usage.c
+FileName=..\..\src\usc\usage.c
 CompileCpp=0
 Folder=src/usc
 Compile=1
@@ -541,7 +541,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit50]
-FileName=..\src\common\bitops.c
+FileName=..\..\src\common\bitops.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -551,7 +551,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit51]
-FileName=..\src\common\config.c
+FileName=..\..\src\common\config.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -561,7 +561,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit52]
-FileName=..\src\common\conn.c
+FileName=..\..\src\common\conn.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -571,7 +571,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit53]
-FileName=..\src\common\debug.c
+FileName=..\..\src\common\debug.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -581,7 +581,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit54]
-FileName=..\src\common\entry.c
+FileName=..\..\src\common\entry.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -591,7 +591,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit55]
-FileName=..\src\common\input.c
+FileName=..\..\src\common\input.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -601,7 +601,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit56]
-FileName=..\src\common\log.c
+FileName=..\..\src\common\log.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -611,7 +611,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit57]
-FileName=..\src\common\mm.c
+FileName=..\..\src\common\mm.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -621,7 +621,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit58]
-FileName=..\src\common\runtime.c
+FileName=..\..\src\common\runtime.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -631,7 +631,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit59]
-FileName=..\src\common\term.c
+FileName=..\..\src\common\term.c
 CompileCpp=0
 Folder=src/common
 Compile=1
@@ -641,7 +641,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit60]
-FileName=strptime.c
+FileName=..\common\strptime.c
 CompileCpp=0
 Folder=
 Compile=1

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 11-01-2015
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,12 +28,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+#include "config.h"
+
+#ifndef COMPILE_WIN32
 #include <unistd.h>
+#endif
 
 #include <panet/panet.h>
 
 #include "debug.h"
-#include "config.h"
 #include "bitops.h"
 #include "mm.h"
 #include "conn.h"
@@ -83,9 +87,9 @@ int process_client_recv_run(struct usched_entry *entry) {
 	}
 
 	/* Read the payload size */
-	if (read(runc.fd, &data_len, 4) != 4) {
+	if (panet_read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_run(): read(..., &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_run(): panet_read(..., &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -102,9 +106,9 @@ int process_client_recv_run(struct usched_entry *entry) {
 	}
 
 	/* Read the payload data */
-	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+	if (panet_read(runc.fd, entry->payload, entry->psize) != entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_run(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_run(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
@@ -153,9 +157,9 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	}
 
 	/* Read data size */
-	if (read(runc.fd, &data_len, 4) != 4) {
+	if (panet_read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): read(, &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_show(): panet_read(, &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -172,9 +176,9 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	}
 
 	/* Receive the payload */
-	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+	if (panet_read(runc.fd, entry->payload, entry->psize) != entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_show(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
@@ -255,9 +259,9 @@ int process_client_recv_show(struct usched_entry *entry) {
 	}
 
 	/* Read data size */
-	if (read(runc.fd, &data_len, 4) != 4) {
+	if (panet_read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): read(, &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_show(): panet_read(, &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -274,9 +278,9 @@ int process_client_recv_show(struct usched_entry *entry) {
 	}
 
 	/* Receive the payload */
-	if (read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+	if (panet_read(runc.fd, entry->payload, entry->psize) != entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_show(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;

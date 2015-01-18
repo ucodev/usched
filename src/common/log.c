@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logging interface
  *
- * Date: 17-01-2014
+ * Date: 18-01-2014
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -75,16 +75,13 @@ int log_monitor_init(void) {
 
 static void _log_msg(int priority, const char *msg) {
 #ifdef COMPILE_WIN32
-	return ;
+	fprintf(stderr, "%s", msg);
 #else
 	syslog(priority, "%s", msg);
 #endif
 }
 
 void log_info(const char *fmt, ...) {
-#ifdef COMPILE_WIN32
-	return ;
-#else
 	va_list ap;
 	char msg[CONFIG_USCHED_LOG_MSG_MAX_SIZE + 1];
 
@@ -99,13 +96,9 @@ void log_info(const char *fmt, ...) {
 	debug_printf(DEBUG_INFO, "== DEBUG INFO == %s", msg);
 
 	_log_msg(LOG_INFO, msg);
-#endif
 }
 
 void log_warn(const char *fmt, ...) {
-#ifdef COMPILE_WIN32
-	return ;
-#else
 	va_list ap;
 	char msg[CONFIG_USCHED_LOG_MSG_MAX_SIZE + 1];
 
@@ -120,13 +113,9 @@ void log_warn(const char *fmt, ...) {
 	debug_printf(DEBUG_WARN, "== DEBUG WARN == %s", msg);
 
 	_log_msg(LOG_WARNING, msg);
-#endif
 }
 
 void log_crit(const char *fmt, ...) {
-#ifdef COMPILE_WIN32
-	return ;
-#else
 	va_list ap;
 	char msg[CONFIG_USCHED_LOG_MSG_MAX_SIZE + 1];
 
@@ -141,7 +130,6 @@ void log_crit(const char *fmt, ...) {
 	debug_printf(DEBUG_CRIT, "== DEBUG CRIT == %s", msg);
 
 	_log_msg(LOG_CRIT, msg);
-#endif
 }
 
 void log_destroy(void) {

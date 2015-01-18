@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Common
  *
- * Date: 17-01-2015
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,6 +44,9 @@
 #include "log.h"
 
 int conn_is_local(int fd) {
+#ifdef COMPILE_WIN32
+	return 0;
+#else
 	int errsv = 0;
 	int ret = panet_info_sock_family(fd);
 
@@ -55,9 +58,13 @@ int conn_is_local(int fd) {
 	}
 
 	return (ret == AF_UNIX);
+#endif
 }
 
 int conn_is_remote(int fd) {
+#ifdef COMPILE_WIN32
+	return 1;
+#else
 	int errsv = 0;
 	int ret = panet_info_sock_family(fd);
 
@@ -69,5 +76,6 @@ int conn_is_remote(int fd) {
 	}
 
 	return (ret != AF_UNIX);
+#endif
 }
 

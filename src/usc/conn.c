@@ -48,7 +48,7 @@ int conn_client_init(void) {
 	int errsv = 0;
 
 	if (runc.opt.remote_hostname[0]) {
-		if ((runc.fd = panet_client_ipv4(runc.opt.remote_hostname, runc.opt.remote_port, PANET_PROTO_TCP, 5)) < 0) {
+		if ((runc.fd = panet_client_ipv4(runc.opt.remote_hostname, runc.opt.remote_port, PANET_PROTO_TCP, 5)) == (sock_t) -1) {
 			errsv = errno;
 			log_crit("conn_client_init(): panet_client_ipv4(): %s\n", strerror(errno));
 			errno = errsv;
@@ -106,9 +106,9 @@ int conn_client_process(void) {
 		}
 
 		/* Send the first entry block */
-		if (write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
+		if (panet_write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
 			errsv = errno;
-			log_crit("conn_client_process(): write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
+			log_crit("conn_client_process(): panet_write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
@@ -125,9 +125,9 @@ int conn_client_process(void) {
 		cur->psize = ntohl(cur->psize);
 
 		/* Read the session token into the session field for further processing */
-		if (read(runc.fd, cur->session, sizeof(cur->session)) != sizeof(cur->session)) {
+		if (panet_read(runc.fd, cur->session, sizeof(cur->session)) != sizeof(cur->session)) {
 			errsv = errno;
-			log_crit("conn_client_process(): read() != sizeof(cur->session): %s\n", strerror(errno));
+			log_crit("conn_client_process(): panet_read() != sizeof(cur->session): %s\n", strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
@@ -172,9 +172,9 @@ int conn_client_process(void) {
 		memcpy(aaa_payload_data + sizeof(cur->session), cur->payload, cur->psize);
 
 		/* Send the authentication and authorization data along entry payload */
-		if (write(runc.fd, aaa_payload_data, sizeof(cur->session) + cur->psize) != (sizeof(cur->session) + cur->psize)) {
+		if (panet_write(runc.fd, aaa_payload_data, sizeof(cur->session) + cur->psize) != (sizeof(cur->session) + cur->psize)) {
 			errsv = errno;
-			log_crit("conn_client_process(): write() != (sizeof(cur->session) + cur->psize): %s\n", strerror(errno));
+			log_crit("conn_client_process(): panet_write() != (sizeof(cur->session) + cur->psize): %s\n", strerror(errno));
 			entry_destroy(cur);
 			mm_free(aaa_payload_data);
 			errno = errsv;

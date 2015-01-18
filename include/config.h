@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 17-01-2015
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -108,6 +108,12 @@
  #define strtok_r strtok_s
  #define getuid() 0
  #define getgid() 0
+
+ enum {
+	LOG_INFO = 1,
+	LOG_WARNING,
+	LOG_CRIT
+ };
 #endif
 
 #include <sys/types.h>

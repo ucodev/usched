@@ -3,9 +3,9 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 24-08-2014
+ * Date: 18-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -34,8 +34,8 @@
 
 #include <psec/crypt.h>
 
-#include "debug.h"
 #include "config.h"
+#include "debug.h"
 #include "mm.h"
 #include "runtime.h"
 #include "conn.h"
@@ -54,12 +54,20 @@ int conn_client_init(void) {
 			errno = errsv;
 			return -1;
 		}
+#ifndef COMPILE_WIN32
 	} else if ((runc.fd = panet_client_unix(runc.config.network.sock_named, PANET_PROTO_UNIX_STREAM)) < 0) {
 		errsv = errno;
 		log_crit("conn_client_init(): panet_client_unix(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
+#endif
 	}
+#ifdef COMPILE_WIN32
+	else {
+		errno = EINVAL;
+		return -1;
+	}
+#endif
 
 	return 0;
 }

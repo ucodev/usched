@@ -3,9 +3,9 @@
  * @brief uSched
  *        Configuration interface - Client
  *
- * Date: 31-07-2014
+ * Date: 18-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -32,6 +32,7 @@
 #include "log.h"
 
 int config_client_init(void) {
+#ifndef COMPILE_WIN32
 	int errsv = 0;
 	struct usched_config *config = &runc.config;
 
@@ -43,15 +44,18 @@ int config_client_init(void) {
 		errno = errsv;
 		return -1;
 	}
+#endif
 
 	return 0;
 }
 
 void config_client_destroy(void) {
+#ifndef COMPILE_WIN32
 	struct usched_config *config = &runc.config;
 
 	config_destroy_network(&config->network);
 
 	memset(config, 0, sizeof(struct usched_config));
+#endif
 }
 

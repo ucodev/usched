@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logging interface
  *
- * Date: 18-01-2014
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *

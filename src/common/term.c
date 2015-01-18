@@ -3,7 +3,7 @@
  * @brief uSched
  *        Terminal attributes control interface
  *
- * Date: 17-01-2015
+ * Date: 18-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,11 +27,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "config.h"
 
 #ifndef COMPILE_WIN32
+#include <unistd.h>
 #include <termios.h>
 #endif
 

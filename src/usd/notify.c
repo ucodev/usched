@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 11-01-2015
+ * Date: 21-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,7 @@
 #include "conn.h"
 #include "process.h"
 #include "gc.h"
+#include "marshal.h"
 
 void notify_read(struct async_op *aop) {
 	struct usched_entry *entry = NULL;
@@ -87,6 +88,15 @@ void notify_read(struct async_op *aop) {
 
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
+
+#if CONFIG_SERIALIZE_ON_REQ == 1
+			pthread_mutex_lock(&rund.mutex_marshal);
+
+			if (marshal_daemon_serialize_pools() < 0)
+				log_warn("notify_read(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
+
+			pthread_mutex_unlock(&rund.mutex_marshal);
+#endif
 		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_PROGRESS) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 			/* This is another acceptable state. A new entry was received but is still
 			 * unauthenticated and is in progress. Authentication is performed during the

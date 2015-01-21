@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 15-01-2015
+ * Date: 21-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -65,7 +65,15 @@ int marshal_daemon_serialize_pools(void) {
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	/* NOTE: All entries present in the active pool shall be already disarmed (granted by schedule_daemon_destroy()) */
+#if CONFIG_SERIALIZE_ON_REQ == 1
+	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {
+		errsv = errno;
+		pthread_mutex_unlock(&rund.mutex_apool);
+		log_warn("marshal_daemon_serialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#endif
 
 	/* Serialize the active pool */
 	if ((ret = rund.apool->serialize(rund.apool, rund.ser_fd)) < 0) {
@@ -120,7 +128,7 @@ int marshal_daemon_unserialize_pools(void) {
 		debug_printf(DEBUG_INFO, "[TIME: %lu]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", time(NULL), entry->id, entry->trigger, entry->step, entry->expire);
 
 		/* Install a new scheduling entry based on the current entry parameters */
-		if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */

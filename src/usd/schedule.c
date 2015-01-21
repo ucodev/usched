@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 15-01-2015
+ * Date: 21-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -82,7 +82,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	/* Install a new scheduling entry based on the current entry parameters */
-	if ((entry->psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+	if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 		errsv = errno;
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
 
@@ -101,7 +101,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 
 		log_warn("schedule_entry_create(): rund.apool->insert(): %s\n", strerror(errno));
 
-		if (psched_disarm(rund.psched, entry->psched_id) < 0)
+		if (psched_disarm(rund.psched, entry->reserved.psched_id) < 0)
 			log_warn("schedule_entry_create(): psched_disarm(): %s\n", strerror(errno));
 
 		errno = errsv;
@@ -128,8 +128,8 @@ struct usched_entry *schedule_entry_get_copy(uint64_t entry_id) {
 		return NULL;
 	}
 
-	if (!entry->psched_id) {
-		log_warn("schedule_entry_get_copy(): entry->psched_id == 0\n");
+	if (!entry->reserved.psched_id) {
+		log_warn("schedule_entry_get_copy(): entry->reserved.psched_id == 0\n");
 		pthread_mutex_unlock(&rund.mutex_apool);
 		errno = EINVAL;
 		return NULL;
@@ -200,13 +200,13 @@ struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {
 		return NULL;
 	}
 
-	if (!entry->psched_id) {
-		log_warn("schedule_entry_disable(): entry->psched_id == 0\n");
+	if (!entry->reserved.psched_id) {
+		log_warn("schedule_entry_disable(): entry->reserved.psched_id == 0\n");
 		errno = EINVAL;
 		return NULL;
 	}
 
-	if (psched_disarm(rund.psched, entry->psched_id) < 0) {
+	if (psched_disarm(rund.psched, entry->reserved.psched_id) < 0) {
 		errsv = errno;
 		log_warn("schedule_entry_disable(): psched_disarm(): %s\n", strerror(errno));
 		errno = errsv;
@@ -267,14 +267,14 @@ int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid) {
 	}
 
 	/* Check if psched_id is still valid */
-	if (!entry->psched_id) {
-		log_warn("schedule_entry_ownership_delete_by_id(): entry->psched_id == 0\n");
+	if (!entry->reserved.psched_id) {
+		log_warn("schedule_entry_ownership_delete_by_id(): entry->reserved.psched_id == 0\n");
 		pthread_mutex_unlock(&rund.mutex_apool);
 		errno = EINVAL;
 		return -1;
 	}
 
-	if (psched_disarm(rund.psched, entry->psched_id) < 0) {
+	if (psched_disarm(rund.psched, entry->reserved.psched_id) < 0) {
 		log_warn("schedule_entry_ownership_delete_by_id(): psched_disarm(): %s\n", strerror(errno));
 		/* This isn't critical, so do not return NULL here. */
 	}
@@ -292,7 +292,7 @@ int schedule_entry_update(struct usched_entry *entry) {
 
 	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE BEGIN]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
 
-	if (psched_search(rund.psched, entry->psched_id, &trigger, &step, &expire) < 0) {
+	if (psched_search(rund.psched, entry->reserved.psched_id, &trigger, &step, &expire) < 0) {
 		/* Entry not found */
 		return 0;
 	}

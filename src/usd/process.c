@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 09-01-2015
+ * Date: 21-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -394,7 +394,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		}
 
 		/* Clear entry psched_id. The client should not be aware of this information */
-		entry_c->psched_id = 0;
+		entry_c->reserved.psched_id = 0;
 
 		/* Calculate the next length for buf */
 		len = buf_offset + offsetof(struct usched_entry, psize) + CONFIG_USCHED_AUTH_USERNAME_MAX + sizeof(entry_c->subj_size) + entry_c->subj_size + 1;

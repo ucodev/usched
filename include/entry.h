@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 17-01-2015
+ * Date: 21-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -60,6 +60,15 @@ typedef enum USCHED_ENTRY_FLAGS {
 } usched_entry_flag_t;
 
 /* uSched Entry Structure */
+#pragma pack(push)
+#pragma pack(4)
+union usched_entry_reserved {
+#if CONFIG_CLIENT_ONLY == 0
+	pschedid_t psched_id;		/* The libpsched entry identifier */
+#endif
+	unsigned char _reserved[32];
+};
+#pragma pack(pop)
 #define usched_entry_id(id) 	((struct usched_entry [1]) { { id, } })
 #define usched_entry_hdr_size()	(offsetof(struct usched_entry, payload))
 #pragma pack(push)
@@ -86,10 +95,8 @@ struct usched_entry {
 	uint32_t subj_size;
 	char *subj;
 
-#if CONFIG_CLIENT_ONLY == 0
 	/* Reserved */
-	pschedid_t psched_id;	/* The libpsched entry identifier */
-#endif
+	union usched_entry_reserved reserved;
 
 	/* Cryptographic Data Context */
 	unsigned char context[KE_CONTEXT_SIZE_CHREKE];

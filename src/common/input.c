@@ -3,9 +3,9 @@
  * @brief uSched
  *        Terminal input interface
  *
- * Date: 14-08-2014
+ * Date: 21-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -27,10 +27,34 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef COMPILE_WIN32
+#include <conio.h>
+#endif
+
+#include "config.h"
 #include "term.h"
 
 int input_password(char *password, size_t max_len) {
+#ifdef COMPILE_WIN32
+	int ch = 0;
+	size_t count = 0;
+
+	memset(password, 0, max_len);
+
+	for (;;) {
+		if (count >= max_len)
+			break;
+
+		ch = _getch();
+
+		if (ch == '\r' || ch == '\n')
+			break;
+
+		password[count ++] = ch;
+	}
+#else
 	size_t len = 0;
+
 	memset(password, 0, max_len);
 
 	if (term_local_echo_unset() < 0)
@@ -46,6 +70,7 @@ int input_password(char *password, size_t max_len) {
 	if (term_local_echo_set() < 0)
 		return -1;
 
+#endif
 	return 0;
 }
 

@@ -1,5 +1,4 @@
 v0.1:
- - Re-check initialization scripts (Grant SIGTERM is being delivered on system halt/shutdown).
  - C# bindings for Client Library
  - Ruby bindings for Client Library
  - Documentation

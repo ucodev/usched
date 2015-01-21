@@ -56,6 +56,22 @@ int marshal_daemon_init(void) {
 		return -1;
 	}
 
+	/* Test lock on serialization file */
+	if (lockf(rund.ser_fd, F_TLOCK, 0) < 0) {
+		errsv = errno;
+		log_warn("marshal_daemon_init(): lockf(): Serialization file is locked by another process.\n");
+		errno = errsv;
+		return -1;
+	}
+
+	/* Acquire lock on serialization file */
+	if (lockf(rund.ser_fd, F_LOCK, 0) < 0) {
+		errsv = errno;
+		log_warn("marshal_daemon_init(): lockf(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -187,6 +203,9 @@ void marshal_daemon_destroy(void) {
 #else
 	sync();
 #endif
+	/* Remove lock from serialization file */
+	if (lockf(rund.ser_fd, F_ULOCK, 0) < 0)
+		log_warn("marshal_daemon_init(): lockf(): %s\n", strerror(errno));
 
 	if (close(rund.ser_fd) < 0)
 		log_warn("marshal_daemon_destroy(): close(): %s\n", strerror(errno));

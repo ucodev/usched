@@ -1,7 +1,5 @@
 v0.1:
- - Allow only one instance of usd and use to run simultaneosly
  - Re-check initialization scripts (Grant SIGTERM is being delivered on system halt/shutdown).
- - Serialization on request option should only be triggered on 'run' and 'stop' requests.
  - C# bindings for Client Library
  - Ruby bindings for Client Library
  - Documentation

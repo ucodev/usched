@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 21-01-2015
+ * Date: 24-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -65,7 +65,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	/* Grant a unique entry->id */
+	/* Grant a unique entry->id that is different than 0 */
 	do {
 		/* Create the unique index key for this entry */
 		if (index_entry_create(entry) < 0) {
@@ -77,7 +77,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 
 			return -1;
 		}
-	} while (rund.apool->search(rund.apool, entry));
+	} while (rund.apool->search(rund.apool, entry) || !entry->id);
 
 	pthread_mutex_unlock(&rund.mutex_apool);
 

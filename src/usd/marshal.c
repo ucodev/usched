@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 21-01-2015
+ * Date: 24-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -124,10 +124,10 @@ int marshal_daemon_unserialize_pools(void) {
 			entry->trigger += entry->step;
 
 		/* Check if the trigger remains valid, i.e., does not exceed the expiration time */
-		if (entry->expire && (entry->trigger > entry->expire)) {
+		if (entry->expire && (entry->trigger >= entry->expire)) {
 			log_info("marshal_daemon_unserialize_pools(): An entry is expired (ID: 0x%llX).\n", entry->id);
 
-			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */
+			/* libpall grants that it's safe to remove a node while iterating the list */
 			rund.apool->del(rund.apool, entry);
 			continue;
 		}
@@ -136,7 +136,7 @@ int marshal_daemon_unserialize_pools(void) {
 		if ((entry->trigger <= time(NULL)) && !entry->step) {
 			log_info("marshal_daemon_unserialize_pools(): Found an invalid entry (ID: 0x%llX).\n", entry->id);
 
-			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */
+			/* libpall grants that it's safe to remove a node while iterating the list */
 			rund.apool->del(rund.apool, entry);
 			continue;
 		}
@@ -147,7 +147,7 @@ int marshal_daemon_unserialize_pools(void) {
 		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
-			/* TODO and/or FIXME: Is it safe to delete this entry during the iteration? */
+			/* libpall grants that it's safe to remove a node while iterating the list */
 			rund.apool->del(rund.apool, entry);
 
 			continue;

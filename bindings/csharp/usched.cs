@@ -27,7 +27,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace usc
+namespace Usched
 {
 	public struct UschedEntry {
 		public UInt64 Id;
@@ -47,7 +47,7 @@ namespace usc
 			public uint flags;		/* 4 bytes */
 			public uint uid;		/* 4 bytes */
 			public uint gid;		/* 4 bytes */
-			public uint trigger;	/* 4 bytes */
+			public uint trigger;		/* 4 bytes */
 			public uint step;		/* 4 bytes */
 			public uint expire;		/* 4 bytes */
 			public uint psize;		/* 4 bytes */
@@ -57,7 +57,7 @@ namespace usc
 			
 			public void *payload;
 			
-			public uint subj_size;	/* 4 bytes */
+			public uint subj_size;		/* 4 bytes */
 			public void *subj;
 			
 			public fixed byte reserved[32];
@@ -211,27 +211,5 @@ namespace usc
 			usched_destroy();
 		}
 	}
-
-	class Program
-	{
-		public static void Main(string[] args)
-		{
-			Usc req = new Usc();
-			UschedEntry[] result;
-
-			req.SetHostname("192.168.1.1");
-			req.SetPort("7600");
-			req.SetUsername("win32user");
-			req.SetPassword("win32password");
-
-			req.Request("show all");
-
-			result = req.ResultShow();
-			
-			/* Print some results */
-			for (int i = 0; i < result.Length; i ++) {
-				Console.WriteLine("ID: " + result[i].Id.ToString("X") + ", Command: " + result[i].Command);
-			}
-		}
-	}
 }
+

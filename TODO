@@ -1,5 +1,5 @@
 v0.1:
- - C# bindings for Client Library
+ - Support for month and year step alignments
  - Ruby bindings for Client Library
  - Documentation
  - Cleanup code

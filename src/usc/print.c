@@ -3,9 +3,9 @@
  * @brief uSched
  *        Printing interface - Client
  *
- * Date: 06-08-2014
+ * Date: 26-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -51,7 +51,7 @@ void print_client_result_del(const uint64_t *entry_list, size_t count) {
 void print_client_result_show(const struct usched_entry *entry_list, size_t count) {
 	int i = 0;
 
-	printf("                 id | username |   uid |   gid |     trigger |   step |      expire | cmd\n");
+	printf("                 id | username |   uid |   gid |     trigger |     step |      expire | cmd\n");
 
 	for (i = 0; i < count; i ++) {
 		printf(
@@ -60,7 +60,7 @@ void print_client_result_show(const struct usched_entry *entry_list, size_t coun
 			"%5u | " \
 			"%5u | " \
 			"%11u | " \
-			"%6u | " \
+			"%8u | " \
 			"%11u | " \
 			"%s\n",
 			(unsigned long long) entry_list[i].id,

@@ -1,4 +1,5 @@
 v0.1:
+ - Check unserialization issues after reboot (no data unserialized)
  - Normalize bindings APIs
  - Documentation
  - Cleanup code

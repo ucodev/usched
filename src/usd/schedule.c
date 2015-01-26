@@ -337,15 +337,12 @@ int schedule_entry_update(struct usched_entry *entry) {
 			return -1;
 		}
 
-		/* Check what we've to align (month or year?) */
+		/* Check what we've to align (month or year?) and update trigger accordingly */
 		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
-			entry->step = _step_ts_add_month(entry->trigger, entry->step / 2592000);
+			entry->trigger += _step_ts_add_month(entry->trigger, entry->step / 2592000);
 		} else { /* USCHED_ENTRY_FLAG_YEARDAY_ALIGN */
-			entry->step = _step_ts_add_year(entry->trigger, entry->step / 31536000);
+			entry->trigger += _step_ts_add_year(entry->trigger, entry->step / 31536000);
 		}
-
-		/* Update trigger accordingly */
-		entry->trigger += entry->step;
 
 		/* Re-arm the entry with the correct alignments */
 		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {

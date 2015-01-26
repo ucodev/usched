@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 15-01-2015
+ * Date: 26-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -299,6 +299,9 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	if (write(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
 		goto _serialize_error;
 
+	if (write(fd, entry->username, sizeof(entry->username)) != sizeof(entry->username))
+		goto _serialize_error;
+
 	if (write(fd, &entry->subj_size, sizeof(entry->subj_size)) != sizeof(entry->subj_size))
 		goto _serialize_error;
 
@@ -350,6 +353,9 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 		goto _unserialize_error;
 
 	if (read(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
+		goto _unserialize_error;
+
+	if (read(fd, entry->username, sizeof(entry->username)) != sizeof(entry->username))
 		goto _unserialize_error;
 
 	if (read(fd, &entry->subj_size, sizeof(entry->subj_size)) != sizeof(entry->subj_size))

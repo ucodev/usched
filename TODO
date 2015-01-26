@@ -1,5 +1,4 @@
 v0.1:
- - Support for day of the month and day of the year step alignments
  - Ruby bindings for Client Library
  - Documentation
  - Cleanup code

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 24-01-2015
+ * Date: 26-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,6 +25,7 @@
  */
 
 
+#include <time.h>
 #include <string.h>
 #include <errno.h>
 #include <stdint.h>
@@ -41,6 +42,26 @@
 #include "entry.h"
 #include "index.h"
 #include "schedule.h"
+
+static uint32_t _step_ts_add_month(time_t t, unsigned int months) {
+	struct tm tm;
+
+	localtime_r(&t, &tm);
+
+	tm.tm_mon += months;
+
+	return mktime(&tm) - t;
+}
+
+static uint32_t _step_ts_add_year(time_t t, unsigned int years) {
+	struct tm tm;
+
+	localtime_r(&t, &tm);
+
+	tm.tm_year += years;
+
+	return mktime(&tm) - t;
+}
 
 int schedule_daemon_init(void) {
 	int errsv = 0;
@@ -288,18 +309,58 @@ int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid) {
 }
 
 int schedule_entry_update(struct usched_entry *entry) {
+	int errsv = 0;
 	struct timespec trigger, step, expire;
 
 	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE BEGIN]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
 
+	/* Search for the entry in order to grant that it is still valid (not expired) */
 	if (psched_search(rund.psched, entry->reserved.psched_id, &trigger, &step, &expire) < 0) {
+		debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE END]: Entry not found");
 		/* Entry not found */
 		return 0;
 	}
 
-	entry->trigger = trigger.tv_sec;
-	entry->step = step.tv_sec;
-	entry->expire = expire.tv_sec;
+	/* Check if entry is flagged for any alignment */
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN) || entry_has_flag(entry, USCHED_ENTRY_FLAG_YEARDAY_ALIGN)) {
+		/* Disarm the entry before performing any step alignments */
+		if (psched_disarm(rund.psched, entry->reserved.psched_id) < 0) {
+			errsv = errno;
+			log_warn("schedule_entry_update(): psched_disarm(): %s\n", strerror(errno));
+			errno = errsv;
+
+			/* Update with the last known values of the psched entry before failing */
+			entry->trigger = trigger.tv_sec;
+			entry->step = step.tv_sec;
+			entry->expire = expire.tv_sec;
+
+			return -1;
+		}
+
+		/* Check what we've to align (month or year?) */
+		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
+			entry->step = _step_ts_add_month(entry->trigger, entry->step / 2592000);
+		} else { /* USCHED_ENTRY_FLAG_YEARDAY_ALIGN */
+			entry->step = _step_ts_add_year(entry->trigger, entry->step / 31104000);
+		}
+
+		/* Update trigger accordingly */
+		entry->trigger += entry->step;
+
+		/* Re-arm the entry with the correct alignments */
+		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+			errsv = errno;
+			log_crit("schedule_entry_update(): psched_timestamp_arm(): %s\n", strerror(errno));
+			errno = errsv;
+
+			/* TODO or FIXME: What should we do here? The entry will be lost... */
+			return -1;
+		}
+	} else {
+		entry->trigger = trigger.tv_sec;
+		entry->step = step.tv_sec;
+		entry->expire = expire.tv_sec;
+	}
 
 	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE END]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
 

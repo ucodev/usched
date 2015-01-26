@@ -3,9 +3,9 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 29-08-2014
+ * Date: 26-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -181,8 +181,6 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("Re-initializing marshal interface...\n");
 
 	marshal_daemon_destroy();
-
-	marshal_daemon_wipe();
 
 	if (marshal_daemon_init() < 0) {
 		errsv = errno;

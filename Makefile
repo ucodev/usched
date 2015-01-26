@@ -15,6 +15,8 @@ install_all:
 	chmod 700 /etc/usched/users
 	mkdir -p /usr/include/usched
 	cp include/*.h /usr/include/usched/
+	mkdir -p /var/cache/usched
+	chmod 700 /var/cache/usched
 
 examples:
 	make -C example/

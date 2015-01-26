@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 18-01-2015
+ * Date: 26-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -100,11 +100,15 @@
   #define DLLIMPORT __declspec(dllimport)
  #endif
  
- typedef unsigned long uid_t, gid_t;
- typedef unsigned char uint8_t;
- typedef unsigned short uint16_t;
- typedef unsigned int uint32_t;
- typedef unsigned long long uint64_t;
+ typedef UINT32	uid_t, gid_t;
+ typedef INT8	int8_t
+ typedef INT16	int16_t
+ typedef INT32	int32_t
+ typedef INT64	int64_t
+ typedef UINT8	uint8_t;
+ typedef UINT16	uint16_t;
+ typedef UINT32	uint32_t;
+ typedef UINT64	uint64_t;
  
  #define strtok_r strtok_s
  #define getuid() 0

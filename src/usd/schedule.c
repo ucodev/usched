@@ -341,7 +341,7 @@ int schedule_entry_update(struct usched_entry *entry) {
 		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
 			entry->step = _step_ts_add_month(entry->trigger, entry->step / 2592000);
 		} else { /* USCHED_ENTRY_FLAG_YEARDAY_ALIGN */
-			entry->step = _step_ts_add_year(entry->trigger, entry->step / 31104000);
+			entry->step = _step_ts_add_year(entry->trigger, entry->step / 31536000);
 		}
 
 		/* Update trigger accordingly */

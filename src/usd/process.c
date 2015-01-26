@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 21-01-2015
+ * Date: 26-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,6 +41,7 @@
 #include "log.h"
 #include "schedule.h"
 #include "conn.h"
+#include "usched.h"
 
 static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0;
@@ -177,10 +178,10 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	for (i = 0; i < entry_list_req_nmemb; i ++)
 		entry_list_req[i] = ntohll(entry_list_req[i]);
 
-	/* If the number of requested elements is 1 and the requested entry id is 0, this means to
-	 * delete all the entries that match the entry's uid
+	/* If the number of requested elements is 1 and the requested entry id is USCHED_SUBJ_ALL,
+	 * this means to delete all the entries that match the entry's uid
 	 */
-	if ((entry_list_req_nmemb == 1) && (!entry_list_req[0])) {
+	if ((entry_list_req_nmemb == 1) && (entry_list_req[0] == USCHED_SUBJ_ALL)) {
 		mm_free(entry->payload);
 		entry->payload = NULL;
 		entry->psize = 0;
@@ -337,10 +338,10 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	for (i = 0; i < entry_list_req_nmemb; i ++)
 		entry_list_req[i] = ntohll(entry_list_req[i]);
 
-	/* If the number of requested elements is 1 and the requested entry id is 0, this means to
-	 * fetch all the entries that match the entry's uid
+	/* If the number of requested elements is 1 and the requested entry id is USCHED_SUBJ_ALL,
+	 * this means to fetch all the entries that match the entry's uid
 	 */
-	if ((entry_list_req_nmemb == 1) && (!entry_list_req[0])) {
+	if ((entry_list_req_nmemb == 1) && (entry_list_req[0] == USCHED_SUBJ_ALL)) {
 		mm_free(entry->payload);
 		entry->payload = NULL;
 		entry->psize = 0;

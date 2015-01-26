@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 21-01-2015
+ * Date: 26-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,16 +47,20 @@
 /* Entry flags */
 typedef enum USCHED_ENTRY_FLAGS {
 	/* Remote flags - Allowed to be handled by client */
-	USCHED_ENTRY_FLAG_NEW = 1,
-	USCHED_ENTRY_FLAG_DEL,
-	USCHED_ENTRY_FLAG_GET,
+	USCHED_ENTRY_FLAG_NEW = 1,	/* Install a new entry */
+	USCHED_ENTRY_FLAG_DEL,		/* Remove an existing entry */
+	USCHED_ENTRY_FLAG_GET,		/* Fetch an existing entry */
 
-	/* Local flags - Allowed to be handled by daemon */
-	USCHED_ENTRY_FLAG_INIT,
-	USCHED_ENTRY_FLAG_PROGRESS,
-	USCHED_ENTRY_FLAG_AUTHORIZED,
-	USCHED_ENTRY_FLAG_FINISH,
-	USCHED_ENTRY_FLAG_COMPLETE
+	/* Scheduling flags (remote) - Allowed to be handled by client */
+	USCHED_ENTRY_FLAG_MONTHDAY_ALIGN,	/* Entry step must be aligned to month day */
+	USCHED_ENTRY_FLAG_YEARDAY_ALIGN,	/* Entry step must be aligned to year day */
+
+	/* Local flags - Only allowed to be handled by daemon */
+	USCHED_ENTRY_FLAG_INIT,		/* Entry state set to initialized */
+	USCHED_ENTRY_FLAG_PROGRESS,	/* Entry is being processed */
+	USCHED_ENTRY_FLAG_AUTHORIZED,	/* Entry is authorized */
+	USCHED_ENTRY_FLAG_FINISH,	/* Cleanup routines are being executed */
+	USCHED_ENTRY_FLAG_COMPLETE	/* Entry is now completely processed */
 } usched_entry_flag_t;
 
 /* uSched Entry Structure */

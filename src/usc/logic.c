@@ -3,9 +3,9 @@
  * @brief uSched
  *        Logic Analyzer interface - Client
  *
- * Date: 05-08-2014
+ * Date: 26-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -31,12 +31,15 @@
 #include <errno.h>
 #include <time.h>
 
+#include "config.h"
 #include "mm.h"
 #include "debug.h"
 #include "runtime.h"
 #include "entry.h"
 #include "logic.h"
 #include "conn.h"
+#include "bitops.h"
+#include "usched.h"
 
 
 int logic_client_process_run(void) {
@@ -67,6 +70,16 @@ int logic_client_process_run(void) {
 				return -1;
 			}
 
+			/* Check and set align flags accordingly */
+			if (bit_test(&cur->flags, USCHED_REQ_FLAG_MONTHDAY_ALIGN)) {
+				/* Step must be aligned with the month day */
+				entry_set_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN);
+			} else if (bit_test(&cur->flags, USCHED_REQ_FLAG_YEARDAY_ALIGN)) {
+				/* Step must be aligned with the the year day */
+				entry_set_flag(entry, USCHED_ENTRY_FLAG_YEARDAY_ALIGN);
+			}
+
+			/* Set entry step */
 			entry_set_step(entry, cur->arg);
 		}
 
@@ -131,13 +144,13 @@ int logic_client_process_stop(void) {
 	}
 
 	/* Validate if this request refers to all entries beloging to this user */
-	if (!strcasecmp(cur->subj, "all")) {
+	if (!strcasecmp(cur->subj, USCHED_SUBJ_ALL_STR)) {
 		entry_list_nmemb = 1;
 
 		if (!(entry_list = mm_alloc(sizeof(uint64_t))))
 			return -1;
 
-		entry_list[0] = 0;	/* 0 means all entries belonging to this user */
+		entry_list[0] = USCHED_SUBJ_ALL; /* means all entries belonging to this user */
 	} else {
 		/* Iterate the current request list in order to craft an entry payload */
 		for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {
@@ -211,13 +224,13 @@ int logic_client_process_show(void) {
 	}
 
 	/* Validate if this request refers to all entries beloging to this user */
-	if (!strcasecmp(cur->subj, "all")) {
+	if (!strcasecmp(cur->subj, USCHED_SUBJ_ALL_STR)) {
 		entry_list_nmemb = 1;
 
 		if (!(entry_list = mm_alloc(sizeof(uint64_t))))
 			return -1;
 
-		entry_list[0] = 0;	/* 0 means all entries belonging to this user */
+		entry_list[0] = USCHED_SUBJ_ALL; /* means all entries belonging to this user */
 	} else {
 		/* Iterate the current request list in order to craft an entry payload */
 		for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 18-01-2015
+ * Date: 26-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,6 +41,7 @@
 #include <sys/types.h>
 
 #include "runtime.h"
+#include "bitops.h"
 #include "mm.h"
 #include "debug.h"
 #include "usched.h"
@@ -50,7 +51,7 @@
 
 static struct usched_client_request *_parse_prep_compound(struct usched_client_request *req, int argc, char **argv);
 
-static long _parse_req_arg(const struct usched_client_request *req, const char *arg) {
+static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 	char *ctf_str = NULL, *endptr = NULL;
 	size_t len = 0;
 	struct tm tm;
@@ -70,8 +71,14 @@ static long _parse_req_arg(const struct usched_client_request *req, const char *
 			case USCHED_ADVERB_HOURS:	return val * 3600;
 			case USCHED_ADVERB_DAYS:	return val * 86400;
 			case USCHED_ADVERB_WEEKS:	return val * 86400 * 7;
-			case USCHED_ADVERB_MONTHS:	return val * 86400 * 30;
-			case USCHED_ADVERB_YEARS:	return val * 86400 * 365;
+			case USCHED_ADVERB_MONTHS: {
+				bit_set(&req->flags, USCHED_REQ_FLAG_MONTHDAY_ALIGN);
+				return val * 86400 * 30;
+			}
+			case USCHED_ADVERB_YEARS: {
+				bit_set(&req->flags, USCHED_REQ_FLAG_YEARDAY_ALIGN);
+				return val * 86400 * 365;
+			}
 			case USCHED_ADVERB_DATE:	/* Invalid in this context */
 			case USCHED_ADVERB_DATETIME:	/* Invalid in this context */
 			case USCHED_ADVERB_TIMESTAMP:	/* Invalid in this context */

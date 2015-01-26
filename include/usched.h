@@ -3,9 +3,9 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 05-08-2014
+ * Date: 26-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -27,8 +27,6 @@
 
 #ifndef USCHED_H
 #define USCHED_H
-
-#include <stdint.h>
 
 #include <sys/types.h>
 
@@ -79,6 +77,9 @@
 #define USCHED_CONJ_THEN_STR		"then"
 #define USCHED_CONJ_UNTIL_STR		"until"
 #define USCHED_CONJ_WHILE_STR		"while"
+
+/* Subject - Human */
+#define USCHED_SUBJ_ALL_STR		"all"
 
 /* Weekdays - Human */
 #define USCHED_WEEKDAY_MONDAY_STR	"monday"
@@ -137,6 +138,11 @@ typedef enum CONJ {
 	USCHED_CONJ_WHILE
 } usched_conj_t;
 
+/* Subject - Machine */
+typedef enum SUBJ {
+	USCHED_SUBJ_ALL = 0
+} usched_subj_t;
+
 /* Weekdays - Machine */
 typedef enum WEEKDAY {
 	USCHED_WEEKDAY_SUNDAY = 1,
@@ -147,6 +153,12 @@ typedef enum WEEKDAY {
 	USCHED_WEEKDAY_FRIDAY,
 	USCHED_WEEKDAY_SATURDAY
 } usched_weekday_t;
+
+/* uSched request flags */
+typedef enum USCHED_REQUEST_FLAGS {
+	USCHED_REQ_FLAG_MONTHDAY_ALIGN = 1,
+	USCHED_REQ_FLAG_YEARDAY_ALIGN
+} usched_request_flag_t;
 
 /* uSched Admin Request Structure */
 struct usched_admin_request {
@@ -166,6 +178,7 @@ struct usched_client_request {
 	long arg;
 	uid_t uid;
 	gid_t gid;
+	usched_request_flag_t flags; /* usched_request_flag_t */
 	struct usched_client_request *next;
 	struct usched_client_request *prev;
 };

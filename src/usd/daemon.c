@@ -3,9 +3,9 @@
  * @brief uSched
  *        Daemon Main Component
  *
- * Date: 29-07-2014
+ * Date: 27-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -64,7 +64,9 @@ static void _destroy(void) {
 	runtime_daemon_destroy();
 }
 
-static void _loop(int argc, char **argv) {
+static int _loop(int argc, char **argv) {
+	int ret = 0;
+
 	_init(argc, argv);
 
 	for (;;) {
@@ -78,6 +80,11 @@ static void _loop(int argc, char **argv) {
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE))
 			break;
 
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL)) {
+			ret = 1;
+			break;
+		}
+
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
 			_destroy();
 			_init(argc, argv);
@@ -90,11 +97,11 @@ static void _loop(int argc, char **argv) {
 	}
 
 	_destroy();
+
+	return ret;
 }
 
 int main(int argc, char *argv[]) {
-	_loop(argc, argv);
-
-	return 0;
+	return _loop(argc, argv);
 }
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 21-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,6 +51,7 @@
 /* Flags */
 typedef enum USCHED_RUNTIME_FLAGS {
 	USCHED_RUNTIME_FLAG_TERMINATE = 1,
+	USCHED_RUNTIME_FLAG_FATAL,
 	USCHED_RUNTIME_FLAG_RELOAD,
 	USCHED_RUNTIME_FLAG_FLUSH,
 	USCHED_RUNTIME_FLAG_LIB
@@ -157,6 +158,7 @@ int runtime_admin_init(int argc, char **argv);
 int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
 int runtime_admin_interrupted(void);
+void runtime_daemon_fatal(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */

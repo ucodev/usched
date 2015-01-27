@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 26-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,26 +42,6 @@
 #include "entry.h"
 #include "index.h"
 #include "schedule.h"
-
-static uint32_t _step_ts_add_month(time_t t, unsigned int months) {
-	struct tm tm;
-
-	localtime_r(&t, &tm);
-
-	tm.tm_mon += months;
-
-	return mktime(&tm) - t;
-}
-
-static uint32_t _step_ts_add_year(time_t t, unsigned int years) {
-	struct tm tm;
-
-	localtime_r(&t, &tm);
-
-	tm.tm_year += years;
-
-	return mktime(&tm) - t;
-}
 
 int schedule_daemon_init(void) {
 	int errsv = 0;
@@ -105,6 +85,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 	/* Install a new scheduling entry based on the current entry parameters */
 	if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 		errsv = errno;
+
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 		errno = errsv;
@@ -229,9 +210,17 @@ struct usched_entry *schedule_entry_disable(struct usched_entry *entry) {
 
 	if (psched_disarm(rund.psched, entry->reserved.psched_id) < 0) {
 		errsv = errno;
+
+		/* This isn't that critical, so do not return NULL here. However, we should set the
+		 * FATAL flag to runtime in order to force the daemon to be restarted by uSched
+		 * monitor (usm) and load the consistent data from the serialization file, cleaning
+		 * up the existing unhandled armed entries.
+		 */
+		runtime_daemon_fatal();
+
 		log_warn("schedule_entry_disable(): psched_disarm(): %s\n", strerror(errno));
+
 		errno = errsv;
-		/* This isn't critical, so do not return NULL here. */
 	}
 
 	pthread_mutex_lock(&rund.mutex_apool);
@@ -339,18 +328,24 @@ int schedule_entry_update(struct usched_entry *entry) {
 
 		/* Check what we've to align (month or year?) and update trigger accordingly */
 		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
-			entry->trigger += _step_ts_add_month(entry->trigger, entry->step / 2592000);
+			entry->trigger += schedule_step_ts_add_month(entry->trigger, entry->step / 2592000);
 		} else { /* USCHED_ENTRY_FLAG_YEARDAY_ALIGN */
-			entry->trigger += _step_ts_add_year(entry->trigger, entry->step / 31536000);
+			entry->trigger += schedule_step_ts_add_year(entry->trigger, entry->step / 31536000);
 		}
 
 		/* Re-arm the entry with the correct alignments */
 		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 			errsv = errno;
+
+			runtime_daemon_fatal();
+
 			log_crit("schedule_entry_update(): psched_timestamp_arm(): %s\n", strerror(errno));
 			errno = errsv;
 
-			/* TODO or FIXME: What should we do here? The entry will be lost... */
+			/* We've set the FATAL flag to runtime, which means that the daemon will
+			 * exit and restarted by uSched monitor (usm).
+			 */
+
 			return -1;
 		}
 	} else {
@@ -362,5 +357,25 @@ int schedule_entry_update(struct usched_entry *entry) {
 	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE END]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
 
 	return 1;
+}
+
+uint32_t schedule_step_ts_add_month(time_t t, unsigned int months) {
+	struct tm tm;
+
+	localtime_r(&t, &tm);
+
+	tm.tm_mon += months;
+
+	return mktime(&tm) - t;
+}
+
+uint32_t schedule_step_ts_add_year(time_t t, unsigned int years) {
+	struct tm tm;
+
+	localtime_r(&t, &tm);
+
+	tm.tm_year += years;
+
+	return mktime(&tm) - t;
 }
 

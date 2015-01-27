@@ -3,9 +3,9 @@
  * @brief uSched
  *        Scheduling handlers interface header
  *
- * Date: 26-07-2014
+ * Date: 27-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -43,6 +43,8 @@ struct usched_entry *schedule_entry_disable(struct usched_entry *entry);
 int schedule_entry_delete(struct usched_entry *entry);
 int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid);
 int schedule_entry_update(struct usched_entry *entry);
+uint32_t schedule_step_ts_add_month(time_t t, unsigned int months);
+uint32_t schedule_step_ts_add_year(time_t t, unsigned int years);
 
 #endif
 

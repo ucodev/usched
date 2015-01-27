@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 26-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -207,6 +207,10 @@ int runtime_daemon_init(int argc, char **argv) {
 	log_info("All systems go. Ignition!\n");
 
 	return 0;
+}
+
+void runtime_daemon_fatal(void) {
+	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_FATAL);
 }
 
 int runtime_daemon_interrupted(void) {

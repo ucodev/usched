@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 21-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -159,6 +159,11 @@ _read_failure:
 		 * than causing the rtsaio_cancel() to access some invalid memory region.
 		 */
 		log_warn("notify_read(): gc_insert(): %s\n", strerror(errno));
+
+		/* To prevent further leaks, if any, we'll force the daemon to be restarted by
+		 * uSched monitor (usm) by setting the FATAL runtime flag.
+		 */
+		runtime_daemon_fatal();
 	}
 }
 
@@ -270,6 +275,11 @@ _write_failure:
 		 * than causing the rtsaio_cancel() to access some invalid memory region.
 		 */
 		log_warn("notify_read(): gc_insert(): %s\n", strerror(errno));
+
+		/* To prevent further leaks, if any, we'll force the daemon to be restarted by
+		 * uSched monitor (usm) by setting the FATAL runtime flag.
+		 */
+		runtime_daemon_fatal();
 	}
 }
 

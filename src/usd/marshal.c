@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 24-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,6 +45,7 @@
 #include "marshal.h"
 #include "log.h"
 #include "entry.h"
+#include "schedule.h"
 
 int marshal_daemon_init(void) {
 	int errsv = 0;
@@ -120,8 +121,17 @@ int marshal_daemon_unserialize_pools(void) {
 	/* Activate all the unserialized entries through libpsched */
 	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
 		/* Update the trigger value based on step and current time */
-		while (entry->step && (entry->trigger <= time(NULL)))
-			entry->trigger += entry->step;
+		while (entry->step && (entry->trigger <= time(NULL))) {
+			/* Check if we've to align (month or year?) and update trigger accordingly */
+			if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
+				entry->trigger += schedule_step_ts_add_month(entry->trigger, entry->step / 2592000);
+			} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_YEARDAY_ALIGN)) {
+				entry->trigger += schedule_step_ts_add_year(entry->trigger, entry->step / 31536000);
+			} else {
+				/* No alignment required */
+				entry->trigger += entry->step;
+			}
+		}
 
 		/* Check if the trigger remains valid, i.e., does not exceed the expiration time */
 		if (entry->expire && (entry->trigger >= entry->expire)) {
@@ -145,6 +155,10 @@ int marshal_daemon_unserialize_pools(void) {
 
 		/* Install a new scheduling entry based on the current entry parameters */
 		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+			/* TODO or FIXME: This is critical, the entry will be lost and we can't force
+			 * a gracefully daemon restart or the serialization data will be overwritten
+			 * with a missing entry... Something must be done here to prevent such damage
+			 */
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 			/* libpall grants that it's safe to remove a node while iterating the list */

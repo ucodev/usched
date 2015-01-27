@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 26-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -101,10 +101,10 @@
  #endif
  
  typedef UINT32	uid_t, gid_t;
- typedef INT8	int8_t
- typedef INT16	int16_t
- typedef INT32	int32_t
- typedef INT64	int64_t
+ typedef INT8	int8_t;
+ typedef INT16	int16_t;
+ typedef INT32	int32_t;
+ typedef INT64	int64_t;
  typedef UINT8	uint8_t;
  typedef UINT16	uint16_t;
  typedef UINT32	uint32_t;

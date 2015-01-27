@@ -1,8 +1,12 @@
 <?php
-	if (usc_request("show all") !== TRUE)
-		die("usc_request(): Failed.");
+	include("usched.php");
 
-	$entry_list = usc_result_get_show();
+	$usc = new Usched();
+
+	if ($usc->Request("show all") !== TRUE)
+		die("usc->Request(): Failed.");
+
+	$entry_list = $usc->ResultShow();
 
 	foreach ($entry_list as $id => $entry) {
 		echo("Entry ID: " . $id . "<br />");
@@ -15,6 +19,4 @@
 		echo("&nbsp;&nbsp;Command: " . $entry_list[$id]["cmd"] . "<br />");
 		echo("<br />");
 	}
-
-	usc_result_free_show();
 

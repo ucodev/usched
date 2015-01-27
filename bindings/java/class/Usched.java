@@ -3,7 +3,7 @@
  * @brief uSched JAVA Library
  *        uSched JAVA Library interface - Client
  *
- * Date: 12-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -58,11 +58,27 @@ public class Usched {
 		System.loadLibrary("usched");
 	}
 
-	public void init() {
+	private void resultFreeRun() {
+		nativeResultFreeRun();
+	}
+
+	private void resultFreeStop() {
+		nativeResultFreeStop();
+	}
+
+	private void resultFreeShow() {
+		nativeResultFreeShow();
+	}
+
+	public Usched() {
 		nativeInit();
 	}
 
-	public void destroy() {
+	public void Destroy() {
+		nativeDestroy();
+	}
+
+	protected void finalize() {
 		nativeDestroy();
 	}
 
@@ -71,35 +87,43 @@ public class Usched {
 		System.out.println(str);
 	}
 
-	public boolean setRemoteHostname(String hostname) {
+	public boolean SetHostname(String hostname) {
 		return nativeOptSetRemoteHostname(hostname);
 	}
 
-	public boolean setRemotePort(String port) {
+	public boolean SetPort(String port) {
 		return nativeOptSetRemotePort(port);
 	}
 
-	public boolean setRemoteUsername(String username) {
+	public boolean SetUsername(String username) {
 		return nativeOptSetRemoteUsername(username);
 	}
 
-	public boolean setRemotePassword(String password) {
+	public boolean SetPassword(String password) {
 		return nativeOptSetRemotePassword(password);
 	}
 
-	public boolean request(String request) {
+	public boolean Request(String request) {
 		return nativeRequest(request);
 	}
 
-	public long[] resultGetRun() {
-		return nativeResultGetRun();
+	public long[] ResultRun() {
+		long[] ret = nativeResultGetRun();
+
+		resultFreeRun();
+
+		return ret;
 	}
 
-	public long[] resultGetStop() {
-		return nativeResultGetStop();
+	public long[] ResultStop() {
+		long[] ret = nativeResultGetStop();
+
+		resultFreeStop();
+
+		return ret;
 	}
 
-	public UschedEntry[] resultGetShow() {
+	public UschedEntry[] ResultShow() {
 		nativeResultGetShowInit();
 
 		UschedEntry[] entries = new UschedEntry[nativeResultGetShowNmemb()];
@@ -119,22 +143,12 @@ public class Usched {
 
 		nativeResultGetShowDestroy();
 
+		resultFreeShow();
+
 		return entries;
 	}
 
-	public void resultFreeRun() {
-		nativeResultFreeRun();
-	}
-
-	public void resultFreeStop() {
-		nativeResultFreeStop();
-	}
-
-	public void resultFreeShow() {
-		nativeResultFreeShow();
-	}
-
-	public String usageErrorStr(int error) {
+	public String UsageError(int error) {
 		return nativeUsageErrorStr(error);
 	}
 }

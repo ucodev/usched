@@ -30,7 +30,7 @@ from usched import *
 # Example
 usc = Usched()
 
-usc.Request("run 'ls -lah /' in 10 seconds then every 5 seconds")
+usc.Request("show all")
 
-print usc.ResultRun()
+print usc.ResultShow()
 

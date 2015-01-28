@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 16-01-2015
+ * Date: 28-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <mqueue.h>
+#include <time.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -47,20 +48,24 @@ extern char **environ;
 static void *_exec_cmd(void *arg) {
 	char *buf = arg;	/* | id (64 bits) | uid (32 bits) | gid (32 bits) | cmd (...) ... | */
 	uint64_t id = 0;
-	uint32_t uid = 0, gid = 0;
-	char *cmd = &buf[16];
+	uint32_t uid = 0, gid = 0, trigger = 0;
+	char *cmd = &buf[20];
 	pid_t pid = 0;
 	int status = 0;
 
 	memcpy(&id, buf, 8);
 	memcpy(&uid, buf + 8, 4);
 	memcpy(&gid, buf + 12, 4);
+	memcpy(&trigger, buf + 16, 4);
 
-	/* Create child */
-	pid = fork();
-
-	/* Create a new process, drop privileges to UID and GID and execute CMD */
-	if (pid == (pid_t) -1) {
+	/* Check delta time before executing event (Absolute value is a safe check. Negative values
+	 * won't occur here... hopefully).
+	 */
+	if (abs(time(NULL) - trigger) >= rune.config.core.delta_noexec) {
+		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - trigger, rune.config.core.delta_noexec);
+	} else if ((pid = fork()) == (pid_t) -1) {	/* Create a new process, drop privileges to
+							 * UID and GID and execute CMD
+							 */
 		/* Failure */
 		log_warn("Entry[0x%016llX]: _exec_cmd(): fork(): %s\n", id, strerror(errno));
 	} else if (!pid) {

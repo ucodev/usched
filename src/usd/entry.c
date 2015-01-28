@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 26-01-2015
+ * Date: 28-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <pthread.h>
 #include <mqueue.h>
@@ -192,9 +193,18 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 
 void entry_daemon_pmq_dispatch(void *arg) {
 	int errsv = 0;
-	char *buf;
+	char *buf = NULL;
 	struct usched_entry *entry = arg;
 
+	/* Check delta time before processing event (Absolute value is a safe check. Negative values
+	 * won't ocurr here... hopefully).
+	 */
+	if (abs(time(NULL) - entry->trigger) >= rund.config.core.delta_noexec) {
+		log_warn("entry_daemon_pmq_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
+		goto _finish;
+	}
+
+	/* Allocate message memory */
 	if (!(buf = mm_alloc(rund.config.core.pmq_msgsize))) {
 		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
@@ -220,7 +230,8 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	memcpy(buf, &entry->id, 8);
 	memcpy(buf + 8, &entry->uid, 4);
 	memcpy(buf + 12, &entry->gid, 4);
-	memcpy(buf + 16, entry->subj, strlen(entry->subj));
+	memcpy(buf + 16, &entry->trigger, 4);
+	memcpy(buf + 20, entry->subj, strlen(entry->subj));
 
 	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
 
@@ -271,7 +282,8 @@ _finish:
 	rund.apool->del(rund.apool, entry);
 	pthread_mutex_unlock(&rund.mutex_apool);
 
-	mm_free(buf);
+	if (buf)
+		mm_free(buf);
 }
 
 int entry_daemon_serialize(pall_fd_t fd, void *data) {

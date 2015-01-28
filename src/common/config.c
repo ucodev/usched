@@ -3,9 +3,9 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 30-08-2014
+ * Date: 28-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -441,6 +441,14 @@ int config_init_auth(struct usched_config_auth *auth) {
 	return 0;
 }
 
+static int _config_init_core_delta_noexec(struct usched_config_core *core) {
+	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, &core->delta_noexec);
+}
+
+static int _config_init_core_delta_reload(struct usched_config_core *core) {
+	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, &core->delta_reload);
+}
+
 static int _config_init_core_file_serialize(struct usched_config_core *core) {
 	if (!(core->file_serialize = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE)))
 		return -1;
@@ -473,6 +481,22 @@ static int _config_init_core_thread_workers(struct usched_config_core *core) {
 
 int config_init_core(struct usched_config_core *core) {
 	int errsv = 0;
+
+	/* Read delta no exec */
+	if (_config_init_core_delta_noexec(core) < 0) {
+		errsv = errno;
+		log_warn("_config_init_core(): _config_init_core_delta_noexec(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read delta reload */
+	if (_config_init_core_delta_reload(core) < 0) {
+		errsv = errno;
+		log_warn("_config_init_core(): _config_init_core_delta_reload(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	/* Read file serialize */
 	if (_config_init_core_file_serialize(core) < 0) {

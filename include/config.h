@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 27-01-2015
+ * Date: 28-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,6 +46,8 @@
 #define CONFIG_USCHED_FILE_AUTH_UID_WL		"uid.whitelist"
 #define CONFIG_USCHED_FILE_AUTH_USE_LOCAL	"use.local"
 #define CONFIG_USCHED_FILE_AUTH_USERS_REMOTE	"users.remote"
+#define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
+#define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
 #define CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE	"file.serialize"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
@@ -151,6 +153,8 @@ struct usched_config_auth {
 };
 
 struct usched_config_core {
+	unsigned int delta_noexec;
+	unsigned int delta_reload;
 	char *file_serialize;
 	unsigned int pmq_msgmax;
 	unsigned int pmq_msgsize;

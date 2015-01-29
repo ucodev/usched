@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 28-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -221,12 +221,14 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		goto _finish;
 	}
 
-	if ((strlen(entry->subj) + 17) > rund.config.core.pmq_msgsize) {
+	/* Check if the message fits in the configured message size */
+	if ((strlen(entry->subj) + 21) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
 		errno = EMSGSIZE;
 		goto _finish;
 	}
 
+	/* Craft message */
 	memcpy(buf, &entry->id, 8);
 	memcpy(buf + 8, &entry->uid, 4);
 	memcpy(buf + 12, &entry->gid, 4);
@@ -235,6 +237,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
 
+	/* Deliver message to uSched executer (use) */
 	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 26-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -79,6 +79,8 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	if (schedule_entry_create(entry_new) < 0) {
 		errsv = errno;
 		log_warn("_process_recv_update_op_new(): schedule_entry_create(): %s\n", strerror(errno));
+
+		mm_free(entry_new);
 
 		/* NOTE: This is a special case: The current entry is no longer in the rpool and wasn't inserted into
 		 * the active pool (apool) due to errors.

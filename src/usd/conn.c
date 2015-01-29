@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 09-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -30,12 +30,16 @@
 #include <errno.h>
 #include <pthread.h>
 
+#include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <rtsaio/rtsaio.h>
 #include <panet/panet.h>
+
+#include <unistd.h>
 
 #include "debug.h"
 #include "config.h"
@@ -65,6 +69,14 @@ static int _conn_daemon_unix_init(void) {
 		return -1;
 	}
 
+	/* Set non-blocking */
+	if (conn_set_nonblock(rund.fd_unix) < 0) {
+		errsv = errno;
+		log_crit("conn_daemon_unix_init(): conn_set_nonblock(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* All good */
 	return 0;
 }
@@ -82,6 +94,14 @@ static int _conn_daemon_remote_init(void) {
 	if ((rund.fd_remote = panet_server_ipv4(rund.config.network.bind_addr, rund.config.network.bind_port, PANET_PROTO_TCP, rund.config.network.conn_limit)) < 0) {
 		errsv = errno;
 		log_crit("conn_daemon_remote_init(): panet_server_ipv4(\"%s\", \"%s\", ...): %s\n", rund.config.network.bind_addr, rund.config.network.bind_port, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set non-blocking */
+	if (conn_set_nonblock(rund.fd_remote) < 0) {
+		errsv = errno;
+		log_crit("conn_daemon_remote_init(): conn_set_nonblock(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -174,14 +194,47 @@ static int _conn_daemon_process_fd(int fd) {
 
 static void *_conn_daemon_process_accept_unix(void *arg) {
 	sock_t fd = 0;
+	sigset_t si_cur, si_prev;
+	fd_set fd_rset;
+
+	/* Initialize signal sets */
+	sigfillset(&si_cur);
+	sigemptyset(&si_prev);
 
 	for (;;) {
 		/* Empty garbage collector */
 		gc_cleanup();
 
+		/* Block all signals */
+		pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
+
 		/* Check for runtime interruptions */
-		if (runtime_daemon_interrupted())
+		if (runtime_daemon_interrupted()) {
+			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			break;
+		}
+
+		/* Expect data only from the bound file descriptor */
+		FD_ZERO(&fd_rset);
+		FD_SET(fd, &fd_rset);
+
+		/* Wait for activity on the file descriptor, but resume execution when a signal is
+		 * caught.
+		 */
+		if (pselect(fd + 1, &fd_rset, NULL, NULL, NULL, &si_prev) < 0) {
+			log_warn("conn_daemon_process_accept_unix(): pselect(): %s\n", strerror(errno));
+			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+			continue;
+		}
+
+		/* Signals can now be caught */
+		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+
+		/* Validate if we've actually received data for processing, or if the interruption
+		 * was caused by a signal.
+		 */
+		if (!FD_ISSET(fd, &fd_rset))
+			continue;
 
 		/* Accept client connection */
 		if ((fd = accept(rund.fd_unix, NULL, NULL)) < 0) {
@@ -203,6 +256,12 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 
 static void *_conn_daemon_process_accept_remote(void *arg) {
 	sock_t fd = 0;
+	sigset_t si_cur, si_prev;
+	fd_set fd_rset;
+
+	/* Initialize signal sets */
+	sigfillset(&si_cur);
+	sigemptyset(&si_prev);
 
 	/* Check if this thread deserves to live */
 	if (!rund.config.auth.users_remote)
@@ -212,9 +271,36 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 		/* Empty garbage collector */
 		gc_cleanup();
 
+		/* Block all signals */
+		pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
+
 		/* Check for runtime interruptions */
-		if (runtime_daemon_interrupted())
+		if (runtime_daemon_interrupted()) {
+			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			break;
+		}
+
+		/* Expect data only from the bound file descriptor */
+		FD_ZERO(&fd_rset);
+		FD_SET(fd, &fd_rset);
+
+		/* Wait for activity on the file descriptor, but resume execution when a signal is
+		 * caught.
+		 */
+		if (pselect(fd + 1, &fd_rset, NULL, NULL, NULL, &si_prev) < 0) {
+			log_warn("conn_daemon_process_accept_remote(): pselect(): %s\n", strerror(errno));
+			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+			continue;
+		}
+
+		/* Signals can now be caught */
+		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+
+		/* Validate if we've actually received data for processing, or if the interruption
+		 * was caused by a signal.
+		 */
+		if (!FD_ISSET(fd, &fd_rset))
+			continue;
 
 		/* Accept client connection */
 		if ((fd = accept(rund.fd_remote, NULL, NULL)) < 0) {

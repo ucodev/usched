@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Common
  *
- * Date: 18-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,6 +32,8 @@
 #include "config.h"
 
 #ifndef COMPILE_WIN32
+#include <unistd.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #endif
 
@@ -79,3 +81,28 @@ int conn_is_remote(int fd) {
 #endif
 }
 
+int conn_set_nonblock(int fd) {
+#ifdef COMPILE_WIN32
+	return 0;
+#else
+	int errsv = 0, flags = 0;
+
+	if ((flags = fcntl(fd, F_GETFL)) < 0) {
+		errsv = errno;
+		log_warn("conn_set_nonblock(): fcntl(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (!(flags & O_NONBLOCK)) {
+		if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0) {
+			errsv = errno;
+			log_warn("conn_set_nonblock(): fcntl(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	}
+
+	return 0;
+#endif
+}

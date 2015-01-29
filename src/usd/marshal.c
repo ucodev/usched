@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 27-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -82,15 +82,18 @@ int marshal_daemon_serialize_pools(void) {
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
-#if CONFIG_SERIALIZE_ON_REQ == 1
+	/* Always set the file descriptor position to the beggining of the serialization file */
 	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {
 		errsv = errno;
 		pthread_mutex_unlock(&rund.mutex_apool);
-		log_warn("marshal_daemon_serialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errno));
+		log_warn("marshal_daemon_serialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errsv));
 		errno = errsv;
+
+		/* FIXME: We can't just give up here, or all the entries will be lost.
+		 * Maybe we should try to create another file?
+		 */
 		return -1;
 	}
-#endif
 
 	/* Serialize the active pool */
 	if ((ret = rund.apool->serialize(rund.apool, rund.ser_fd)) < 0) {
@@ -110,6 +113,16 @@ int marshal_daemon_unserialize_pools(void) {
 	struct usched_entry *entry = NULL;
 
 	pthread_mutex_lock(&rund.mutex_apool);
+
+	/* Always set the file descriptor position to the beggining of the serialization file */
+	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {
+		errsv = errno;
+		pthread_mutex_unlock(&rund.mutex_apool);
+		log_warn("marshal_daemon_serialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errsv));
+		errno = errsv;
+
+		return -1;
+	}
 
 	/* Unserialize active pool */
 	if ((ret = rund.apool->unserialize(rund.apool, rund.ser_fd)) < 0) {

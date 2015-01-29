@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 27-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,6 +43,8 @@
 #if CONFIG_CLIENT_ONLY == 0
 #include <psched/sched.h>
 #endif
+
+#include <sys/types.h>
 
 #include "usched.h"
 #include "usage.h"
@@ -99,6 +101,8 @@ struct usched_runtime_admin {
 struct usched_runtime_daemon {
 	int argc;
 	char **argv;
+
+	pid_t pid;
 
 	sock_t fd_unix;
 	sock_t fd_remote;
@@ -159,6 +163,7 @@ int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
 int runtime_admin_interrupted(void);
 void runtime_daemon_fatal(void);
+void runtime_daemon_interrupt(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */

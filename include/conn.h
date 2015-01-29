@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface header
  *
- * Date: 17-01-2015
+ * Date: 29-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -68,6 +68,7 @@ void conn_daemon_destroy(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 int conn_is_local(int fd);
 int conn_is_remote(int fd);
+int conn_set_nonblock(int fd);
 
 #endif
 

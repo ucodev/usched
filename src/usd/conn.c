@@ -216,12 +216,12 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 
 		/* Expect data only from the bound file descriptor */
 		FD_ZERO(&fd_rset);
-		FD_SET(fd, &fd_rset);
+		FD_SET(rund.fd_unix, &fd_rset);
 
 		/* Wait for activity on the file descriptor, but resume execution when a signal is
 		 * caught.
 		 */
-		if (pselect(fd + 1, &fd_rset, NULL, NULL, NULL, &si_prev) < 0) {
+		if (pselect(rund.fd_unix + 1, &fd_rset, NULL, NULL, NULL, &si_prev) < 0) {
 			log_warn("conn_daemon_process_accept_unix(): pselect(): %s\n", strerror(errno));
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			continue;
@@ -233,7 +233,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 		/* Validate if we've actually received data for processing, or if the interruption
 		 * was caused by a signal.
 		 */
-		if (!FD_ISSET(fd, &fd_rset))
+		if (!FD_ISSET(rund.fd_unix, &fd_rset))
 			continue;
 
 		/* Accept client connection */
@@ -282,12 +282,12 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 
 		/* Expect data only from the bound file descriptor */
 		FD_ZERO(&fd_rset);
-		FD_SET(fd, &fd_rset);
+		FD_SET(rund.fd_remote, &fd_rset);
 
 		/* Wait for activity on the file descriptor, but resume execution when a signal is
 		 * caught.
 		 */
-		if (pselect(fd + 1, &fd_rset, NULL, NULL, NULL, &si_prev) < 0) {
+		if (pselect(rund.fd_remote + 1, &fd_rset, NULL, NULL, NULL, &si_prev) < 0) {
 			log_warn("conn_daemon_process_accept_remote(): pselect(): %s\n", strerror(errno));
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			continue;
@@ -299,7 +299,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 		/* Validate if we've actually received data for processing, or if the interruption
 		 * was caused by a signal.
 		 */
-		if (!FD_ISSET(fd, &fd_rset))
+		if (!FD_ISSET(rund.fd_remote, &fd_rset))
 			continue;
 
 		/* Accept client connection */

@@ -3,9 +3,9 @@
  * @brief uSched
  *        Local utilities and handlers interface
  *
- * Date: 12-07-2014
+ * Date: 30-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -29,15 +29,15 @@
 #include <string.h>
 #include <errno.h>
 
-#if defined(CONFIG_SYS_LINUX) || defined(CONFIG_SYS_NETBSD)
+#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <sys/un.h>
  #include <unistd.h>
-#elif defined(CONFIG_SYS_BSD)
+#elif CONFIG_SYS_BSD == 1
  #include <sys/types.h>
  #include <unistd.h>
-#elif defined(CONFIG_SYS_SOLARIS)
+#elif CONFIG_SYS_SOLARIS == 1
  #include <sys/types.h>
  #include <ucred.h>
 #else
@@ -50,7 +50,7 @@
 int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 	int errsv = 0;
 
-#if defined(CONFIG_SYS_LINUX) || defined(CONFIG_SYS_NETBSD)
+#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1
 	socklen_t uc_len = 0;
  #if defined(SO_PEERCRED)
   #define uc_get_uid(uc)		(uc.uid)
@@ -84,7 +84,7 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
  #undef uc_get_gid
 
 	return 0;
-#elif defined(CONFIG_SYS_BSD)
+#elif CONFIG_SYS_BSD == 1
 	if (getpeereid(fd, uid, gid) < 0) {
 		errsv = errno;
 		log_warn("local_fd_peer_cred(): getpeereid(): %s\n", strerror(errno));
@@ -93,7 +93,7 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 	}
 
 	return 0;
-#elif defined(CONFIG_SYS_SOLARIS)
+#elif CONFIG_SYS_SOLARIS == 1
 	ucred_t *uc = NULL;
 
 	if (getpeerucred(fd, &ucred) < 0) {

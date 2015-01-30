@@ -74,18 +74,20 @@
 #define CONFIG_USCHED_AUTH_PASSWORD_MIN		8
 #define CONFIG_USCHED_AUTH_SESSION_MAX		272 /* Current mac: 257 */
 #define CONFIG_USCHED_HASH_FNV1A		1
-/* #define CONFIG_USCHED_HASH_DJB2		1 */
+#define CONFIG_USCHED_HASH_DJB2			0
 
-/* #define CONFIG_SYS_LINUX			1 */
-/* #define CONFIG_SYS_NETBSD			0 */
-/* #define CONFIG_SYS_BSD			0 */
-/* #define CONFIG_SYS_SOLARIS			0 */
-/* #define CONFIG_SYS_WINDOWS			0 */
+#define CONFIG_SYS_LINUX			1
+#define CONFIG_SYS_NETBSD			0
+#define CONFIG_SYS_BSD				0
+#define CONFIG_SYS_SOLARIS			0
+#define CONFIG_SYS_WINDOWS			0
 #define CONFIG_SYS_DEV_ZERO			"/dev/zero"
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
 
 /* Windows */
-#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || defined(CONFIG_SYS_WINDOWS)
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64) || CONFIG_SYS_WINDOWS == 1
+ #undef CONFIG_SYS_WINDOWS
+ #define CONFIG_SYS_WINDOWS 1
  #ifndef COMPILE_WIN32
   #define COMPILE_WIN32 1
  #endif

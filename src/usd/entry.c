@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 29-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -195,6 +195,9 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	int errsv = 0;
 	char *buf = NULL;
 	struct usched_entry *entry = arg;
+
+	/* Remove relative trigger flags, if any */
+	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
 
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).

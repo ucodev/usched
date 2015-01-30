@@ -158,7 +158,7 @@ static void *_exec_cmd(void *arg) {
 			log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
 
 		/* Log errors (if any) based on exit status */
-		switch (status) {
+		switch (WEXITSTATUS(status)) {
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETSID: {
 				log_warn("Entry[0x%016llX]: PID[%u]: setsid() failed.\n", id, pid);
 			} break;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface
  *
- * Date: 16-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,6 +44,14 @@ static void _sig_term_daemon_handler(int n) {
 
 static void _sig_hup_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD);
+
+	/* Cancel active threads */
+	pthread_cancel(rund.t_unix);
+	pthread_cancel(rund.t_remote);
+}
+
+static void _sig_usr1_daemon_handler(int n) {
+	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
 
 	/* Cancel active threads */
 	pthread_cancel(rund.t_unix);
@@ -112,6 +120,14 @@ int sig_daemon_init(void) {
 	if (sigaction(SIGPIPE, &sa, NULL) < 0) {
 		errsv = errno;
 		log_warn("sig_daemon_init(): sigaction(SIGPIPE, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
+	sa.sa_handler = _sig_usr1_daemon_handler;
+
+	if (sigaction(SIGUSR1, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_daemon_init(): sigaction(SIGUSR1, ...): %s\n", strerror(errno));
 		goto _failure;
 	}
 

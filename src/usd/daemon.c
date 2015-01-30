@@ -3,7 +3,7 @@
  * @brief uSched
  *        Daemon Main Component
  *
- * Date: 27-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -77,22 +77,22 @@ static int _loop(int argc, char **argv) {
 		}
 
 		/* Check for runtime interruptions */
-		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE))
-			break;
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH)) {
+			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH);
+			_serialize();
+		}
 
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL)) {
 			ret = 1;
 			break;
 		}
 
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE))
+			break;
+
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
 			_destroy();
 			_init(argc, argv);
-		}
-
-		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH)) {
-			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH);
-			_serialize();
 		}
 	}
 

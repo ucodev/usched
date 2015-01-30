@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 29-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,6 +45,7 @@
 #include "bitops.h"
 #include "marshal.h"
 #include "gc.h"
+#include "delta.h"
 
 
 int runtime_daemon_init(int argc, char **argv) {
@@ -193,6 +194,18 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	log_info("Marshal interface initialized.\n");
 
+	/* Initialize delta T monitor */
+	log_info("Initializing delta time monitor...\n");
+
+	if (delta_time_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): delta_time_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Delta time monitor initialized.\n");
+
 	/* Initialize connections interface */
 	log_info("Initializing connections interface...\n");
 
@@ -221,7 +234,7 @@ void runtime_daemon_interrupt(void) {
 }
 
 int runtime_daemon_interrupted(void) {
-	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH))
+	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT))
 		return 1;
 
 	return 0;
@@ -232,6 +245,11 @@ void runtime_daemon_destroy(void) {
 	log_info("Destroying connections interface...\n");
 	conn_daemon_destroy();
 	log_info("Connections interface destroyed.\n");
+
+	/* Destroy delta T monitor */
+	log_info("Destroying delta time monitor...\n");
+	delta_time_destroy();
+	log_info("Delta time monitor destroyed.\n");
 
 	/* Destroy scheduling interface */
 	log_info("Destroying scheduling interface...\n");

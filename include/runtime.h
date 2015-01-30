@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 29-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,6 +56,7 @@ typedef enum USCHED_RUNTIME_FLAGS {
 	USCHED_RUNTIME_FLAG_FATAL,
 	USCHED_RUNTIME_FLAG_RELOAD,
 	USCHED_RUNTIME_FLAG_FLUSH,
+	USCHED_RUNTIME_FLAG_INTERRUPT,
 	USCHED_RUNTIME_FLAG_LIB
 } usched_runtime_flag_t;
 
@@ -74,7 +75,7 @@ struct usched_runtime_client {
 	size_t result_nmemb;
 
 	sock_t fd;
-	usched_runtime_flag_t flags;
+	volatile usched_runtime_flag_t flags;
 
 	struct usched_config config;
 
@@ -92,7 +93,7 @@ struct usched_runtime_admin {
 	char *usage_err_offending;
 	struct usched_admin_request *req;
 
-	usched_runtime_flag_t flags;
+	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
 	struct usched_config config;
@@ -106,7 +107,7 @@ struct usched_runtime_daemon {
 
 	sock_t fd_unix;
 	sock_t fd_remote;
-	usched_runtime_flag_t flags;
+	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
 	struct cll_handler *rpool;	/* Receiving pool */
@@ -129,13 +130,16 @@ struct usched_runtime_daemon {
 	struct usched_config config;
 
 	pthread_t t_unix, t_remote;
+	pthread_t t_delta;
+
+	time_t time_last;
 };
 
 struct usched_runtime_exec {
 	int argc;
 	char **argv;
 
-	usched_runtime_flag_t flags;
+	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
 	mqd_t pmqd;

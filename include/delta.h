@@ -1,7 +1,7 @@
 /**
- * @file bitops.h
+ * @file delta.h
  * @brief uSched
- *        Bit Operations interface header
+ *        Delta T interface header - Daemon
  *
  * Date: 30-01-2015
  * 
@@ -24,17 +24,13 @@
  *
  */
 
-
-#ifndef USCHED_BITOPS_H
-#define USCHED_BITOPS_H
-
-#include <stdint.h>
+#ifndef USCHED_DELTA_H
+#define USCHED_DELTA_H
 
 /* Prototypes */
-void bit_set(volatile uint32_t *dword, unsigned int n);
-void bit_clear(volatile uint32_t *dword, unsigned int n);
-void bit_toggle(volatile uint32_t *dword, unsigned int n);
-unsigned int bit_test(const volatile uint32_t *dword, unsigned int n);
+int delta_time_init(void);
+void delta_time_destroy(void);
+
 
 #endif
 

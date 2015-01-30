@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 28-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,7 @@
 #define CONFIG_USE_SYNCFS			0
 #define CONFIG_CLIENT_ONLY			0
 #define CONFIG_SERIALIZE_ON_REQ			1
+#define CONFIG_USCHED_DELTA_CHECK_INTERVAL	1
 #define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/bash"
 #define CONFIG_USCHED_DIR_BASE			"/etc/usched"
 #define CONFIG_USCHED_NET_DEFAULT_PORT		"7600"

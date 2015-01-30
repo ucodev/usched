@@ -3,9 +3,9 @@
  * @brief uSched
  *        Bit Operations interface
  *
- * Date: 24-06-2014
+ * Date: 30-01-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -27,19 +27,19 @@
 
 #include <stdint.h>
 
-void bit_set(uint32_t *dword, unsigned int n) {
+void bit_set(volatile uint32_t *dword, unsigned int n) {
 	*dword |= (1 << n);
 }
 
-void bit_clear(uint32_t *dword, unsigned int n) {
+void bit_clear(volatile uint32_t *dword, unsigned int n) {
 	*dword &= ~(1 << n);
 }
 
-void bit_toggle(uint32_t *dword, unsigned int n) {
+void bit_toggle(volatile uint32_t *dword, unsigned int n) {
 	*dword ^= (1 << n);
 }
 
-unsigned int bit_test(const uint32_t *dword, unsigned int n) {
+unsigned int bit_test(const volatile uint32_t *dword, unsigned int n) {
 	return (*dword & (1 << n));
 }
 

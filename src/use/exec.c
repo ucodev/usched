@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 28-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -77,72 +77,78 @@ static void *_exec_cmd(void *arg) {
 		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", id, pid, cmd, uid, gid);
 
 		/* Create a new session */
-		if (setsid() == (pid_t) -1)
-			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setsid(): %s\n", id, pid, strerror(errno)) */;
+		if (setsid() == (pid_t) -1) {
+			/* Free argument resources */
+			mm_free(arg);
+
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETSID);
+		}
 
 		/* Redirect standard files */
 		if (!freopen(CONFIG_SYS_DEV_ZERO, "r", stdin)) {
-			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"r\", stdin): %s\n", id, pid, CONFIG_SYS_DEV_ZERO, strerror(errno)) */;
+			/* Free argument resources */
+			mm_free(arg);
+
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDIN);
 		}
 
 		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stdout)) {
-			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stdout): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno)) */;
+			/* Free argument resources */
+			mm_free(arg);
+
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDOUT);
 		}
 
 		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stderr)) {
-			/* FIXME (AS-Unsafe): log_warn("Entry[0x%016llX]: PID[%u]: _exec_cmd(): freopen(\"%s\", \"a\", stderr): %s\n", id, pid, CONFIG_SYS_DEV_NULL, strerror(errno)) */;
+			/* Free argument resources */
+			mm_free(arg);
+
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR);
 		}
 
 		/* Drop privileges, if required */
 		if (setregid(gid, gid) < 0) {
-			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setregid(%u): %s\n", id, pid, gid, strerror(errno)) */;
-
 			/* Free argument resources */
 			mm_free(arg);
 
-			exit(EXIT_FAILURE);
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREGID);
 		}
 
 		if (setreuid(uid, uid) < 0) {
-			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): setreuid(%u): %s\n", id, pid, uid, strerror(errno)) */;
-
 			/* Free argument resources */
 			mm_free(arg);
 
-			exit(EXIT_FAILURE);
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREUID);
 		}
 
 		/* Paranoid mode */
 		if ((getuid() != uid) || (geteuid() != uid)) {
-			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected UID[%u] or EUID[%u] value. Expecting: %u\n", id, pid, getuid(), geteuid(), uid) */;
-
 			/* Free argument resources */
 			mm_free(arg);
 
-			exit(EXIT_FAILURE);
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_UID);
 		}
 
 		if ((getgid() != gid) || (getegid() != gid)) {
-			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): Unexpected GID[%u] or EGID[%u] value. Expecting: %u\n", id, pid, getgid(), getegid(), gid) */;
-
 			/* Free argument resources */
 			mm_free(arg);
 
-			exit(EXIT_FAILURE);
+			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_GID);
 		}
 
 		/* Cleanup child */
 		runtime_exec_quiet_destroy();
 
 		/* Execute command */
-		if (execlp(CONFIG_USCHED_SHELL_BIN_PATH, CONFIG_USCHED_SHELL_BIN_PATH, "-c", cmd, (char *) NULL) < 0)
-			/* FIXME (AS-Unsafe): log_crit("Entry[0x%016llX]: PID[%u]: _exec_cmd(): execlp(\"%s\", \"-c\", \"%s\"): %s\n", id, pid, CONFIG_USCHED_SHELL_BIN_PATH, cmd, strerror(errno)) */;
+		execlp(CONFIG_USCHED_SHELL_BIN_PATH, CONFIG_USCHED_SHELL_BIN_PATH, "-c", cmd, (char *) NULL);
+
+		/* If execlp() returns, it's safe to assume that it has failed */
 
 		/* Free argument resources */
 		mm_free(arg);
 
 		/* If reached, execlp() have failed */
-		exit(EXIT_FAILURE);
+		exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_EXECLP);
 	} else {
 		/* Parent */
 		log_info("Entry[0x%016llX]: PID[%u]: Executing '%s' [uid: %u, gid: %u]. Waiting for child to exit...", id, pid, cmd, uid, gid);
@@ -150,6 +156,39 @@ static void *_exec_cmd(void *arg) {
 		/* Wait for child to return */
 		if (waitpid(pid, &status, 0) < 0)
 			log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
+
+		/* Log errors (if any) based on exit status */
+		switch (status) {
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETSID: {
+				log_warn("Entry[0x%016llX]: PID[%u]: setsid() failed.\n", id, pid);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDIN: {
+				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"r\", stdout) failed.\n", id, pid, CONFIG_SYS_DEV_ZERO);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDOUT: {
+				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"a\", stdout) failed.\n", id, pid, CONFIG_SYS_DEV_NULL);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR: {
+				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"a\", stderr) failed.\n", id, pid, CONFIG_SYS_DEV_NULL);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREGID: {
+				log_warn("Entry[0x%016llX]: PID[%u]: setregid() failed.\n", id, pid);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREUID: {
+				log_warn("Entry[0x%016llX]: PID[%u]: setreuid() failed.\n", id, pid);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_UID: {
+				log_warn("Entry[0x%016llX]: PID[%u]: Failed to drop process privileges (UID).", id, pid);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_GID: {
+				log_warn("Entry[0x%016llX]: PID[%u]: Failed to drop process privileges (GID).", id, pid);
+			} break;
+			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_EXECLP: {
+				log_warn("Entry[0x%016llX]: PID[%u]: execlp() failed.", id, pid);
+			} break;
+			case EXIT_SUCCESS:
+			default: break;
+		}
 
 		log_info("Entry[0x%016llX]: PID[%u]: Child exited. Exit Status: %d\n", id, pid, WEXITSTATUS(status));
 	}

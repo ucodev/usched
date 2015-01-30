@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 26-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -54,6 +54,9 @@ typedef enum USCHED_ENTRY_FLAGS {
 	/* Scheduling flags (remote) - Allowed to be handled by client */
 	USCHED_ENTRY_FLAG_MONTHDAY_ALIGN,	/* Entry step must be aligned to month day */
 	USCHED_ENTRY_FLAG_YEARDAY_ALIGN,	/* Entry step must be aligned to year day */
+
+	USCHED_ENTRY_FLAG_RELATIVE_TRIGGER,	/* Trigger time is relative to it's creation date */
+	USCHED_ENTRY_FLAG_RELATIVE_EXPIRE,	/* Expire time is relative to it's creation date */
 
 	/* Local flags - Only allowed to be handled by daemon */
 	USCHED_ENTRY_FLAG_INIT,		/* Entry state set to initialized */

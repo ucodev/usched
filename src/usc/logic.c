@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Client
  *
- * Date: 26-01-2015
+ * Date: 30-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,14 @@ int logic_client_process_run(void) {
 	struct usched_entry *entry = NULL;
 	time_t time_ref = runc.t;
 
+	/* Perliminary checks for the first entry */
+	if (runc.req->prep == USCHED_PREP_EVERY) {
+		/* First preposition cannot be EVERY */
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Check further logic */
 	for (cur = runc.req; cur; cur = cur->next, runc.epool->push(runc.epool, entry)) {
 		/* Allocate a new scheduling entry with subject as its payload. */
 		if (!(entry = entry_client_init(cur->uid, cur->gid, time_ref + cur->arg, cur->subj, strlen(cur->subj) + 1)))
@@ -54,6 +62,14 @@ int logic_client_process_run(void) {
 
 		/* This is a new entry */
 		entry_set_flag(entry, USCHED_ENTRY_FLAG_NEW);
+
+		/* Check if the initial trigger is relative to the current time
+		 * This is only possible on IN prepositions
+		 */
+		if (cur->prep == USCHED_PREP_IN) {
+			/* The initial trigger value is relative to the current time */
+			entry_set_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
+		}
 
 		/* Check if this is a THEN conjunction */
 		if (cur->conj == USCHED_CONJ_THEN) {
@@ -114,6 +130,10 @@ int logic_client_process_run(void) {
 				return -1;
 			}
 
+			/* The expire value is relative to the current time */
+			entry_set_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_EXPIRE);
+
+			/* Set the expire value */
 			entry_set_expire(entry, time_ref + cur->arg);
 		}
 

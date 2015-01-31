@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 30-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,7 +31,6 @@
 #define CONFIG_USCHED_DEBUG			0
 #define CONFIG_USE_LIBFSMA			0
 #define CONFIG_USE_SYNCFS			0
-#define CONFIG_CLIENT_ONLY			0
 #define CONFIG_SERIALIZE_ON_REQ			1
 #define CONFIG_USCHED_DELTA_CHECK_INTERVAL	1
 #define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/bash"
@@ -84,6 +83,11 @@
 #define CONFIG_SYS_DEV_ZERO			"/dev/zero"
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
 #define CONFIG_SYS_EXIT_CODE_CUSTOM_BASE	70
+
+#define CONFIG_CLIENT_ONLY			0
+#ifndef CONFIG_DAEMON_SPECIFIC
+#define CONFIG_DAEMON_SPECIFIC			0
+#endif
 
 /* Custom exit status offsets (base value is CONFIG_SYS_EXIT_CODE_CUSTOM_BASE) */
 enum CHILD_EXIT_STATUS_CUSTOM_OFFSET {

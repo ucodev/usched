@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 27-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,6 +29,7 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <time.h>
 
 #include <rtsaio/rtsaio.h>
 
@@ -85,6 +86,8 @@ void notify_read(struct async_op *aop) {
 			 */
 			entry_unset_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
 			entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
+
+			entry->create_time = time(NULL);
 
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);

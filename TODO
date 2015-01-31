@@ -1,6 +1,4 @@
 v0.1:
- - New entry flag: execute command regardless of delta T
- - Detect system date/time changes and update runtime data accordingly
  - Documentation
  - Cleanup code
 

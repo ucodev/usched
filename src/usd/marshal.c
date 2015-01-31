@@ -99,6 +99,7 @@ int marshal_daemon_serialize_pools(void) {
 			 */
 			if ((entry_has_flag(entry, USCHED_ENTRY_FLAG_TRIGGERED) && (rund.delta_last < 0)) || entry_has_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER)) {
 				log_info("Entry ID 0x%016llX trigger (timestamp: %u) will be compensated by %lld seconds due to machine time changes...", entry->id, entry->trigger, rund.delta_last);
+
 				entry->trigger += rund.delta_last;
 			}
 		}
@@ -157,6 +158,25 @@ int marshal_daemon_unserialize_pools(void) {
 
 	/* Activate all the unserialized entries through libpsched */
 	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
+		/* If the entry was already triggered before and the next execution exceeds the step
+		 * value relative to the current time, then the machine time was changed while the
+		 * daemon wasn't running and we need to compensate this entry.
+		 */
+		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_TRIGGERED) && ((entry->trigger - entry->step) >= time(NULL))) {
+			do entry->trigger -= entry->step;
+			while (entry->trigger >= time(NULL));
+
+			/* Further adjustments (positive) will be performed in the next loop */
+		}
+
+		/* TODO or FIXME: Currently we can't handle relative triggered entries that were not
+		 * triggered before the daemon serialized the data. There's also no guarantee that
+		 * this will ever be supported as it will require some changes in the daemon and
+		 * data tracking that will not be implemented in near future. Avoid the use of the
+		 * IN preposition if you expect the daemon to be stopped while the machine time is
+		 * changed.
+		 */
+
 		/* Update the trigger value based on step and current time */
 		while (entry->step && (entry->trigger <= time(NULL))) {
 			/* Check if we've to align (month or year?) and update trigger accordingly */

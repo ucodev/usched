@@ -110,6 +110,9 @@ struct usched_entry {
 	unsigned char context[KE_CONTEXT_SIZE_CHREKE];
 	unsigned char agreed_key[KE_KEY_SIZE_CHREKE];
 	uint64_t nonce;
+#if CONFIG_DAEMON_SPECIFIC == 1
+	time_t create_time;
+#endif
 };
 #pragma pack(pop)
 

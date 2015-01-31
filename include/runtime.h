@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 30-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -133,6 +133,7 @@ struct usched_runtime_daemon {
 	pthread_t t_delta;
 
 	time_t time_last;
+	time_t delta_last;
 };
 
 struct usched_runtime_exec {

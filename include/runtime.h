@@ -133,7 +133,7 @@ struct usched_runtime_daemon {
 	pthread_t t_delta;
 
 	time_t time_last;
-	long long delta_last;
+	int64_t delta_last;
 };
 
 struct usched_runtime_exec {

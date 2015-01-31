@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 30-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,7 +46,7 @@
 extern char **environ;
 
 static void *_exec_cmd(void *arg) {
-	char *buf = arg;	/* | id (64 bits) | uid (32 bits) | gid (32 bits) | cmd (...) ... | */
+	char *buf = arg;	/* | id (64 bits) | uid (32 bits) | gid (32 bits) | trigger (32 bits) | cmd (...) ... | */
 	uint64_t id = 0;
 	uint32_t uid = 0, gid = 0, trigger = 0;
 	char *cmd = &buf[20];

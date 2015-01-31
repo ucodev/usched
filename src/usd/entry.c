@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 30-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -204,6 +204,10 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	 */
 	if (abs(time(NULL) - entry->trigger) >= rund.config.core.delta_noexec) {
 		log_warn("entry_daemon_pmq_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
+
+		/* Force daemon to be restarted and reload a clean state */
+		runtime_daemon_fatal();
+
 		goto _finish;
 	}
 
@@ -211,6 +215,10 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if (!(buf = mm_alloc(rund.config.core.pmq_msgsize))) {
 		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
+
+		/* Force daemon to be restarted and reload a clean state */
+		runtime_daemon_fatal();
+
 		errno = errsv;
 		goto _finish;
 	}
@@ -220,6 +228,10 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		log_warn("entry_daemon_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
+
+		/* Force daemon to be restarted and reload a clean state */
+		runtime_daemon_fatal();
+
 		errno = EACCES;
 		goto _finish;
 	}
@@ -227,6 +239,10 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check if the message fits in the configured message size */
 	if ((strlen(entry->subj) + 21) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
+
+		/* Force daemon to be restarted and reload a clean state */
+		runtime_daemon_fatal();
+
 		errno = EMSGSIZE;
 		goto _finish;
 	}
@@ -244,19 +260,20 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
-		errno = errsv;
 
 		/* NOTE:
 		 *
 		 * We should not delete this entry from active pool if we're unable to write to
 		 * the pqueue of the execution process.
 		 *
-		 * We should continue processing the scheduled entries as it nothing happened, and
+		 * We should continue processing the scheduled entries as if nothing happened, and
 		 * notify the user with a critical log entry. 
 		 *
 		 */
 
 		log_crit("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
+
+		errno = errsv;
 	}
 
 	/* TODO: Evaluate the need of this lock. This only makes sense if an iteration over the
@@ -282,12 +299,12 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	log_info("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX isn't recurrent and will be deleted from the active pool.", entry->id);
 
-_finish:
 	/* Remove the entry from active pool */
 	pthread_mutex_lock(&rund.mutex_apool);
 	rund.apool->del(rund.apool, entry);
 	pthread_mutex_unlock(&rund.mutex_apool);
 
+_finish:
 	if (buf)
 		mm_free(buf);
 }

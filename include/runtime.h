@@ -115,7 +115,7 @@ struct usched_runtime_daemon {
 
 	pthread_mutex_t mutex_rpool;
 	pthread_mutex_t mutex_apool;
-#if CONFIG_SERIALIZE_ON_REQ == 1
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 	pthread_mutex_t mutex_marshal;
 #endif
 

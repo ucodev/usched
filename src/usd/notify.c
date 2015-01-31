@@ -87,12 +87,13 @@ void notify_read(struct async_op *aop) {
 			entry_unset_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
 			entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
 
+			/* Set the entry creation time */
 			entry->create_time = time(NULL);
 
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
 
-#if CONFIG_SERIALIZE_ON_REQ == 1
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 			/* Serialize the entire active pool when state-changing operations are performed */
 			if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
 				pthread_mutex_lock(&rund.mutex_marshal);

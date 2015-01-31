@@ -110,14 +110,36 @@ int marshal_daemon_serialize_pools(void) {
 	/* Always set the file descriptor position to the beggining of the serialization file */
 	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {
 		errsv = errno;
-		pthread_mutex_unlock(&rund.mutex_apool);
 		log_warn("marshal_daemon_serialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errsv));
+
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
+		pthread_mutex_unlock(&rund.mutex_apool);
+
 		errno = errsv;
 
-		/* FIXME: We can't just give up here, or all the entries will be lost.
-		 * Maybe we should try to create another file?
-		 */
+		/* We can give up here... all the entries are serialized */
 		return -1;
+#else
+		/* NOTE: We can't just give up here, or all the entries will be lost.
+		 * We'll desperately try to reopen the serialization file and hope for the best...
+		 */
+
+		close(rund.ser_fd);
+
+		marshal_daemon_destroy();
+
+		if (marshal_daemon_init() < 0) {
+			/* TODO:
+			 * We've tried almost everything... but we can still create another file
+			 * on some temporary directory to dump the data...*/
+
+			pthread_mutex_unlock(&rund.mutex_apool);
+
+			errno = errsv;
+
+			return -1;
+		}
+#endif
 	}
 
 	/* Serialize the active pool */

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 29-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <time.h>
 #include <pthread.h>
@@ -79,8 +80,31 @@ int marshal_daemon_init(void) {
 int marshal_daemon_serialize_pools(void) {
 	int errsv = 0;
 	int ret = -1;
+	struct usched_entry *entry = NULL;
 
 	pthread_mutex_lock(&rund.mutex_apool);
+
+	/* Grant entry status correctness before serialization */
+	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
+		/* Check if we need to compensate the entry time values */
+		if (abs(rund.delta_last) >= rund.config.core.delta_reload) {
+			/* If this entry was triggered at least once OR if has a relative trigger,
+			 * we must compensate the trigger value with the last known time variation
+			 * value.
+			 *
+			 * NOTE that for already TRIGGERED entries, we must only compensate if the
+			 * time variation is negative, because if the time was changed to the future
+			 * the compensation was already performed by the psched library.
+			 *
+			 */
+			if ((entry_has_flag(entry, USCHED_ENTRY_FLAG_TRIGGERED) && (rund.delta_last < 0)) || entry_has_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER)) {
+				log_info("Entry ID 0x%016llX trigger (timestamp: %u) will be compensated by %lld seconds due to machine time changes...", entry->id, entry->trigger, rund.delta_last);
+				entry->trigger += rund.delta_last;
+			}
+		}
+
+		/* NOTE: Further integrity checks should be implemented below */
+	}
 
 	/* Always set the file descriptor position to the beggining of the serialization file */
 	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {

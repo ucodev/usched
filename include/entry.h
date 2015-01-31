@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 30-01-2015
+ * Date: 31-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -63,7 +63,8 @@ typedef enum USCHED_ENTRY_FLAGS {
 	USCHED_ENTRY_FLAG_PROGRESS,	/* Entry is being processed */
 	USCHED_ENTRY_FLAG_AUTHORIZED,	/* Entry is authorized */
 	USCHED_ENTRY_FLAG_FINISH,	/* Cleanup routines are being executed */
-	USCHED_ENTRY_FLAG_COMPLETE	/* Entry is now completely processed */
+	USCHED_ENTRY_FLAG_COMPLETE,	/* Entry is now completely processed */
+	USCHED_ENTRY_FLAG_TRIGGERED	/* Entry was triggered at least once by the scheduler */
 } usched_entry_flag_t;
 
 /* uSched Entry Structure */

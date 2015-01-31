@@ -192,12 +192,15 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 }
 
 void entry_daemon_pmq_dispatch(void *arg) {
-	int errsv = 0;
+	int errsv = 0; /* FIXME: errno and errsv don't make much sense in this routine */
 	char *buf = NULL;
 	struct usched_entry *entry = arg;
 
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
+
+	/* Mark this entry as triggered (initial trigger was reached at least once) */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_TRIGGERED);
 
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).
@@ -205,10 +208,8 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if (abs(time(NULL) - entry->trigger) >= rund.config.core.delta_noexec) {
 		log_warn("entry_daemon_pmq_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
 
-		/* Force daemon to be restarted and reload a clean state */
-		runtime_daemon_fatal();
-
-		goto _finish;
+		/* Do not deliver this entry to the uSched executer (use) */
+		goto _process;
 	}
 
 	/* Allocate message memory */
@@ -228,23 +229,19 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		log_warn("entry_daemon_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
-
-		/* Force daemon to be restarted and reload a clean state */
-		runtime_daemon_fatal();
-
 		errno = EACCES;
-		goto _finish;
+
+		/* Remove this entry as it is invalid */
+		goto _remove;
 	}
 
 	/* Check if the message fits in the configured message size */
 	if ((strlen(entry->subj) + 21) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
-
-		/* Force daemon to be restarted and reload a clean state */
-		runtime_daemon_fatal();
-
 		errno = EMSGSIZE;
-		goto _finish;
+
+		/* Remove this entry as it is invalid */
+		goto _remove;
 	}
 
 	/* Craft message */
@@ -276,6 +273,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		errno = errsv;
 	}
 
+_process:
 	/* TODO: Evaluate the need of this lock. This only makes sense if an iteration over the
 	 * active pool is performed concurrently with the schedule_entry_update(), and the values
 	 * of this entry could affect that iteration.
@@ -286,9 +284,8 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if (schedule_entry_update(entry) == 1) {
 		pthread_mutex_unlock(&rund.mutex_apool);
 
-		mm_free(buf);
 		/* Entry was successfully updated. */
-		return;
+		goto _finish;
 	}
 
 	pthread_mutex_unlock(&rund.mutex_apool);
@@ -299,6 +296,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	log_info("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX isn't recurrent and will be deleted from the active pool.", entry->id);
 
+_remove:
 	/* Remove the entry from active pool */
 	pthread_mutex_lock(&rund.mutex_apool);
 	rund.apool->del(rund.apool, entry);

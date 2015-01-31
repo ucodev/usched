@@ -172,9 +172,9 @@ int marshal_daemon_unserialize_pools(void) {
 		/* TODO or FIXME: Currently we can't handle relative triggered entries that were not
 		 * triggered before the daemon serialized the data. There's also no guarantee that
 		 * this will ever be supported as it will require some changes in the daemon and
-		 * data tracking that will not be implemented in near future. Avoid the use of the
+		 * data tracking that will not be implemented in the near future. Avoid the use of the
 		 * IN preposition if you expect the daemon to be stopped while the machine time is
-		 * changed.
+		 * changed to the past.
 		 */
 
 		/* Update the trigger value based on step and current time */
@@ -212,16 +212,24 @@ int marshal_daemon_unserialize_pools(void) {
 
 		/* Install a new scheduling entry based on the current entry parameters */
 		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
-			/* TODO or FIXME: This is critical, the entry will be lost and we can't force
-			 * a gracefully daemon restart or the serialization data will be overwritten
-			 * with a missing entry... Something must be done here to prevent such damage
-			 */
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 			/* libpall grants that it's safe to remove a node while iterating the list */
 			rund.apool->del(rund.apool, entry);
 
-			continue;
+			/* TODO or FIXME: This is critical, the entry will be lost and we can't force
+			 * a gracefully daemon restart or the serialization data will be overwritten
+			 * with a missing entry... Something must be done here to prevent such damage.
+			 *
+			 * For now, an abort() will be performed in order to force the restart of the
+			 * the daemon through the uSched Monitor (usm)... but despite the fact that
+			 * this is pretty ugly, it may cause an infinite restart loop if we'll be
+			 * still unable to perform a psched_timestamp_arm() successfully on the
+			 * subsequent daemon restarts!
+			 */
+			abort();
+
+			continue; /* Unreachable for now (abort() preceeds this) */
 		}
 	}
 

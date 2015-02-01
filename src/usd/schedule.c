@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 27-01-2015
+ * Date: 01-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -343,7 +343,9 @@ int schedule_entry_update(struct usched_entry *entry) {
 			errno = errsv;
 
 			/* We've set the FATAL flag to runtime, which means that the daemon will
-			 * exit and restarted by uSched monitor (usm).
+			 * exit and restarted by uSched monitor (usm). TODO or FIXME: This may
+			 * cause an infinite loop if further restarts can't successfuly perform the
+			 * psched_timestamp_arm() routine (but this is unlikely to ever happen).
 			 */
 
 			return -1;

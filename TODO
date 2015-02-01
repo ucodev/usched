@@ -1,4 +1,5 @@
 v0.1:
+ - When a configuration error exists, uSched monitor should not try to restart the service.
  - Documentation
  - Cleanup code
 

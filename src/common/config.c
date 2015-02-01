@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 28-01-2015
+ * Date: 01-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include <pall/cll.h>
 
@@ -471,6 +475,20 @@ static int _config_init_core_pmq_name(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_init_core_privdrop_user(struct usched_config_core *core) {
+	if (!(core->privdrop_user = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_init_core_privdrop_group(struct usched_config_core *core) {
+	if (!(core->privdrop_group = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP)))
+		return -1;
+
+	return 0;
+}
+
 static int _config_init_core_thread_priority(struct usched_config_core *core) {
 	return _value_init_int_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, &core->thread_priority);
 }
@@ -481,6 +499,9 @@ static int _config_init_core_thread_workers(struct usched_config_core *core) {
 
 int config_init_core(struct usched_config_core *core) {
 	int errsv = 0;
+	struct passwd passwd_buf, *passwd = NULL;
+	struct group group_buf, *group = NULL;
+	char buf[8192];
 
 	/* Read delta no exec */
 	if (_config_init_core_delta_noexec(core) < 0) {
@@ -529,6 +550,48 @@ int config_init_core(struct usched_config_core *core) {
 		errno = errsv;
 		return -1;
 	}
+
+	/* Read privilege drop user */
+	if (_config_init_core_privdrop_user(core) < 0) {
+		errsv = errno;
+		log_warn("_config_init_core(): _config_init_core_privdrop_user(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Retrieve the UID associated to the user */
+	memset(buf, 0, sizeof(buf));
+	memset(&passwd_buf, 0, sizeof(passwd_buf));
+
+	if (getpwnam_r(core->privdrop_user, &passwd_buf, buf, sizeof(buf), &passwd) || (passwd != &passwd_buf)) {
+		errsv = errno;
+		log_warn("_config_init_core(): getpwnam_r(\"%s\", ...): %s\n.", core->privdrop_user, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	core->privdrop_uid = passwd->pw_uid;
+
+	/* Read privilege drop group */
+	if (_config_init_core_privdrop_group(core) < 0) {
+		errsv = errno;
+		log_warn("_config_init_core(): _config_init_core_privdrop_group(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Retrieve the GID associated to the group */
+	memset(buf, 0, sizeof(buf));
+	memset(&group_buf, 0, sizeof(group_buf));
+
+	if (getgrnam_r(core->privdrop_group, &group_buf, buf, sizeof(buf), &group) || (group != &group_buf)) {
+		errsv = errno;
+		log_warn("_config_init_core(): getgrnam_r(\"%s\", ...): %s\n.", core->privdrop_group, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	core->privdrop_gid = group->gr_gid;
 
 	/* Read thread priority */
 	if (_config_init_core_thread_priority(core) < 0) {

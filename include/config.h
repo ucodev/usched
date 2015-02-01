@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 31-01-2015
+ * Date: 01-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,6 +29,7 @@
 #define USCHED_CONFIG_H
 
 #define CONFIG_USCHED_DEBUG			0
+#define CONFIG_USCHED_DROP_PRIVS		1
 #define CONFIG_USCHED_SERIALIZE_ON_REQ		1
 #define CONFIG_USCHED_DELTA_CHECK_INTERVAL	1
 #define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/bash"
@@ -50,6 +51,8 @@
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
 #define CONFIG_USCHED_FILE_CORE_PMQ_NAME	"pmq.name"
+#define CONFIG_USCHED_FILE_CORE_PRIVDROP_USER	"privdrop.user"
+#define CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY	"thread.priority"
 #define CONFIG_USCHED_FILE_CORE_THREAD_WORKERS	"thread.workers"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_ADDR	"bind.addr"
@@ -91,6 +94,36 @@
 
 #define CONFIG_USE_LIBFSMA			0
 #define CONFIG_USE_SYNCFS			0
+
+
+/* Configuration compliance checks */
+#if CONFIG_USCHED_DROP_PRIVS == 0
+ #warning "CONFIG_USCHED_DROP_PRIVS is disabled. It's strongly recommended to drop privileges by default."
+#endif
+#if CONFIG_USCHED_DROP_PRIVS == 1 && CONFIG_USCHED_SERIALIZE_ON_REQ == 0
+ #error "CONFIG_USCHED_DROP_PRIVS cannot be enabled if CONFIG_USCHED_SERIALIZE_ON_REQ is disabled."
+#endif
+#if CONFIG_USCHED_AUTH_USERNAME_MAX < 8
+ #error "CONFIG_USCHED_AUTH_USERNAME_MAX value must be equal or greater than 8"
+#endif
+#if CONFIG_USCHED_AUTH_PASSWORD_MAX < CONFIG_USCHED_AUTH_PASSWORD_MIN
+ #error "CONFIG_USCHED_AUTH_PASSWORD_MAX value is lesser than CONFIG_USCHED_AUTH_PASSWORD_MIN."
+#endif
+#if CONFIG_USCHED_HASH_FNV1A == 1 && CONFIG_USCHED_HASH_DJB2 == 1
+ #error "CONFIG_USCHED_HASH_FNV1A and CONFIG_USCHED_HASH_DJB2 are both enabled. Only one can be selected."
+#endif
+#if CONFIG_USCHED_HASH_FNV1A == 0 && CONFIG_USCHED_HASH_DJB2 == 0
+ #error "CONFIG_USCHED_HASH_FNV1A and CONFIG_USCHED_HASH_DJB2 are both disabled. At least one must be enabled."
+#endif
+#if CONFIG_SYS_EXIT_CODE_CUSTOM_BASE < 2 || CONFIG_SYS_EXIT_CODE_CUSTOM_BASE > 110
+ #error "CONFIG_SYS_EXIT_CODE_CUSTOM_BASE value must stand between 2 and 110"
+#endif
+#if CONFIG_USCHED_LOG_MSG_MAX_SIZE < 256
+ #error "CONFIG_USCHED_LOG_MSG_MAX_SIZE value must be equal or greater than 256"
+#endif
+#if CONFIG_USCHED_SEC_KDF_ROUNDS < 1000
+ #error "CONFIG_USCHED_SEC_KDF_ROUNDS value must be greater than 1000"
+#endif
 
 
 /* Custom exit status offsets (base value is CONFIG_SYS_EXIT_CODE_CUSTOM_BASE) */
@@ -184,6 +217,10 @@ struct usched_config_core {
 	unsigned int pmq_msgmax;
 	unsigned int pmq_msgsize;
 	char *pmq_name;
+	char *privdrop_user;
+	char *privdrop_group;
+	uid_t privdrop_uid;
+	gid_t privdrop_gid;
 	int thread_priority;
 	unsigned int thread_workers;
 };

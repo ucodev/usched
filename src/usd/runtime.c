@@ -28,6 +28,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <pall/cll.h>
 
@@ -47,13 +48,35 @@
 #include "gc.h"
 #include "delta.h"
 
+#if CONFIG_USCHED_JAIL == 1
+static int _runtime_daemon_jail(void) {
+	int errsv = 0;
+
+	if (chdir(rund.config.core.jail_dir) < 0) {
+		errsv = errno;
+		log_crit("_runtime_daemon_jail(): chdir(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (chroot(rund.config.core.jail_dir) < 0) {
+		errsv = errno;
+		log_crit("_runtime_daemon_jail(): chroot(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+#endif
+
 #if CONFIG_USCHED_DROP_PRIVS == 1
-static int _runtime_drop_privs(void) {
+static int _runtime_daemon_drop_privs(void) {
 	int errsv = 0;
 
 	if (setregid(rund.config.core.privdrop_gid, rund.config.core.privdrop_gid) < 0) {
 		errsv = errno;
-		log_crit("_runtime_drop_privs(): setregid(): %s\n", strerror(errno));
+		log_crit("_runtime_daemon_drop_privs(): setregid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -239,13 +262,27 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	log_info("Connections interface initialized.\n");
 
+#if CONFIG_USCHED_JAIL == 1
+	/* Jail process */
+	log_info("Jailing process to %s...\n", rund.config.core.jail_dir);
+
+	if (_runtime_daemon_jail() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): _runtime_daemon_jail(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Process successfully jailed.\n");
+#endif
+
+#if CONFIG_USCHED_DROP_PRIVS == 1
 	/* Drop process privileges */
 	log_info("Dropping process privileges...\n");
 
-#if CONFIG_USCHED_DROP_PRIVS == 1
-	if (_runtime_drop_privs() < 0) {
+	if (_runtime_daemon_drop_privs() < 0) {
 		errsv = errno;
-		log_crit("runtime_daemon_init(): _runtime_drop_privs(): %s\n", strerror(errno));
+		log_crit("runtime_daemon_init(): _runtime_daemon_drop_privs(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

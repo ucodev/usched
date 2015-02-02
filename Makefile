@@ -17,6 +17,8 @@ install_all:
 	cp include/*.h /usr/include/usched/
 	mkdir -p /var/cache/usched
 	chmod 700 /var/cache/usched
+	mkdir -p /var/cache/usched/jail
+	chmod 700 /var/cache/usched/jail
 
 examples:
 	make -C example/

@@ -1,7 +1,7 @@
 CC=`cat ../../.compiler`
 ECFLAGS=-DCONFIG_SYS_LINUX=1 -D_GNU_SOURCE=1
-CCFLAGS=-std=c1x -fPIC -DCONFIG_DAEMON_SPECIFIC=1 -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
-LDFLAGS=-g -pthread -lpsched -lpall -lfsma -lrt -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
+CCFLAGS=-std=c1x -DCONFIG_DAEMON_SPECIFIC=1 -D_POSIX_C_SOURCE=199309L -D_XOPEN_SOURCE -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector
+LDFLAGS=-lgcc_s -pthread -lpsched -lpall -lfsma -lrt -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/sig.o ../common/thread.o

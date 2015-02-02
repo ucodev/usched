@@ -30,6 +30,7 @@
 
 #define CONFIG_USCHED_DEBUG			0
 #define CONFIG_USCHED_DROP_PRIVS		1
+#define CONFIG_USCHED_JAIL			1
 #define CONFIG_USCHED_SERIALIZE_ON_REQ		1
 #define CONFIG_USCHED_DELTA_CHECK_INTERVAL	1
 #define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/bash"
@@ -48,6 +49,7 @@
 #define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
 #define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
 #define CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE	"file.serialize"
+#define CONFIG_USCHED_FILE_CORE_JAIL_DIR	"jail.dir"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
 #define CONFIG_USCHED_FILE_CORE_PMQ_NAME	"pmq.name"
@@ -102,6 +104,12 @@
 #endif
 #if CONFIG_USCHED_DROP_PRIVS == 1 && CONFIG_USCHED_SERIALIZE_ON_REQ == 0
  #error "CONFIG_USCHED_DROP_PRIVS cannot be enabled if CONFIG_USCHED_SERIALIZE_ON_REQ is disabled."
+#endif
+#if CONFIG_USCHED_JAIL == 1 && CONFIG_USCHED_DROP_PRIVS == 0
+ #error "CONFIG_USCHED_JAIL is enabled while CONFIG_USCHED_DROP_PRIVS is disabled."
+#endif
+#if CONFIG_USCHED_JAIL == 1 && CONFIG_SYS_SOLARIS == 1
+ #error "CONFIG_USCHED_JAIL is enabled but it's not supported for the target Operating System (CONFIG_SYS_SOLARIS)."
 #endif
 #if CONFIG_USCHED_AUTH_USERNAME_MAX < 8
  #error "CONFIG_USCHED_AUTH_USERNAME_MAX value must be equal or greater than 8"
@@ -220,6 +228,7 @@ struct usched_config_core {
 	unsigned int delta_noexec;
 	unsigned int delta_reload;
 	char *file_serialize;
+	char *jail_dir;
 	unsigned int pmq_msgmax;
 	unsigned int pmq_msgsize;
 	char *pmq_name;

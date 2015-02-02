@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 01-02-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -460,6 +460,13 @@ static int _config_init_core_file_serialize(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_init_core_jail_dir(struct usched_config_core *core) {
+	if (!(core->jail_dir = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR)))
+		return -1;
+
+	return 0;
+}
+
 static int _config_init_core_pmq_msgmax(struct usched_config_core *core) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, &core->pmq_msgmax);
 }
@@ -523,6 +530,14 @@ int config_init_core(struct usched_config_core *core) {
 	if (_config_init_core_file_serialize(core) < 0) {
 		errsv = errno;
 		log_warn("_config_init_core(): _config_init_core_file_serialize(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read the jail directory */
+	if (_config_init_core_jail_dir(core) < 0) {
+		errsv = errno;
+		log_warn("_config_init_core(): _config_init_core_jail_dir(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

@@ -108,9 +108,6 @@
 #if CONFIG_USCHED_JAIL == 1 && CONFIG_USCHED_DROP_PRIVS == 0
  #error "CONFIG_USCHED_JAIL is enabled while CONFIG_USCHED_DROP_PRIVS is disabled."
 #endif
-#if CONFIG_USCHED_JAIL == 1 && CONFIG_SYS_SOLARIS == 1
- #error "CONFIG_USCHED_JAIL is enabled but it's not supported for the target Operating System (CONFIG_SYS_SOLARIS)."
-#endif
 #if CONFIG_USCHED_AUTH_USERNAME_MAX < 8
  #error "CONFIG_USCHED_AUTH_USERNAME_MAX value must be equal or greater than 8"
 #endif

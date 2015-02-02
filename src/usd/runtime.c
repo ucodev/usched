@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 30-01-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,26 @@
 #include "gc.h"
 #include "delta.h"
 
+
+static int _runtime_drop_privs(void) {
+	int errsv = 0;
+
+	if (setregid(rund.config.core.privdrop_gid, rund.config.core.privdrop_gid) < 0) {
+		errsv = errno;
+		log_crit("_runtime_drop_privs(): setregid(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (setreuid(rund.config.core.privdrop_uid, rund.config.core.privdrop_uid) < 0) {
+		errsv = errno;
+		log_crit("_runtime_drop_privs(): setregid(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
 
 int runtime_daemon_init(int argc, char **argv) {
 	int errsv = 0;
@@ -217,6 +237,18 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Connections interface initialized.\n");
+
+	/* Drop process privileges */
+	log_info("Dropping process privileges...\n");
+
+	if (_runtime_drop_privs() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): _runtime_drop_privs(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Privileges successfully dropped.\n");
 
 	/* All good */
 	log_info("All systems go. Ignition!\n");

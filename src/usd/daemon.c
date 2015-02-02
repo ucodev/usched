@@ -3,7 +3,7 @@
  * @brief uSched
  *        Daemon Main Component
  *
- * Date: 30-01-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -37,20 +37,17 @@
 #include "log.h"
 #include "conn.h"
 
-static void _serialize(void) {
+static void _flush(void) {
+	pthread_mutex_lock(&rund.mutex_marshal);
+
 	if (marshal_daemon_serialize_pools() < 0) {
 		log_warn("_serialize(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
 		return;
 	}
 
+	pthread_mutex_unlock(&rund.mutex_marshal);
+
 	log_info("_serialize(): Active pools were serialized.");
-
-	marshal_daemon_destroy();
-
-	if (marshal_daemon_init() < 0) {
-		log_crit("_serialize(): marshal_daemon_init(): %s\n", strerror(errno));
-		log_crit("_serialize(): === DO NOT TRY TO FLUSH DATA AGAIN! SERVICE RESTART IS REQUIRED ===");
-	}
 }
 
 static void _init(int argc, char **argv) {
@@ -79,7 +76,7 @@ static int _loop(int argc, char **argv) {
 		/* Check for runtime interruptions */
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH)) {
 			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH);
-			_serialize();
+			_flush();
 		}
 
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL)) {

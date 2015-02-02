@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 31-01-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -124,6 +124,9 @@ int marshal_daemon_serialize_pools(void) {
 		 * We'll desperately try to reopen the serialization file and hope for the best...
 		 */
 
+ #if CONFIG_USCHED_DROP_PRIVS == 0
+  #error "CONFIG_USCHED_SERIALIZE_ON_REQ is disabled and CONFIG_USCHED_DROP_PRIVS isn't enabled... unable to compile a uSched safe state."
+ #endif
 		close(rund.ser_fd);
 
 		marshal_daemon_destroy();

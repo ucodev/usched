@@ -202,12 +202,6 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Mark this entry as triggered (initial trigger was reached at least once) */
 	entry_set_flag(entry, USCHED_ENTRY_FLAG_TRIGGERED);
 
-	/* Check if it's safe to process this entry */
-	if (!rund.psched) {
-		log_info("entry_daemon_pmq_dispatch(): Scheduling interface was destroyed. Ignoring exxecution of Entry ID 0x%016llX... (this message is informational only and does not represent an error condition).\n", entry->id);
-		goto _finish;
-	}
-
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).
 	 */
@@ -280,9 +274,11 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	}
 
 _process:
-	/* TODO: Evaluate the need of this lock. This only makes sense if an iteration over the
-	 * active pool is performed concurrently with the schedule_entry_update(), and the values
-	 * of this entry could affect that iteration.
+	/* This lock is required in order to sync the scheduling interface init/destroy engine with
+	 * the async routines that may be triggered by libpsched. We must grant that the
+	 * schedule_daemon_active() routine that is executed inside the schedule_entry_update() have
+	 * the rund.mutex_apool lock acquired (which is same the lock that schedule_daemon_destroy()
+	 * acquires).
 	 */
 	pthread_mutex_lock(&rund.mutex_apool);
 

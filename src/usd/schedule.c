@@ -57,13 +57,27 @@ int schedule_daemon_init(void) {
 }
 
 void schedule_daemon_destroy(void) {
+	/* Lock the active pool access to avoid races */
+	pthread_mutex_lock(&rund.mutex_apool);
+
 	psched_destroy(rund.psched);
 	psched_handler_destroy(rund.psched);
+
+	/* TODO or FIXME: We must grant somehow at this point that all the routines queued by
+	 * libpsched are flushed (inactive) OR grant that they won't disrupt the runtime exiting
+	 * procedures if they are triggered after this point in time.
+	 */
 
 	/* NOTE: We need to explicitly inform that scheduling interface was destroyed to avoid entry
 	 * updates that may occur due to queued routines on psched library that were not yet executed
 	 */
 	rund.psched = 0;
+
+	pthread_mutex_unlock(&rund.mutex_apool);
+}
+
+int schedule_daemon_active(void) {
+	return (int) rund.psched;
 }
 
 int schedule_entry_create(struct usched_entry *entry) {
@@ -307,7 +321,7 @@ int schedule_entry_update(struct usched_entry *entry) {
 	struct timespec trigger, step, expire;
 
 	/* Check if it's safe to update this entry */
-	if (!rund.psched) {
+	if (!schedule_daemon_active()) {
 		log_info("schedule_entry_update(): Scheduling interface was destroyed. Entry ID 0x%016llX will not be updated (this message is informational only and does not represent an error condition).\n", entry->id);
 		return 0;
 	}

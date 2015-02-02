@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 31-01-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -201,6 +201,12 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Mark this entry as triggered (initial trigger was reached at least once) */
 	entry_set_flag(entry, USCHED_ENTRY_FLAG_TRIGGERED);
+
+	/* Check if it's safe to process this entry */
+	if (!rund.psched) {
+		log_info("entry_daemon_pmq_dispatch(): Scheduling interface was destroyed. Ignoring exxecution of Entry ID 0x%016llX... (this message is informational only and does not represent an error condition).\n", entry->id);
+		goto _finish;
+	}
 
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).

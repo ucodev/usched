@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 01-02-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,6 +59,11 @@ int schedule_daemon_init(void) {
 void schedule_daemon_destroy(void) {
 	psched_destroy(rund.psched);
 	psched_handler_destroy(rund.psched);
+
+	/* NOTE: We need to explicitly inform that scheduling interface was destroyed to avoid entry
+	 * updates that may occur due to queued routines on psched library that were not yet executed
+	 */
+	rund.psched = 0;
 }
 
 int schedule_entry_create(struct usched_entry *entry) {
@@ -300,6 +305,12 @@ int schedule_entry_ownership_delete_by_id(uint64_t id, uid_t uid) {
 int schedule_entry_update(struct usched_entry *entry) {
 	int errsv = 0;
 	struct timespec trigger, step, expire;
+
+	/* Check if it's safe to update this entry */
+	if (!rund.psched) {
+		log_info("schedule_entry_update(): Scheduling interface was destroyed. Entry ID 0x%016llX will not be updated (this message is informational only and does not represent an error condition).\n", entry->id);
+		return 0;
+	}
 
 	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE BEGIN]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
 

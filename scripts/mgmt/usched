@@ -4,9 +4,9 @@
 # @brief uSched
 #        uSched flush/start/stop script
 #
-# Date: 28-07-2014
+# Date: 02-02-2015
 # 
-# Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
 # This file is part of usched.
 #
@@ -28,6 +28,7 @@ import sys
 import os
 import signal
 import subprocess
+import time
 
 # Config
 CONFIG_USCHED_DAEMON_BIN = "/usr/sbin/usd"
@@ -95,7 +96,7 @@ def usched_flush():
 	print_info("Flush operation status: ")
 
 	# Signal usd
-	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGUSR1) == False:
+	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGUSR2) == False:
 		return False
 
 	return True
@@ -142,6 +143,14 @@ def usched_stop():
 	# Terminate use
 	if signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGTERM) == False:
 		return False
+
+	# Wait for 'usd' to terminate
+	while os.path.isfile(CONFIG_USCHED_DAEMON_PID_FILE):
+		time.sleep(1)
+
+	# Wait for 'use' to terminate
+	while os.path.isfile(CONFIG_USCHED_EXEC_PID_FILE):
+		time.sleep(1)
 
 	return True
 

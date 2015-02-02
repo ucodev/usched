@@ -47,7 +47,7 @@
 #include "gc.h"
 #include "delta.h"
 
-
+#if CONFIG_USCHED_DROP_PRIVS == 1
 static int _runtime_drop_privs(void) {
 	int errsv = 0;
 
@@ -67,6 +67,7 @@ static int _runtime_drop_privs(void) {
 
 	return 0;
 }
+#endif
 
 int runtime_daemon_init(int argc, char **argv) {
 	int errsv = 0;
@@ -241,6 +242,7 @@ int runtime_daemon_init(int argc, char **argv) {
 	/* Drop process privileges */
 	log_info("Dropping process privileges...\n");
 
+#if CONFIG_USCHED_DROP_PRIVS == 1
 	if (_runtime_drop_privs() < 0) {
 		errsv = errno;
 		log_crit("runtime_daemon_init(): _runtime_drop_privs(): %s\n", strerror(errno));
@@ -249,6 +251,7 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Privileges successfully dropped.\n");
+#endif
 
 	/* All good */
 	log_info("All systems go. Ignition!\n");

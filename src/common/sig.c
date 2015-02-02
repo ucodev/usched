@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface
  *
- * Date: 30-01-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *

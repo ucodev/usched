@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "config.h"
 #include "debug.h"
 #include "bitops.h"
 #include "runtime.h"
@@ -53,7 +54,7 @@ static void _flush(void) {
 static void _init(int argc, char **argv) {
 	if (runtime_daemon_init(argc, argv) < 0) {
 		log_crit("_init(): runtime_daemon_init(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
+		exit(PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME);
 	}
 }
 
@@ -88,9 +89,22 @@ static int _loop(int argc, char **argv) {
 			break;
 
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
+#if CONFIG_USCHED_DROP_PRIVS == 0
 			_destroy();
 			_init(argc, argv);
+#else
+			/* NOTE: If privilege drop is enabled, conventional reload will fail to load
+			 * files owned and readable only by root, so we need to terminate the
+			 * execution of the daemon and wait for uSched Monitor (usm) to restart the
+			 * process.
+			 */
+			ret = PROCESS_EXIT_STATUS_CUSTOM_RELOAD_NOPRIV;
+			break;
+#endif
 		}
+
+		/* Make sure the interrupt flag is cleared if we reach this point */
+		bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
 	}
 
 	_destroy();

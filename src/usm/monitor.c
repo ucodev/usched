@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 16-01-2015
+ * Date: 02-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -247,9 +247,11 @@ static int _bexec(
 
 		if (execve(file, args, envp) < 0)
 			_failure("execve");
+
+		return -1;
 	}
 
-	return -1;
+	return WEXITSTATUS(status);
 }
 
 static void _usage(char *const *argv) {
@@ -410,6 +412,14 @@ int main(int argc, char *argv[], char *envp[]) {
 		ret = _bexec(config.binary, config.args, envp);
 
 		log_info("main(): _bexec(): Execution of '%s' terminated.\n", config.binary);
+
+		/* Check if the exit status refers to a bad runtime state */
+		if (ret == PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME) {
+			/* If so, do not attempt to restart the process, even if explicitly requested
+			 * by command line options.
+			 */
+			break;
+		}
 
 		if (!(config.flags & CONFIG_FL_PROC_RESTART) || !ret) {
 			if (!(config.flags & CONFIG_FL_PROC_RSTIGN))

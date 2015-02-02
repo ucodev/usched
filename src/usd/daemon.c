@@ -54,7 +54,7 @@ static void _flush(void) {
 static void _init(int argc, char **argv) {
 	if (runtime_daemon_init(argc, argv) < 0) {
 		log_crit("_init(): runtime_daemon_init(): %s\n", strerror(errno));
-		exit(PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME);
+		exit(PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG);
 	}
 }
 

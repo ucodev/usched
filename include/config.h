@@ -85,7 +85,7 @@
 #define CONFIG_SYS_WINDOWS			0
 #define CONFIG_SYS_DEV_ZERO			"/dev/zero"
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
-#define CONFIG_SYS_EXIT_CODE_CUSTOM_BASE	70
+#define CONFIG_SYS_EXIT_CODE_CUSTOM_BASE	90
 
 #ifndef CONFIG_CLIENT_ONLY
 #define CONFIG_CLIENT_ONLY			0
@@ -123,8 +123,8 @@
 #if CONFIG_USCHED_HASH_FNV1A == 0 && CONFIG_USCHED_HASH_DJB2 == 0
  #error "CONFIG_USCHED_HASH_FNV1A and CONFIG_USCHED_HASH_DJB2 are both disabled. At least one must be enabled."
 #endif
-#if CONFIG_SYS_EXIT_CODE_CUSTOM_BASE < 2 || CONFIG_SYS_EXIT_CODE_CUSTOM_BASE > 110
- #error "CONFIG_SYS_EXIT_CODE_CUSTOM_BASE value must stand between 2 and 110"
+#if CONFIG_SYS_EXIT_CODE_CUSTOM_BASE < 79 || CONFIG_SYS_EXIT_CODE_CUSTOM_BASE > 125
+ #error "CONFIG_SYS_EXIT_CODE_CUSTOM_BASE value must stand between 79 and 125"
 #endif
 #if CONFIG_USCHED_LOG_MSG_MAX_SIZE < 256
  #error "CONFIG_USCHED_LOG_MSG_MAX_SIZE value must be equal or greater than 256"
@@ -149,8 +149,8 @@ enum CHILD_EXIT_STATUS_CUSTOM_OFFSET {
 
 /* Custom exit codes for uSched processes (used to inform uSched monitor of some special states) */
 enum PROCESS_EXIT_STATUS_CUSTOM_CODES {
-	PROCESS_EXIT_STATUS_CUSTOM_RELOAD_NOPRIV = 10,
-	PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME
+	PROCESS_EXIT_STATUS_CUSTOM_RELOAD_NOPRIV = 77,
+	PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG
 };
 
 /* Windows specific parameters */

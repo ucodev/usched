@@ -61,7 +61,7 @@ extern int optind, optopt;
 #define CONFIG_FL_REDIR_ERR	0x10
 #define CONFIG_FL_PROC_RESTART	0x20
 #define CONFIG_FL_PROC_RSTIGN	0x40
-
+#define CONFIG_FL_PROC_RSTSEGV	0x80
 
 /* Declarations */
 struct cmdline_params {
@@ -235,10 +235,8 @@ static int _bexec(
 			return -1;
 		}
 
-		if (WEXITSTATUS(status) == EXIT_SUCCESS)
-			return 0;
-
-		log_crit("_bexec(): Execution of '%s' terminated with error status code %d.\n", file, WEXITSTATUS(status));
+		if (WEXITSTATUS(status) != EXIT_SUCCESS)
+			log_crit("_bexec(): Execution of '%s' terminated with error status code %d.\n", file, WEXITSTATUS(status));
 	} else if (!config.cpid) {
 		_config_destroy();
 
@@ -251,7 +249,7 @@ static int _bexec(
 		return -1;
 	}
 
-	return WEXITSTATUS(status);
+	return status;
 }
 
 static void _usage(char *const *argv) {
@@ -270,6 +268,7 @@ static void _usage(char *const *argv) {
 			"code is different than zero.\n" \
 			"    -R         \tRestart process regardless the " \
 			"child exit code.\n" \
+			"    -S         \tRestart process on child SIGSEGV\n" \
 			"    -f         \tForce PID file rewrite\n" \
 			"    -p <file>  \tPID file name\n" \
 			"\n", argv[0]);
@@ -294,7 +293,7 @@ static void _usage_invalid_opt_arg(
 static void _cmdline_process(int argc, char *const *argv) {
 	int opt = 0;
 
-	while ((opt = getopt(argc, argv, "frRu:g:i:o:e:p:")) != -1) {
+	while ((opt = getopt(argc, argv, "frRSu:g:i:o:e:p:")) != -1) {
 		if (opt == 'u') {
 			if (!_strisdigit(optarg))
 				_usage_invalid_opt_arg(opt, optarg, argv);
@@ -336,6 +335,8 @@ static void _cmdline_process(int argc, char *const *argv) {
 		} else if (opt == 'R') {
 			config.flags |= CONFIG_FL_PROC_RESTART;
 			config.flags |= CONFIG_FL_PROC_RSTIGN;
+		} else if (opt == 'S') {
+			config.flags |= CONFIG_FL_PROC_RSTSEGV;
 		} else {
 			_usage_invalid_opt(optopt, argv);
 		}
@@ -384,8 +385,17 @@ static int _signal_init(void) {
 	return 0;
 }
 
+void _main_loop_restart_prepare(void) {
+	if (config.flags & CONFIG_FL_PIDF_CREATE) {
+		if (unlink(config.pidf_name) < 0)
+			_failure("unlink");
+	}
+
+	log_info("_main_loop_restart_prepare(): Restarting '%s'...\n", config.binary);
+}
+
 int main(int argc, char *argv[], char *envp[]) {
-	int ret = 0;
+	int status = 0;
 
 	_log_init();
 
@@ -409,32 +419,49 @@ int main(int argc, char *argv[], char *envp[]) {
 		if (config.flags & CONFIG_FL_PIDF_CREATE)
 			_file_pid_create(config.pidf_name);
 
-		ret = _bexec(config.binary, config.args, envp);
+		/* Make sure that we receive a valid status value... otherwise jump out of here. */
+		if ((status = _bexec(config.binary, config.args, envp)) == -1)
+			break;
 
-		log_info("main(): _bexec(): Execution of '%s' terminated.\n", config.binary);
+		log_info("main(): _bexec(): Execution of '%s' terminated (Exit status: %d).\n", config.binary, WEXITSTATUS(status));
 
 		/* Check if the exit status refers to a bad runtime state */
-		if (ret == PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME) {
+		if (WEXITSTATUS(status) == PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG) {
+			log_info("main(): Child process \'%s\' won't be restarted due to runtime or configuration errors.", config.binary);
+
 			/* If so, do not attempt to restart the process, even if explicitly requested
 			 * by command line options.
 			 */
 			break;
 		}
 
-		if (!(config.flags & CONFIG_FL_PROC_RESTART) || !ret) {
-			if (!(config.flags & CONFIG_FL_PROC_RSTIGN))
-				break;
+		if (config.flags & CONFIG_FL_PROC_RSTIGN) {
+			log_info("main(): Restarting child \'%s\' regardless of exit status code.", config.binary);
+
+			/* Restart child regardless of signals and exit codes */
+			_main_loop_restart_prepare();
+
+			continue;
+		} else if ((config.flags & CONFIG_FL_PROC_RSTSEGV) && WIFSIGNALED(status) && (WTERMSIG(status) == SIGSEGV)) {
+			log_info("main(): Restarting child \'%s\' due to SIGSEGV.", config.binary);
+
+			/* Restart child if a SIGSEGV was caught */
+			_main_loop_restart_prepare();
+
+			continue;
+		} else if ((config.flags & CONFIG_FL_PROC_RESTART) && WEXITSTATUS(status)) {
+			log_info("main(): Restarting child \'%s\' due to a non-zero exit status code.", config.binary);
+
+			/* Restart child is exit status code isn't zero */
+			_main_loop_restart_prepare();
+
+			continue;
 		}
 
-		if (config.flags & CONFIG_FL_PIDF_CREATE) {
-			if (unlink(config.pidf_name) < 0)
-				_failure("unlink");
-		}
-
-		log_info("main(): Restarting '%s'...\n", config.binary);
+		break;
 	}
 
-	if (ret < 0)
+	if (status < 0)
 		_failure("_bexec");
 
 	if (config.flags & CONFIG_FL_PIDF_CREATE) {

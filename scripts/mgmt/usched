@@ -114,7 +114,7 @@ def usched_start():
 	print_info("Start operation status: ")
 
 	try:
-		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", CONFIG_USCHED_DAEMON_BIN])
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", "-S", CONFIG_USCHED_DAEMON_BIN])
 	except OSError:
 		status = 127
 
@@ -123,7 +123,7 @@ def usched_start():
 		return False
 
 	try:
-		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_EXEC_PID_FILE, "-r", CONFIG_USCHED_EXEC_BIN])
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_EXEC_PID_FILE, "-r", "-S", CONFIG_USCHED_EXEC_BIN])
 	except OSError:
 		status = 127
 

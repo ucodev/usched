@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 02-02-2015
+ * Date: 03-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -83,7 +83,7 @@ static int _runtime_daemon_drop_privs(void) {
 
 	if (setreuid(rund.config.core.privdrop_uid, rund.config.core.privdrop_uid) < 0) {
 		errsv = errno;
-		log_crit("_runtime_drop_privs(): setregid(): %s\n", strerror(errno));
+		log_crit("_runtime_daemon_drop_privs(): setreuid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

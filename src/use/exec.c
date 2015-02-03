@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 31-01-2015
+ * Date: 03-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -106,6 +106,7 @@ static void *_exec_cmd(void *arg) {
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR);
 		}
 
+#if CONFIG_USCHED_MULTIUSER == 0
 		/* Drop privileges, if required */
 		if (setregid(gid, gid) < 0) {
 			/* Free argument resources */
@@ -120,6 +121,7 @@ static void *_exec_cmd(void *arg) {
 
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREUID);
 		}
+#endif
 
 		/* Paranoid mode */
 		if ((getuid() != uid) || (geteuid() != uid)) {
@@ -222,7 +224,10 @@ static void _exec_process(void) {
 				break;
 		}
 
-		if (!(tbuf = mm_alloc(rune.config.core.pmq_msgsize))) {
+		/* Alocate temporary buffer size, plus one byte that won't be written to safe guard
+		 * the subject NULL termination
+		 */
+		if (!(tbuf = mm_alloc(rune.config.core.pmq_msgsize + 1))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));
 			continue;
 		}

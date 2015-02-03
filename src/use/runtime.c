@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 16-01-2014
+ * Date: 03-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,6 +39,28 @@
 #include "sig.h"
 #include "bitops.h"
 
+
+#if CONFIG_USCHED_MULTIUSER == 0
+static int _runtime_exec_drop_privs(void) {
+	int errsv = 0;
+
+	if (setregid(rune.config.core.privdrop_gid, rune.config.core.privdrop_gid) < 0) {
+		errsv = errno;
+		log_crit("_runtime_exec_drop_privs(): setregid(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (setreuid(rund.config.core.privdrop_uid, rund.config.core.privdrop_uid) < 0) {
+		errsv = errno;
+		log_crit("_runtime_exec_drop_privs(): setreuid(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+#endif
 
 int runtime_exec_init(int argc, char **argv) {
 	int errsv = 0;
@@ -103,6 +125,20 @@ int runtime_exec_init(int argc, char **argv) {
 		errno = errsv;
 		return -1;
 	}
+
+#if CONFIG_USCHED_MULTIUSER == 0
+	/* If no multiuser support, drop privileges to the configured nopriv user and group */
+	log_info("Dropping process privileges (no multi-user support)...\n");
+
+	if (_runtime_exec_drop_privs() < 0) {
+		errsv = errno;
+		log_crit("runtime_exec_init(): _runtime_exec_drop_privs(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Privileges successfully dropped.\n");
+#endif
 
 	log_info("IPC interface initialized.\n");
 

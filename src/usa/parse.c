@@ -3,9 +3,9 @@
  * @brief uSched
  *        Parser interface - Admin
  *
- * Date: 05-08-2014
+ * Date: 03-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -54,6 +54,15 @@ static usched_op_t _parse_get_op(const char *op) {
 }
 
 static usched_category_t _parse_get_category(const char *category) {
+	if (!strcasecmp(category, USCHED_CATEGORY_AUTH_STR))
+		return USCHED_CATEGORY_AUTH;
+
+	if (!strcasecmp(category, USCHED_CATEGORY_CORE_STR))
+		return USCHED_CATEGORY_CORE;
+
+	if (!strcasecmp(category, USCHED_CATEGORY_NETWORK_STR))
+		return USCHED_CATEGORY_NETWORK;
+
 	if (!strcasecmp(category, USCHED_CATEGORY_USERS_STR))
 		return USCHED_CATEGORY_USERS;
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 26-01-2015
+ * Date: 03-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,9 @@
 #include "entry.h"
 
 /* Categorty - Human */
+#define USCHED_CATEGORY_AUTH_STR	"auth"
+#define USCHED_CATEGORY_CORE_STR	"core"
+#define USCHED_CATEGORY_NETWORK_STR	"network"
 #define USCHED_CATEGORY_USERS_STR	"users"
 
 /* Operations - Human */
@@ -92,7 +95,10 @@
 
 /* Categories - Machine */
 typedef enum CATEGORY {
-	USCHED_CATEGORY_USERS = 1
+	USCHED_CATEGORY_AUTH = 1,
+	USCHED_CATEGORY_CORE,
+	USCHED_CATEGORY_NETWORK,
+	USCHED_CATEGORY_USERS
 } usched_category_t;
 
 /* Operations - Machine */

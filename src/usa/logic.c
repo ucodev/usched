@@ -3,9 +3,9 @@
  * @brief uSched
  *        Logic Analyzer interface - Admin
  *
- * Date: 06-08-2014
+ * Date: 03-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -74,7 +74,28 @@ int logic_admin_process_delete(void) {
 int logic_admin_process_change(void) {
 	int errsv = 0;
 
-	if (runa.req->category == USCHED_CATEGORY_USERS) {
+	if (runa.req->category == USCHED_CATEGORY_AUTH) {
+		if (category_auth_change(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_change(): category_auth_change(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_CORE) {
+		if (category_core_change(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_change(): category_core_change(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
+		if (category_network_change(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_change(): category_network_change(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_USERS) {
 		if (category_users_change(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_change(): category_users_change(): %s\n", strerror(errno));
@@ -93,7 +114,28 @@ int logic_admin_process_change(void) {
 int logic_admin_process_show(void) {
 	int errsv = 0;
 
-	if (runa.req->category == USCHED_CATEGORY_USERS) {
+	if (runa.req->category == USCHED_CATEGORY_AUTH) {
+		if (category_auth_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_auth_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_CORE) {
+		if (category_core_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_core_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
+		if (category_network_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_network_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_USERS) {
 		if (category_users_show(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_show(): category_users_show(): %s\n", strerror(errno));

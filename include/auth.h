@@ -2,8 +2,9 @@
  * @file auth.h
  * @brief uSched
  *        Authentication and Authorization interface header
+ *        Authentication configuration and administration header
  *
- * Date: 17-01-2015
+ * Date: 03-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +41,12 @@ int auth_daemon_remote_session_verify(const char *username, const unsigned char 
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 int auth_client_remote_session_create(unsigned char *session, const char *username, const char *plain_passwd, unsigned char *context);
 int auth_client_remote_session_process(unsigned char *session, const char *username, const char *plain_passwd, unsigned char *context, unsigned char *agreed_key);
+
+/* Auth admin prototypes (usa only) */
+char *auth_admin_use_local_get(void);
+int auth_admin_use_local_set(const char *use_local);
+char *auth_admin_users_remote_get(void);
+int auth_admin_users_remote_set(const char *users_remote);
 
 #endif
 

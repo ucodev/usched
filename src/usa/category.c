@@ -78,7 +78,7 @@ int category_users_add(size_t argc, char **args) {
 		errno = EINVAL;
 		return -1;
 	} else if (argc > 4) {
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, "change users");
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, "add users");
 		log_warn("category_users_add(): Too many arguments.\n");
 		errno = EINVAL;
 		return -1;

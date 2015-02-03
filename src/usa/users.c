@@ -1,11 +1,11 @@
 /**
  * @file users.c
  * @brief uSched
- *        Users configuration interface
+ *        Users configuration and administration interface
  *
- * Date: 04-09-2014
+ * Date: 03-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -70,7 +70,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 
 	/* Check password length */
 	if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
-		log_warn("users_admon_config_add(): Password is too short (it must be at least 8 characters long).\n");
+		log_warn("users_admin_config_add(): Password is too short (it must be at least 8 characters long).\n");
 		errno = EINVAL;
 		return -1;
 	}

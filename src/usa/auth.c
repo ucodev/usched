@@ -30,19 +30,19 @@
 #include "auth.h"
 
 
-char *auth_admin_use_local_get(void) {
-	return NULL;
-}
-
-int auth_admin_use_local_set(const char *use_local) {
+int auth_admin_local_use_show(void) {
 	return -1;
 }
 
-char *auth_admin_users_remote_get(void) {
-	return NULL;
+int auth_admin_local_use_change(const char *use_local) {
+	return -1;
 }
 
-int auth_admin_users_remote_set(const char *users_remote) {
+int auth_admin_remote_users_show(void) {
+	return -1;
+}
+
+int auth_admin_remote_users_change(const char *users_remote) {
 	return -1;
 }
 

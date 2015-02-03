@@ -29,16 +29,16 @@
 
 
 /* Prototypes */
-char *network_admin_bind_addr_get(void);
-int network_admin_bind_addr_set(const char *bind_addr);
-char *network_admin_bind_port_get(void);
-int network_admin_bind_port_set(const char *bind_port);
-char *network_admin_conn_limit_get(void);
-int network_admin_conn_limit_set(const char *conn_limit);
-char *network_admin_conn_timeout_get(void);
-int network_admin_conn_timeout_set(const char *conn_timeout);
-char *network_admin_sock_named_get(void);
-int network_admin_sock_named_set(const char *sock_named);
+int network_admin_bind_addr_show(void);
+int network_admin_bind_addr_change(const char *bind_addr);
+int network_admin_bind_port_show(void);
+int network_admin_bind_port_change(const char *bind_port);
+int network_admin_conn_limit_show(void);
+int network_admin_conn_limit_change(const char *conn_limit);
+int network_admin_conn_timeout_show(void);
+int network_admin_conn_timeout_change(const char *conn_timeout);
+int network_admin_sock_name_show(void);
+int network_admin_sock_name_change(const char *sock_named);
 
 #endif
 

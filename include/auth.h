@@ -43,10 +43,10 @@ int auth_client_remote_session_create(unsigned char *session, const char *userna
 int auth_client_remote_session_process(unsigned char *session, const char *username, const char *plain_passwd, unsigned char *context, unsigned char *agreed_key);
 
 /* Auth admin prototypes (usa only) */
-char *auth_admin_use_local_get(void);
-int auth_admin_use_local_set(const char *use_local);
-char *auth_admin_users_remote_get(void);
-int auth_admin_users_remote_set(const char *users_remote);
+int auth_admin_local_use_show(void);
+int auth_admin_local_use_change(const char *use_local);
+int auth_admin_remote_users_show(void);
+int auth_admin_remote_users_change(const char *users_remote);
 
 #endif
 

@@ -32,6 +32,38 @@
 
 #include "entry.h"
 
+/* Components - Human */
+#define USCHED_COMPONENT_LOCAL_STR	"local"
+#define USCHED_COMPONENT_REMOTE_STR	"remote"
+#define USCHED_COMPONENT_DELTA_STR	"delta"
+#define USCHED_COMPONENT_SERIALIZE_STR	"serialize"
+#define USCHED_COMPONENT_JAIL_STR	"jail"
+#define USCHED_COMPONENT_PMQ_STR	"pmq"
+#define USCHED_COMPONENT_PRIVDROP_STR	"privdrop"
+#define USCHED_COMPONENT_THREAD_STR	"thread"
+#define USCHED_COMPONENT_BIND_STR	"bind"
+#define USCHED_COMPONENT_CONN_STR	"conn"
+#define USCHED_COMPONENT_SOCK_STR	"sock"
+
+/* Properties - Human */
+#define USCHED_PROPERTY_USE_STR		"use"
+#define USCHED_PROPERTY_USERS_STR	"users"
+#define USCHED_PROPERTY_NOEXEC_STR	"noexec"
+#define USCHED_PROPERTY_RELOAD_STR	"reload"
+#define USCHED_PROPERTY_FILE_STR	"file"
+#define USCHED_PROPERTY_DIR_STR		"dir"
+#define USCHED_PROPERTY_MSGMAX_STR	"msgmax"
+#define USCHED_PROPERTY_MSGSIZE_STR	"msgsize"
+#define USCHED_PROPERTY_NAME_STR	"name"
+#define USCHED_PROPERTY_GROUP_STR	"group"
+#define USCHED_PROPERTY_USER_STR	"user"
+#define USCHED_PROPERTY_PRIORITY_STR	"priority"
+#define USCHED_PROPERTY_WORKERS_STR	"workers"
+#define USCHED_PROPERTY_ADDR_STR	"addr"
+#define USCHED_PROPERTY_PORT_STR	"port"
+#define USCHED_PROPERTY_LIMIT_STR	"limit"
+#define USCHED_PROPERTY_TIMEOUT_STR	"timeout"
+
 /* Categorty - Human */
 #define USCHED_CATEGORY_AUTH_STR	"auth"
 #define USCHED_CATEGORY_CORE_STR	"core"

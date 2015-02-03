@@ -3,9 +3,9 @@
  * @brief uSched
  *        Usage handlers interface header
  *
- * Date: 05-08-2014
+ * Date: 03-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -31,6 +31,8 @@
 /* Usage error type strings */
 #define USCHED_USAGE_ADMIN_ERR_INVALID_OP_STR			"Invalid operation"
 #define USCHED_USAGE_ADMIN_ERR_INVALID_CATEGORY_STR		"Invalid category"
+#define USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT_STR		"Invalid component"
+#define USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY_STR		"Invalid property"
 #define USCHED_USAGE_ADMIN_ERR_INVALID_ARG_STR			"Invalid argument"
 #define USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS_STR			"Insufficient arguments"
 #define USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS_STR			"Too many arguments"
@@ -49,6 +51,8 @@
 typedef enum USAGE_ADMIN_ERROR {
 	USCHED_USAGE_ADMIN_ERR_INVALID_OP = 1,
 	USCHED_USAGE_ADMIN_ERR_INVALID_CATEGORY,
+	USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT,
+	USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY,
 	USCHED_USAGE_ADMIN_ERR_INVALID_ARG,
 	USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS,
 	USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS

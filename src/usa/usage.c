@@ -44,6 +44,16 @@ static void _usage_admin_error_print(void) {
 				USCHED_USAGE_ADMIN_ERR_INVALID_CATEGORY_STR,
 				runa.usage_err_offending ? runa.usage_err_offending : "");
 			break;
+		case USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT:
+			fprintf(stderr, "%s: %s\n",
+				USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT_STR,
+				runa.usage_err_offending ? runa.usage_err_offending : "");
+			break;
+		case USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY:
+			fprintf(stderr, "%s: %s\n",
+				USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY_STR,
+				runa.usage_err_offending ? runa.usage_err_offending : "");
+			break;
 		case USCHED_USAGE_ADMIN_ERR_INVALID_ARG:
 			fprintf(stderr, "%s: %s\n",
 				USCHED_USAGE_ADMIN_ERR_INVALID_ARG_STR,

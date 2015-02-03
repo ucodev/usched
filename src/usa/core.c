@@ -30,91 +30,91 @@
 #include "core.h"
 
 
-char *core_admin_delta_noexec_get(void) {
-	return NULL;
-}
-
-int core_admin_delta_noexec_set(const char *delta_noexec) {
+int core_admin_delta_noexec_show(void) {
 	return -1;
 }
 
-char *core_admin_delta_reload_get(void) {
-	return NULL;
-}
-
-int core_admin_delta_reload_set(const char *delta_reload) {
+int core_admin_delta_noexec_change(const char *delta_noexec) {
 	return -1;
 }
 
-char *core_admin_file_serialize_get(void) {
-	return NULL;
-}
-
-int core_admin_file_serialize_set(const char *file_serialize) {
+int core_admin_delta_reload_show(void) {
 	return -1;
 }
 
-char *core_admin_jail_dir_get(void) {
-	return NULL;
-}
-
-int core_admin_jail_dir_set(const char *jail_dir) {
+int core_admin_delta_reload_change(const char *delta_reload) {
 	return -1;
 }
 
-char *core_admin_pmq_msgmax_get(void) {
-	return NULL;
-}
-
-int core_admin_pmq_msgmax_set(const char *pmq_msgmax) {
+int core_admin_serialize_file_show(void) {
 	return -1;
 }
 
-char *core_admin_pmq_msgsize_get(void) {
-	return NULL;
-}
-
-int core_admin_pmq_msgsize_set(const char *pmq_msgsize) {
+int core_admin_serialize_file_change(const char *file_serialize) {
 	return -1;
 }
 
-char *core_admin_pmq_name_get(void) {
-	return NULL;
-}
-
-int core_admin_pmq_name_set(const char *pmq_name) {
+int core_admin_jail_dir_show(void) {
 	return -1;
 }
 
-char *core_admin_privdrop_group_get(void) {
-	return NULL;
-}
-
-int core_admin_privdrop_group_set(const char *privdrop_group) {
+int core_admin_jail_dir_change(const char *jail_dir) {
 	return -1;
 }
 
-char *core_admin_privdrop_user_get(void) {
-	return NULL;
-}
-
-int core_admin_privdrop_user_set(const char *privdrop_user) {
+int core_admin_pmq_msgmax_show(void) {
 	return -1;
 }
 
-char *core_admin_thread_priority_get(void) {
-	return NULL;
-}
-
-int core_admin_thread_priority_set(const char *thread_priority) {
+int core_admin_pmq_msgmax_change(const char *pmq_msgmax) {
 	return -1;
 }
 
-char *core_admin_thread_workers_get(void) {
-	return NULL;
+int core_admin_pmq_msgsize_show(void) {
+	return -1;
 }
 
-int core_admin_thread_workers_set(const char *thread_workers) {
+int core_admin_pmq_msgsize_change(const char *pmq_msgsize) {
+	return -1;
+}
+
+int core_admin_pmq_name_show(void) {
+	return -1;
+}
+
+int core_admin_pmq_name_change(const char *pmq_name) {
+	return -1;
+}
+
+int core_admin_privdrop_group_show(void) {
+	return -1;
+}
+
+int core_admin_privdrop_group_change(const char *privdrop_group) {
+	return -1;
+}
+
+int core_admin_privdrop_user_show(void) {
+	return -1;
+}
+
+int core_admin_privdrop_user_change(const char *privdrop_user) {
+	return -1;
+}
+
+int core_admin_thread_priority_show(void) {
+	return -1;
+}
+
+int core_admin_thread_priority_change(const char *thread_priority) {
+	return -1;
+}
+
+int core_admin_thread_workers_show(void) {
+	return -1;
+}
+
+int core_admin_thread_workers_change(const char *thread_workers) {
 	return -1;
 }
 

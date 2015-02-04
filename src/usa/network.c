@@ -3,7 +3,7 @@
  * @brief uSched
  *        Network configuration and administration interface
  *
- * Date: 03-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,17 +25,53 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #include "config.h"
 #include "network.h"
-
+#include "file.h"
+#include "log.h"
+#include "mm.h"
+#include "usched.h"
+#include "print.h"
 
 int network_admin_bind_addr_show(void) {
-	return -1;
+	int errsv = 0;
+	char *value = NULL;
+
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR))) {
+		errsv = errno;
+		log_crit("network_admin_bind_addr_show(): file_read_line_single(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, value);
+
+	mm_free(value);
+
+	return 0;
 }
 
 int network_admin_bind_addr_change(const char *bind_addr) {
-	return -1;
+	int errsv = 0;
+
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, bind_addr) < 0) {
+		errsv = errno;
+		log_crit("network_admin_bind_addr_change(): file_write_line_single(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (network_admin_bind_addr_show() < 0) {
+		errsv = errno;
+		log_crit("network_admin_bind_addr_change(): network_admin_bind_addr_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int network_admin_bind_port_show(void) {

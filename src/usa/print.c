@@ -3,9 +3,9 @@
  * @brief uSched
  *        Printing interface - Admin
  *
- * Date: 05-08-2014
+ * Date: 05-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -63,5 +63,9 @@ void print_admin_config_users(const struct usched_config_users *users) {
 			user->uid,
 			user->gid);
 	}
+}
+
+void print_admin_category_var_value(const char *component, const char *var, const char *value) {
+	printf("%s.%s = %s\n", component, var, value);
 }
 

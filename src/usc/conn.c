@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 18-01-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,7 +59,7 @@ int conn_client_init(void) {
 			return -1;
 		}
 #ifndef COMPILE_WIN32
-	} else if ((runc.fd = panet_client_unix(runc.config.network.sock_named, PANET_PROTO_UNIX_STREAM)) < 0) {
+	} else if ((runc.fd = panet_client_unix(runc.config.network.sock_name, PANET_PROTO_UNIX_STREAM)) < 0) {
 		errsv = errno;
 		log_crit("conn_client_init(): panet_client_unix(): %s\n", strerror(errno));
 		errno = errsv;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 02-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -366,20 +366,20 @@ static char *_value_init_string_from_file(const char *file) {
 	return string;
 }
 
-static int _config_init_auth_gid_blacklist(struct usched_config_auth *auth) {
-	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_GID_BL, &auth->gid_blacklist);
+static int _config_init_auth_blacklist_gid(struct usched_config_auth *auth) {
+	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, &auth->blacklist_uid);
 }
 
-static int _config_init_auth_gid_whitelist(struct usched_config_auth *auth) {
-	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_GID_WL, &auth->gid_whitelist);
+static int _config_init_auth_whitelist_gid(struct usched_config_auth *auth) {
+	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, &auth->whitelist_uid);
 }
 
-static int _config_init_auth_uid_blacklist(struct usched_config_auth *auth) {
-	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_UID_BL, &auth->uid_blacklist);
+static int _config_init_auth_blacklist_uid(struct usched_config_auth *auth) {
+	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, &auth->blacklist_uid);
 }
 
-static int _config_init_auth_uid_whitelist(struct usched_config_auth *auth) {
-	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_UID_WL, &auth->uid_whitelist);
+static int _config_init_auth_whitelist_uid(struct usched_config_auth *auth) {
+	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, &auth->whitelist_uid);
 }
 
 static int _config_init_auth_use_local(struct usched_config_auth *auth) {
@@ -394,33 +394,33 @@ int config_init_auth(struct usched_config_auth *auth) {
 	int errsv = 0;
 
 	/* Read GID blacklist */
-	if (_config_init_auth_gid_blacklist(auth) < 0) {
+	if (_config_init_auth_blacklist_gid(auth) < 0) {
 		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_gid_blacklist(): %s\n", strerror(errno));
+		log_warn("_config_init_auth(): _config_init_auth_blacklist_gid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	/* Read GID whitelist */
-	if (_config_init_auth_gid_whitelist(auth) < 0) {
+	if (_config_init_auth_whitelist_gid(auth) < 0) {
 		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_gid_whitelist(): %s\n", strerror(errno));
+		log_warn("_config_init_auth(): _config_init_auth_whitelist_gid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	/* Read UID blacklist */
-	if (_config_init_auth_uid_blacklist(auth) < 0) {
+	if (_config_init_auth_blacklist_uid(auth) < 0) {
 		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_uid_blacklist(): %s\n", strerror(errno));
+		log_warn("_config_init_auth(): _config_init_auth_blacklist_uid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	/* Read UID whitelist */
-	if (_config_init_auth_uid_whitelist(auth) < 0) {
+	if (_config_init_auth_whitelist_uid(auth) < 0) {
 		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_uid_whitelist(): %s\n", strerror(errno));
+		log_warn("_config_init_auth(): _config_init_auth_whitelist_uid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -453,8 +453,8 @@ static int _config_init_core_delta_reload(struct usched_config_core *core) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, &core->delta_reload);
 }
 
-static int _config_init_core_file_serialize(struct usched_config_core *core) {
-	if (!(core->file_serialize = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE)))
+static int _config_init_core_serialize_file(struct usched_config_core *core) {
+	if (!(core->serialize_file = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE)))
 		return -1;
 
 	return 0;
@@ -527,9 +527,9 @@ int config_init_core(struct usched_config_core *core) {
 	}
 
 	/* Read file serialize */
-	if (_config_init_core_file_serialize(core) < 0) {
+	if (_config_init_core_serialize_file(core) < 0) {
 		errsv = errno;
-		log_warn("_config_init_core(): _config_init_core_file_serialize(): %s\n", strerror(errno));
+		log_warn("_config_init_core(): _config_init_core_serialize_file(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -650,8 +650,8 @@ static int _config_init_network_conn_timeout(struct usched_config_network *netwo
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, &network->conn_timeout);
 }
 
-static int _config_init_network_sock_named(struct usched_config_network *network) {
-	if (!(network->sock_named = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED)))
+static int _config_init_network_sock_name(struct usched_config_network *network) {
+	if (!(network->sock_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAME)))
 		return -1;
 
 	return 0;
@@ -693,9 +693,9 @@ int config_init_network(struct usched_config_network *network) {
 	}
 
 	/* Read sock named */
-	if (_config_init_network_sock_named(network) < 0) {
+	if (_config_init_network_sock_name(network) < 0) {
 		errsv = errno;
-		log_warn("_config_init_network(): _config_init_network_sock_named(): %s\n", strerror(errno));
+		log_warn("_config_init_network(): _config_init_network_sock_name(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -939,19 +939,25 @@ int config_init_users(struct usched_config_users *users) {
 }
 
 void config_destroy_auth(struct usched_config_auth *auth) {
-	pall_cll_destroy(auth->gid_blacklist);
-	pall_cll_destroy(auth->gid_whitelist);
-	pall_cll_destroy(auth->uid_blacklist);
-	pall_cll_destroy(auth->uid_whitelist);
+	pall_cll_destroy(auth->blacklist_gid);
+	pall_cll_destroy(auth->whitelist_gid);
+	pall_cll_destroy(auth->blacklist_uid);
+	pall_cll_destroy(auth->whitelist_uid);
 
 	memset(auth, 0, sizeof(struct usched_config_auth));
 }
 
 void config_destroy_core(struct usched_config_core *core) {
-	memset(core->file_serialize, 0, strlen(core->file_serialize));
-	mm_free(core->file_serialize);
+	memset(core->serialize_file, 0, strlen(core->serialize_file));
+	mm_free(core->serialize_file);
 	memset(core->pmq_name, 0, strlen(core->pmq_name));
 	mm_free(core->pmq_name);
+	memset(core->jail_dir, 0, strlen(core->jail_dir));
+	mm_free(core->jail_dir);
+	memset(core->privdrop_user, 0, strlen(core->privdrop_user));
+	mm_free(core->privdrop_user);
+	memset(core->privdrop_group, 0, strlen(core->privdrop_group));
+	mm_free(core->privdrop_group);
 
 	memset(core, 0, sizeof(struct usched_config_core));
 }
@@ -961,8 +967,8 @@ void config_destroy_network(struct usched_config_network *network) {
 	mm_free(network->bind_addr);
 	memset(network->bind_port, 0, strlen(network->bind_port));
 	mm_free(network->bind_port);
-	memset(network->sock_named, 0, strlen(network->sock_named));
-	mm_free(network->sock_named);
+	memset(network->sock_name, 0, strlen(network->sock_name));
+	mm_free(network->sock_name);
 
 	memset(network, 0, sizeof(struct usched_config_network));
 }

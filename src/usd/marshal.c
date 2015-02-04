@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 02-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,9 +51,9 @@
 int marshal_daemon_init(void) {
 	int errsv = 0;
 
-	if ((rund.ser_fd = open(rund.config.core.file_serialize, O_CREAT | O_SYNC | O_RDWR, S_IRUSR | S_IWUSR)) < 0) {
+	if ((rund.ser_fd = open(rund.config.core.serialize_file, O_CREAT | O_SYNC | O_RDWR, S_IRUSR | S_IWUSR)) < 0) {
 		errsv = errno;
-		log_warn("marshal_daemon_init(): open(\"%s\", ...): %s\n", rund.config.core.file_serialize, strerror(errno));
+		log_warn("marshal_daemon_init(): open(\"%s\", ...): %s\n", rund.config.core.serialize_file, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -268,7 +268,7 @@ _unserialize_finish:
 
 int marshal_daemon_backup(void) {
 	int errsv = 0;
-	size_t len = strlen(rund.config.core.file_serialize) + 50;
+	size_t len = strlen(rund.config.core.serialize_file) + 50;
 	char *file_bak = NULL;
 
 	if (!(file_bak = mm_alloc(len))) {
@@ -280,9 +280,9 @@ int marshal_daemon_backup(void) {
 
 	memset(file_bak, 0, len);
 
-	snprintf(file_bak, len - 1, "%s-%lu-%u", rund.config.core.file_serialize, time(NULL), getpid());
+	snprintf(file_bak, len - 1, "%s-%lu-%u", rund.config.core.serialize_file, time(NULL), getpid());
 
-	if (fsop_cp(rund.config.core.file_serialize, file_bak, 8192) < 0) {
+	if (fsop_cp(rund.config.core.serialize_file, file_bak, 8192) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_backup(): fsop_cp(): %s\n", strerror(errno));
 		mm_free(file_bak);
@@ -296,8 +296,8 @@ int marshal_daemon_backup(void) {
 }
 
 void marshal_daemon_wipe(void) {
-	if (unlink(rund.config.core.file_serialize) < 0)
-		log_warn("marshal_daemon_wipe(): unlink(\"%s\"): %s\n", rund.config.core.file_serialize, strerror(errno));
+	if (unlink(rund.config.core.serialize_file) < 0)
+		log_warn("marshal_daemon_wipe(): unlink(\"%s\"): %s\n", rund.config.core.serialize_file, strerror(errno));
 }
 
 void marshal_daemon_destroy(void) {

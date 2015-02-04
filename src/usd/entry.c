@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 02-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -123,8 +123,8 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	}
 
 	/* Check if UID is whitelisted or blacklisted */
-	bl = rund.config.auth.uid_blacklist;
-	wl = rund.config.auth.uid_whitelist;
+	bl = rund.config.auth.blacklist_uid;
+	wl = rund.config.auth.whitelist_uid;
 
 	/* Blacklists always take precedence over whitelists */
 	if (bl->count(bl)) {
@@ -136,8 +136,8 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	}
 
 	/* Check if GID is whitelisted or blacklisted */
-	bl = rund.config.auth.gid_blacklist;
-	wl = rund.config.auth.gid_whitelist;
+	bl = rund.config.auth.blacklist_gid;
+	wl = rund.config.auth.whitelist_gid;
 
 	/* Blacklists always take precedence over whitelists */
 	if (bl->count(bl)) {

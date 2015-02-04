@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 03-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,15 +41,15 @@
 #define CONFIG_USCHED_DIR_CORE			"core"
 #define CONFIG_USCHED_DIR_NETWORK		"network"
 #define CONFIG_USCHED_DIR_USERS			"users"
-#define CONFIG_USCHED_FILE_AUTH_GID_BL		"blacklist.gid"
-#define CONFIG_USCHED_FILE_AUTH_UID_BL		"blacklist.uid"
-#define CONFIG_USCHED_FILE_AUTH_GID_WL		"whitelist.gid"
-#define CONFIG_USCHED_FILE_AUTH_UID_WL		"whitelist.uid"
+#define CONFIG_USCHED_FILE_AUTH_BL_GID		"blacklist.gid"
+#define CONFIG_USCHED_FILE_AUTH_BL_UID		"blacklist.uid"
+#define CONFIG_USCHED_FILE_AUTH_WL_GID		"whitelist.gid"
+#define CONFIG_USCHED_FILE_AUTH_WL_UID		"whitelist.uid"
 #define CONFIG_USCHED_FILE_AUTH_USE_LOCAL	"local.use"
 #define CONFIG_USCHED_FILE_AUTH_USERS_REMOTE	"remote.users"
 #define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
 #define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
-#define CONFIG_USCHED_FILE_CORE_FILE_SERIALIZE	"serialize.file"
+#define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
 #define CONFIG_USCHED_FILE_CORE_JAIL_DIR	"jail.dir"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
@@ -62,7 +62,7 @@
 #define CONFIG_USCHED_FILE_NETWORK_BIND_PORT	"bind.port"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT	"conn.timeout"
-#define CONFIG_USCHED_FILE_NETWORK_SOCK_NAMED	"sock.name"
+#define CONFIG_USCHED_FILE_NETWORK_SOCK_NAME	"sock.name"
 #define CONFIG_USCHED_DAEMON_PID_FILE		"/var/run/usched_usd.pid"
 #define CONFIG_USCHED_EXEC_PID_FILE		"/var/run/usched_use.pid"
 #define CONFIG_USCHED_ADMIN_PROC_NAME		"usa"
@@ -218,10 +218,10 @@ struct usched_config_users {
 };
 
 struct usched_config_auth {
-	struct cll_handler *gid_blacklist;
-	struct cll_handler *gid_whitelist;
-	struct cll_handler *uid_blacklist;
-	struct cll_handler *uid_whitelist;
+	struct cll_handler *blacklist_gid;
+	struct cll_handler *whitelist_gid;
+	struct cll_handler *blacklist_uid;
+	struct cll_handler *whitelist_uid;
 	unsigned int use_local;
 	unsigned int use_pam;
 	unsigned int users_remote;
@@ -230,7 +230,7 @@ struct usched_config_auth {
 struct usched_config_core {
 	unsigned int delta_noexec;
 	unsigned int delta_reload;
-	char *file_serialize;
+	char *serialize_file;
 	char *jail_dir;
 	unsigned int pmq_msgmax;
 	unsigned int pmq_msgsize;
@@ -248,7 +248,7 @@ struct usched_config_network {
 	char *bind_port;
 	unsigned int conn_limit;
 	unsigned int conn_timeout;
-	char *sock_named;
+	char *sock_name;
 };
 
 struct usched_config {

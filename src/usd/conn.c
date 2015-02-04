@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 29-01-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -54,17 +54,17 @@ static int _conn_daemon_unix_init(void) {
 	int errsv = 0;
 
 	/* Initialize local connections manager */
-	if ((rund.fd_unix = panet_server_unix(rund.config.network.sock_named, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
+	if ((rund.fd_unix = panet_server_unix(rund.config.network.sock_name, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_unix_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.network.sock_named, strerror(errno));
+		log_crit("conn_daemon_unix_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.network.sock_name, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	/* Grant read/write privileges to everyone on the named socket */
-	if (chmod(rund.config.network.sock_named, 0666) < 0) {
+	if (chmod(rund.config.network.sock_name, 0666) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_unix_init(): chmod(\"%s\", 0666): %s\n", rund.config.network.sock_named, strerror(errno));
+		log_crit("conn_daemon_unix_init(): chmod(\"%s\", 0666): %s\n", rund.config.network.sock_name, strerror(errno));
 		errno = errsv;
 		return -1;
 	}

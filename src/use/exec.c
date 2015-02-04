@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 03-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -106,7 +106,7 @@ static void *_exec_cmd(void *arg) {
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR);
 		}
 
-#if CONFIG_USCHED_MULTIUSER == 0
+#if CONFIG_USCHED_MULTIUSER == 1
 		/* Drop privileges, if required */
 		if (setregid(gid, gid) < 0) {
 			/* Free argument resources */

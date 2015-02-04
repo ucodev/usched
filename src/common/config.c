@@ -367,11 +367,11 @@ static char *_value_init_string_from_file(const char *file) {
 }
 
 static int _config_init_auth_blacklist_gid(struct usched_config_auth *auth) {
-	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, &auth->blacklist_uid);
+	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, &auth->blacklist_gid);
 }
 
 static int _config_init_auth_whitelist_gid(struct usched_config_auth *auth) {
-	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, &auth->whitelist_uid);
+	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, &auth->whitelist_gid);
 }
 
 static int _config_init_auth_blacklist_uid(struct usched_config_auth *auth) {

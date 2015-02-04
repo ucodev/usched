@@ -3,9 +3,9 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 12-07-2014
+ * Date: 04-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -59,6 +59,9 @@ int pool_daemon_init(void) {
 		return -1;
 	}
 
+	/* Setup CLL: No auto search, head insert, search forward */
+	rund.rpool->set_config(rund.rpool, CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD);
+
 	return 0;
 }
 
@@ -70,6 +73,9 @@ void pool_daemon_destroy(void) {
 	}
 	pthread_mutex_unlock(&rund.mutex_apool);
 
+	/* TODO: Evaluate if there isn't a risk of after active pool is destroyed, some entries that
+	 * may be shared with the remote connections pool have become invalid.
+	 */
 	pthread_mutex_lock(&rund.mutex_rpool);
 	if (rund.rpool) {
 		pall_cll_destroy(rund.rpool);

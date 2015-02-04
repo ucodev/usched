@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 02-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -99,8 +99,6 @@ int schedule_entry_create(struct usched_entry *entry) {
 		}
 	} while (rund.apool->search(rund.apool, entry) || !entry->id);
 
-	pthread_mutex_unlock(&rund.mutex_apool);
-
 	/* Install a new scheduling entry based on the current entry parameters */
 	if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
 		errsv = errno;
@@ -113,8 +111,6 @@ int schedule_entry_create(struct usched_entry *entry) {
 	}
 
 	/* Insert the new entry into the entries list */
-	pthread_mutex_lock(&rund.mutex_apool);
-
 	if (rund.apool->insert(rund.apool, entry) < 0) {
 		errsv = errno;
 		pthread_mutex_unlock(&rund.mutex_apool);

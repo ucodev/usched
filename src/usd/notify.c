@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 31-01-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -61,21 +61,29 @@ void notify_read(struct async_op *aop) {
 				log_warn("notify_read(): process_daemon_recv_update(): %s\n", strerror(errno));
 				goto _read_failure;
 			}
-		} else if (!(entry = process_daemon_recv_create(aop))) {
-			log_warn("notify_read(): process_daemon_recv_create(): %s\n", strerror(errno));
-			goto _read_failure;
-		}
 
-		/* Re-insert the entry into the rpool before any I/O */
-		pthread_mutex_lock(&rund.mutex_rpool);
+			/* NOTE: No need to re-insert the entry into the remote connections pool.
+			 * If process_daemon_recv_update() was successful, then the entry was
+			 * inserted into the active pool and will now become completed (its current
+			 * state is PROGRESS).
+			 */
+		} else {
+			if (!(entry = process_daemon_recv_create(aop))) {
+				log_warn("notify_read(): process_daemon_recv_create(): %s\n", strerror(errno));
+				goto _read_failure;
+			}
 
-		if (rund.rpool->insert(rund.rpool, entry) < 0) {
+			/* Re-insert the entry into the rpool before any I/O */
+			pthread_mutex_lock(&rund.mutex_rpool);
+
+			if (rund.rpool->insert(rund.rpool, entry) < 0) {
+				pthread_mutex_unlock(&rund.mutex_rpool);
+				log_warn("notify_read(): rund.rpool->insert(): %s\n", strerror(errno));
+				goto _read_failure;
+			}
+
 			pthread_mutex_unlock(&rund.mutex_rpool);
-			log_warn("notify_read(): rund.rpool->insert(): %s\n", strerror(errno));
-			goto _read_failure;
 		}
-
-		pthread_mutex_unlock(&rund.mutex_rpool);
 
 		/* If we've reached this point without errors and the 'entry' pointer is still valid,
 		 * then it either bolongs to apool (completed) or it's in progress.
@@ -141,6 +149,10 @@ _read_failure:
 	 */
 	pthread_mutex_lock(&rund.mutex_rpool);
 
+	/* If we find an entry by it's file descriptor, it's safe to delete it because it doesn't
+	 * reside in the active pool. The ID of the entries on the active pool are no longer the
+	 * file descriptor value, but a unique identifier.
+	 */
 	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd))))
 		rund.rpool->del(rund.rpool, entry);
 
@@ -187,9 +199,6 @@ void notify_write(struct async_op *aop) {
 		entry = rund.rpool->pope(rund.rpool, usched_entry_id(aop->fd));
 		pthread_mutex_unlock(&rund.mutex_rpool);
 
-		if (!entry)
-			goto _write_failure;
-
 		/* Prepare the aop for another read */
 		memset(aop, 0, sizeof(struct async_op));
 
@@ -198,14 +207,20 @@ void notify_write(struct async_op *aop) {
 		aop->timeout.tv_sec = rund.config.network.conn_timeout;
 
 		/* Based on entry status, read the necessary amount of data */
-		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_COMPLETE)) {
-			/* As the entry is complete, we need to destroy it. */
-			entry_destroy(entry);
+		if (!entry) {
+			/* If we've performed a rtsaio_write() and we can't find the entry in the
+			 * remote connections pool, then the entry was already completed and resides
+			 * only on the active pool. This also means that we now should perform
+			 * another read on the file descriptor in order to wait for more entries
+			 * from the client.
+			 */
 
 			/* Do another rtsaio_read() of usched_entry_hdr_size() bytes in order
 			 * to wait for another entry
 			 */
 			aop->count = usched_entry_hdr_size();
+
+			debug_printf(DEBUG_INFO, "Performing another entry read (aop->count: %u)...\n", aop->count);
 		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_PROGRESS)) {
 			/* Re-insert the entry into the rpool before any I/O */
 			pthread_mutex_lock(&rund.mutex_rpool);
@@ -222,7 +237,7 @@ void notify_write(struct async_op *aop) {
 			aop->count = sizeof(entry->session) + entry->psize;
 		} else {
 			/* Unexpected entry state */
-			log_warn("notify_write(): Unexpected entry state.");
+			log_warn("notify_write(): Unexpected entry state.\n");
 			goto _write_failure;
 		}
 
@@ -257,6 +272,10 @@ _write_failure:
 	 */
 	pthread_mutex_lock(&rund.mutex_rpool);
 
+	/* If we find an entry by it's file descriptor, it's safe to delete it because it doesn't
+	 * reside in the active pool. The ID of the entries on the active pool are no longer the
+	 * file descriptor value, but a unique identifier.
+	 */
 	if ((entry = rund.rpool->search(rund.rpool, usched_entry_id(aop->fd))))
 		rund.rpool->del(rund.rpool, entry);
 

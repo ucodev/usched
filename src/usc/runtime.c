@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 11-01-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,7 @@
 #include "log.h"
 #include "pool.h"
 #include "bitops.h"
+#include "sig.h"
 
 
 int runtime_client_init(int argc, char **argv) {
@@ -65,6 +66,14 @@ int runtime_client_init(int argc, char **argv) {
 	if (config_client_init() < 0) {
 		errsv = errno;
 		log_crit("runtime_client_init(): config_client_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Initialize signals interface */
+	if (sig_client_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_client_init(): sig_client_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -145,6 +154,14 @@ int runtime_client_lib_init(void) {
 		return -1;
 	}
 
+	/* Initialize signals interface */
+	if (sig_client_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_client_lib_init(): sig_client_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* This is a client library */
 	bit_set(&runc.flags, USCHED_RUNTIME_FLAG_LIB);
 
@@ -192,6 +209,9 @@ void runtime_client_destroy(void) {
 	parse_client_req_destroy(runc.req);
 	runc.req = NULL;
 
+	/* Destroy signals interface */
+	sig_client_destroy();
+
 	/* Destroy configuration */
 	config_client_destroy();
 
@@ -215,6 +235,9 @@ void runtime_client_lib_destroy(void) {
 	/* Destroy requests */
 	parse_client_req_destroy(runc.req);
 	runc.req = NULL;
+
+	/* Destroy signals interface */
+	sig_client_destroy();
 
 	/* Destroy configuration */
 	config_client_destroy();

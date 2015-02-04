@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface
  *
- * Date: 02-02-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,10 +29,16 @@
 #include <signal.h>
 #include <pthread.h>
 
+#include "config.h"
 #include "runtime.h"
 #include "bitops.h"
 #include "log.h"
 #include "sig.h"
+
+static void _sig_pipe_client_handler(int n) {
+	/* Ignore SIGPIPE */
+	return;
+}
 
 static void _sig_term_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE);
@@ -77,6 +83,26 @@ static void _sig_term_exec_handler(int n) {
 
 static void _sig_hup_exec_handler(int n) {
 	bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
+}
+
+int sig_client_init(void) {
+#if !defined(COMPILE_WIN32) || COMPILE_WIN32 == 0
+	int errsv = 0;
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(struct sigaction));
+
+	sa.sa_handler = _sig_pipe_client_handler;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGPIPE, &sa, &runc.sa_save) < 0) {
+		errsv = errno;
+		log_warn("sig_client_init(): sigaction(SIGPIPE, ...): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#endif
+	return 0;
 }
 
 int sig_daemon_init(void) {
@@ -193,6 +219,12 @@ _failure:
 	errno = errsv;
 
 	return -1;
+}
+
+void sig_client_destroy(void) {
+#if !defined(COMPILE_WIN32) || COMPILE_WIN32 == 0
+	sigaction(SIGPIPE, &runc.sa_save, NULL);
+#endif
 }
 
 void sig_daemon_destroy(void) {

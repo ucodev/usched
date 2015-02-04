@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 26-01-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,9 +57,13 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 	struct tm tm;
 	long val = strtol(arg, &endptr, 10);
 
-	/* Validate 'val' */
-	if ((*endptr) || (endptr == arg) || (val < 0) || (errno == EINVAL) || (errno == ERANGE))
+	/* Validate 'val'. If adverbial of time is WEEKDAYS, then we can accept a non integer
+	 * value.
+	 */
+	if (((*endptr) || (endptr == arg) || (val < 0) || (errno == EINVAL) || (errno == ERANGE)) && (req->adverb != USCHED_ADVERB_WEEKDAYS)) {
+		errno = EINVAL;
 		return -1;
+	}
 
 	memset(&tm, 0, sizeof(struct tm));
 

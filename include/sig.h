@@ -3,9 +3,9 @@
  * @brief uSched
  *        Signals interface header
  *
- * Date: 24-06-2014
+ * Date: 04-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -28,11 +28,11 @@
 #ifndef USCHED_SIG_H
 #define USCHED_SIG_H
 
-
 /* Prototypes */
-
+int sig_client_init(void);
 int sig_daemon_init(void);
 int sig_exec_init(void);
+void sig_client_destroy(void);
 void sig_daemon_destroy(void);
 void sig_exec_destroy(void);
 

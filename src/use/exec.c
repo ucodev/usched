@@ -153,7 +153,7 @@ static void *_exec_cmd(void *arg) {
 		exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_EXECLP);
 	} else {
 		/* Parent */
-		log_info("Entry[0x%016llX]: PID[%u]: Executing '%s' [uid: %u, gid: %u]. Waiting for child to exit...", id, pid, cmd, uid, gid);
+		log_info("Entry[0x%016llX]: PID[%u]: Executing '%s' [uid: %u, gid: %u]. Waiting for child to exit...\n", id, pid, cmd, uid, gid);
 
 		/* Wait for child to return */
 		if (waitpid(pid, &status, 0) < 0)

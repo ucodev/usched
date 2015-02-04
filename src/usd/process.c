@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 29-01-2015
+ * Date: 04-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,7 +46,6 @@
 static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry *entry) {
 	int errsv = 0;
 	int cur_fd = aop->fd;
-	struct usched_entry *entry_new = NULL;
 
 	debug_printf(DEBUG_INFO, "PAYLOAD: %s\n", entry->payload);
 
@@ -60,27 +59,13 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 	/* Clear payload information */
 	entry_unset_payload(entry);
 
-	/* Alloc memory for entry duplication */
-	if (!(entry_new = mm_alloc(sizeof(struct usched_entry)))) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_new(): mm_alloc(): %s\n", strerror(errno));
-		goto _update_op_new_failure_1;
-	}
-
-	/* Duplicate the entry */
-	if (entry_copy(entry_new, entry) < 0) {
-		errsv = errno;
-		log_warn("_process_recv_update_op_new(): entry_copy(): %s\n", strerror(errno));
-		mm_free(entry_new);
-		goto _update_op_new_failure_1;
-	}
-
 	/* We're done. Now we need to install and set a global and unique id for this entry */
-	if (schedule_entry_create(entry_new) < 0) {
+	if (schedule_entry_create(entry) < 0) {
 		errsv = errno;
 		log_warn("_process_recv_update_op_new(): schedule_entry_create(): %s\n", strerror(errno));
 
-		mm_free(entry_new);
+		/* Destroy the entry (see NOTE below) */
+		entry_destroy(entry);
 
 		/* NOTE: This is a special case: The current entry is no longer in the rpool and wasn't inserted into
 		 * the active pool (apool) due to errors.
@@ -89,9 +74,6 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 		goto _update_op_new_failure_1;
 	}
-
-	/* Update entry->id in order to report back the Entry ID to the client */
-	entry->id = entry_new->id;
 
 	/* NOTE: After schedule_entry_create() success, a new and unique entry->id is now set. */
 
@@ -136,7 +118,7 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 _update_op_new_failure_2:
 	/* If we're unable to comunicate with the client, the scheduled entry should be disabled and pop'd from apool */
-	if (!schedule_entry_disable(entry_new)) {
+	if (!schedule_entry_disable(entry)) {
 		/* This is critical and should never happen. This means that a race condition occured that allowed
 		 * the user to operate over a unfinished entry. We'll abort here in order to prevent further damage.
 		 */
@@ -224,6 +206,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	}
 
 	/* Report back the deleted entries. */
+
+	/* Unset the entry payload */
+	entry_unset_payload(entry);
 
 	/* Allocate enough memory to craft the payload */
 	entry->psize = (sizeof(entry->id) * entry_list_res_nmemb) + sizeof(entry_list_res_nmemb);
@@ -383,6 +368,9 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		/* Grant that the found entry belongs to the requesting uid */
 		if (entry_c->uid != entry->uid) {
 			log_warn("_process_recv_update_op_get(): entry_c->uid != entry->uid. (UID of the request: %u\n", entry->uid);
+
+			entry_destroy(entry_c);
+
 			continue;
 		}
 
@@ -447,6 +435,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	memcpy(buf, (uint32_t [1]) { htonl(entry_list_res_nmemb) }, 4);
 
 	/* Setup the payload to be encrypted */
+	entry_unset_payload(entry);
 	entry->payload = buf;
 	entry->psize = buf_offset;
 

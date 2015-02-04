@@ -125,6 +125,11 @@ _update_op_new_failure_2:
 		abort();
 	}
 
+	/* Revert the entry id to its original file descriptor. This will allow the rpool cleanup
+	 * routines be aware that this entry wasn't successfully inserted into the active pool.
+	 */
+	entry->id = aop->fd;
+
 _update_op_new_failure_1:
 	errno = errsv;
 
@@ -173,7 +178,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 		if (schedule_entry_get_by_uid(entry->uid, &entry_list_req, &entry_list_req_nmemb) < 0) {
 			errsv = errno;
-			log_warn("_process_recv_update_op_get(): schedule_entry_get_by_uid(): %s\n", strerror(errno));
+			log_warn("_process_recv_update_op_del(): schedule_entry_get_by_uid(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -230,7 +235,7 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	/* Encrypt the payload */
 	if (entry_payload_encrypt(entry, 4) < 0) {
 		errsv = errno;
-		log_warn("_process_recv_update_op_get(): entry_payload_encrypt(): %s\n", strerror(errno));
+		log_warn("_process_recv_update_op_del(): entry_payload_encrypt(): %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		mm_free(entry_list_res);
 		errno = errsv;

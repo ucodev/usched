@@ -77,7 +77,7 @@ void schedule_daemon_destroy(void) {
 }
 
 int schedule_daemon_active(void) {
-	return (int) rund.psched;
+	return (int) (uintptr_t) rund.psched;
 }
 
 int schedule_entry_create(struct usched_entry *entry) {

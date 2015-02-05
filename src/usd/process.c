@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -171,9 +171,8 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 	 * this means to delete all the entries that match the entry's uid
 	 */
 	if ((entry_list_req_nmemb == 1) && (entry_list_req[0] == USCHED_SUBJ_ALL)) {
-		mm_free(entry->payload);
-		entry->payload = NULL;
-		entry->psize = 0;
+		entry_unset_payload(entry);
+
 		entry_list_req = NULL;
 
 		if (schedule_entry_get_by_uid(entry->uid, &entry_list_req, &entry_list_req_nmemb) < 0) {
@@ -334,9 +333,8 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	 * this means to fetch all the entries that match the entry's uid
 	 */
 	if ((entry_list_req_nmemb == 1) && (entry_list_req[0] == USCHED_SUBJ_ALL)) {
-		mm_free(entry->payload);
-		entry->payload = NULL;
-		entry->psize = 0;
+		entry_unset_payload(entry);
+
 		entry_list_req = NULL;
 
 		if (schedule_entry_get_by_uid(entry->uid, &entry_list_req, &entry_list_req_nmemb) < 0) {
@@ -364,7 +362,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 
 	/* Iterate payload, ensure the user that's requesting a given entry id is authorized to do so. */
 	for (i = 0; i < entry_list_req_nmemb; i ++) {
-		/* Search for the entry id in the active pool */
+		/* Search for the entry id in the active pool and get a copy of it. */
 		if (!(entry_c = schedule_entry_get_copy(entry_list_req[i]))) {
 			log_warn("_process_recv_update_op_get(): schedule_entry_get_copy(): %s\n", strerror(errno));
 			continue;
@@ -383,11 +381,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		memset(entry_c->session, 0, CONFIG_USCHED_AUTH_SESSION_MAX);
 
 		/* Clear entry payload */
-		if (entry_c->payload) {
-			mm_free(entry_c->payload);
-			entry_c->payload = NULL;
-			entry_c->psize = 0;
-		}
+		entry_unset_payload(entry_c);
 
 		/* Clear entry psched_id. The client should not be aware of this information */
 		entry_c->reserved.psched_id = 0;

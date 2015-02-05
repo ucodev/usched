@@ -23,23 +23,26 @@ install_all:
 examples:
 	make -C example/
 
-install_centos:
-	make -C scripts/ install_centos
+install_classic_centos:
+	make -C scripts/ install_classic_centos
 
-install_debian:
-	make -C scripts/ install_debian
+install_classic_debian:
+	make -C scripts/ install_classic_debian
 
-install_deepin:
-	make -C scripts/ install_deepin
+install_classic_deepin:
+	make -C scripts/ install_classic_deepin
 
-install_fedora:
-	make -C scripts/ install_fedora
+install_classic_fedora:
+	make -C scripts/ install_classic_fedora
 
-install_redhat:
-	make -C scripts/ install_redhat
+install_classic_redhat:
+	make -C scripts/ install_classic_redhat
 
-install_ubuntu:
-	make -C scripts/ install_ubuntu
+install_classic_ubuntu:
+	make -C scripts/ install_classic_ubuntu
+
+install_systemd:
+	make -C scripts/ install_systemd
 
 install_doc:
 	mkdir -p /usr/share/doc/usched/doc

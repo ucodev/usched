@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -318,8 +318,8 @@ int schedule_entry_update(struct usched_entry *entry) {
 
 	/* Check if it's safe to update this entry */
 	if (!schedule_daemon_active()) {
-		log_info("schedule_entry_update(): Scheduling interface was destroyed. Entry ID 0x%016llX will not be updated (this message is informational only and does not represent an error condition).\n", entry->id);
-		return 0;
+		log_info("schedule_entry_update(): Scheduling interface was destroyed. Entry ID 0x%016llX will not be updated.\n", entry->id);
+		return -1;
 	}
 
 	debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE BEGIN]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", entry->id, entry->trigger, entry->step, entry->expire);
@@ -327,6 +327,7 @@ int schedule_entry_update(struct usched_entry *entry) {
 	/* Search for the entry in order to grant that it is still valid (not expired) */
 	if (psched_search(rund.psched, entry->reserved.psched_id, &trigger, &step, &expire) < 0) {
 		debug_printf(DEBUG_INFO, "[SCHEDULE UPDATE END]: Entry not found");
+
 		/* Entry not found */
 		return 0;
 	}

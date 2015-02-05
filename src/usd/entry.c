@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -192,7 +192,7 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 }
 
 void entry_daemon_pmq_dispatch(void *arg) {
-	int errsv = 0; /* FIXME: errno and errsv don't make much sense in this routine */
+	int ret = 0;
 	char *buf = NULL;
 	struct usched_entry *entry = arg;
 
@@ -214,13 +214,11 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Allocate message memory */
 	if (!(buf = mm_alloc(rund.config.core.pmq_msgsize))) {
-		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
 
 		/* Force daemon to be restarted and reload a clean state */
 		runtime_daemon_fatal();
 
-		errno = errsv;
 		goto _finish;
 	}
 
@@ -229,7 +227,6 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		log_warn("entry_daemon_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
-		errno = EACCES;
 
 		/* Remove this entry as it is invalid */
 		goto _remove;
@@ -238,7 +235,6 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check if the message fits in the configured message size */
 	if ((strlen(entry->subj) + 21) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
-		errno = EMSGSIZE;
 
 		/* Remove this entry as it is invalid */
 		goto _remove;
@@ -255,7 +251,6 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Deliver message to uSched executer (use) */
 	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
-		errsv = errno;
 		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
 
 		/* NOTE:
@@ -269,8 +264,6 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		 */
 
 		log_crit("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
-
-		errno = errsv;
 	}
 
 _process:
@@ -283,7 +276,7 @@ _process:
 	pthread_mutex_lock(&rund.mutex_apool);
 
 	/* Update trigger, step and expire parameters of the entry based on psched library data */
-	if (schedule_entry_update(entry) == 1) {
+	if ((ret = schedule_entry_update(entry)) == 1) {
 		pthread_mutex_unlock(&rund.mutex_apool);
 
 		/* Entry was successfully updated. */
@@ -291,6 +284,15 @@ _process:
 	}
 
 	pthread_mutex_unlock(&rund.mutex_apool);
+
+	/* Check if an error ocurred */
+	if (ret < 0) {
+		log_info("entry_daemon_pmq_dispatch(): schedule_entry_update(): %s. (Entry ID: 0x%016llX\n", strerror(errno), entry->id);
+
+		runtime_daemon_fatal();
+
+		goto _finish;
+	}
 
 	/* Entry was not found. This means that it wasn't a recurrent entry (no step).
 	 * It should be deleted from the active pool.

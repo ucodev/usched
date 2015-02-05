@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -53,10 +53,16 @@
 static int _conn_daemon_unix_init(void) {
 	int errsv = 0;
 
+	/* Check if local connections are authorized */
+	if (!rund.config.auth.local_use) {
+		log_info("_conn_daemon_unix_init(): Skipping local connections manager.\n");
+		return 0;
+	}
+
 	/* Initialize local connections manager */
 	if ((rund.fd_unix = panet_server_unix(rund.config.network.sock_name, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_unix_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.network.sock_name, strerror(errno));
+		log_crit("_conn_daemon_unix_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.network.sock_name, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -64,7 +70,7 @@ static int _conn_daemon_unix_init(void) {
 	/* Grant read/write privileges to everyone on the named socket */
 	if (chmod(rund.config.network.sock_name, 0666) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_unix_init(): chmod(\"%s\", 0666): %s\n", rund.config.network.sock_name, strerror(errno));
+		log_crit("_conn_daemon_unix_init(): chmod(\"%s\", 0666): %s\n", rund.config.network.sock_name, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -72,7 +78,7 @@ static int _conn_daemon_unix_init(void) {
 	/* Set non-blocking */
 	if (conn_set_nonblock(rund.fd_unix) < 0) {
 		errsv = errno;
-		log_crit("conn_daemon_unix_init(): conn_set_nonblock(): %s\n", strerror(errno));
+		log_crit("_conn_daemon_unix_init(): conn_set_nonblock(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -85,7 +91,7 @@ static int _conn_daemon_remote_init(void) {
 	int errsv = 0;
 
 	/* Check if remote connections are authorized */
-	if (!rund.config.auth.users_remote) {
+	if (!rund.config.auth.remote_users) {
 		log_info("_conn_daemon_remote_init(): Skipping remote connections manager.\n");
 		return 0;
 	}
@@ -201,6 +207,10 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 	sigfillset(&si_cur);
 	sigemptyset(&si_prev);
 
+	/* Check if this thread deserves to live */
+	if (!rund.config.auth.local_use)
+		pthread_exit(NULL);
+
 	for (;;) {
 		/* Empty garbage collector */
 		gc_cleanup();
@@ -264,7 +274,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 	sigemptyset(&si_prev);
 
 	/* Check if this thread deserves to live */
-	if (!rund.config.auth.users_remote)
+	if (!rund.config.auth.remote_users)
 		pthread_exit(NULL);
 
 	for (;;) {

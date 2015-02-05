@@ -4,7 +4,7 @@
  *        Authentication and Authorization interface header
  *        Authentication configuration and administration header
  *
- * Date: 03-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,10 +43,11 @@ int auth_client_remote_session_create(unsigned char *session, const char *userna
 int auth_client_remote_session_process(unsigned char *session, const char *username, const char *plain_passwd, unsigned char *context, unsigned char *agreed_key);
 
 /* Auth admin prototypes (usa only) */
+void auth_admin_show(void);
 int auth_admin_local_use_show(void);
-int auth_admin_local_use_change(const char *use_local);
+int auth_admin_local_use_change(const char *local_use);
 int auth_admin_remote_users_show(void);
-int auth_admin_remote_users_change(const char *users_remote);
+int auth_admin_remote_users_change(const char *remote_users);
 
 #endif
 

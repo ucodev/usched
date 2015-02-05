@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 03-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -53,8 +53,8 @@ int category_auth_change(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_USE_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_USE_STR)) {
 			/* set local.use */
 			if (auth_admin_local_use_change(args[2]) < 0) {
 				errsv = errno;
@@ -73,8 +73,8 @@ int category_auth_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_REMOTE_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_USERS_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_REMOTE_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_USERS_STR)) {
 			/* set remote.users */
 			if (auth_admin_remote_users_change(args[2]) < 0) {
 				errsv = errno;
@@ -107,6 +107,11 @@ int category_auth_show(size_t argc, char **args) {
 	int errsv = 0;
 
 	/* Usage: show auth <component> <property> */
+	if (!argc) {
+		auth_admin_show();
+		return 0;
+	}
+
 	if (argc < 2) {
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "show auth");
 		log_warn("category_auth_show(): Insufficient arguments.\n");
@@ -114,8 +119,8 @@ int category_auth_show(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_USE_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_USE_STR)) {
 			/* show local.use */
 			if (auth_admin_local_use_show() < 0) {
 				errsv = errno;
@@ -134,8 +139,8 @@ int category_auth_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_REMOTE_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_USERS_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_REMOTE_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_USERS_STR)) {
 			/* show remote.users */
 			if (auth_admin_remote_users_show() < 0) {
 				errsv = errno;
@@ -175,8 +180,8 @@ int category_core_change(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
 			/* set delta.noexec */
 			if (core_admin_delta_noexec_change(args[2]) < 0) {
 				errsv = errno;
@@ -187,7 +192,7 @@ int category_core_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
 			/* set delta.reload */
 			if (core_admin_delta_reload_change(args[2]) < 0) {
 				errsv = errno;
@@ -206,8 +211,8 @@ int category_core_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_JAIL_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_DIR_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_JAIL_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_DIR_STR)) {
 			/* set jail.dir */
 			if (core_admin_jail_dir_change(args[2]) < 0) {
 				errsv = errno;
@@ -226,8 +231,8 @@ int category_core_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_PMQ_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PMQ_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
 			/* set pmq.msgmax */
 			if (core_admin_pmq_msgmax_change(args[2]) < 0) {
 				errsv = errno;
@@ -238,7 +243,7 @@ int category_core_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
 			/* set pmq.msgsize */
 			if (core_admin_pmq_msgsize_change(args[2]) < 0) {
 				errsv = errno;
@@ -249,7 +254,7 @@ int category_core_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
 			/* set pmq.name */
 			if (core_admin_pmq_name_change(args[2]) < 0) {
 				errsv = errno;
@@ -268,8 +273,8 @@ int category_core_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
 			/* set privdrop.group */
 			if (core_admin_privdrop_group_change(args[2]) < 0) {
 				errsv = errno;
@@ -280,7 +285,7 @@ int category_core_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_USER_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_USER_STR)) {
 			/* set privdrop.user */
 			if (core_admin_privdrop_user_change(args[2]) < 0) {
 				errsv = errno;
@@ -299,8 +304,8 @@ int category_core_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_SERIALIZE_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_FILE_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_SERIALIZE_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_FILE_STR)) {
 			/* set serialize.file */
 			if (core_admin_serialize_file_change(args[2]) < 0) {
 				errsv = errno;
@@ -319,8 +324,8 @@ int category_core_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_THREAD_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_PRIORITY_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_THREAD_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_PRIORITY_STR)) {
 			/* set thread.priority */
 			if (core_admin_thread_priority_change(args[2]) < 0) {
 				errsv = errno;
@@ -331,7 +336,7 @@ int category_core_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_WORKERS_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_WORKERS_STR)) {
 			/* set thread.workers */
 			if (core_admin_thread_workers_change(args[2]) < 0) {
 				errsv = errno;
@@ -364,6 +369,11 @@ int category_core_show(size_t argc, char **args) {
 	int errsv = 0;
 
 	/* Usage: show core <component> <property> */
+	if (!argc) {
+		core_admin_show();
+		return 0;
+	}
+
 	if (argc < 2) {
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "show core");
 		log_warn("category_core_change(): Insufficient arguments.\n");
@@ -371,8 +381,8 @@ int category_core_show(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
 			/* show delta.noexec */
 			if (core_admin_delta_noexec_show() < 0) {
 				errsv = errno;
@@ -383,7 +393,7 @@ int category_core_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
 			/* show delta.reload */
 			if (core_admin_delta_reload_show() < 0) {
 				errsv = errno;
@@ -402,8 +412,8 @@ int category_core_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_JAIL_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_DIR_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_JAIL_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_DIR_STR)) {
 			/* show jail.dir */
 			if (core_admin_jail_dir_show() < 0) {
 				errsv = errno;
@@ -422,8 +432,8 @@ int category_core_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_PMQ_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PMQ_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
 			/* show pmq.msgmax */
 			if (core_admin_pmq_msgmax_show() < 0) {
 				errsv = errno;
@@ -434,7 +444,7 @@ int category_core_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
 			/* show pmq.msgsize */
 			if (core_admin_pmq_msgsize_show() < 0) {
 				errsv = errno;
@@ -445,7 +455,7 @@ int category_core_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
 			/* show pmq.name */
 			if (core_admin_pmq_name_show() < 0) {
 				errsv = errno;
@@ -464,8 +474,8 @@ int category_core_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
 			/* show privdrop.group */
 			if (core_admin_privdrop_group_show() < 0) {
 				errsv = errno;
@@ -476,7 +486,7 @@ int category_core_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_USER_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_USER_STR)) {
 			/* show privdrop.user */
 			if (core_admin_privdrop_user_show() < 0) {
 				errsv = errno;
@@ -495,8 +505,8 @@ int category_core_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_SERIALIZE_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_FILE_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_SERIALIZE_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_FILE_STR)) {
 			/* show serialize.file */
 			if (core_admin_serialize_file_show() < 0) {
 				errsv = errno;
@@ -515,8 +525,8 @@ int category_core_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_THREAD_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_PRIORITY_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_THREAD_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_PRIORITY_STR)) {
 			/* show thread.priority */
 			if (core_admin_thread_priority_show() < 0) {
 				errsv = errno;
@@ -527,7 +537,7 @@ int category_core_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_WORKERS_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_WORKERS_STR)) {
 			/* show thread.workers */
 			if (core_admin_thread_workers_show() < 0) {
 				errsv = errno;
@@ -567,8 +577,8 @@ int category_network_change(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (strcasecmp(args[0], USCHED_COMPONENT_BIND_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_ADDR_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_BIND_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_ADDR_STR)) {
 			/* set bind.addr */
 			if (network_admin_bind_addr_change(args[2]) < 0) {
 				errsv = errno;
@@ -579,7 +589,7 @@ int category_network_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_PORT_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_PORT_STR)) {
 			/* set bind.port */
 			if (network_admin_bind_port_change(args[2]) < 0) {
 				errsv = errno;
@@ -598,8 +608,8 @@ int category_network_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_CONN_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_LIMIT_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_CONN_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_LIMIT_STR)) {
 			/* set conn.limit */
 			if (network_admin_conn_limit_change(args[2]) < 0) {
 				errsv = errno;
@@ -610,7 +620,7 @@ int category_network_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_TIMEOUT_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_TIMEOUT_STR)) {
 			/* set conn.timeout */
 			if (network_admin_conn_timeout_change(args[2]) < 0) {
 				errsv = errno;
@@ -629,8 +639,8 @@ int category_network_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_SOCK_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_SOCK_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
 			/* set sock.name */
 			if (network_admin_sock_name_change(args[2]) < 0) {
 				errsv = errno;
@@ -663,6 +673,11 @@ int category_network_show(size_t argc, char **args) {
 	int errsv = 0;
 
 	/* Usage: show network <component> <property> */
+	if (!argc) {
+		network_admin_show();
+		return 0;
+	}
+
 	if (argc < 2) {
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "show network");
 		log_warn("category_network_show(): Insufficient arguments.\n");
@@ -670,8 +685,8 @@ int category_network_show(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (strcasecmp(args[0], USCHED_COMPONENT_BIND_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_ADDR_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_BIND_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_ADDR_STR)) {
 			/* show bind.addr */
 			if (network_admin_bind_addr_show() < 0) {
 				errsv = errno;
@@ -682,7 +697,7 @@ int category_network_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_PORT_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_PORT_STR)) {
 			/* show bind.port */
 			if (network_admin_bind_port_show() < 0) {
 				errsv = errno;
@@ -701,8 +716,8 @@ int category_network_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_CONN_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_LIMIT_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_CONN_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_LIMIT_STR)) {
 			/* show conn.limit */
 			if (network_admin_conn_limit_show() < 0) {
 				errsv = errno;
@@ -713,7 +728,7 @@ int category_network_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
-		} else if (strcasecmp(args[1], USCHED_PROPERTY_TIMEOUT_STR)) {
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_TIMEOUT_STR)) {
 			/* show conn.timeout */
 			if (network_admin_conn_timeout_show() < 0) {
 				errsv = errno;
@@ -732,8 +747,8 @@ int category_network_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (strcasecmp(args[0], USCHED_COMPONENT_SOCK_STR)) {
-		if (strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_SOCK_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
 			/* show sock.name */
 			if (network_admin_sock_name_show() < 0) {
 				errsv = errno;

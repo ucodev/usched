@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -382,12 +382,12 @@ static int _config_init_auth_whitelist_uid(struct usched_config_auth *auth) {
 	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, &auth->whitelist_uid);
 }
 
-static int _config_init_auth_use_local(struct usched_config_auth *auth) {
-	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_USE_LOCAL, &auth->use_local);
+static int _config_init_auth_local_use(struct usched_config_auth *auth) {
+	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE, &auth->local_use);
 }
 
-static int _config_init_auth_users_remote(struct usched_config_auth *auth) {
-	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_USERS_REMOTE, &auth->users_remote);
+static int _config_init_auth_remote_users(struct usched_config_auth *auth) {
+	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, &auth->remote_users);
 }
 
 int config_init_auth(struct usched_config_auth *auth) {
@@ -426,17 +426,17 @@ int config_init_auth(struct usched_config_auth *auth) {
 	}
 
 	/* Read use local */
-	if (_config_init_auth_use_local(auth) < 0) {
+	if (_config_init_auth_local_use(auth) < 0) {
 		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_use_local(): %s\n", strerror(errno));
+		log_warn("_config_init_auth(): _config_init_auth_local_use(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	/* Read users remote */
-	if (_config_init_auth_users_remote(auth) < 0) {
+	if (_config_init_auth_remote_users(auth) < 0) {
 		errsv = errno;
-		log_warn("_config_init_auth(): _config_init_auth_users_remote(): %s\n", strerror(errno));
+		log_warn("_config_init_auth(): _config_init_auth_remote_users(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

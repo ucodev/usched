@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,8 +45,8 @@
 #define CONFIG_USCHED_FILE_AUTH_BL_UID		"blacklist.uid"
 #define CONFIG_USCHED_FILE_AUTH_WL_GID		"whitelist.gid"
 #define CONFIG_USCHED_FILE_AUTH_WL_UID		"whitelist.uid"
-#define CONFIG_USCHED_FILE_AUTH_USE_LOCAL	"local.use"
-#define CONFIG_USCHED_FILE_AUTH_USERS_REMOTE	"remote.users"
+#define CONFIG_USCHED_FILE_AUTH_LOCAL_USE	"local.use"
+#define CONFIG_USCHED_FILE_AUTH_REMOTE_USERS	"remote.users"
 #define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
 #define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
 #define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
@@ -222,9 +222,9 @@ struct usched_config_auth {
 	struct cll_handler *whitelist_gid;
 	struct cll_handler *blacklist_uid;
 	struct cll_handler *whitelist_uid;
-	unsigned int use_local;
-	unsigned int use_pam;
-	unsigned int users_remote;
+	unsigned int local_use;
+	unsigned int pam_use;
+	unsigned int remote_users;
 };
 
 struct usched_config_core {

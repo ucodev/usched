@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Admin
  *
- * Date: 03-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -109,8 +109,8 @@ static struct usched_admin_request *_parse_op_compound(struct usched_admin_reque
 	switch (req->op) {
 		case USCHED_OP_DELETE:
 		case USCHED_OP_ADD: if (argc < 3) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_CHANGE: if (argc < 5) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_SHOW: if (argc != 2) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
+		case USCHED_OP_CHANGE: if (argc < 4) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
+		case USCHED_OP_SHOW: if (argc < 2) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
 		default: usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_OP, argv[0]); goto _op_error;
 	}
 

@@ -58,6 +58,9 @@ char *file_read_line_single(const char *file) {
 
 	fgets(line, 8191, fp);
 
+	while (line[strlen(line) - 1] == '\n')
+		line[strlen(line) - 1] = 0;
+
 	fclose(fp);
 
 	return line;

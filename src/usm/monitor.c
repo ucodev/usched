@@ -61,7 +61,7 @@ extern int optind, optopt;
 #define CONFIG_FL_REDIR_ERR	0x10
 #define CONFIG_FL_PROC_RESTART	0x20
 #define CONFIG_FL_PROC_RSTIGN	0x40
-#define CONFIG_FL_PROC_RSTSEGV	0x80
+#define CONFIG_FL_PROC_RSTUSIG	0x80
 
 /* Declarations */
 struct cmdline_params {
@@ -268,7 +268,8 @@ static void _usage(char *const *argv) {
 			"code is different than zero.\n" \
 			"    -R         \tRestart process regardless the " \
 			"child exit code.\n" \
-			"    -S         \tRestart process on child SIGSEGV\n" \
+			"    -S         \tRestart process if terminated by " \
+			"any unhandled signal other than SIGKILL or SIGQUIT.\n" \
 			"    -f         \tForce PID file rewrite\n" \
 			"    -p <file>  \tPID file name\n" \
 			"\n", argv[0]);
@@ -336,7 +337,7 @@ static void _cmdline_process(int argc, char *const *argv) {
 			config.flags |= CONFIG_FL_PROC_RESTART;
 			config.flags |= CONFIG_FL_PROC_RSTIGN;
 		} else if (opt == 'S') {
-			config.flags |= CONFIG_FL_PROC_RSTSEGV;
+			config.flags |= CONFIG_FL_PROC_RSTUSIG;
 		} else {
 			_usage_invalid_opt(optopt, argv);
 		}
@@ -430,11 +431,11 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		/* Log any signals that caused the termination */
 		if (WIFSIGNALED(status))
-			log_info("main(): Child process \'%s\' received terminated due to signal %d.\n", config.binary, WTERMSIG(status));
+			log_info("main(): Child process \'%s\' was terminated due to unhandled signal %d.\n", config.binary, WTERMSIG(status));
 
 		/* Check if the exit status refers to a bad runtime state */
 		if (WEXITSTATUS(status) == PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG) {
-			log_info("main(): Child process \'%s\' won't be restarted due to runtime or configuration errors.", config.binary);
+			log_info("main(): Child process \'%s\' won't be restarted due to runtime or configuration errors.\n", config.binary);
 
 			/* If so, do not attempt to restart the process, even if explicitly requested
 			 * by command line options.
@@ -443,16 +444,18 @@ int main(int argc, char *argv[], char *envp[]) {
 		}
 
 		if (config.flags & CONFIG_FL_PROC_RSTIGN) {
-			log_info("main(): Restarting child \'%s\' regardless of exit status code.", config.binary);
+			log_info("main(): Restarting child \'%s\' regardless of exit status code.\n", config.binary);
 
 			/* Restart child regardless of signals and exit codes */
 			_main_loop_restart_prepare();
 
 			continue;
-		} else if ((config.flags & CONFIG_FL_PROC_RSTSEGV) && WIFSIGNALED(status) && (WTERMSIG(status) == SIGSEGV)) {
-			log_info("main(): Restarting child \'%s\' due to SIGSEGV.", config.binary);
+		} else if ((config.flags & CONFIG_FL_PROC_RSTUSIG) && WIFSIGNALED(status) && (WTERMSIG(status) != SIGKILL) && (WTERMSIG(status) != SIGQUIT)) {
+			log_info("main(): Restarting child \'%s\' since its termination was caused by an unhandled signal other than SIGKILL and SIGQUIT. (Termination signal was %d)\n", config.binary, WTERMSIG(status));
 
-			/* Restart child if a SIGSEGV was caught */
+			/* Restart child if any unhandled signal other than KILL and QUIT caused its
+			 * termination
+			 */
 			_main_loop_restart_prepare();
 
 			continue;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 04-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -84,6 +84,8 @@ int marshal_daemon_serialize_pools(void) {
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
+	log_info("Serialize pools (Checkpoint #1)...\n");
+
 	/* Grant entry status correctness before serialization */
 	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
 		/* Check if we need to compensate the entry time values */
@@ -106,6 +108,8 @@ int marshal_daemon_serialize_pools(void) {
 
 		/* NOTE: Further integrity checks should be implemented below */
 	}
+
+	log_info("Serialize pools (Checkpoint #2)...\n");
 
 	/* Always set the file descriptor position to the beggining of the serialization file */
 	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {
@@ -145,11 +149,15 @@ int marshal_daemon_serialize_pools(void) {
 #endif
 	}
 
+	log_info("Serialize pools (Checkpoint #3)...\n");
+
 	/* Serialize the active pool */
 	if ((ret = rund.apool->serialize(rund.apool, rund.ser_fd)) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_serialize_pools(): rund.apool->serialize(): %s\n", strerror(errno));
 	}
+
+	log_info("Serialize pools (Checkpoint #4)...\n");
 
 	pthread_mutex_unlock(&rund.mutex_apool);
 

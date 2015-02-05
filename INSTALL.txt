@@ -46,14 +46,17 @@
 
 3. Specific Add-ons
 
- In order to install operating system specific add-ons, run:
+ In order to install operating system specific scripts, run:
 
-   # make install_<distro>
+   # make install_classic_<distro>
 
  Where distro is the name of the system distribution. For example, to install Debian add-ons, run:
 
-   # make install_debian
+   # make install_classic_debian
 
+ For operating systems incorporating the systemd:
+
+   # make install_systemd
 
 
 4. Starting uSched Services

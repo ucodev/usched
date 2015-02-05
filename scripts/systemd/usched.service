@@ -1,0 +1,12 @@
+[Unit]
+Description=uSched
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/systemd/scripts/usched start
+ExecStop=/usr/lib/systemd/scripts/usched stop
+ExecReload=/usr/lib/systemd/scripts/usched reload
+
+[Install]
+WantedBy=multi-user.target
+

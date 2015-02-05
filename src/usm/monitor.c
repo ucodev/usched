@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 02-02-2015
+ * Date: 05-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -420,10 +420,17 @@ int main(int argc, char *argv[], char *envp[]) {
 			_file_pid_create(config.pidf_name);
 
 		/* Make sure that we receive a valid status value... otherwise jump out of here. */
-		if ((status = _bexec(config.binary, config.args, envp)) == -1)
+		if ((status = _bexec(config.binary, config.args, envp)) == -1) {
+			log_warn("main(): _bexec(): Unable to execute binary '%s': %s.\n", config.binary, strerror(errno));
 			break;
+		}
 
+		/* Log process termination */
 		log_info("main(): _bexec(): Execution of '%s' terminated (Exit status: %d).\n", config.binary, WEXITSTATUS(status));
+
+		/* Log any signals that caused the termination */
+		if (WIFSIGNALED(status))
+			log_info("main(): Child process \'%s\' received terminated due to signal %d.\n", config.binary, WTERMSIG(status));
 
 		/* Check if the exit status refers to a bad runtime state */
 		if (WEXITSTATUS(status) == PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG) {

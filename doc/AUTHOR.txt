@@ -1,0 +1,8 @@
+uSched
+
+Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+
+Licensed under GNU General Public Licence version 3
+
+Home Page: http://www.ucodev.org
+

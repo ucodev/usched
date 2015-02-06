@@ -28,7 +28,7 @@ fi
 ## Test features ##
 mkdir -p build
 rm -f .l*
-. test.inc
+. ./lib/sh/test.inc
 
 test_lib "crypt"
 test_lib "gmp"

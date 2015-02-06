@@ -1,0 +1,72 @@
+1. Dependencies
+
+ The following dependencies are automatically installed through the 'deps' script:
+
+  - fsop Library
+    * https://github.com/ucodev/libfsop
+
+  - pall Library
+    * https://github.com/ucodev/libpall
+
+  - panet Library
+    * https://github.com/ucodev/libpanet
+
+  - rtsaio Library
+    * https://github.com/ucodev/librtsaio
+
+  - psched Library
+    * https://github.com/ucodev/libpsched
+
+  - psec Library
+    * https://github.com/ucodev/libpsec
+
+  - fsma Library
+    * https://github.com/ucodev/libfsma
+
+
+
+2. Installation
+
+ The following command will fetch all the required dependencies and install the uSched services:
+
+   # ./deploy
+
+
+ Alternatively, each of the scripts invoked by 'deploy' can be executed separately:
+
+   # ./deps
+   # ./do
+   # ./install
+   # ./undo
+
+ For Raspberry PI deployment, set the build target before any of the commands above:
+
+   # ./target rpi
+
+
+3. Specific Add-ons
+
+ In order to install operating system specific scripts, run:
+
+   # make install_classic_<distro>
+
+ Where distro is the name of the system distribution. For example, to install Debian add-ons, run:
+
+   # make install_classic_debian
+
+ For operating systems incorporating the systemd, run:
+
+   # make install_systemd
+
+
+4. Starting uSched Services
+
+   # usched start
+
+
+
+5. Stopping uSched Services
+
+   # usched stop
+
+

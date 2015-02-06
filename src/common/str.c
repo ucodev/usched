@@ -25,16 +25,15 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "config.h"
-#include "str.h"
 #include "mm.h"
+#include "str.h"
 
 char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
 	char *occurrence = NULL, *str_new = NULL;
-	size_t len_new = 0;
+	size_t len_haystack = 0, len_needle = 0, len_rcontent = 0, len_new = 0;
 
 	/* Reject any argument that is NULL */
 	if (!haystack || !needle || !rcontent)
@@ -44,8 +43,17 @@ char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
 	if (!(occurrence = strstr(haystack, needle)))
 		return NULL;
 
+	/* Compute the arguments length */
+	len_haystack = strlen(haystack);
+	len_needle = strlen(needle);
+	len_rcontent = strlen(rcontent);
+
+	/* Length of haystack and needle must be non-zero */
+	if (!len_haystack || !len_needle)
+		return NULL;
+
 	/* Compute the length of the result */
-	len_new = strlen(haystack) - strlen(needle) + strlen(rcontent);
+	len_new = len_haystack - len_needle + len_rcontent;
 
 	/* Alloc enough memoery for the result */
 	if (!(str_new = mm_alloc(len_new + 1)))
@@ -58,10 +66,10 @@ char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
 	memcpy(str_new, haystack, occurrence - haystack);
 
 	/* Replace the occurrence */
-	memcpy(str_new + (occurrence - haystack), rcontent, strlen(rcontent));
+	memcpy(str_new + (occurrence - haystack), rcontent, len_rcontent);
 
 	/* Craft the third part of the result (if any) */
-	strcat(str_new, occurrence + strlen(needle));
+	strcat(str_new, occurrence + len_needle);
 
 	/* Return the result */
 	return str_new;

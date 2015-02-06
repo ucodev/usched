@@ -49,6 +49,7 @@
 #include "auth.h"
 #include "conn.h"
 #include "schedule.h"
+#include "vars.h"
 
 static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 	int errsv = 0;
@@ -193,7 +194,7 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 
 void entry_daemon_pmq_dispatch(void *arg) {
 	int ret = 0;
-	char *buf = NULL;
+	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
 
 	/* Remove relative trigger flags, if any */
@@ -232,8 +233,12 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		goto _remove;
 	}
 
+	/* Replace subject variables with current values */
+	if (!(cmd = vars_replace_all(entry->subj, (struct usched_vars [1]) { { entry->id, entry->username, entry->uid, entry->gid, entry->trigger, entry->step, entry->expire } })))
+		cmd = entry->subj;
+
 	/* Check if the message fits in the configured message size */
-	if ((strlen(entry->subj) + 21) > rund.config.core.pmq_msgsize) {
+	if ((strlen(cmd) + 21) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
 
 		/* Remove this entry as it is invalid */
@@ -245,7 +250,11 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	memcpy(buf + 8, &entry->uid, 4);
 	memcpy(buf + 12, &entry->gid, 4);
 	memcpy(buf + 16, &entry->trigger, 4);
-	memcpy(buf + 20, entry->subj, strlen(entry->subj));
+	memcpy(buf + 20, cmd, strlen(cmd));
+
+	/* Free cmd memory if allocated by vars_replace_all() */
+	if (cmd != entry->subj)
+		mm_free(cmd);
 
 	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
 

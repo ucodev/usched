@@ -165,9 +165,10 @@ char *vars_replace_all(const char *in, const struct usched_vars *vars) {
 
 	if (ret) {
 		if (tmp != in) mm_free((void *) tmp); /* Safe! We're sure that it's non-const */
+		tmp = ret;
 	}
 
 	/* Return result */
-	return ret;
+	return tmp != in ? (char *) tmp : NULL; /* If 'tmp' is returned, it points to a non-const */
 }
 

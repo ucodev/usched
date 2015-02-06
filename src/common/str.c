@@ -31,7 +31,12 @@
 #include "mm.h"
 #include "str.h"
 
-char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
+static char *_strrepl_generic(
+		const char *haystack,
+		const char *needle,
+		const char *rcontent,
+		size_t *start_index)
+{
 	char *occurrence = NULL, *str_new = NULL;
 	size_t len_haystack = 0, len_needle = 0, len_rcontent = 0, len_new = 0;
 
@@ -40,7 +45,7 @@ char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
 		return NULL;
 
 	/* Search for at least one occurrence */
-	if (!(occurrence = strstr(haystack, needle)))
+	if (!(occurrence = strstr(haystack + *start_index, needle)))
 		return NULL;
 
 	/* Compute the arguments length */
@@ -71,15 +76,23 @@ char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
 	/* Craft the third part of the result (if any) */
 	strcat(str_new, occurrence + len_needle);
 
+	/* Update start index */
+	*start_index = occurrence - haystack + len_rcontent;
+
 	/* Return the result */
 	return str_new;
 }
 
+char *strrepl(const char *haystack, const char *needle, const char *rcontent) {
+	return _strrepl_generic(haystack, needle, rcontent, (size_t [1]) { 0 });
+}
+
 char *strreplall(const char *haystack, const char *needle, const char *rcontent) {
 	const char *str_new = NULL, *prev = haystack;
+	size_t start_index = 0;
 
 	/* Keep replacing the haystack while we find needles on it */
-	while ((str_new = strrepl(prev, needle, rcontent))) {
+	while ((str_new = _strrepl_generic(prev, needle, rcontent, &start_index))) {
 		if (prev != haystack)
 			mm_free((void *) prev); /* Safe to consider it non-const */
 

@@ -13,7 +13,11 @@ fi
 
 if [ `uname -m` = "armv6l" ]; then
 	if [ "`cat .target`" == "rpi" ]; then
-		echo "-ccc-host-triple armv6-unknown-eabi -march=armv6 -mfpu=vfp -mcpu=arm1176jzf-s -mtune=arm1176jzf-s -mfloat-abi=hard" > .archflags
+		if [ "`cat .compiler`" == "/usr/bin/clang" ]; then
+			echo "-ccc-host-triple armv6-unknown-eabi -march=armv6 -mfpu=vfp -mcpu=arm1176jzf-s -mtune=arm1176jzf-s -mfloat-abi=hard" > .archflags
+		else
+			echo "-march=armv6zk -mfpu=vfp -mcpu=arm1176jzf-s -mtune=arm1176jzf-s -mfloat-abi=hard" > .archflags
+		fi
 	else
 		echo "-march=armv6" > .archflags
 	fi

@@ -54,7 +54,7 @@
 
    # make install_classic_debian
 
- For operating systems incorporating the systemd:
+ For operating systems incorporating the systemd, run:
 
    # make install_systemd
 

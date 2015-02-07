@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 03-02-2015
+ * Date: 07-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -297,17 +297,30 @@ int runtime_daemon_init(int argc, char **argv) {
 }
 
 void runtime_daemon_fatal(void) {
-	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_FATAL);
-	runtime_daemon_interrupt();
+	/* We need to check if the runtime was already interrupted BEFORE setting the FATAL flag.
+	 * If already interrupted, just mark it with FATAL.
+	 * If not interrupted, mark it with FATAL and force the interruption.
+	 */
+	if (runtime_daemon_interrupted()) {
+		bit_set(&rund.flags, USCHED_RUNTIME_FLAG_FATAL);
+	} else {
+		bit_set(&rund.flags, USCHED_RUNTIME_FLAG_FATAL);
+		runtime_daemon_interrupt();
+	}
 }
 
 void runtime_daemon_interrupt(void) {
 	kill(rund.pid, SIGUSR1);
+
+	/* TODO or FIXME: Probably it's a good idea to block all signals from now on... */
 }
 
 int runtime_daemon_interrupted(void) {
-	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT))
+	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
+		/* TODO or FIXME: Probably it's a good idea to block all signals from now on... */
+
 		return 1;
+	}
 
 	return 0;
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 06-02-2015
+ * Date: 07-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -193,7 +193,7 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 }
 
 void entry_daemon_pmq_dispatch(void *arg) {
-	int ret = 0;
+	int ret = 0, errsv = 0;
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
 
@@ -241,7 +241,9 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if ((strlen(cmd) + 21) > rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
 
-		/* Remove this entry as it is invalid */
+		/* Remove this entry as it is invalid. FIXME: We rather mark it as invalid instead of
+		 * removing it, so we can inform the user regarding this issue.
+		 */
 		goto _remove;
 	}
 
@@ -292,10 +294,14 @@ _process:
 		goto _finish;
 	}
 
+	errsv = errno;
+
 	pthread_mutex_unlock(&rund.mutex_apool);
 
 	/* Check if an error ocurred */
 	if (ret < 0) {
+		errno = errsv;
+
 		log_info("entry_daemon_pmq_dispatch(): schedule_entry_update(): %s. (Entry ID: 0x%016llX\n", strerror(errno), entry->id);
 
 		runtime_daemon_fatal();

@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 05-02-2015
+ * Date: 07-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -220,6 +220,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted()) {
+			pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, (int [1]) { 0 });
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			break;
 		}
@@ -286,6 +287,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted()) {
+			pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, (int [1]) { 0 });
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			break;
 		}

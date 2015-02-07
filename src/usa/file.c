@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface
  *
- * Date: 05-02-2015
+ * Date: 07-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+
+#include <pall/cll.h>
 
 #include "config.h"
 #include "log.h"
@@ -66,6 +68,10 @@ char *file_read_line_single(const char *file) {
 	return line;
 }
 
+struct cll_handler *file_read_line_all(const char *file) {
+	return NULL;
+}
+
 int file_write_line_single(const char *file, const char *line) {
 	int errsv = 0;
 	FILE *fp = NULL;
@@ -89,5 +95,9 @@ int file_write_line_single(const char *file, const char *line) {
 	fclose(fp);
 
 	return 0;
+}
+
+int file_write_line_all(const char *file, struct cll_handler *lines) {
+	return -1;
 }
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Daemon Main Component
  *
- * Date: 02-02-2015
+ * Date: 08-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -68,11 +68,17 @@ static int _loop(int argc, char **argv) {
 	_init(argc, argv);
 
 	for (;;) {
+		/* Runtime can be canceled from this point on... */
+		pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, (int [1]) { 0 });
+
 		/* Process connections */
 		if (conn_daemon_process_all() < 0) {
 			log_crit("_loop(): conn_daemon_process_all(): %s", strerror(errno));
 			break;
 		}
+
+		/* Runtime can't be canceled from this point on... */
+		pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, (int [1]) { 0 });
 
 		/* Check for runtime interruptions */
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH)) {
@@ -103,8 +109,12 @@ static int _loop(int argc, char **argv) {
 #endif
 		}
 
-		/* Make sure the interrupt flag is cleared if we reach this point */
-		bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
+		/* Clear interrupt flag if we reach this point */
+		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
+			pthread_mutex_lock(&rund.mutex_interrupt);
+			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
+			pthread_mutex_unlock(&rund.mutex_interrupt);
+		}
 	}
 
 	_destroy();

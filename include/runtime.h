@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 04-02-2015
+ * Date: 08-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,7 +56,7 @@ typedef enum USCHED_RUNTIME_FLAGS {
 	USCHED_RUNTIME_FLAG_FATAL,
 	USCHED_RUNTIME_FLAG_RELOAD,
 	USCHED_RUNTIME_FLAG_FLUSH,
-	USCHED_RUNTIME_FLAG_INTERRUPT,
+	USCHED_RUNTIME_FLAG_INTERRUPT, /* Set atomically */
 	USCHED_RUNTIME_FLAG_LIB
 } usched_runtime_flag_t;
 
@@ -115,6 +115,7 @@ struct usched_runtime_daemon {
 	struct cll_handler *rpool;	/* Receiving pool */
 	struct cll_handler *apool;	/* Active pool */
 
+	pthread_mutex_t mutex_interrupt;
 	pthread_mutex_t mutex_rpool;
 	pthread_mutex_t mutex_apool;
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
@@ -131,6 +132,7 @@ struct usched_runtime_daemon {
 
 	struct usched_config config;
 
+	pthread_t t_runtime;
 	pthread_t t_unix, t_remote;
 	pthread_t t_delta;
 

@@ -1,7 +1,7 @@
 /**
- * @file thread.c
+ * @file sig.c
  * @brief uSched
- *        Thread handlers interface
+ *        Signals interface - Client
  *
  * Date: 08-02-2015
  * 
@@ -24,31 +24,45 @@
  *
  */
 
-
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 #include <pthread.h>
 
 #include "config.h"
-#include "log.h"
 #include "runtime.h"
-#include "thread.h"
+#include "bitops.h"
+#include "log.h"
+#include "sig.h"
 
-
-void thread_atfork_noop(void) {
+static void _sig_pipe_client_handler(int n) {
+	/* Ignore SIGPIPE */
 	return;
 }
 
-void thread_atfork_prepare(void) {
-	thread_atfork_noop();
+int sig_client_init(void) {
+#if !defined(COMPILE_WIN32) || COMPILE_WIN32 == 0
+	int errsv = 0;
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(struct sigaction));
+
+	sa.sa_handler = _sig_pipe_client_handler;
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGPIPE, &sa, &runc.sa_save) < 0) {
+		errsv = errno;
+		log_warn("sig_client_init(): sigaction(SIGPIPE, ...): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#endif
+	return 0;
 }
 
-void thread_atfork_parent(void) {
-	thread_atfork_noop();
-}
-
-void thread_atfork_child(void) {
-	thread_atfork_noop();
+void sig_client_destroy(void) {
+#if !defined(COMPILE_WIN32) || COMPILE_WIN32 == 0
+	sigaction(SIGPIPE, &runc.sa_save, NULL);
+#endif
 }
 

@@ -4,8 +4,8 @@ CCFLAGS=-std=c1x -DCONFIG_DAEMON_SPECIFIC=1 -D_POSIX_C_SOURCE=199309L -D_XOPEN_S
 LDFLAGS=-g -lgcc_s -pthread -lpsched -lpall -lfsma -lrt -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/sig.o ../common/str.o ../common/thread.o
-OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o marshal.o notify.o pmq.o pool.o process.o runtime.o schedule.o vars.o
+OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
+OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o marshal.o notify.o pmq.o pool.o process.o runtime.o schedule.o sig.o thread.o vars.o
 TARGET=usd
 
 all:
@@ -23,6 +23,8 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c process.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c schedule.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c sig.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c thread.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c vars.c
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS}
 

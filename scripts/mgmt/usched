@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script
 #
-# Date: 02-02-2015
+# Date: 08-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -96,7 +96,7 @@ def usched_flush():
 	print_info("Flush operation status: ")
 
 	# Signal usd
-	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGUSR2) == False:
+	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGUSR1) == False:
 		return False
 
 	return True

@@ -1,9 +1,9 @@
 /**
  * @file sig.c
  * @brief uSched
- *        Signals interface
+ *        Signals interface - Daemon
  *
- * Date: 04-02-2015
+ * Date: 08-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,10 +35,6 @@
 #include "log.h"
 #include "sig.h"
 
-static void _sig_pipe_client_handler(int n) {
-	/* Ignore SIGPIPE */
-	return;
-}
 
 static void _sig_term_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE);
@@ -57,14 +53,6 @@ static void _sig_hup_daemon_handler(int n) {
 }
 
 static void _sig_usr1_daemon_handler(int n) {
-	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
-
-	/* Cancel active threads */
-	pthread_cancel(rund.t_unix);
-	pthread_cancel(rund.t_remote);
-}
-
-static void _sig_usr2_daemon_handler(int n) {
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH);
 
 	/* Cancel active threads */
@@ -75,34 +63,6 @@ static void _sig_usr2_daemon_handler(int n) {
 static void _sig_pipe_daemon_handler(int n) {
 	/* Ignore SIGPIPE */
 	return;
-}
-
-static void _sig_term_exec_handler(int n) {
-	bit_set(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE);
-}
-
-static void _sig_hup_exec_handler(int n) {
-	bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
-}
-
-int sig_client_init(void) {
-#if !defined(COMPILE_WIN32) || COMPILE_WIN32 == 0
-	int errsv = 0;
-	struct sigaction sa;
-
-	memset(&sa, 0, sizeof(struct sigaction));
-
-	sa.sa_handler = _sig_pipe_client_handler;
-	sigemptyset(&sa.sa_mask);
-
-	if (sigaction(SIGPIPE, &sa, &runc.sa_save) < 0) {
-		errsv = errno;
-		log_warn("sig_client_init(): sigaction(SIGPIPE, ...): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#endif
-	return 0;
 }
 
 int sig_daemon_init(void) {
@@ -157,14 +117,6 @@ int sig_daemon_init(void) {
 		goto _failure;
 	}
 
-	sa.sa_handler = _sig_usr2_daemon_handler;
-
-	if (sigaction(SIGUSR2, &sa, NULL) < 0) {
-		errsv = errno;
-		log_warn("sig_daemon_init(): sigaction(SIGUSR2, ...): %s\n", strerror(errno));
-		goto _failure;
-	}
-
 	return 0;
 
 _failure:
@@ -175,58 +127,6 @@ _failure:
 	return -1;
 }
 
-int sig_exec_init(void) {
-	int errsv = 0;
-	struct sigaction sa;
-
-	memset(&sa, 0, sizeof(struct sigaction));
-
-	sa.sa_handler = _sig_term_exec_handler;
-	sigemptyset(&sa.sa_mask);
-
-	if (sigaction(SIGTERM, &sa, &rune.sa_save) < 0) {
-		errsv = errno;
-		log_warn("sig_exec_init(): sigaction(SIGTERM, ...): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (sigaction(SIGINT, &sa, NULL) < 0) {
-		errsv = errno;
-		log_warn("sig_exec_init(): sigaction(SIGINT, ...): %s\n", strerror(errno));
-		goto _failure;
-	}
-
-	if (sigaction(SIGQUIT, &sa, NULL) < 0) {
-		errsv = errno;
-		log_warn("sig_exec_init(): sigaction(SIGQUIT, ...): %s\n", strerror(errno));
-		goto _failure;
-	}
-
-	sa.sa_handler = _sig_hup_exec_handler;
-
-	if (sigaction(SIGHUP, &sa, NULL) < 0) {
-		errsv = errno;
-		log_warn("sig_exec_init(): sigaction(SIGHUP, ...): %s\n", strerror(errno));
-		goto _failure;
-	}
-
-	return 0;
-
-_failure:
-	sig_exec_destroy();
-
-	errno = errsv;
-
-	return -1;
-}
-
-void sig_client_destroy(void) {
-#if !defined(COMPILE_WIN32) || COMPILE_WIN32 == 0
-	sigaction(SIGPIPE, &runc.sa_save, NULL);
-#endif
-}
-
 void sig_daemon_destroy(void) {
 	sigaction(SIGTERM, &rund.sa_save, NULL);
 	sigaction(SIGINT, &rund.sa_save, NULL);
@@ -234,12 +134,5 @@ void sig_daemon_destroy(void) {
 	sigaction(SIGHUP, &rund.sa_save, NULL);
 	sigaction(SIGPIPE, &rund.sa_save, NULL);
 	sigaction(SIGUSR2, &rund.sa_save, NULL);
-}
-
-void sig_exec_destroy(void) {
-	sigaction(SIGTERM, &rune.sa_save, NULL);
-	sigaction(SIGINT, &rune.sa_save, NULL);
-	sigaction(SIGQUIT, &rune.sa_save, NULL);
-	sigaction(SIGHUP, &rune.sa_save, NULL);
 }
 

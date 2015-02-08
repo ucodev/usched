@@ -1,7 +1,7 @@
 /**
- * @file thread.h
+ * @file thread.c
  * @brief uSched
- *        Thread handlers interface header
+ *        Thread handlers interface - Exec
  *
  * Date: 08-02-2015
  * 
@@ -25,19 +25,31 @@
  */
 
 
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <pthread.h>
 
-#ifndef USCHED_THREAD_H
-#define USCHED_THREAD_H
+#include "config.h"
+#include "log.h"
+#include "runtime.h"
+#include "thread.h"
 
-/* Prototypes */
-int thread_daemon_mutexes_init(void);
-void thread_daemon_mutexes_destroy(void);
-int thread_exec_behaviour_init(void);
-void thread_exec_behaviour_destroy(void);
-void thread_atfork_noop(void);
-void thread_atfork_prepare(void);
-void thread_atfork_parent(void);
-void thread_atfork_child(void);
+int thread_exec_behaviour_init(void) {
+	int errsv = 0;
 
-#endif
+	if (pthread_atfork(&thread_atfork_prepare, &thread_atfork_parent, &thread_atfork_child)) {
+		errsv = errno;
+		log_crit("thread_exec_behaviour_init(): pthread_atfork(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+void thread_exec_behaviour_destroy(void) {
+	if (pthread_atfork(&thread_atfork_noop, &thread_atfork_noop, &thread_atfork_noop))
+		log_crit("thread_exec_behaviour_destroy(): pthread_atfork(): %s\n", strerror(errno));
+}
 

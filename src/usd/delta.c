@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface - Daemon
  *
- * Date: 07-02-2015
+ * Date: 08-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,10 +39,8 @@
 static void *_delta_time_monitor(void *arg) {
 	for (;;) {
 		/* Check if the daemon was interrupted */
-		if (runtime_daemon_interrupted()) {
-			pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, (int [1]) { 0 });
+		if (runtime_daemon_interrupted())
 			break;
-		}
 
 		/* Compute delta time */
 		rund.delta_last = time(NULL) - rund.time_last - CONFIG_USCHED_DELTA_CHECK_INTERVAL;
@@ -67,6 +65,8 @@ static void *_delta_time_monitor(void *arg) {
 		/* Wait until next check */
 		usleep(CONFIG_USCHED_DELTA_CHECK_INTERVAL * 1000000);
 	}
+
+	log_info("delta_time_monitor(): Thread exiting...\n");
 
 	/* All good */
 	pthread_exit(NULL);

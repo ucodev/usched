@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 07-02-2015
+ * Date: 08-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -220,7 +220,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted()) {
-			pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, (int [1]) { 0 });
+			log_info("_conn_daemon_process_accept_unix(): Runtime interruption detected...\n");
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			break;
 		}
@@ -260,6 +260,8 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 		}
 	}
 
+	log_info("_conn_daemon_process_accept_unix(): Thread exiting...\n");
+
 	pthread_exit(NULL);
 
 	return NULL;
@@ -287,7 +289,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted()) {
-			pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, (int [1]) { 0 });
+			log_info("_conn_daemon_process_accept_remote(): Runtime interruption detected...\n");
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			break;
 		}
@@ -336,6 +338,8 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 			continue;
 		}
 	}
+
+	log_info("_conn_daemon_process_accept_remote(): Thread exiting...\n");
 
 	pthread_exit(NULL);
 

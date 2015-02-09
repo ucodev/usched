@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 05-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -153,7 +153,8 @@ enum CHILD_EXIT_STATUS_CUSTOM_OFFSET {
 /* Custom exit codes for uSched processes (used to inform uSched monitor of some special states) */
 enum PROCESS_EXIT_STATUS_CUSTOM_CODES {
 	PROCESS_EXIT_STATUS_CUSTOM_RELOAD_NOPRIV = 77,
-	PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG
+	PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG,
+	PROCESS_EXIT_STATUS_CUSTOM_UNKNOWN_ABORT
 };
 
 /* Windows specific parameters */

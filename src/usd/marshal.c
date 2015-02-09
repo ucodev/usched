@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 05-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -251,7 +251,7 @@ int marshal_daemon_unserialize_pools(void) {
 			rund.apool->del(rund.apool, entry);
 
 			/* TODO or FIXME: This is critical, the entry will be lost and we can't force
-			 * a gracefully daemon restart or the serialization data will be overwritten
+			 * a graceful daemon restart or the serialization data will be overwritten
 			 * with a missing entry... Something must be done here to prevent such damage.
 			 *
 			 * For now, an abort() will be performed in order to force the restart of the

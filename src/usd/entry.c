@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 07-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -197,6 +197,12 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
 
+	/* FIXME: Grant that we don't pass this point if a pool_daemon_destroy() is in progress.
+	 * To avoid such thing, we need to check here if it's safe to proceed, and we need to
+	 * check in pool_daemon_destroy() if there are active notification threads before
+	 * destroying the pools.
+	 */
+
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
 
@@ -296,18 +302,22 @@ _process:
 
 	errsv = errno;
 
-	pthread_mutex_unlock(&rund.mutex_apool);
 
 	/* Check if an error ocurred */
 	if (ret < 0) {
 		errno = errsv;
 
-		log_info("entry_daemon_pmq_dispatch(): schedule_entry_update(): %s. (Entry ID: 0x%016llX\n", strerror(errno), entry->id);
+		log_info("entry_daemon_pmq_dispatch(): schedule_entry_update(): %s. (Entry ID: 0x%016llX)\n", strerror(errno), entry->id);
+
+		/* Unlock only after the last use of 'entry' reference */
+		pthread_mutex_unlock(&rund.mutex_apool);
 
 		runtime_daemon_fatal();
 
 		goto _finish;
 	}
+
+	pthread_mutex_unlock(&rund.mutex_apool);
 
 	/* Entry was not found. This means that it wasn't a recurrent entry (no step).
 	 * It should be deleted from the active pool.

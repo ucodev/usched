@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 05-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -122,7 +122,7 @@ _update_op_new_failure_2:
 		/* This is critical and should never happen. This means that a race condition occured that allowed
 		 * the user to operate over a unfinished entry. We'll abort here in order to prevent further damage.
 		 */
-		abort();
+		runtime_daemon_fatal();
 	}
 
 	/* Revert the entry id to its original file descriptor. This will allow the rpool cleanup

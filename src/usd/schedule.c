@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 05-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -319,6 +319,7 @@ int schedule_entry_update(struct usched_entry *entry) {
 	/* Check if it's safe to update this entry */
 	if (!schedule_daemon_active()) {
 		log_info("schedule_entry_update(): Scheduling interface was destroyed. Entry ID 0x%016llX will not be updated.\n", entry->id);
+		errno = ECANCELED;
 		return -1;
 	}
 

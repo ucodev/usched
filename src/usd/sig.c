@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface - Daemon
  *
- * Date: 08-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,7 +27,10 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <pthread.h>
+
+#include <psched/sched.h>
 
 #include "config.h"
 #include "runtime.h"
@@ -63,6 +66,21 @@ static void _sig_usr1_daemon_handler(int n) {
 static void _sig_pipe_daemon_handler(int n) {
 	/* Ignore SIGPIPE */
 	return;
+}
+
+static void _sig_abrt_daemon_handler(int n) {
+	/* Check if the abort signal came from the psched library */
+	if (psched_fatal(rund.psched)) {
+		/* If so, just reload the daemon to force a clean state */
+		bit_set(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD);
+
+		/* Cancel active threads */
+		pthread_cancel(rund.t_unix);
+		pthread_cancel(rund.t_remote);
+	}
+
+	/* Otherwise we don't know where this signal came from... better abort execution */
+	exit(PROCESS_EXIT_STATUS_CUSTOM_UNKNOWN_ABORT);
 }
 
 int sig_daemon_init(void) {
@@ -114,6 +132,14 @@ int sig_daemon_init(void) {
 	if (sigaction(SIGUSR1, &sa, NULL) < 0) {
 		errsv = errno;
 		log_warn("sig_daemon_init(): sigaction(SIGUSR1, ...): %s\n", strerror(errno));
+		goto _failure;
+	}
+
+	sa.sa_handler = _sig_abrt_daemon_handler;
+
+	if (sigaction(SIGABRT, &sa, NULL) < 0) {
+		errsv = errno;
+		log_warn("sig_daemon_init(): sigaction(SIGABRT, ...): %s\n", strerror(errno));
 		goto _failure;
 	}
 

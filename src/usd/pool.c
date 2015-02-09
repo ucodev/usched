@@ -3,7 +3,7 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 04-02-2015
+ * Date: 09-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -66,6 +66,10 @@ int pool_daemon_init(void) {
 }
 
 void pool_daemon_destroy(void) {
+	/* FIXME: Check if there are active notification threads. If so, we need to wait until
+	 * all the notification threads finish execution before destroyed the active pool...
+	 */
+
 	pthread_mutex_lock(&rund.mutex_apool);
 	if (rund.apool) {
 		pall_cll_destroy(rund.apool);

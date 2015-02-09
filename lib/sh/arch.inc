@@ -42,6 +42,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+touch .target
+
 if [ `uname -m` = "armv6l" ]; then
 	if [ "`cat .target`" = "rpi" ]; then
 		if [ "`cat .compiler`" = "`which clang`" ]; then

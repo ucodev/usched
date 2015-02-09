@@ -8,6 +8,7 @@ fi
 make clean
 
 rm -rf build
+rm -f .target
 rm -f .compiler
 rm -f .ecflags
 rm -f .elflags

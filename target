@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ $# -ne 1 ]; then
 	echo "Usage: ${0} <special target>"
@@ -8,4 +8,4 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-echo -ne ${1} > .target
+printf -- ${1} > .target

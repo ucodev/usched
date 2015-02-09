@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ -e "/usr/bin/clang" ]; then
 	echo "/usr/bin/clang" > .compiler

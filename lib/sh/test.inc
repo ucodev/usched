@@ -1,7 +1,7 @@
 #
 # Feature testing shell scripting library
 #
-# Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
 #
 # Double licensed under Apache License Version 2.0:
@@ -49,7 +49,7 @@ test_lib()
 
 	if [ $? -eq 0 ]; then
 		touch .l${1}
-		echo -ne "-l${1} " >> .libs
+		printf -- "-l${1} "  >> .libs
 	fi
 }
 

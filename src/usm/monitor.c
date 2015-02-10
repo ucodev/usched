@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 05-02-2015
+ * Date: 10-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,7 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #include <unistd.h>
 #include <fcntl.h>

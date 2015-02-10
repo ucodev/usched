@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 05-02-2015
+ * Date: 10-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <errno.h>
 

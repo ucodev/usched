@@ -3,9 +3,9 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Daemon
  *
- * Date: 01-09-2014
+ * Date: 10-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -39,7 +39,7 @@
 int pmq_daemon_init(void) {
 	int errsv = 0;
 
-	if ((rund.pmqd = pmq_init(rund.config.core.pmq_name, O_WRONLY | O_CREAT, 0200, rund.config.core.pmq_msgmax, rund.config.core.pmq_msgsize)) == (mqd_t) - 1) {
+	if ((rund.pmqd = pmq_init(rund.config.core.pmq_name, O_WRONLY | O_CREAT, 0600, rund.config.core.pmq_msgmax, rund.config.core.pmq_msgsize)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_daemon_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;

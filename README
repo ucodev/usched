@@ -8,7 +8,15 @@
 
 
 
-2. Installation
+2. Portability
+
+  uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in case of some non-portable calls being unavailable for the target operating system, such as chroot(). For disable such calls and features, set the CONFIG_POSIX_FULL definition to 1 in the include/config.h file.
+
+  uSched client will compile on most Windows versions and the API bindings are available for C#.
+
+
+
+3. Installation
 
   Perform the following commands:
 
@@ -25,7 +33,7 @@
 
 
 
-3. Command-Line Usage Examples
+4. Command-Line Usage Examples
 
   Run the do_backups.sh script at 23:00 and then run it every 24 hours:
 
@@ -53,19 +61,19 @@
 
 
 
-4. Library Usage Examples
+5. Library Usage Examples
 
   See example/*
 
 
 
-5. Documentation
+6. Documentation
 
   See doc/*
 
 
 
-6. Notes
+7. Notes
 
   This project is on a beta stage.
 

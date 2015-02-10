@@ -31,13 +31,13 @@ if [ `id -u` -ne 0 ]; then
 fi
 
 # Check if unzip is installed
-if ! [ -e "/usr/bin/unzip" ]; then
+if ! [ -e "`which unzip`" ]; then
 	echo "unzip isn't installed"
 	exit 1
 fi
 
 # Check if unzip is installed
-if ! [ -e "/usr/bin/wget" ]; then
+if ! [ -e "`which wget`" ]; then
 	echo "wget isn't installed"
 	exit 1
 fi

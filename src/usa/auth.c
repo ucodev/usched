@@ -3,7 +3,7 @@
  * @brief uSched
  *        Auth configuration and administration interface
  *
- * Date: 05-02-2015
+ * Date: 14-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,8 +38,44 @@
 
 
 void auth_admin_show(void) {
+	auth_admin_blacklist_gid_show();
+	auth_admin_blacklist_uid_show();
 	auth_admin_local_use_show();
 	auth_admin_remote_users_show();
+	auth_admin_whitelist_gid_show();
+	auth_admin_whitelist_uid_show();
+}
+
+int auth_admin_blacklist_gid_show(void) {
+	return -1;
+}
+
+int auth_admin_blacklist_gid_change(const char *blacklist_gid_list) {
+	return -1;
+}
+
+int auth_admin_blacklist_gid_add(const char *blacklist_gid) {
+	return -1;
+}
+
+int auth_admin_blacklist_gid_delete(const char *blacklist_gid) {
+	return -1;
+}
+
+int auth_admin_blacklist_uid_show(void) {
+	return -1;
+}
+
+int auth_admin_blacklist_uid_change(const char *blacklist_uid_list) {
+	return -1;
+}
+
+int auth_admin_blacklist_uid_add(const char *blacklist_uid) {
+	return -1;
+}
+
+int auth_admin_blacklist_uid_delete(const char *blacklist_uid) {
+	return -1;
 }
 
 int auth_admin_local_use_show(void) {
@@ -116,5 +152,37 @@ int auth_admin_remote_users_change(const char *remote_users) {
 	}
 
 	return 0;
+}
+
+int auth_admin_whitelist_gid_show(void) {
+	return -1;
+}
+
+int auth_admin_whitelist_gid_change(const char *blacklist_gid_list) {
+	return -1;
+}
+
+int auth_admin_whitelist_gid_add(const char *blacklist_gid) {
+	return -1;
+}
+
+int auth_admin_whitelist_gid_delete(const char *blacklist_gid) {
+	return -1;
+}
+
+int auth_admin_whitelist_uid_show(void) {
+	return -1;
+}
+
+int auth_admin_whitelist_uid_change(const char *blacklist_uid_list) {
+	return -1;
+}
+
+int auth_admin_whitelist_uid_add(const char *blacklist_uid) {
+	return -1;
+}
+
+int auth_admin_whitelist_uid_delete(const char *blacklist_uid) {
+	return -1;
 }
 

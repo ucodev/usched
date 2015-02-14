@@ -4,7 +4,7 @@
  *        Authentication and Authorization interface header
  *        Authentication configuration and administration header
  *
- * Date: 05-02-2015
+ * Date: 14-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,10 +44,26 @@ int auth_client_remote_session_process(unsigned char *session, const char *usern
 
 /* Auth admin prototypes (usa only) */
 void auth_admin_show(void);
+int auth_admin_blacklist_gid_show(void);
+int auth_admin_blacklist_gid_change(const char *blacklist_gid_list);
+int auth_admin_blacklist_gid_add(const char *blacklist_gid);
+int auth_admin_blacklist_gid_delete(const char *blacklist_gid);
+int auth_admin_blacklist_uid_show(void);
+int auth_admin_blacklist_uid_change(const char *blacklist_uid_list);
+int auth_admin_blacklist_uid_add(const char *blacklist_uid);
+int auth_admin_blacklist_uid_delete(const char *blacklist_uid);
 int auth_admin_local_use_show(void);
 int auth_admin_local_use_change(const char *local_use);
 int auth_admin_remote_users_show(void);
 int auth_admin_remote_users_change(const char *remote_users);
+int auth_admin_whitelist_gid_show(void);
+int auth_admin_whitelist_gid_change(const char *blacklist_gid_list);
+int auth_admin_whitelist_gid_add(const char *blacklist_gid);
+int auth_admin_whitelist_gid_delete(const char *blacklist_gid);
+int auth_admin_whitelist_uid_show(void);
+int auth_admin_whitelist_uid_change(const char *blacklist_uid_list);
+int auth_admin_whitelist_uid_add(const char *blacklist_uid);
+int auth_admin_whitelist_uid_delete(const char *blacklist_uid);
 
 #endif
 

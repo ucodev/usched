@@ -1,22 +1,23 @@
 all:
-	make -C common/
-	make -C usa/
-	make -C usc/
-	make -C usd/
-	make -C use/
-	make -C usm/
+	cd common && make && cd ..
+	cd usa && make && cd ..
+	cd usc && make && cd ..
+	cd usd && make && cd ..
+	cd use && make && cd ..
+	cd usm && make && cd ..
 
 install:
-	make -C usa/ install
-	make -C usc/ install
-	make -C usd/ install
-	make -C use/ install
-	make -C usm/ install
+	cd usa && make install && cd ..
+	cd usc && make install && cd ..
+	cd usd && make install && cd ..
+	cd use && make install && cd ..
+	cd usm && make install && cd ..
 
 clean:
-	make -C common/ clean
-	make -C usa/ clean
-	make -C usc/ clean
-	make -C usd/ clean
-	make -C use/ clean
-	make -C usm/ clean
+	cd common && make clean && cd ..
+	cd usa && make clean && cd ..
+	cd usc && make clean && cd ..
+	cd usd && make clean && cd ..
+	cd use && make clean && cd ..
+	cd usm && make clean && cd ..
+

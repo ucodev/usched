@@ -1,6 +1,6 @@
 all:
-	make -C c/
+	cd c && make && cd ..
 
 clean:
-	make -C c/ clean
+	cd c && make clean && cd ..
 

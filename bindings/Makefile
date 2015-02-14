@@ -1,11 +1,11 @@
 all:
 
 install_all:
-	make -C python/ install
+	cd python && make install && cd ..
 
 install_python:
-	make -C python/ install
+	cd python && make install && cd ..
 
 clean:
-	make -C python/ clean
+	cd python && make clean && cd ..
 

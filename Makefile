@@ -1,11 +1,11 @@
 all:
-	make -C src/
-	make -C scripts/
+	cd src && make && cd ..
+	cd scripts && make && cd ..
 
 install_all:
-	make -C src/ install
-	make -C scripts/ install
-	make -C bindings/ install_all
+	cd src && make install && cd ..
+	cd scripts && make install && cd ..
+	cd bindings && make install_all && cd ..
 	mkdir -p /etc/usched
 	cp -r config/* /etc/usched/
 	chown -R root:root /etc/usched
@@ -21,28 +21,28 @@ install_all:
 	chmod 700 /var/cache/usched/jail
 
 examples:
-	make -C example/
+	cd example && make && cd ..
 
 install_classic_centos:
-	make -C scripts/ install_classic_centos
+	cd scripts && make install_classic_centos && cd ..
 
 install_classic_debian:
-	make -C scripts/ install_classic_debian
+	cd scripts && make install_classic_debian && cd ..
 
 install_classic_deepin:
-	make -C scripts/ install_classic_deepin
+	cd scripts && make install_classic_deepin && cd ..
 
 install_classic_fedora:
-	make -C scripts/ install_classic_fedora
+	cd scripts && make install_classic_fedora && cd ..
 
 install_classic_redhat:
-	make -C scripts/ install_classic_redhat
+	cd scripts && make install_classic_redhat && cd ..
 
 install_classic_ubuntu:
-	make -C scripts/ install_classic_ubuntu
+	cd scripts && make install_classic_ubuntu && cd ..
 
 install_systemd:
-	make -C scripts/ install_systemd
+	cd scripts && make install_systemd && cd ..
 
 install_doc:
 	mkdir -p /usr/share/doc/usched/doc
@@ -55,8 +55,8 @@ install_doc:
 	cp doc/* /usr/share/doc/usched/doc/
 
 clean:
-	make -C src/ clean
-	make -C scripts/ clean
-	make -C example/ clean
-	make -C bindings/ clean
+	cd src && make clean && cd ..
+	cd scripts && make clean && cd ..
+	cd example && make clean && cd ..
+	cd bindings && make clean && cd ..
 

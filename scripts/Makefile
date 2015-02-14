@@ -1,28 +1,28 @@
 all:
 
 install:
-	make -C mgmt/ install
+	cd mgmt && make install && cd ..
 
 install_classic_centos:
-	make -C init/ install_centos
+	cd init && make install_centos && cd ..
 
 install_classic_debian:
-	make -C init/ install_debian
+	cd init && make install_debian && cd ..
 
 install_classic_deepin:
-	make -C init/ install_deepin
+	cd init && make install_deepin && cd ..
 
 install_classic_fedora:
-	make -C init/ install_fedora
+	cd init && make install_fedora && cd ..
 
 install_classic_redhat:
-	make -C init/ install_redhat
+	cd init && make install_redhat && cd ..
 
 install_classic_ubuntu:
-	make -C init/ install_ubuntu
+	cd init && make install_ubuntu && cd ..
 
 install_systemd:
-	make -C systemd/ install
+	cd systemd && make install && cd ..
 
 clean:
 

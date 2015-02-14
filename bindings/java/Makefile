@@ -1,10 +1,11 @@
 all:
-	make -C class/
-	make -C jni/
+	cd class && make && cd ..
+	cd jni && make && cd ..
 
 clean:
-	make -C class/ clean
-	make -C jni/ clean
+	cd class && make clean && cd ..
+	cd jni && make clean && cd ..
 
 test:
-	make -C build/ test
+	cd build && make test && cd ..
+

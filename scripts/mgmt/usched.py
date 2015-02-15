@@ -2,9 +2,9 @@
 #
 # @file usched
 # @brief uSched
-#        uSched flush/start/stop script
+#        uSched flush/start/stop script - Python implementation
 #
-# Date: 08-02-2015
+# Date: 15-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -179,9 +179,10 @@ if __name__ == "__main__":
 	op_check()
 
 	if op_process() == False:
+		print_info("Failed.\n")
 		sys.exit(EXIT_FAILURE)
 
-	print_info("Success\n")
+	print_info("Success.\n")
 
 	sys.exit(EXIT_SUCCESS)
 

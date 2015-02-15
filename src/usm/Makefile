@@ -4,7 +4,7 @@ CCFLAGS=-std=c1x -D_POSIX_C_SOURCE=199309L -D_REENTRANT -fstrict-aliasing -fstac
 LDFLAGS=-g -pthread -lfsma
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/log.o ../common/debug.o ../common/mm.o
+OBJS_COMMON=../common/log.o ../common/debug.o ../common/mm.o ../common/str.o
 OBJS=monitor.o
 TARGET=usm
 

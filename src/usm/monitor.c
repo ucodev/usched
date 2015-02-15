@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 10-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,7 @@
 #include "config.h"
 #include "log.h"
 #include "mm.h"
+#include "str.h"
 
 extern char *optarg;
 extern int optind, optopt;
@@ -86,23 +87,11 @@ static void _sigah(int sig, siginfo_t *si, void *ucontext) {
 }
 
 static void _close_safe(int fd) {
-#if 0
+	/* SA_RESTART set */
 	while (close(fd) < 0) {
 		if (errno != EINTR)
 			break;
 	}
-#endif
-	/* SA_RESTART set */
-	close(fd);
-}
-
-static int _strisdigit(const char *str) {
-	while (*str) {
-		if (!isdigit(*str ++))
-			return 0;
-	}
-
-	return 1;
 }
 
 static void _log_init(void) {
@@ -117,7 +106,6 @@ static void _config_default_init(void) {
 	memset(&config, 0, sizeof(struct cmdline_params));
 
 	config.uid = getuid();
-	config.gid = getgid();
 }
 
 static inline void _config_set_req(const char *binary) {
@@ -223,6 +211,7 @@ static int _bexec(
 		char *const *envp)
 {
 	int status = 0;
+	pid_t ret = 0;
 
 	if ((config.cpid = fork()) > 0) {
 		if ((config.flags & CONFIG_FL_PIDF_CREATE) && (_file_pid_write(config.cpid) < 0)) {
@@ -231,11 +220,18 @@ static int _bexec(
 		}
 
 		/* SA_RESTART set */
-		if ((config.cpid = wait(&status)) == (pid_t) -1) {
-			log_crit("_bexec(): wait(): %s\n", strerror(errno));
-			return -1;
-		}
+		do {
+			if ((ret = waitpid(config.cpid, &status, 0)) != (pid_t) -1)
+				break;
 
+			log_crit("_bexec(): waitpid(%u, &status, 0): %s\n", config.cpid, strerror(errno));
+		} while (errno == EINTR); /* Restart the syscall if it was interrupted by a signal */
+
+		/* Check if we've an error condition from waitpid() */
+		if (ret == (pid_t) -1)
+			return -1;
+
+		/* Success? */
 		if (WEXITSTATUS(status) != EXIT_SUCCESS)
 			log_crit("_bexec(): Execution of '%s' terminated with error status code %d.\n", file, WEXITSTATUS(status));
 	} else if (!config.cpid) {
@@ -297,12 +293,12 @@ static void _cmdline_process(int argc, char *const *argv) {
 
 	while ((opt = getopt(argc, argv, "frRSu:g:i:o:e:p:")) != -1) {
 		if (opt == 'u') {
-			if (!_strisdigit(optarg))
+			if (!strisnum(optarg))
 				_usage_invalid_opt_arg(opt, optarg, argv);
 
 			config.uid = strtoul(optarg, NULL, 10);
 		} else if (opt == 'g') {
-			if (!_strisdigit(optarg))
+			if (!strisnum(optarg))
 				_usage_invalid_opt_arg(opt, optarg, argv);
 
 			config.gid = strtoul(optarg, NULL, 10);

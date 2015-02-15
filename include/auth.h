@@ -4,7 +4,7 @@
  *        Authentication and Authorization interface header
  *        Authentication configuration and administration header
  *
- * Date: 14-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,13 +57,13 @@ int auth_admin_local_use_change(const char *local_use);
 int auth_admin_remote_users_show(void);
 int auth_admin_remote_users_change(const char *remote_users);
 int auth_admin_whitelist_gid_show(void);
-int auth_admin_whitelist_gid_change(const char *blacklist_gid_list);
-int auth_admin_whitelist_gid_add(const char *blacklist_gid);
-int auth_admin_whitelist_gid_delete(const char *blacklist_gid);
+int auth_admin_whitelist_gid_change(const char *whitelist_gid_list);
+int auth_admin_whitelist_gid_add(const char *whitelist_gid);
+int auth_admin_whitelist_gid_delete(const char *whitelist_gid);
 int auth_admin_whitelist_uid_show(void);
-int auth_admin_whitelist_uid_change(const char *blacklist_uid_list);
-int auth_admin_whitelist_uid_add(const char *blacklist_uid);
-int auth_admin_whitelist_uid_delete(const char *blacklist_uid);
+int auth_admin_whitelist_uid_change(const char *whitelist_uid_list);
+int auth_admin_whitelist_uid_add(const char *whitelist_uid);
+int auth_admin_whitelist_uid_delete(const char *whitelist_uid);
 
 #endif
 

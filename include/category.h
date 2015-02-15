@@ -3,7 +3,7 @@
  * @brief uSched
  *       Category processing interface header
  *
- * Date: 03-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,7 +30,9 @@
 #include <stdio.h>
 
 /* Prototypes */
+int category_auth_add(size_t argc, char **args);
 int category_auth_change(size_t argc, char **args);
+int category_auth_delete(size_t argc, char **args);
 int category_auth_show(size_t argc, char **args);
 int category_core_change(size_t argc, char **args);
 int category_core_show(size_t argc, char **args);

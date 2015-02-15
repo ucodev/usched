@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Admin
  *
- * Date: 03-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,6 +43,14 @@ int logic_admin_process_add(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_AUTH) {
+		/* Add auth */
+		if (category_auth_add(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_add(): category_auth_add(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else {
 		log_warn("logic_admin_process_add(): Invalid category.\n");
 		errno = EINVAL;
@@ -58,7 +66,15 @@ int logic_admin_process_delete(void) {
 	if (runa.req->category == USCHED_CATEGORY_USERS) {
 		if (category_users_delete(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
-			log_warn("logic_admin_process_add(): category_users_delete(): %s\n", strerror(errno));
+			log_warn("logic_admin_process_delete(): category_users_delete(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_AUTH) {
+		/* Delete auth */
+		if (category_auth_delete(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_delete(): category_auth_delete(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}

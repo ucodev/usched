@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface
  *
- * Date: 14-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -150,6 +150,7 @@ struct cll_handler *file_read_line_all_ordered(const char *file) {
 		if (l->insert(l, line) < 0) {
 			errsv = errno;
 			log_crit("file_read_line_all(): l->insert(): %s\n", strerror(errno));
+			mm_free(line);
 			pall_cll_destroy(l);
 			fclose(fp);
 			errno = errsv;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 03-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,6 +44,8 @@
 #define USCHED_COMPONENT_BIND_STR	"bind"
 #define USCHED_COMPONENT_CONN_STR	"conn"
 #define USCHED_COMPONENT_SOCK_STR	"sock"
+#define USCHED_COMPONENT_BLACKLIST_STR	"blacklist"
+#define USCHED_COMPONENT_WHITELIST_STR	"whitelist"
 
 /* Properties - Human */
 #define USCHED_PROPERTY_USE_STR		"use"
@@ -63,6 +65,8 @@
 #define USCHED_PROPERTY_PORT_STR	"port"
 #define USCHED_PROPERTY_LIMIT_STR	"limit"
 #define USCHED_PROPERTY_TIMEOUT_STR	"timeout"
+#define USCHED_PROPERTY_GID_STR		"gid"
+#define USCHED_PROPERTY_UID_STR		"uid"
 
 /* Categorty - Human */
 #define USCHED_CATEGORY_AUTH_STR	"auth"

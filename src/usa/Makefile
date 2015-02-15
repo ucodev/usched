@@ -4,7 +4,7 @@ CCFLAGS=-std=c1x -D_POSIX_C_SOURCE=199309L -D_REENTRANT -fstrict-aliasing -fstac
 LDFLAGS=-g -lrt -pthread -lpall -lfsma -lfsop -lpsec `cat ../../.libs`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/config.o ../common/debug.o ../common/input.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/term.o
+OBJS_COMMON=../common/config.o ../common/debug.o ../common/input.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/str.o ../common/term.o
 OBJS=admin.o auth.o category.o config.o core.o file.o logic.o network.o op.o parse.o print.o runtime.o usage.o users.o
 TARGET=usa
 

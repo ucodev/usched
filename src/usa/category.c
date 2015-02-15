@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 10-02-2015
+ * Date: 15-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,6 +43,89 @@
 #include "input.h"
 
 
+int category_auth_add(size_t argc, char **args) {
+	int errsv = 0;
+
+	/* Usage: add auth <component> <property> <value> */
+	if (argc < 3) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "add auth");
+		log_warn("category_auth_add(): Insufficient arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (!strcasecmp(args[0], USCHED_COMPONENT_BLACKLIST_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_blacklist_gid_add(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_add(): auth_admin_blacklist_gid_add(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_UID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_blacklist_uid_add(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_add(): auth_admin_blacklist_uid_add(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "add auth blacklist");
+		log_warn("category_auth_add(): Invalid 'blacklist' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_WHITELIST_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_whitelist_gid_add(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_add(): auth_admin_whitelist_gid_add(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_UID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_blacklist_uid_add(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_add(): auth_admin_whitelist_uid_add(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "add auth whitelist");
+		log_warn("category_auth_add(): Invalid 'whitelist' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	}
+
+	/* Unknown component */
+	usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT, "add auth");
+	log_warn("category_auth_add(): Invalid 'add auth' component: %s\n", args[0]);
+	errno = EINVAL;
+
+	return -1;
+}
+
 int category_auth_change(size_t argc, char **args) {
 	int errsv = 0;
 
@@ -54,7 +137,27 @@ int category_auth_change(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (!strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_BLACKLIST_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GID_STR)) {
+			/* set local.use */
+			if (auth_admin_blacklist_gid_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_change(): auth_admin_blacklist_gid_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change auth blacklist");
+		log_warn("category_auth_change(): Invalid 'blacklist' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
 		if (!strcasecmp(args[1], USCHED_PROPERTY_USE_STR)) {
 			/* set local.use */
 			if (auth_admin_local_use_change(args[2]) < 0) {
@@ -104,6 +207,90 @@ int category_auth_change(size_t argc, char **args) {
 	return -1;
 }
 
+int category_auth_delete(size_t argc, char **args) {
+	int errsv = 0;
+
+	/* Usage: add auth <component> <property> <value> */
+	if (argc < 3) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "delete auth");
+		log_warn("category_auth_delete(): Insufficient arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (!strcasecmp(args[0], USCHED_COMPONENT_BLACKLIST_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_blacklist_gid_delete(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_delete(): auth_admin_blacklist_gid_delete(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_UID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_blacklist_uid_delete(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_delete(): auth_admin_blacklist_uid_delete(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "delete auth blacklist");
+		log_warn("category_auth_delete(): Invalid 'blacklist' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_WHITELIST_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_whitelist_gid_delete(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_delete(): auth_admin_whitelist_gid_delete(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_UID_STR)) {
+			/* add blacklist.gid */
+			if (auth_admin_blacklist_uid_delete(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_auth_delete(): auth_admin_whitelist_uid_delete(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "delete auth whitelist");
+		log_warn("category_auth_delete(): Invalid 'whitelist' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	}
+
+	/* Unknown component */
+	usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT, "delete auth");
+	log_warn("category_auth_delete(): Invalid 'delete auth' component: %s\n", args[0]);
+	errno = EINVAL;
+
+	return -1;
+}
+
+
 int category_auth_show(size_t argc, char **args) {
 	int errsv = 0;
 
@@ -120,7 +307,27 @@ int category_auth_show(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (!strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_BLACKLIST_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GID_STR)) {
+			/* show blacklist.gid */
+			if (auth_admin_blacklist_gid_show() < 0) {
+				errsv = errno;
+				log_warn("category_auth_show(): auth_admin_blacklist_gid_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show auth blacklist");
+		log_warn("category_auth_show(): Invalid 'blacklist' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_LOCAL_STR)) {
 		if (!strcasecmp(args[1], USCHED_PROPERTY_USE_STR)) {
 			/* show local.use */
 			if (auth_admin_local_use_show() < 0) {

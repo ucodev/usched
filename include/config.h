@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 10-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -91,12 +91,26 @@
 #define CONFIG_SYS_DEV_NULL			"/dev/null"
 #define CONFIG_SYS_EXIT_CODE_CUSTOM_BASE	90
 
+#ifndef CONFIG_COMMON
+#define CONFIG_COMMON				0
+#endif
 #ifndef CONFIG_CLIENT_ONLY
 #define CONFIG_CLIENT_ONLY			0
+#endif
+#ifndef CONFIG_CLIENT_SPECIFIC
+#define CONFIG_CLIENT_SPECIFIC			0
 #endif
 #ifndef CONFIG_DAEMON_SPECIFIC
 #define CONFIG_DAEMON_SPECIFIC			0
 #endif
+#ifndef CONFIG_EXEC_SPECIFIC
+#define CONFIG_EXEC_SPECIFIC			0
+#endif
+#ifndef CONFIG_ADMIN_SPECIFIC
+#define CONFIG_ADMIN_SPECIFIC			0
+#endif
+
+
 
 #define CONFIG_USE_LIBFSMA			0
 #define CONFIG_USE_SYNCFS			0

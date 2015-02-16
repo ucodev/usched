@@ -9,8 +9,8 @@ Libs=
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
-Compiler=-DCOMPILE_WIN32=1_@@_
-CppCompiler=-DCOMPILE_WIN32=1_@@_
+Compiler=-DCOMPILE_WIN32=1_@@_-DCONFIG_CLIENT_SPECIFIC=1_@@_-DCONFIG_CLIENT_ONLY=1_@@_
+CppCompiler=-DCOMPILE_WIN32=1_@@_-DCONFIG_CLIENT_SPECIFIC=1_@@_-DCONFIG_CLIENT_ONLY=1_@@_
 Linker=-lfsop_@@_-lpall_@@_-lpanet_@@_-lpsec_@@_-lws2_32_@@_
 IsCpp=0
 Icon=

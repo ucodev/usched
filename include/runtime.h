@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 08-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -61,6 +61,7 @@ typedef enum USCHED_RUNTIME_FLAGS {
 } usched_runtime_flag_t;
 
 /* Structures */
+#if CONFIG_CLIENT_SPECIFIC == 1 || CONFIG_COMMON == 1
 struct usched_runtime_client {
 	int argc;
 	char **argv;
@@ -84,8 +85,10 @@ struct usched_runtime_client {
 	/* Command line options */
 	struct usched_opt_client opt;
 };
+#endif /* CONFIG_CLIENT_SPECIFIC */
 
 #if CONFIG_CLIENT_ONLY == 0
+#if CONFIG_ADMIN_SPECIFIC == 1 || CONFIG_COMMON == 1
 struct usched_runtime_admin {
 	int argc;
 	char **argv;
@@ -100,7 +103,9 @@ struct usched_runtime_admin {
 
 	struct usched_config config;
 };
+#endif /* CONFIG_ADMIN_SPECIFIC */
 
+#if CONFIG_DAEMON_SPECIFIC == 1 || CONFIG_COMMON == 1
 struct usched_runtime_daemon {
 	int argc;
 	char **argv;
@@ -139,7 +144,9 @@ struct usched_runtime_daemon {
 	time_t time_last;
 	int64_t delta_last;
 };
+#endif /* CONFIG_DAEMON_SPECIFIC */
 
+#if CONFIG_EXEC_SPECIFIC == 1 || CONFIG_COMMON == 1
 struct usched_runtime_exec {
 	int argc;
 	char **argv;
@@ -151,14 +158,23 @@ struct usched_runtime_exec {
 
 	struct usched_config config;
 };
+#endif /* CONFIG_EXEC_SPECIFIC */
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* External */
+#if CONFIG_CLIENT_SPECIFIC == 1
 extern struct usched_runtime_client runc;
+#endif
 #if CONFIG_CLIENT_ONLY == 0
-extern struct usched_runtime_admin runa;
-extern struct usched_runtime_daemon rund;
-extern struct usched_runtime_exec rune;
+ #if CONFIG_ADMIN_SPECIFIC == 1 || CONFIG_COMMON == 1
+ extern struct usched_runtime_admin runa;
+ #endif /* CONFIG_ADMIN_SPECIFIC */
+ #if CONFIG_DAEMON_SPECIFIC == 1 || CONFIG_COMMON == 1
+ extern struct usched_runtime_daemon rund;
+ #endif /* CONFIG_DAEMON_SPECIFIC */
+ #if CONFIG_EXEC_SPECIFIC == 1 || CONFIG_COMMON == 1
+ extern struct usched_runtime_exec rune;
+ #endif /* CONFIG_EXEC_SPECIFIC */
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* Prototypes */

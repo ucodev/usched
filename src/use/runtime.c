@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 03-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,7 +51,7 @@ static int _runtime_exec_drop_privs(void) {
 		return -1;
 	}
 
-	if (setreuid(rund.config.core.privdrop_uid, rund.config.core.privdrop_uid) < 0) {
+	if (setreuid(rune.config.core.privdrop_uid, rune.config.core.privdrop_uid) < 0) {
 		errsv = errno;
 		log_crit("_runtime_exec_drop_privs(): setreuid(): %s\n", strerror(errno));
 		errno = errsv;

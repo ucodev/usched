@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 05-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -126,9 +126,8 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 		/* Strip '\n' */
 		len = strlen(line);
 
-		if (line[len - 1] == '\n')
+		while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
 			line[-- len] = 0;
-
 
 		/* Allocate value memory */
 		if (!(val = mm_alloc(sizeof(unsigned int)))) {
@@ -218,9 +217,8 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 	/* Strip '\n' */
 	len = strlen(line);
 
-	if (line[len - 1] == '\n')
+	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
 		line[-- len] = 0;
-
 
 	/* Retrieve line value */
 	*val = strtoul(line, &endptr, 0);
@@ -284,7 +282,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	/* Strip '\n' */
 	len = strlen(line);
 
-	if (line[len - 1] == '\n')
+	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
 		line[-- len] = 0;
 
 	/* Retrieve line value */
@@ -349,7 +347,7 @@ static char *_value_init_string_from_file(const char *file) {
 	/* Strip '\n' */
 	len = strlen(line);
 
-	if (line[len - 1] == '\n')
+	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
 		line[-- len] = 0;
 
 	/* Allocate memory for string */

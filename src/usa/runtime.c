@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Admin
  *
- * Date: 05-08-2014
+ * Date: 16-08-2014
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,7 +49,7 @@ int runtime_admin_init(int argc, char **argv) {
 		return -1;
 	}
 
-	memset(&runa, 0, sizeof(struct usched_runtime_client));
+	memset(&runa, 0, sizeof(struct usched_runtime_admin));
 
 	runa.argc = argc;
 	runa.argv = argv;

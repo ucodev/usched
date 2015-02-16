@@ -3,5 +3,10 @@ v0.1:
  - Cleanup code
 
 v0.2:
+ - Communication Protocol cleanup
+ - New operations: Hold
+ - Exceptions
+ - Entry Groups
+ - Recursivity (full support)
  - Statistics (uss)
 

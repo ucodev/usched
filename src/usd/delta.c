@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface - Daemon
  *
- * Date: 08-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,7 +25,9 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>

@@ -10,3 +10,7 @@ v0.2:
  - Recursivity (full support)
  - Statistics (uss)
 
+v0.3:
+ - crontab importer
+ - at importer
+

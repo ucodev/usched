@@ -41,15 +41,17 @@
    # ./install
    # ./undo
 
+
  For Raspberry PI deployment, set the build target before any of the commands above:
 
    # ./target rpi
+
 
  The APIs for all supported languages (bindings) are not installed by default. In order to deploy the bindings use:
 
    # make install_bindings_<language>
 
- Where language may be any of the supported languages (or the keyword 'all' to install everything).
+ Where language may be any of the supported languages (or the keyword 'all' to install everything). The available languages keywords are: all, csharp, java, php and python.
 
 
 

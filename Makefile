@@ -19,8 +19,20 @@ install_all:
 	mkdir -p /var/cache/usched/jail
 	chmod 700 /var/cache/usched/jail
 
-install_bindings:
+install_bindings_all:
 	cd bindings && make install_all && cd ..
+
+install_bindings_csharp:
+	cd bindings && make install_csharp && cd ..
+
+install_bindings_java:
+	cd bindings && make install_java && cd ..
+
+install_bindings_php:
+	cd bindings && make install_php && cd ..
+
+install_bindings_python:
+	cd bindings && make isntall_python && cd ..
 
 examples:
 	cd example && make && cd ..

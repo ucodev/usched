@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 09-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,7 +33,7 @@
 
 #include <sys/types.h>
 
-#include <psched/sched.h>
+#include <psched/psched.h>
 
 #include "debug.h"
 #include "log.h"

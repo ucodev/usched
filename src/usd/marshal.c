@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 09-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <psched/sched.h>
+#include <psched/psched.h>
 
 #include <fsop/file.h>
 

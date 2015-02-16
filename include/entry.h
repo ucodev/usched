@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 31-01-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,7 +36,7 @@
 #include "config.h"
 
 #if CONFIG_CLIENT_ONLY == 0
-#include <psched/sched.h>
+#include <psched/psched.h>
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 #include <psec/crypt.h>

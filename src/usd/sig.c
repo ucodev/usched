@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface - Daemon
  *
- * Date: 09-02-2015
+ * Date: 16-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include <psched/sched.h>
+#include <psched/psched.h>
 
 #include "config.h"
 #include "runtime.h"

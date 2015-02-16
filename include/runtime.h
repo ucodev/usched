@@ -41,7 +41,7 @@
 #include <pall/fifo.h>
 #include <panet/panet.h>
 #if CONFIG_CLIENT_ONLY == 0
-#include <psched/sched.h>
+#include <psched/psched.h>
 #endif
 
 #include <sys/types.h>

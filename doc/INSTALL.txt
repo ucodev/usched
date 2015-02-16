@@ -23,6 +23,8 @@
   - fsma Library
     * https://github.com/ucodev/libfsma
 
+ The 'deps' script depends on 'wget', 'zip' and 'unzip'. Make sure they are installed on the system.
+
 
 
 2. Installation
@@ -43,6 +45,13 @@
 
    # ./target rpi
 
+ The APIs for all supported languages (bindings) are not installed by default. In order to deploy the bindings use:
+
+   # make install_bindings_<language>
+
+ Where language may be any of the supported languages (or the keyword 'all' to install everything).
+
+
 
 3. Specific Add-ons
 
@@ -57,6 +66,7 @@
  For operating systems incorporating the systemd, run:
 
    # make install_systemd
+
 
 
 4. Starting uSched Services

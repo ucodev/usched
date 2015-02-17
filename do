@@ -10,11 +10,11 @@
 if [ `uname` = "Linux" ]; then
 	echo "-DCONFIG_SYS_LINUX=1 -D_GNU_SOURCE=1 -D_XOPEN_SOURCE=700" > .defines
 elif [ `uname` = "Darwin" ]; then
-	echo "-DCONFIG_SYS_BSD=1 -D_XOPEN_SOURCE=700" > .defines
+	echo "-DCONFIG_SYS_BSD=1 -D_BSD_SOURCE=1 -D__BSD_VISIBLE=1 -D_XOPEN_SOURCE=700" > .defines
 elif [ `uname` = "FreeBSD" ]; then
-	echo "-DCONFIG_SYS_BSD=1 -D_XOPEN_SOURCE=700" > .defines
+	echo "-DCONFIG_SYS_BSD=1 -D_BSD_SOURCE=1 -D__BSD_VISIBLE=1 -D_XOPEN_SOURCE=700" > .defines
 elif [ `uname` = "OpenBSD" ]; then
-	echo "-DCONFIG_SYS_BSD=1 -D_XOPEN_SOURCE=700" > .defines
+	echo "-DCONFIG_SYS_BSD=1 -D_BSD_SOURCE=1 -D__BSD_VISIBLE=1 -D_XOPEN_SOURCE=700" > .defines
 elif [ `uname` = "SunOS" ]; then
 	echo "-DCONFIG_SYS_SOLARIS=1 -D_XOPEN_SOURCE=700" > .defines
 fi

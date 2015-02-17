@@ -1,6 +1,6 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.defines`
-CCFLAGS=-std=c1x -D_POSIX_C_SOURCE=199309L -DCONFIG_EXEC_SPECIFIC=1 -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
+CCFLAGS=-std=c99 -D_POSIX_C_SOURCE=199309L -DCONFIG_EXEC_SPECIFIC=1 -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
 LDFLAGS=-g -pthread -lfsma -lfsop -lpall -lrt
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include

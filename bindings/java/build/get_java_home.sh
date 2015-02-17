@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 JAVA_HOME_TRY=$(readlink -f `which java`)
 

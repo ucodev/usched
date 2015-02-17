@@ -19,7 +19,7 @@ install_python:
 	cd python && make && make install && cd ..
 
 clean:
-	cd chsarp && make clean && cd ..
+	cd csharp && make clean && cd ..
 	cd java && make clean && cd ..
 	cd php && make clean && cd ..
 	cd python && make clean && cd ..

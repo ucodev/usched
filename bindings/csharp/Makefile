@@ -5,4 +5,4 @@ install:
 	# TODO
 
 clean:
-	rm *.dll
+	rm -f *.dll

@@ -40,20 +40,17 @@
 mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, unsigned int msgsize) {
 	int errsv = 0;
 	mqd_t ret;
-#if CONFIG_SYS_BSD != 1
 	struct mq_attr mqattr;
 
-	memset(&mqattr, 0, sizeof(struct mq_attr));
-#endif
-
 	memset(&ret, 0, sizeof(mqd_t));
+	memset(&mqattr, 0, sizeof(struct mq_attr));
 
-#if CONFIG_SYS_BSD != 1
 	mqattr.mq_flags = 0;		/* Flags */
 	mqattr.mq_maxmsg = maxmsg;	/* Max number of messagees on queue */
 	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
 	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
 
+#if CONFIG_SYS_BSD != 1
 	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
 #else
 	if ((ret = mq_open(name, oflags, mode)) == (mqd_t) -1) {
@@ -63,6 +60,15 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 		errno = errsv;
 		return (mqd_t) -1;
 	}
+
+#if CONFIG_SYS_BSD == 1
+	if (mq_setattr(ret, &mqattr, NULL) < 0) {
+		errsv = errno;
+		log_crit("pmq_init(): mq_setattr(): %s\n", strerror(errno));
+		errno = errsv;
+		return (mqd_t) -1;
+	}
+#endif
 
 	return ret;
 }

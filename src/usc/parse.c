@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 04-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -454,9 +454,18 @@ static struct usched_client_request *_parse_subj_compound(struct usched_client_r
 	debug_printf(DEBUG_INFO, "SUBJ: %s\n", req->subj);
 
 	switch (req->op) {
-		case USCHED_OP_RUN:  return (argc - 1) ? _parse_prep_compound(req, argc - 1, &argv[1]) : req;
-		case USCHED_OP_STOP: if (!(argc - 1)) { return req; } else break;
-		case USCHED_OP_SHOW: if (!(argc - 1)) { return req; } else break;
+		case USCHED_OP_RUN: {
+			return (argc - 1) ? _parse_prep_compound(req, argc - 1, &argv[1]) : req;
+		}
+
+		case USCHED_OP_STOP: {
+			if (!(argc - 1)) return req;
+		} break;
+
+		case USCHED_OP_SHOW: {
+			if (!(argc - 1)) return req;
+		} break;
+
 		default: break; /* Invalid operation */
 	}
 
@@ -483,10 +492,31 @@ static struct usched_client_request *_parse_op_compound(struct usched_client_req
 
 	/* Evaluate argument counter validity for each operation */
 	switch (req->op) {
-		case USCHED_OP_RUN:  if (argc < 3)  { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_STOP: if (argc != 2) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_SHOW: if (argc != 2) { usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
-		default: usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INVALID_OP, argv[0]); goto _op_error;
+		case USCHED_OP_RUN: {
+			if (argc < 3) {
+				usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		case USCHED_OP_STOP: {
+			if (argc != 2) {
+				usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		case USCHED_OP_SHOW: {
+			if (argc != 2) {
+				usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		default: {
+			usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INVALID_OP, argv[0]);
+			goto _op_error;
+		}
 	}
 
 	return _parse_subj_compound(req, argc - 1, &argv[1]);

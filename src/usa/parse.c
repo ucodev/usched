@@ -140,7 +140,7 @@ static struct usched_admin_request *_parse_op_compound(struct usched_admin_reque
 		} break;
 
 		case USCHED_OP_COMMIT: {
-			if (argc < 1) {
+			if (argc < 2) {
 				usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL);
 				goto _op_error;
 			}

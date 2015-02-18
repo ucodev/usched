@@ -106,6 +106,10 @@ op_start() {
 		return ${?}
 	fi
 
+	sleep 1
+
+	while ! [ -f ${CONFIG_USCHED_DAEMON_PID_FILE} ]; do sleep 1; done
+
 	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_EXEC_PID_FILE} -r -S ${CONFIG_USCHED_EXEC_BIN}
 
 	return ${?}

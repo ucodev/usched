@@ -40,7 +40,7 @@
 int pmq_exec_init(void) {
 	int errsv = 0;
 
-	if ((rune.pmqd = pmq_init(rune.config.core.pmq_name, O_RDONLY, 0400, rune.config.core.pmq_msgmax, rune.config.core.pmq_msgsize)) == (mqd_t) - 1) {
+	if ((rune.pmqd = pmq_init(rune.config.core.pmq_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_exec_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;

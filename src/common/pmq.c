@@ -43,28 +43,38 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 	struct mq_attr mqattr;
 
 	memset(&ret, 0, sizeof(mqd_t));
-	memset(&mqattr, 0, sizeof(struct mq_attr));
 
-	mqattr.mq_flags = 0;		/* Flags */
-	mqattr.mq_maxmsg = maxmsg;	/* Max number of messagees on queue */
-	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
-	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
+	if (oflags & O_CREAT) {
+		memset(&mqattr, 0, sizeof(struct mq_attr));
 
-	/* Try to unlink any previous message queue */
-	if (mq_unlink(name) < 0) {
-		if (errno != ENOENT) {
-			errsv = errno;
-			log_crit("pmq_init(): mq_unlink(): %s\n", strerror(errno));
-			errno = errsv;
-			return -1;
+		mqattr.mq_flags = 0;		/* Flags */
+		mqattr.mq_maxmsg = maxmsg;	/* Max number of messagees on queue */
+		mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
+		mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
+
+		/* Try to unlink any previous message queue */
+		if (mq_unlink(name) < 0) {
+			if (errno != ENOENT) {
+				errsv = errno;
+				log_crit("pmq_init(): mq_unlink(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
 		}
 	}
 
+	if (oflags & O_CREAT) {
 #if !defined(CONFIG_SYS_BSD) || CONFIG_SYS_BSD == 0
-	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
+		if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
 #else
-	if ((ret = mq_open(name, oflags, mode, NULL)) == (mqd_t) -1) {
+		if ((ret = mq_open(name, oflags, mode, NULL)) == (mqd_t) -1) {
 #endif
+			errsv = errno;
+			log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
+			errno = errsv;
+			return (mqd_t) -1;
+		}
+	} else if ((ret = mq_open(name, oflags)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
 		errno = errsv;
@@ -72,7 +82,7 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 	}
 
 #if CONFIG_SYS_BSD == 1
-	if (mq_setattr(ret, &mqattr, NULL) < 0) {
+	if ((oflags & O_CREAT) && mq_setattr(ret, &mqattr, NULL) < 0) {
 		errsv = errno;
 		log_crit("pmq_init(): mq_setattr(): %s\n", strerror(errno));
 		errno = errsv;

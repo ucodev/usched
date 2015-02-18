@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 15-02-2015
+# Date: 18-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -117,6 +117,12 @@ def usched_start():
 		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", "-S", CONFIG_USCHED_DAEMON_BIN])
 	except OSError:
 		status = 127
+
+	time.sleep(1)
+
+	# Wait for 'usd' to start
+	while not os.path.isfile(CONFIG_USCHED_DAEMON_PID_FILE):
+		time.sleep(1)
 
 	if status != EXIT_SUCCESS:
 		print_info("Failed: Unable to start uSched Daemon\n")

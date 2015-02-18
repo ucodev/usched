@@ -55,6 +55,9 @@ install_classic_redhat:
 install_classic_ubuntu:
 	cd scripts && make install_classic_ubuntu && cd ..
 
+install_freebsd:
+	cd scripts && make install_freebsd && cd ..
+
 install_systemd:
 	cd scripts && make install_systemd && cd ..
 

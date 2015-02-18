@@ -21,6 +21,9 @@ install_classic_redhat:
 install_classic_ubuntu:
 	cd init && make install_ubuntu && cd ..
 
+install_freebsd:
+	cd init && make install_freebsd && cd ..
+
 install_systemd:
 	cd systemd && make install && cd ..
 

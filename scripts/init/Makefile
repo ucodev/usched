@@ -16,3 +16,6 @@ install_redhat:
 install_ubuntu:
 	make -C ubuntu/ install
 
+install_freebsd:
+	cd freebsd && make install && cd ..
+

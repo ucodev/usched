@@ -77,7 +77,7 @@ void usage_admin_show(void) {
 	fprintf(stderr, "Usage: %s OP { CATEGORY [ ARG1 ARG2 ... ] }\n", runa.argv[0]);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "\tOP\t\tadd | delete | change | commit | rollback | show\n");
-	fprintf(stderr, "\tCATEGORY\tauth | core | network | users\n");
+	fprintf(stderr, "\tCATEGORY\tall | auth | core | network | users\n");
 	fprintf(stderr, "\n");
 }
 

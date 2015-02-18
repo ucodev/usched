@@ -3,7 +3,7 @@
  * @brief uSched
  *       Category processing interface header
  *
- * Date: 15-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,17 +30,29 @@
 #include <stdio.h>
 
 /* Prototypes */
+int category_all_commit(size_t argc, char **args);
+int category_all_rollback(size_t argc, char **args);
+int category_all_show(size_t argc, char **args);
+int category_auth_commit(size_t argc, char **args);
+int category_auth_rollback(size_t argc, char **args);
 int category_auth_add(size_t argc, char **args);
 int category_auth_change(size_t argc, char **args);
 int category_auth_delete(size_t argc, char **args);
 int category_auth_show(size_t argc, char **args);
+int category_core_commit(size_t argc, char **args);
+int category_core_rollback(size_t argc, char **args);
 int category_core_change(size_t argc, char **args);
 int category_core_show(size_t argc, char **args);
+int category_network_commit(size_t argc, char **args);
+int category_network_rollback(size_t argc, char **args);
 int category_network_change(size_t argc, char **args);
 int category_network_show(size_t argc, char **args);
+int category_users_commit(size_t argc, char **args);
+int category_users_rollback(size_t argc, char **args);
 int category_users_add(size_t argc, char **args);
 int category_users_delete(size_t argc, char **args);
 int category_users_change(size_t argc, char **args);
 int category_users_show(size_t argc, char **args);
 
 #endif
+

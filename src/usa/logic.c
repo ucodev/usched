@@ -130,7 +130,14 @@ int logic_admin_process_change(void) {
 int logic_admin_process_show(void) {
 	int errsv = 0;
 
-	if (runa.req->category == USCHED_CATEGORY_AUTH) {
+	if (runa.req->category == USCHED_CATEGORY_ALL) {
+		if (category_all_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_all_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_AUTH) {
 		if (category_auth_show(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_show(): category_auth_show(): %s\n", strerror(errno));

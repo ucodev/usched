@@ -60,6 +60,9 @@ static usched_op_t _parse_get_op(const char *op) {
 }
 
 static usched_category_t _parse_get_category(const char *category) {
+	if (!strcasecmp(category, USCHED_CATEGORY_ALL_STR))
+		return USCHED_CATEGORY_ALL;
+
 	if (!strcasecmp(category, USCHED_CATEGORY_AUTH_STR))
 		return USCHED_CATEGORY_AUTH;
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 15-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,30 @@
 #include "print.h"
 #include "input.h"
 
+int category_all_show(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_all_commit(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_all_rollback(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_auth_commit(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_auth_rollback(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
 
 int category_auth_add(size_t argc, char **args) {
 	int errsv = 0;
@@ -461,6 +485,16 @@ int category_auth_show(size_t argc, char **args) {
 	return -1;
 }
 
+int category_core_commit(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_core_rollback(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
 int category_core_change(size_t argc, char **args) {
 	int errsv = 0;
 
@@ -852,9 +886,19 @@ int category_core_show(size_t argc, char **args) {
 
 	/* Unknown component */
 	usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT, "show core");
-	log_warn("category_core_change(): Invalid 'show core' component: %s\n", args[0]);
+	log_warn("category_core_show(): Invalid 'show core' component: %s\n", args[0]);
 	errno = EINVAL;
 
+	return -1;
+}
+
+int category_network_commit(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_network_rollback(size_t argc, char **args) {
+	/* TODO */
 	return -1;
 }
 
@@ -1066,6 +1110,16 @@ int category_network_show(size_t argc, char **args) {
 	log_warn("category_network_show(): Invalid 'show network' component: %s\n", args[0]);
 	errno = EINVAL;
 
+	return -1;
+}
+
+int category_users_commit(size_t argc, char **args) {
+	/* TODO */
+	return -1;
+}
+
+int category_users_rollback(size_t argc, char **args) {
+	/* TODO */
 	return -1;
 }
 

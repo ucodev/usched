@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 15-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -81,6 +81,8 @@
 #define USCHED_OP_ADD_STR		"add"
 #define USCHED_OP_DELETE_STR		"delete"
 #define USCHED_OP_CHANGE_STR		"change"
+#define USCHED_OP_COMMIT_STR		"commit"
+#define USCHED_OP_ROLLBACK_STR		"rollback"
 
 /* Prepositions - Human */
 #define USCHED_PREP_IN_STR		"in"
@@ -144,7 +146,9 @@ typedef enum OP {
 	USCHED_OP_SHOW,
 	USCHED_OP_ADD,		/* Used by administration tools only */
 	USCHED_OP_DELETE,	/* Used by administration tools only */
-	USCHED_OP_CHANGE	/* Used by administration tools only */
+	USCHED_OP_CHANGE,	/* Used by administration tools only */
+	USCHED_OP_COMMIT,	/* Used by administration tools only */
+	USCHED_OP_ROLLBACK	/* Used by administration tools only */
 } usched_op_t;
 
 /* Prepositions - Machine */

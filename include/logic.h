@@ -3,9 +3,9 @@
  * @brief uSched
  *        Logic Analyzer interface header
  *
- * Date: 06-08-2014
+ * Date: 18-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -32,6 +32,8 @@ int logic_admin_process_add(void);
 int logic_admin_process_delete(void);
 int logic_admin_process_change(void);
 int logic_admin_process_show(void);
+int logic_admin_process_commit(void);
+int logic_admin_process_rollback(void);
 int logic_client_process_run(void);
 int logic_client_process_stop(void);
 int logic_client_process_show(void);

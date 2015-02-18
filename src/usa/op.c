@@ -3,9 +3,9 @@
  * @brief uSched
  *        Operation Handling interface - Admin
  *
- * Date: 05-08-2014
+ * Date: 18-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -68,6 +68,24 @@ int op_admin_process(void) {
 			if (ret < 0) {
 				errsv = errno;
 				log_warn("op_admin_process(): logic_admin_process_change(): %s\n", strerror(errno));
+			}
+
+			break;
+		case USCHED_OP_COMMIT:
+			ret = logic_admin_process_commit();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_admin_process(): logic_admin_process_commit(): %s\n", strerror(errno));
+			}
+
+			break;
+		case USCHED_OP_ROLLBACK:
+			ret = logic_admin_process_rollback();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_admin_process(): logic_admin_process_rollback(): %s\n", strerror(errno));
 			}
 
 			break;

@@ -38,8 +38,9 @@
 
 int pmq_daemon_init(void) {
 	int errsv = 0;
+	int oflags = O_WRONLY;
 
-	if ((rund.pmqd = pmq_init(rund.config.core.pmq_name, O_WRONLY | O_CREAT, 0600, rund.config.core.pmq_msgmax, rund.config.core.pmq_msgsize)) == (mqd_t) -1) {
+	if ((rund.pmqd = pmq_init(rund.config.core.pmq_name, oflags, 0, 0, 0)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_daemon_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
@@ -51,6 +52,5 @@ int pmq_daemon_init(void) {
 
 void pmq_daemon_destroy(void) {
 	pmq_destroy(rund.pmqd);
-	pmq_unlink(rund.config.core.pmq_name);
 }
 

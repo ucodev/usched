@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Admin
  *
- * Date: 15-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -165,5 +165,15 @@ int logic_admin_process_show(void) {
 	}
 
 	return 0;
+}
+
+int logic_admin_process_commit(void) {
+	/* TODO */
+	return -1;
+}
+
+int logic_admin_process_rollback(void) {
+	/* TODO */
+	return -1;
 }
 

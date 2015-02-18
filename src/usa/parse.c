@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Admin
  *
- * Date: 05-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,12 @@ static usched_op_t _parse_get_op(const char *op) {
 
 	if (!strcasecmp(op, USCHED_OP_SHOW_STR))
 		return USCHED_OP_SHOW;
+
+	if (!strcasecmp(op, USCHED_OP_COMMIT_STR))
+		return USCHED_OP_COMMIT;
+
+	if (!strcasecmp(op, USCHED_OP_ROLLBACK_STR))
+		return USCHED_OP_ROLLBACK;
 
 	return -1;
 }
@@ -108,10 +114,46 @@ static struct usched_admin_request *_parse_op_compound(struct usched_admin_reque
 	/* Evaluate argument counter validity for each operation */
 	switch (req->op) {
 		case USCHED_OP_DELETE:
-		case USCHED_OP_ADD: if (argc < 3) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_CHANGE: if (argc < 4) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL); goto _op_error; } break;
-		case USCHED_OP_SHOW: if (argc < 2) { usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_TOOMANY_ARGS, NULL); goto _op_error; } break;
-		default: usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_OP, argv[0]); goto _op_error;
+
+		case USCHED_OP_ADD: {
+			if (argc < 3) {
+				usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		case USCHED_OP_CHANGE: {
+			if (argc < 4) {
+				usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		case USCHED_OP_SHOW: {
+			if (argc < 2) {
+				usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		case USCHED_OP_COMMIT: {
+			if (argc < 1) {
+				usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		case USCHED_OP_ROLLBACK: {
+			if (argc < 1) {
+				usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
+		default: {
+			usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_OP, argv[0]);
+			goto _op_error;
+		}
 	}
 
 	return _parse_category_compound(req, argc - 1, &argv[1]);

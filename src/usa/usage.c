@@ -3,7 +3,7 @@
  * @brief uSched
  *        Usage handlers interface - Admin
  *
- * Date: 03-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -74,9 +74,9 @@ static void _usage_admin_error_print(void) {
 void usage_admin_show(void) {
 	_usage_admin_error_print();
 
-	fprintf(stderr, "Usage: %s OP CATEGORY [ ARG1 ARG2 ... ]\n", runa.argv[0]);
+	fprintf(stderr, "Usage: %s OP { CATEGORY [ ARG1 ARG2 ... ] }\n", runa.argv[0]);
 	fprintf(stderr, "\n");
-	fprintf(stderr, "\tOP\t\tadd | delete | change | show\n");
+	fprintf(stderr, "\tOP\t\tadd | delete | change | commit | rollback | show\n");
 	fprintf(stderr, "\tCATEGORY\tauth | core | network | users\n");
 	fprintf(stderr, "\n");
 }

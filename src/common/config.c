@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 16-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,6 +41,7 @@
 #include "config.h"
 #include "mm.h"
 #include "log.h"
+#include "str.h"
 
 
 static int _list_uint_compare(const void *d1, const void *d2) {
@@ -80,7 +81,7 @@ static void _userinfo_destroy(void *data) {
 }
 
 static int _list_init_uint_from_file(const char *file, struct cll_handler **list) {
-	int errsv = 0, len = 0;
+	int errsv = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
 	char line[32];
@@ -123,11 +124,8 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 		if (!line[0] || (line[0] == '\n'))
 			continue;
 
-		/* Strip '\n' */
-		len = strlen(line);
-
-		while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
-			line[-- len] = 0;
+		/* Strip '\n' and/or '\r' */
+		strrtrim(line, "\n\r");
 
 		/* Allocate value memory */
 		if (!(val = mm_alloc(sizeof(unsigned int)))) {
@@ -170,7 +168,7 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 }
 
 static int _value_init_uint_from_file(const char *file, unsigned int *val) {
-	int errsv = 0, len = 0;
+	int errsv = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
 	char line[32];
@@ -214,11 +212,8 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 		return -1;
 	}
 
-	/* Strip '\n' */
-	len = strlen(line);
-
-	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
-		line[-- len] = 0;
+	/* Strip '\n' and/or '\r' */
+	strrtrim(line, "\n\r");
 
 	/* Retrieve line value */
 	*val = strtoul(line, &endptr, 0);
@@ -235,7 +230,7 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 }
 
 static int _value_init_int_from_file(const char *file, int *val) {
-	int errsv = 0, len = 0;
+	int errsv = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
 	char line[32];
@@ -279,11 +274,8 @@ static int _value_init_int_from_file(const char *file, int *val) {
 		return -1;
 	}
 
-	/* Strip '\n' */
-	len = strlen(line);
-
-	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
-		line[-- len] = 0;
+	/* Strip '\n' and/or '\r' */
+	strrtrim(line, "\n\r");
 
 	/* Retrieve line value */
 	*val = strtol(line, &endptr, 0);
@@ -344,11 +336,8 @@ static char *_value_init_string_from_file(const char *file) {
 		return NULL;
 	}
 
-	/* Strip '\n' */
-	len = strlen(line);
-
-	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
-		line[-- len] = 0;
+	/* Strip '\n' and/or '\r' */
+	strrtrim(line, "\n\r");
 
 	/* Allocate memory for string */
 	if (!(string = mm_alloc(len + 1))) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        String helper interface
  *
- * Date: 15-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -107,5 +107,15 @@ int strisnum(const char *s) {
 	for ( ; *s; s ++) if ((*s < 48) || (*s > 57)) return 0;
 
 	return 1;
+}
+
+int strrtrim(char *s, const char *trail) {
+	size_t len = strlen(s);
+	char ch = trail[0];
+	int i = 0;
+
+	while (ch) ch = (s[len - 1] == ch) ? trail[i = s[-- len] = 0] : trail[++ i];
+
+	return strlen(s) - len;
 }
 

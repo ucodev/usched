@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface
  *
- * Date: 15-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,6 +35,7 @@
 #include "log.h"
 #include "mm.h"
 #include "file.h"
+#include "str.h"
 
 
 static void _l_destroy(void *data) {
@@ -49,7 +50,6 @@ static int _l_compare(const void *l1, const void *l2) {
 
 char *file_read_line_single(const char *file) {
 	int errsv = 0;
-	size_t len = 0;
 	FILE *fp = NULL;
 	char *line = NULL;
 
@@ -76,12 +76,8 @@ char *file_read_line_single(const char *file) {
 	/* Fetch one line */
 	fgets(line, 8191, fp);
 
-	/* Compute line length */
-	len = strlen(line);
-
 	/* Get rid of trailling new lines */
-	while ((line[len - 1] == '\n') || (line[len - 1] == '\r'))
-		line[-- len] = 0;
+	strrtrim(line, "\n\r");
 
 	/* Close the file pointer */
 	fclose(fp);
@@ -130,8 +126,7 @@ struct cll_handler *file_read_line_all_ordered(const char *file) {
 			break;
 
 		/* Get rid of trailing new lines */
-		while ((buf[len - 1] == '\n') || (buf[len - 1] == '\r'))
-			buf[-- len] = 0;
+		strrtrim(buf, "\n\r");
 
 		/* Allocate line memory */
 		if (!(line = mm_alloc(len + 1))) {

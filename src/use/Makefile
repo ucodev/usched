@@ -4,7 +4,7 @@ CCFLAGS=-std=c99 -D_POSIX_C_SOURCE=199309L -DCONFIG_EXEC_SPECIFIC=1 -D_REENTRANT
 LDFLAGS=-g -pthread -lfsma -lfsop -lpall -lrt
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/bitops.o ../common/config.o ../common/debug.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/thread.o
+OBJS_COMMON=../common/bitops.o ../common/config.o ../common/debug.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
 OBJS=config.o exec.o pmq.o runtime.o sig.o thread.o
 TARGET=use
 

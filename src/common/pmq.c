@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface
  *
- * Date: 17-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -50,25 +50,12 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
 	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
 
-#if CONFIG_SYS_BSD == 0
 	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
-#else
-	if ((ret = mq_open(name, oflags, mode, NULL)) == (mqd_t) -1) {
-#endif
 		errsv = errno;
 		log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
 		errno = errsv;
 		return (mqd_t) -1;
 	}
-
-#if CONFIG_SYS_BSD == 1
-	if (mq_setattr(ret, &mqattr, NULL) < 0) {
-		errsv = errno;
-		log_crit("pmq_init(): mq_setattr(): %s\n", strerror(errno));
-		errno = errsv;
-		return (mqd_t) -1;
-	}
-#endif
 
 	return ret;
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 16-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -141,8 +141,8 @@
 #if CONFIG_USCHED_HASH_FNV1A == 0 && CONFIG_USCHED_HASH_DJB2 == 0
  #error "CONFIG_USCHED_HASH_FNV1A and CONFIG_USCHED_HASH_DJB2 are both disabled. At least one must be enabled."
 #endif
-#if CONFIG_SYS_EXIT_CODE_CUSTOM_BASE < 79 || CONFIG_SYS_EXIT_CODE_CUSTOM_BASE > 125
- #error "CONFIG_SYS_EXIT_CODE_CUSTOM_BASE value must stand between 79 and 125"
+#if CONFIG_SYS_EXIT_CODE_CUSTOM_BASE < 80 || CONFIG_SYS_EXIT_CODE_CUSTOM_BASE > 125
+ #error "CONFIG_SYS_EXIT_CODE_CUSTOM_BASE value must stand between 80 and 125"
 #endif
 #if CONFIG_USCHED_LOG_MSG_MAX_SIZE < 256
  #error "CONFIG_USCHED_LOG_MSG_MAX_SIZE value must be equal or greater than 256"
@@ -170,6 +170,9 @@ enum PROCESS_EXIT_STATUS_CUSTOM_CODES {
 	PROCESS_EXIT_STATUS_CUSTOM_RELOAD_NOPRIV = 77,
 	PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG,
 	PROCESS_EXIT_STATUS_CUSTOM_UNKNOWN_ABORT
+	/* NOTE: If more options are added here, make sure that CONFIG_SYS_EXIT_CODE_CUSTOM_BASE
+	 *       value is greater than the maximum value of this enumeration.
+	 */
 };
 
 /* Windows specific parameters */

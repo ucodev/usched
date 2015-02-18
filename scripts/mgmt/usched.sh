@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 15-02-2015
+# Date: 18-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -76,7 +76,11 @@ perms_check() {
 op_flush() {
 	print_info "Flush operation status: "
 
-	kill -USR1 `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
+	if [ -f "${CONFIG_USCHED_DAEMON_PID_FILE}" ]; then
+		kill -USR1 `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
+	else
+		return 1
+	fi
 
 	return ${?}
 }
@@ -84,7 +88,11 @@ op_flush() {
 op_reload() {
 	print_info "Reload operation status: "
 
-	kill -HUP `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
+	if [ -f "${CONFIG_USCHED_DAEMON_PID_FILE}" ]; then
+		kill -HUP `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
+	else
+		return 1
+	fi
 
 	return ${?}
 }
@@ -106,8 +114,13 @@ op_start() {
 op_stop() {
 	print_info "Stop operation status: "
 
-	kill -TERM `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
-	kill -TERM `cat ${CONFIG_USCHED_EXEC_PID_FILE}`
+	if [ -f "${CONFIG_USCHED_DAEMON_PID_FILE}" ]; then
+		kill -TERM `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
+	fi
+
+	if [ -f "${CONFIG_USCHED_EXEC_PID_FILE}" ]; then
+		kill -TERM `cat ${CONFIG_USCHED_EXEC_PID_FILE}`
+	fi
 
 	while [ -f ${CONFIG_USCHED_DAEMON_PID_FILE} ]; do sleep 1; done
 	while [ -f ${CONFIG_USCHED_EXEC_PID_FILE} ]; do sleep 1; done

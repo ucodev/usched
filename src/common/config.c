@@ -337,7 +337,7 @@ static char *_value_init_string_from_file(const char *file) {
 	}
 
 	/* Strip '\n' and/or '\r' */
-	strrtrim(line, "\n\r");
+	len = strrtrim(line, "\n\r");
 
 	/* Allocate memory for string */
 	if (!(string = mm_alloc(len + 1))) {

@@ -116,6 +116,6 @@ int strrtrim(char *s, const char *trail) {
 
 	while (ch) ch = (s[len - 1] == ch) ? trail[i = s[-- len] = 0] : trail[++ i];
 
-	return strlen(s) - len;
+	return len;
 }
 

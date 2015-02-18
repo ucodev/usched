@@ -126,7 +126,7 @@ struct cll_handler *file_read_line_all_ordered(const char *file) {
 			break;
 
 		/* Get rid of trailing new lines */
-		strrtrim(buf, "\n\r");
+		len = strrtrim(buf, "\n\r");
 
 		/* Allocate line memory */
 		if (!(line = mm_alloc(len + 1))) {

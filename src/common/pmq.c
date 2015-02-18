@@ -88,6 +88,6 @@ void pmq_destroy(mqd_t pmqd) {
 }
 
 int pmq_unlink(const char *pmqname) {
-	mq_unlink(pmqname);
+	return mq_unlink(pmqname);
 }
 

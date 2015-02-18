@@ -50,6 +50,16 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 	mqattr.mq_msgsize = msgsize;	/* Max message size in bytes */
 	mqattr.mq_curmsgs = 0;		/* Number of messages currently in queue */
 
+	/* Try to unlink any previous message queue */
+	if (mq_unlink(name) < 0) {
+		if (errno != ENOENT) {
+			errsv = errno;
+			log_crit("pmq_init(): mq_unlink(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	}
+
 #if !defined(CONFIG_SYS_BSD) || CONFIG_SYS_BSD == 0
 	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
 #else
@@ -75,5 +85,9 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 
 void pmq_destroy(mqd_t pmqd) {
 	mq_close(pmqd);
+}
+
+int pmq_unlink(const char *pmqname) {
+	mq_unlink(pmqname);
 }
 

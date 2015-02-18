@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Daemon
  *
- * Date: 10-02-2015
+ * Date: 18-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,5 +51,6 @@ int pmq_daemon_init(void) {
 
 void pmq_daemon_destroy(void) {
 	pmq_destroy(rund.pmqd);
+	pmq_unlink(rund.config.core.pmq_name);
 }
 

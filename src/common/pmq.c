@@ -53,7 +53,7 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, u
 #if !defined(CONFIG_SYS_BSD) || CONFIG_SYS_BSD == 0
 	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
 #else
-	if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
+	if ((ret = mq_open(name, oflags, mode, NULL)) == (mqd_t) -1) {
 #endif
 		errsv = errno;
 		log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));

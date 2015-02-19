@@ -3,7 +3,7 @@
  * @brief uSched
  *        Core configuration and administration interface
  *
- * Date: 05-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,6 +36,15 @@
 #include "usched.h"
 #include "print.h"
 
+int core_admin_commit(void) {
+	/* TODO */
+	return -1;
+}
+
+int core_admin_rollback(void) {
+	/* TODO */
+	return -1;
+}
 
 void core_admin_show(void) {
 	core_admin_delta_noexec_show();

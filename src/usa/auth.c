@@ -3,7 +3,7 @@
  * @brief uSched
  *        Auth configuration and administration interface
  *
- * Date: 15-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,16 @@ static int _l_compare(const void *l1, const void *l2) {
 	const char *bl1 = l1, *bl2 = l2;
 
 	return strcmp(bl1, bl2);
+}
+
+int auth_admin_commit(void) {
+	/* TODO */
+	return -1;
+}
+
+int auth_admin_rollback(void) {
+	/* TODO */
+	return -1;
 }
 
 void auth_admin_show(void) {

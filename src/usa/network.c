@@ -3,7 +3,7 @@
  * @brief uSched
  *        Network configuration and administration interface
  *
- * Date: 05-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,6 +35,16 @@
 #include "mm.h"
 #include "usched.h"
 #include "print.h"
+
+int network_admin_commit(void) {
+	/* TODO */
+	return -1;
+}
+
+int network_admin_rollback(void) {
+	/* TODO */
+	return -1;
+}
 
 void network_admin_show(void) {
 	network_admin_bind_addr_show();

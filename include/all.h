@@ -3,7 +3,7 @@
  * @brief uSched
  *       ALL Category administration interface header
  *
- * Date: 18-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,7 +29,7 @@
 #define USCHED_ALL_H
 
 /* Prototypes */
-void all_admin_show(void);
+int all_admin_show(void);
 int all_admin_commit(void);
 int all_admin_rollback(void);
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Network configuration and administration interface header
  *
- * Date: 05-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,6 +29,8 @@
 
 
 /* Prototypes */
+int network_admin_commit(void);
+int network_admin_rollback(void);
 void network_admin_show(void);
 int network_admin_bind_addr_show(void);
 int network_admin_bind_addr_change(const char *bind_addr);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Core configuration and administration interface header
  *
- * Date: 05-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,8 @@
 #define USCHED_CORE_H
 
 /* Prototypes */
+int core_admin_commit(void);
+int core_admin_rollback(void);
 void core_admin_show(void);
 int core_admin_delta_noexec_show(void);
 int core_admin_delta_noexec_change(const char *delta_noexec);

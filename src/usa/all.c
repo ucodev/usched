@@ -3,7 +3,7 @@
  * @brief uSched
  *       ALL Category administration interface
  *
- * Date: 18-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,24 +24,99 @@
  *
  */
 
+#include <string.h>
+#include <errno.h>
+
+#include "config.h"
+#include "log.h"
 #include "all.h"
 #include "auth.h"
 #include "core.h"
 #include "network.h"
 #include "users.h"
 
-void all_admin_show(void) {
+int all_admin_show(void) {
 	auth_admin_show();
 	core_admin_show();
 	network_admin_show();
-	users_admin_config_show();
+	users_admin_show();
+
+	return 0;
 }
 
 int all_admin_commit(void) {
-	return -1;
+	int errsv = 0;
+
+	/* Commit auth changes */
+	if (auth_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): auth_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Commit core changes */
+	if (core_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): core_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Commit network changes */
+	if (network_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): network_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Commit auth changes */
+	if (users_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): users_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int all_admin_rollback(void) {
-	return -1;
+	int errsv = 0;
+
+	/* Rollback auth changes */
+	if (auth_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("all_admin_rollback(): auth_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Rollback core changes */
+	if (core_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("all_admin_rollback(): core_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Rollback network changes */
+	if (network_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_all_commit(): network_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Rollback auth changes */
+	if (users_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("all_admin_rollback(): users_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 

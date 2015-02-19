@@ -3,9 +3,9 @@
  * @brief uSched
  *        Users configuration interface header
  *
- * Date: 06-08-2014
+ * Date: 19-02-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -30,10 +30,12 @@
 #include <sys/types.h>
 
 /* Prototypes */
-int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const char *password);
-int users_admin_config_delete(const char *username);
-int users_admin_config_change(const char *username, uid_t uid, gid_t gid, const char *password);
-int users_admin_config_show(void);
+int users_admin_commit(void);
+int users_admin_rollback(void);
+int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *password);
+int users_admin_delete(const char *username);
+int users_admin_change(const char *username, uid_t uid, gid_t gid, const char *password);
+int users_admin_show(void);
 
 #endif
 

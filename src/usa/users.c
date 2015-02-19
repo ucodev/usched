@@ -3,7 +3,7 @@
  * @brief uSched
  *        Users configuration and administration interface
  *
- * Date: 03-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,7 +44,17 @@
 #include "log.h"
 #include "print.h"
 
-int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const char *password) {
+int users_admin_commit(void) {
+	/* TODO */
+	return -1;
+}
+
+int users_admin_rollback(void) {
+	/* TODO */
+	return -1;
+}
+
+int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *password) {
 	int errsv = 0, len = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
@@ -56,28 +66,28 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 
 	/* Grant that username isn't empty */
 	if (!username || !username[0]) {
-		log_warn("users_admin_config_add(): Username is an empty string.\n");
+		log_warn("users_admin_add(): Username is an empty string.\n");
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Grant that password isn't empty */
 	if (!password || !password[0]) {
-		log_warn("users_admin_config_add(): Password is an empty string.\n");
+		log_warn("users_admin_add(): Password is an empty string.\n");
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Check password length */
 	if (strlen(password) < CONFIG_USCHED_AUTH_PASSWORD_MIN) {
-		log_warn("users_admin_config_add(): Password is too short (it must be at least 8 characters long).\n");
+		log_warn("users_admin_add(): Password is too short (it must be at least 8 characters long).\n");
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Check if username doesn't exceed the expected size */
 	if (strlen(username) > sizeof(salt)) {
-		log_warn("users_admin_config_add(): Username is too long.\n");
+		log_warn("users_admin_add(): Username is too long.\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -89,7 +99,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Hash raw salt */
 	if (!hash_buffer_blake2s(salt, salt_raw, sizeof(salt_raw))) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): hash_buffer_blake2s(): %s\n", strerror(errno));
+		log_warn("users_admin_add(): hash_buffer_blake2s(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -97,7 +107,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Generate the password digest */
 	if (!kdf_pbkdf2_sha512(digest, (const unsigned char *) password, strlen(password), salt, sizeof(salt), rounds, HASH_DIGEST_SIZE_SHA512)) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
+		log_warn("users_admin_add(): kdf_pbkdf2_hash(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -105,7 +115,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Encode the salt */
 	if (!(encoded_salt = encode_buffer_base64(NULL, &esalt_out_len, salt, sizeof(salt)))) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): encode_buffer_base64(): %s\n", strerror(errno));
+		log_warn("users_admin_add(): encode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -117,7 +127,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Encode the digest */
 	if (!(encoded_digest = encode_buffer_base64(NULL, &edigest_out_len, digest, HASH_DIGEST_SIZE_SHA512))) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): encode_buffer_base64(): %s\n", strerror(errno));
+		log_warn("users_admin_add(): encode_buffer_base64(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -132,7 +142,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 
 	if (!(result = mm_alloc(len))) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("users_admin_add(): mm_alloc(): %s\n", strerror(errno));
 		encode_destroy(encoded_salt);
 		encode_destroy(encoded_digest);
 		errno = errsv;
@@ -155,7 +165,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 
 	if (!(path = mm_alloc(len))) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("users_admin_add(): mm_alloc(): %s\n", strerror(errno));
 		mm_free(result);
 		errno = errsv;
 		return -1;
@@ -169,7 +179,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 
 	/* Check if file exists */
 	if (fsop_path_exists(path)) {
-		log_warn("users_admin_config_add(): User \'%s\' already exists.\n", username);
+		log_warn("users_admin_add(): User \'%s\' already exists.\n", username);
 		mm_free(result);
 		mm_free(path);
 		errno = EEXIST;
@@ -179,7 +189,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	/* Open the file for writting */
 	if (!(fp = fopen(path, "w"))) {
 		errsv = errno;
-		log_warn("users_admin_config_add(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
+		log_warn("users_admin_add(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
 		mm_free(result);
 		mm_free(path);
 		errno = errsv;
@@ -207,7 +217,7 @@ int users_admin_config_add(const char *username, uid_t uid, gid_t gid, const cha
 	return 0;
 }
 
-int users_admin_config_delete(const char *username) {
+int users_admin_delete(const char *username) {
 	int errsv = 0, len = 0;
 	char *path = NULL;
 
@@ -217,7 +227,7 @@ int users_admin_config_delete(const char *username) {
 
 	if (!(path = mm_alloc(len))) {
 		errsv = errno;
-		log_warn("users_admin_config_delete(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("users_admin_delete(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -231,7 +241,7 @@ int users_admin_config_delete(const char *username) {
 	/* Delete the file */
 	if (unlink(path) < 0) {
 		errsv = errno;
-		log_warn("users_admin_config_delete(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("users_admin_delete(): mm_alloc(): %s\n", strerror(errno));
 		mm_free(path);
 		errno = errsv;
 		return -1;
@@ -247,21 +257,21 @@ int users_admin_config_delete(const char *username) {
 	return 0;
 }
 
-int users_admin_config_change(const char *username, uid_t uid, gid_t gid, const char *password) {
+int users_admin_change(const char *username, uid_t uid, gid_t gid, const char *password) {
 	int errsv = 0;
 
 	/* Delete the user */
-	if (users_admin_config_delete(username) < 0) {
+	if (users_admin_delete(username) < 0) {
 		errsv = errno;
-		log_warn("users_admin_config_change(): users_admin_config_delete(): %s\n", strerror(errno));
+		log_warn("users_admin_change(): users_admin_delete(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	/* Add the user */
-	if (users_admin_config_add(username, uid, gid, password) < 0) {
+	if (users_admin_add(username, uid, gid, password) < 0) {
 		errsv = errno;
-		log_warn("users_admin_config_change(): users_admin_config_add(): %s\n", strerror(errno));
+		log_warn("users_admin_change(): users_admin_add(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -270,7 +280,7 @@ int users_admin_config_change(const char *username, uid_t uid, gid_t gid, const 
 	return 0;
 }
 
-int users_admin_config_show(void) {
+int users_admin_show(void) {
 	print_admin_config_users(&runa.config.users);
 
 	return 0;

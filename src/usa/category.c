@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 18-02-2015
+ * Date: 19-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,7 @@
 #include <sys/types.h>
 
 #include "config.h"
+#include "all.h"
 #include "auth.h"
 #include "core.h"
 #include "network.h"
@@ -43,28 +44,113 @@
 #include "input.h"
 
 int category_all_show(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: add auth <component> <property> <value> */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "show all");
+		log_warn("category_all_show(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Show all configurations */
+	if (all_admin_show() < 0) {
+		errsv = errno;
+		log_warn("category_all_show(): all_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_all_commit(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit auth */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "commit all");
+		log_warn("category_all_commit(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Commit all changes */
+	if (all_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("category_all_commit(): all_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int category_all_rollback(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: rollback auth */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "rollback all");
+		log_warn("category_all_rollback(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Rollback all changes */
+	if (all_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_all_rollback(): all_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int category_auth_commit(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit auth */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "commit auth");
+		log_warn("category_auth_commit(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (auth_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("category_auth_commit(): auth_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_auth_rollback(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit auth */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "rollback auth");
+		log_warn("category_auth_rollback(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (auth_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_auth_rollback(): auth_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_auth_add(size_t argc, char **args) {
@@ -486,13 +572,45 @@ int category_auth_show(size_t argc, char **args) {
 }
 
 int category_core_commit(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit core */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "commit core");
+		log_warn("category_core_commit(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (core_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("category_core_commit(): core_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_core_rollback(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: rollback core */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "rollback core");
+		log_warn("category_core_rollback(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (core_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_core_rollback(): core_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_core_change(size_t argc, char **args) {
@@ -893,13 +1011,45 @@ int category_core_show(size_t argc, char **args) {
 }
 
 int category_network_commit(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit network */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "commit network");
+		log_warn("category_network_commit(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (network_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("category_network_commit(): network_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_network_rollback(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: rollback network */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "rollback network");
+		log_warn("category_network_rollback(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (network_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_network_rollback(): network_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_network_change(size_t argc, char **args) {
@@ -1114,13 +1264,45 @@ int category_network_show(size_t argc, char **args) {
 }
 
 int category_users_commit(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit users */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "commit users");
+		log_warn("category_users_commit(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (users_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("category_users_commit(): users_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_users_rollback(size_t argc, char **args) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit users */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "rollback users");
+		log_warn("category_users_rollback(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (users_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_users_rollback(): users_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_users_add(size_t argc, char **args) {
@@ -1205,9 +1387,9 @@ int category_users_add(size_t argc, char **args) {
 	}
 
 	/* Add the user */
-	if (users_admin_config_add(username, uid, gid, password) < 0) {
+	if (users_admin_add(username, uid, gid, password) < 0) {
 		errsv = errno;
-		log_warn("category_users_add(): users_admin_config_add(): %s\n", strerror(errno));
+		log_warn("category_users_add(): users_admin_add(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -1233,9 +1415,9 @@ int category_users_delete(size_t argc, char **args) {
 	username = args[0];
 
 	/* Delete the user */
-	if (users_admin_config_delete(username) < 0) {
+	if (users_admin_delete(username) < 0) {
 		errsv = errno;
-		log_warn("category_users_delete(): users_admin_config_delete(): %s\n", strerror(errno));
+		log_warn("category_users_delete(): users_admin_delete(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -1329,9 +1511,9 @@ int category_users_change(size_t argc, char **args) {
 	}
 
 	/* Change the user */
-	if (users_admin_config_change(username, uid, gid, password) < 0) {
+	if (users_admin_change(username, uid, gid, password) < 0) {
 		errsv = errno;
-		log_warn("category_users_change(): users_admin_config_change(): %s\n", strerror(errno));
+		log_warn("category_users_change(): users_admin_change(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -1354,9 +1536,9 @@ int category_users_show(size_t argc, char **args) {
 	}
 
 	/* Show the users */
-	if (users_admin_config_show() < 0) {
+	if (users_admin_show() < 0) {
 		errsv = errno;
-		log_warn("category_users_show(): users_admin_config_show(): %s\n", strerror(errno));
+		log_warn("category_users_show(): users_admin_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

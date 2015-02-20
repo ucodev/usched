@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface
  *
- * Date: 18-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <pall/cll.h>
+#include <fsop/path.h>
 
 #include "config.h"
 #include "log.h"

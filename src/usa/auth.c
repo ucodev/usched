@@ -107,7 +107,7 @@ int auth_admin_show(void) {
 	return 0;
 }
 
-static int _auth_admin_list_show(
+static char *_auth_admin_list_show(
 	const char *file,
 	const char *category_str,
 	const char *comp_dot_prop)
@@ -123,7 +123,7 @@ static int _auth_admin_list_show(
 		errsv = errno;
 		log_crit("_auth_admin_list_show(): file_read_line_all_ordered(\"%s\"): %s\n", file, strerror(errno));
 		errno = errsv;
-		return -1;
+		return NULL;
 	}
 
 	/* Iterate the list and create an output string */
@@ -137,7 +137,7 @@ static int _auth_admin_list_show(
 			log_crit("_auth_admin_list_show(): mm_realloc(): %s\n", strerror(errno));
 			pall_cll_destroy(l);
 			errno = errsv;
-			return -1;
+			return NULL;
 		}
 
 		/* Check if output was already alloc'd */
@@ -160,25 +160,24 @@ static int _auth_admin_list_show(
 	if (output) {
 		/* Remove trailing "," */
 		output[output_len - 1] = 0;
-
-		/* Print the output */
-		print_admin_category_var_value(category_str, comp_dot_prop, output);
-
-		/* Free the memory */
-		mm_free(output);
 	} else {
-		/* Empty value */
-		output = "";
+		if (!(output = mm_alloc(1))) {
+			errsv = errno;
+			log_crit("_auth_admin_list_show(): mm_alloc(): %s\n", strerror(errno));
+			pall_cll_destroy(l);
+			errno = errsv;
+			return NULL;
+		}
 
-		/* Print the output */
-		print_admin_category_var_value(category_str, comp_dot_prop, output);
+		/* Empty value */
+		output[0] = 0;
 	}
 
 	/* Destroy the lines list */
 	pall_cll_destroy(l);
 
 	/* All good */
-	return 0;
+	return output;
 }
 
 static int _auth_admin_list_change(
@@ -188,7 +187,7 @@ static int _auth_admin_list_change(
 	const char *list)
 {
 	int errsv = 0;
-	char *ptr = NULL, *saveptr = NULL, *line = NULL, *input = NULL;
+	char *ptr = NULL, *saveptr = NULL, *line = NULL, *input = NULL, *cfg_value = NULL;
 	struct cll_handler *l = NULL;
 
 	/* Initialize the lines list */
@@ -262,12 +261,18 @@ static int _auth_admin_list_change(
 	pall_cll_destroy(l);
 
 	/* Show the new configuration value */
-	if (_auth_admin_list_show(file, category_str, comp_dot_prop) < 0) {
+	if ((cfg_value = _auth_admin_list_show(file, category_str, comp_dot_prop))) {
 		errsv = errno;
 		log_crit("_auth_admin_list_change(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	/* Print the output */
+	print_admin_category_var_value(category_str, comp_dot_prop, cfg_value);
+
+	/* Free memory */
+	mm_free(cfg_value);
 
 	/* All good */
 	return 0;
@@ -280,7 +285,7 @@ static int _auth_admin_list_add(
 	const char *value)
 {
 	int errsv = 0;
-	char *val = NULL;
+	char *val = NULL, *cfg_value = NULL;
 	struct cll_handler *l = NULL;
 
 	/* Check if the value is valid */
@@ -342,12 +347,18 @@ static int _auth_admin_list_add(
 	pall_cll_destroy(l);
 
 	/* Show the new configuration value */
-	if (_auth_admin_list_show(file, category_str, comp_dot_prop) < 0) {
+	if (!(cfg_value = _auth_admin_list_show(file, category_str, comp_dot_prop))) {
 		errsv = errno;
 		log_crit("_auth_admin_list_add(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	/* Print the output */
+	print_admin_category_var_value(category_str, comp_dot_prop, cfg_value);
+
+	/* Free memory */
+	mm_free(cfg_value);
 
 	/* All good */
 	return 0;
@@ -361,6 +372,7 @@ static int _auth_admin_list_delete(
 {
 	int errsv = 0;
 	struct cll_handler *l = NULL;
+	char *cfg_value = NULL;
 
 	/* Check if the value is valid */
 	if (!strisnum(value)) {
@@ -400,13 +412,19 @@ static int _auth_admin_list_delete(
 	/* Cleanup lines list */
 	pall_cll_destroy(l);
 
-	/* Show the new configuration value */
-	if (_auth_admin_list_show(file, category_str, comp_dot_prop) < 0) {
+	/* Retrieve the new configuration value */
+	if (!(cfg_value = _auth_admin_list_show(file, category_str, comp_dot_prop))) {
 		errsv = errno;
 		log_crit("_auth_admin_list_delete(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	/* Print the output */
+	print_admin_category_var_value(category_str, comp_dot_prop, cfg_value);
+
+	/* Free memory */
+	mm_free(cfg_value);
 
 	/* All good */
 	return 0;
@@ -414,21 +432,68 @@ static int _auth_admin_list_delete(
 
 int auth_admin_blacklist_gid_show(void) {
 	int errsv = 0;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (_auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID) < 0) {
+	/* Read current (temporary) value */
+	if (!(value_tmp = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID))) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_gid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Read effective value */
+	if (!(value = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID))) {
+		errsv = errno;
+		log_crit("auth_admin_blacklist_gid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("auth_admin_blacklist_gid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value_tmp);
+			mm_free(value);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("auth_admin_blacklist_gid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value_tmp);
+			mm_free(value);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, value_print);
+
+	/* Free memory */
+	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
+
+	/* ALl good */
 	return 0;
 }
 
 int auth_admin_blacklist_gid_change(const char *blacklist_gid_list) {
 	int errsv = 0;
 
-	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, blacklist_gid_list) < 0) {
+	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, blacklist_gid_list) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_gid_change(): _auth_admin_list_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -441,7 +506,7 @@ int auth_admin_blacklist_gid_change(const char *blacklist_gid_list) {
 int auth_admin_blacklist_gid_add(const char *blacklist_gid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, blacklist_gid) < 0) {
+	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, blacklist_gid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_gid_add(): _auth_admin_list_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -454,7 +519,7 @@ int auth_admin_blacklist_gid_add(const char *blacklist_gid) {
 int auth_admin_blacklist_gid_delete(const char *blacklist_gid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, blacklist_gid) < 0) {
+	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID, blacklist_gid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_gid_delete(): _auth_admin_list_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -466,21 +531,68 @@ int auth_admin_blacklist_gid_delete(const char *blacklist_gid) {
 
 int auth_admin_blacklist_uid_show(void) {
 	int errsv = 0;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (_auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID) < 0) {
+	/* Read the current (temporary) value */
+	if (!(value_tmp = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID))) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_uid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Read effective value */
+	if (!(value = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_GID))) {
+		errsv = errno;
+		log_crit("auth_admin_blacklist_uid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("auth_admin_blacklist_uid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("auth_admin_blacklist_uid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, value_print);
+
+	/* Free memory */
+	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
+
+	/* ALl good */
 	return 0;
 }
 
 int auth_admin_blacklist_uid_change(const char *blacklist_uid_list) {
 	int errsv = 0;
 
-	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, blacklist_uid_list) < 0) {
+	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, blacklist_uid_list) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_uid_change(): _auth_admin_list_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -493,7 +605,7 @@ int auth_admin_blacklist_uid_change(const char *blacklist_uid_list) {
 int auth_admin_blacklist_uid_add(const char *blacklist_uid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, blacklist_uid) < 0) {
+	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, blacklist_uid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_uid_add(): _auth_admin_list_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -506,7 +618,7 @@ int auth_admin_blacklist_uid_add(const char *blacklist_uid) {
 int auth_admin_blacklist_uid_delete(const char *blacklist_uid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, blacklist_uid) < 0) {
+	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_BL_UID, blacklist_uid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_blacklist_gid_delete(): _auth_admin_list_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -518,21 +630,59 @@ int auth_admin_blacklist_uid_delete(const char *blacklist_uid) {
 
 int auth_admin_local_use_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	/* Retrieve the value from the configuration file */
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE))) {
+	/* Retrieve the current value from the configuration file */
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_LOCAL_USE))) {
 		errsv = errno;
 		log_crit("auth_admin_local_use_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Print the value */
-	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_LOCAL_USE, value);
+	/* Retrieve the effective value from the configuration file */
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE))) {
+		errsv = errno;
+		log_crit("auth_admin_local_use_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("auth_admin_local_use_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("auth_admin_local_use_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_LOCAL_USE, value_print);
 
 	/* Free the memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
 	/* All good */
 	return 0;
@@ -542,7 +692,7 @@ int auth_admin_local_use_change(const char *local_use) {
 	int errsv = 0;
 
 	/* Write the new value into the configuration file */
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE, local_use) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_LOCAL_USE, local_use) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_local_use_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -563,26 +713,68 @@ int auth_admin_local_use_change(const char *local_use) {
 
 int auth_admin_remote_users_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS))) {
+	/* Read the current configuration value */
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_REMOTE_USERS))) {
 		errsv = errno;
 		log_crit("auth_admin_remote_users_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, value);
+	/* Read the effective configuration value */
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS))) {
+		errsv = errno;
+		log_crit("auth_admin_remote_users_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("auth_admin_remote_users_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("auth_admin_remote_users_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, value_print);
+
+	/* Free the memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
 int auth_admin_remote_users_change(const char *remote_users) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, remote_users) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, remote_users) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_remote_users_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -601,21 +793,66 @@ int auth_admin_remote_users_change(const char *remote_users) {
 
 int auth_admin_whitelist_gid_show(void) {
 	int errsv = 0;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (_auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID) < 0) {
+	if (!(value_tmp = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID))) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_gid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	if (!(value = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID))) {
+		errsv = errno;
+		log_crit("auth_admin_whitelist_gid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("auth_admin_whitelist_gid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value_tmp);
+			mm_free(value);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("auth_admin_whitelist_gid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value_tmp);
+			mm_free(value);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, value_print);
+
+	/* Free memory */
+	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
+
+	/* ALl good */
 	return 0;
 }
 
 int auth_admin_whitelist_gid_change(const char *whitelist_gid_list) {
 	int errsv = 0;
 
-	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, whitelist_gid_list) < 0) {
+	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, whitelist_gid_list) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_gid_change(): _auth_admin_list_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -628,7 +865,7 @@ int auth_admin_whitelist_gid_change(const char *whitelist_gid_list) {
 int auth_admin_whitelist_gid_add(const char *whitelist_gid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, whitelist_gid) < 0) {
+	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, whitelist_gid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_gid_add(): _auth_admin_list_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -641,7 +878,7 @@ int auth_admin_whitelist_gid_add(const char *whitelist_gid) {
 int auth_admin_whitelist_gid_delete(const char *whitelist_gid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, whitelist_gid) < 0) {
+	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_GID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_GID, whitelist_gid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_gid_delete(): _auth_admin_list_delete(): %s\n", strerror(errno));
 		errno = errsv;
@@ -653,21 +890,66 @@ int auth_admin_whitelist_gid_delete(const char *whitelist_gid) {
 
 int auth_admin_whitelist_uid_show(void) {
 	int errsv = 0;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (_auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID) < 0) {
+	if (!(value_tmp = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID))) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_uid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	if (!(value = _auth_admin_list_show(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID))) {
+		errsv = errno;
+		log_crit("auth_admin_whitelist_uid_show(): _auth_admin_list_show(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("auth_admin_whitelist_uid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value_tmp);
+			mm_free(value);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("auth_admin_whitelist_uid_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value_tmp);
+			mm_free(value);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, value_print);
+
+	/* Free memory */
+	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
+
+	/* ALl good */
 	return 0;
 }
 
 int auth_admin_whitelist_uid_change(const char *whitelist_uid_list) {
 	int errsv = 0;
 
-	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, whitelist_uid_list) < 0) {
+	if (_auth_admin_list_change(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, whitelist_uid_list) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_uid_change(): _auth_admin_list_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -680,7 +962,7 @@ int auth_admin_whitelist_uid_change(const char *whitelist_uid_list) {
 int auth_admin_whitelist_uid_add(const char *whitelist_uid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, whitelist_uid) < 0) {
+	if (_auth_admin_list_add(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, whitelist_uid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_uid_add(): _auth_admin_list_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -693,7 +975,7 @@ int auth_admin_whitelist_uid_add(const char *whitelist_uid) {
 int auth_admin_whitelist_uid_delete(const char *whitelist_uid) {
 	int errsv = 0;
 
-	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, whitelist_uid) < 0) {
+	if (_auth_admin_list_delete(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_UID, USCHED_CATEGORY_AUTH_STR, CONFIG_USCHED_FILE_AUTH_WL_UID, whitelist_uid) < 0) {
 		errsv = errno;
 		log_crit("auth_admin_whitelist_uid_delete(): _auth_admin_list_delete(): %s\n", strerror(errno));
 		errno = errsv;

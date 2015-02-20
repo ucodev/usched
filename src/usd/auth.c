@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 18-01-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -154,6 +154,15 @@ int auth_daemon_remote_session_create(
 	 * Total session size: 64 bytes
 	 *
 	 */
+
+	/* Check if username starts with a '.' (as in, not commited, but an attempt to exploit it
+	 * is being performed)
+	 */
+	if (username[0] == '.') {
+		log_warn("auth_daemon_remote_session_create(): Invalid username: %s (possible exploitation attempt)\n", username);
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Get userinfo data from current configuration */
 	if (!(userinfo = rund.config.users.list->search(rund.config.users.list, (struct usched_config_userinfo [1]) { { (char *) username, NULL, NULL, 0, 0 } }))) {

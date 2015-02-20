@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Admin
  *
- * Date: 05-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,12 +56,18 @@ void print_admin_config_users(const struct usched_config_users *users) {
 	printf("         username |    uid |    gid\n");
 
 	for (users->list->rewind(users->list, 0); (user = users->list->iterate(users->list)); ) {
+		if (user->username[0] == '.')
+			user->username[0] = '*';
+
 		printf(	" %16s | " \
 			"%6u | " \
 			"%6u\n",
 			user->username,
 			user->uid,
 			user->gid);
+
+		if (user->username[0] == '*')
+			user->username[0] = '.';
 	}
 }
 

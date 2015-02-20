@@ -131,19 +131,59 @@ int core_admin_show(void) {
 
 int core_admin_delta_noexec_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC))) {
 		errsv = errno;
 		log_crit("core_admin_delta_noexec_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC))) {
+		errsv = errno;
+		log_crit("core_admin_delta_noexec_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_delta_noexec_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_delta_noexec_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -169,19 +209,59 @@ int core_admin_delta_noexec_change(const char *delta_noexec) {
 
 int core_admin_delta_reload_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_RELOAD))) {
 		errsv = errno;
 		log_crit("core_admin_delta_reload_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD))) {
+		errsv = errno;
+		log_crit("core_admin_delta_reload_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_delta_reload_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_delta_reload_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -207,19 +287,59 @@ int core_admin_delta_reload_change(const char *delta_reload) {
 
 int core_admin_jail_dir_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_JAIL_DIR))) {
 		errsv = errno;
 		log_crit("core_admin_jail_dir_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_JAIL_DIR, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR))) {
+		errsv = errno;
+		log_crit("core_admin_jail_dir_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_jail_dir_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_jail_dir_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_JAIL_DIR, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -245,19 +365,59 @@ int core_admin_jail_dir_change(const char *jail_dir) {
 
 int core_admin_pmq_msgmax_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX))) {
 		errsv = errno;
 		log_crit("core_admin_pmq_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX))) {
+		errsv = errno;
+		log_crit("core_admin_pmq_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_pmq_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_pmq_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -283,19 +443,59 @@ int core_admin_pmq_msgmax_change(const char *pmq_msgmax) {
 
 int core_admin_pmq_msgsize_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE))) {
 		errsv = errno;
 		log_crit("core_admin_pmq_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE))) {
+		errsv = errno;
+		log_crit("core_admin_pmq_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_pmq_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_pmq_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -321,19 +521,59 @@ int core_admin_pmq_msgsize_change(const char *pmq_msgsize) {
 
 int core_admin_pmq_name_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME))) {
 		errsv = errno;
 		log_crit("core_admin_pmq_name_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_NAME, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME))) {
+		errsv = errno;
+		log_crit("core_admin_pmq_name_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_pmq_name_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_pmq_name_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_NAME, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -359,19 +599,59 @@ int core_admin_pmq_name_change(const char *pmq_name) {
 
 int core_admin_privdrop_group_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP))) {
 		errsv = errno;
 		log_crit("core_admin_privdrop_group_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP))) {
+		errsv = errno;
+		log_crit("core_admin_privdrop_group_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_privdrop_group_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_privdrop_group_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -397,19 +677,59 @@ int core_admin_privdrop_group_change(const char *privdrop_group) {
 
 int core_admin_privdrop_user_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_USER))) {
 		errsv = errno;
 		log_crit("core_admin_privdrop_user_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER))) {
+		errsv = errno;
+		log_crit("core_admin_privdrop_user_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_privdrop_user_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_privdrop_user_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -435,19 +755,59 @@ int core_admin_privdrop_user_change(const char *privdrop_user) {
 
 int core_admin_serialize_file_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE))) {
 		errsv = errno;
 		log_crit("core_admin_serialize_file_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE))) {
+		errsv = errno;
+		log_crit("core_admin_serialize_file_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_serialize_file_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_serialize_file_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -473,19 +833,59 @@ int core_admin_serialize_file_change(const char *serialize_file) {
 
 int core_admin_thread_priority_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY))) {
 		errsv = errno;
 		log_crit("core_admin_thread_priority_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY))) {
+		errsv = errno;
+		log_crit("core_admin_thread_priority_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_thread_priority_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_thread_priority_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -511,19 +911,59 @@ int core_admin_thread_priority_change(const char *thread_priority) {
 
 int core_admin_thread_workers_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_WORKERS))) {
 		errsv = errno;
 		log_crit("core_admin_thread_workers_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS))) {
+		errsv = errno;
+		log_crit("core_admin_thread_workers_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_thread_workers_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_thread_workers_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 

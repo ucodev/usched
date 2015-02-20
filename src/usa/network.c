@@ -89,19 +89,59 @@ int network_admin_show(void) {
 
 int network_admin_bind_addr_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_ADDR))) {
 		errsv = errno;
 		log_crit("network_admin_bind_addr_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR))) {
+		errsv = errno;
+		log_crit("network_admin_bind_addr_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("network_admin_bind_addr_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("network_admin_bind_addr_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -127,19 +167,59 @@ int network_admin_bind_addr_change(const char *bind_addr) {
 
 int network_admin_bind_port_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_PORT))) {
 		errsv = errno;
 		log_crit("network_admin_bind_port_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_BIND_PORT, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT))) {
+		errsv = errno;
+		log_crit("network_admin_bind_port_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("network_admin_bind_port_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("network_admin_bind_port_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_BIND_PORT, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -165,19 +245,59 @@ int network_admin_bind_port_change(const char *bind_port) {
 
 int network_admin_conn_limit_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT))) {
 		errsv = errno;
 		log_crit("network_admin_conn_limit_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT))) {
+		errsv = errno;
+		log_crit("network_admin_conn_limit_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("network_admin_conn_limit_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("network_admin_conn_limit_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -203,19 +323,59 @@ int network_admin_conn_limit_change(const char *conn_limit) {
 
 int network_admin_conn_timeout_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT))) {
 		errsv = errno;
 		log_crit("network_admin_conn_timeout_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT))) {
+		errsv = errno;
+		log_crit("network_admin_conn_timeout_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("network_admin_conn_timeout_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("network_admin_conn_timeout_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 
@@ -241,19 +401,59 @@ int network_admin_conn_timeout_change(const char *conn_timeout) {
 
 int network_admin_sock_name_show(void) {
 	int errsv = 0;
-	char *value = NULL;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAME))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_SOCK_NAME))) {
 		errsv = errno;
 		log_crit("network_admin_sock_name_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, value);
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAME))) {
+		errsv = errno;
+		log_crit("network_admin_sock_name_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
 
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("network_admin_sock_name_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("network_admin_sock_name_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_NETWORK_STR, CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, value_print);
+
+	/* Free memory */
 	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
 
+	/* All good */
 	return 0;
 }
 

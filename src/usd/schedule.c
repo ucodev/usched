@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 16-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,11 +57,21 @@ int schedule_daemon_init(void) {
 }
 
 void schedule_daemon_destroy(void) {
+	/* psched_destroy() must be called before we acquire the apool lock, or a deadlock will
+	 * occur (since event_pmq_dispatch() will wait to acquire this lock, while this function will
+	 * wait for pmq_dispatch() to complete).
+	 *
+	 * This will not cause any races nor corruptions, since psched library prevent any new
+	 * entries from being created, while granting integrity of the current entries until they
+	 * complete.
+	 */
+	psched_destroy(rund.psched);
+
 	/* Lock the active pool access to avoid races */
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	psched_destroy(rund.psched);
 	psched_handler_destroy(rund.psched);
+
 
 	/* TODO or FIXME: We must grant somehow at this point that all the routines queued by
 	 * libpsched are flushed (inactive) OR grant that they won't disrupt the runtime exiting

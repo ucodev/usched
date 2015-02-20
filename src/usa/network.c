@@ -3,7 +3,7 @@
  * @brief uSched
  *        Network configuration and administration interface
  *
- * Date: 19-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,12 +46,45 @@ int network_admin_rollback(void) {
 	return -1;
 }
 
-void network_admin_show(void) {
-	network_admin_bind_addr_show();
-	network_admin_bind_port_show();
-	network_admin_conn_limit_show();
-	network_admin_conn_timeout_show();
-	network_admin_sock_name_show();
+int network_admin_show(void) {
+	int errsv = 0;
+
+	if (network_admin_bind_addr_show() < 0) {
+		errsv = errno;
+		log_crit("network_admin_show(): network_admin_bind_addr_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (network_admin_bind_port_show() < 0) {
+		errsv = errno;
+		log_crit("network_admin_show(): network_admin_bind_port_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (network_admin_conn_limit_show() < 0) {
+		errsv = errno;
+		log_crit("network_admin_show(): network_admin_conn_limit_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (network_admin_conn_timeout_show() < 0) {
+		errsv = errno;
+		log_crit("network_admin_show(): network_admin_conn_timeout_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (network_admin_sock_name_show() < 0) {
+		errsv = errno;
+		log_crit("network_admin_show(): network_admin_sock_name_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int network_admin_bind_addr_show(void) {

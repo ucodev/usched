@@ -3,7 +3,7 @@
  * @brief uSched
  *       ALL Category administration interface
  *
- * Date: 19-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,10 +36,35 @@
 #include "users.h"
 
 int all_admin_show(void) {
-	auth_admin_show();
-	core_admin_show();
-	network_admin_show();
-	users_admin_show();
+	int errsv = 0;
+
+	if (auth_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): auth_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): core_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (network_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): network_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (users_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): users_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	return 0;
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Auth configuration and administration interface
  *
- * Date: 19-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,13 +59,52 @@ int auth_admin_rollback(void) {
 	return -1;
 }
 
-void auth_admin_show(void) {
-	auth_admin_blacklist_gid_show();
-	auth_admin_blacklist_uid_show();
-	auth_admin_local_use_show();
-	auth_admin_remote_users_show();
-	auth_admin_whitelist_gid_show();
-	auth_admin_whitelist_uid_show();
+int auth_admin_show(void) {
+	int errsv = 0;
+
+	if (auth_admin_blacklist_gid_show() < 0) {
+		errsv = errno;
+		log_crit("auth_admin_show(): auth_admin_blacklist_gid_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (auth_admin_blacklist_uid_show() < 0) {
+		errsv = errno;
+		log_crit("auth_admin_show(): auth_admin_blacklist_uid_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (auth_admin_local_use_show() < 0) {
+		errsv = errno;
+		log_crit("auth_admin_show(): auth_admin_local_use_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (auth_admin_remote_users_show() < 0) {
+		errsv = errno;
+		log_crit("auth_admin_show(): auth_admin_remote_users_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (auth_admin_whitelist_gid_show() < 0) {
+		errsv = errno;
+		log_crit("auth_admin_show(): auth_admin_whitelist_gid_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (auth_admin_whitelist_uid_show() < 0) {
+		errsv = errno;
+		log_crit("auth_admin_show(): auth_admin_whitelist_uid_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 static int _auth_admin_list_show(

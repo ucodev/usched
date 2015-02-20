@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Admin
  *
- * Date: 18-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -175,12 +175,96 @@ int logic_admin_process_show(void) {
 }
 
 int logic_admin_process_commit(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	if (runa.req->category == USCHED_CATEGORY_ALL) {
+		if (category_all_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_all_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_AUTH) {
+		if (category_auth_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_auth_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_CORE) {
+		if (category_core_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_core_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
+		if (category_network_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_network_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_USERS) {
+		if (category_users_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_users_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else {
+		log_warn("logic_admin_process_commit(): Invalid category.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	return 0;
 }
 
 int logic_admin_process_rollback(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	if (runa.req->category == USCHED_CATEGORY_ALL) {
+		if (category_all_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_all_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_AUTH) {
+		if (category_auth_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_auth_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_CORE) {
+		if (category_core_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_core_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
+		if (category_network_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_network_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_USERS) {
+		if (category_users_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_users_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else {
+		log_warn("logic_admin_process_rollback(): Invalid category.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	return 0;
 }
 

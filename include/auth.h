@@ -4,7 +4,7 @@
  *        Authentication and Authorization interface header
  *        Authentication configuration and administration header
  *
- * Date: 19-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,7 +45,7 @@ int auth_client_remote_session_process(unsigned char *session, const char *usern
 /* Auth admin prototypes (usa only) */
 int auth_admin_commit(void);
 int auth_admin_rollback(void);
-void auth_admin_show(void);
+int auth_admin_show(void);
 int auth_admin_blacklist_gid_show(void);
 int auth_admin_blacklist_gid_change(const char *blacklist_gid_list);
 int auth_admin_blacklist_gid_add(const char *blacklist_gid);

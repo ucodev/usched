@@ -3,7 +3,7 @@
  * @brief uSched
  *        Core configuration and administration interface
  *
- * Date: 19-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,18 +46,87 @@ int core_admin_rollback(void) {
 	return -1;
 }
 
-void core_admin_show(void) {
-	core_admin_delta_noexec_show();
-	core_admin_delta_reload_show();
-	core_admin_jail_dir_show();
-	core_admin_pmq_msgmax_show();
-	core_admin_pmq_msgsize_show();
-	core_admin_pmq_name_show();
-	core_admin_privdrop_group_show();
-	core_admin_privdrop_user_show();
-	core_admin_serialize_file_show();
-	core_admin_thread_priority_show();
-	core_admin_thread_workers_show();
+int core_admin_show(void) {
+	int errsv = 0;
+
+	if (core_admin_delta_noexec_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_delta_noexec_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_delta_reload_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_delta_reload_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_jail_dir_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_jail_dir_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_pmq_msgmax_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_pmq_msgmax_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_pmq_msgsize_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_pmq_msgsize_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_pmq_name_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_pmq_name_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_privdrop_group_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_privdrop_group_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_privdrop_user_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_privdrop_user_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_serialize_file_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_serialize_file_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_thread_priority_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_thread_priority_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_thread_workers_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_thread_workers_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int core_admin_delta_noexec_show(void) {

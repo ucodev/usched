@@ -3,7 +3,7 @@
  * @brief uSched
  *        Users configuration and administration interface
  *
- * Date: 19-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,8 +30,12 @@
 #include <stdlib.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <fsop/path.h>
+#include <fsop/file.h>
+#include <fsop/dir.h>
 
 #include <psec/encode.h>
 #include <psec/hash.h>
@@ -44,21 +48,124 @@
 #include "log.h"
 #include "print.h"
 
+static int _cleanup_action(
+	int order,
+	const char *fpath,
+	const char *rpath,
+	void *arg)
+{
+	struct stat st;
+
+	if (order == FSOP_WALK_INORDER) {
+		if (stat(fpath, &st) < 0)
+			return -1;
+
+		/* Delete file if it's empty */
+		if (S_ISREG(st.st_mode) && !st.st_size) {
+			if (unlink(fpath) < 0)
+				return -1;
+		}
+	}
+
+	/* All good */
+	return 0;
+}
+
+
+static int _commit_action(
+	int order,
+	const char *fpath,
+	const char *rpath,
+	void *arg)
+{
+	char *new_path = NULL;
+
+	if ((order == FSOP_WALK_INORDER) && (rpath[0] == '.')) {
+		if (!(new_path = mm_alloc(strlen(fpath) + 1)))
+			return -1;
+
+		(strrchr(strcpy(new_path, fpath), '/') + 1)[0] = 0;
+		strcat(new_path, &rpath[1]);
+
+		if (fsop_cp(fpath, new_path, 128) < 0)
+			return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+static int _rollback_action(
+	int order,
+	const char *fpath,
+	const char *rpath,
+	void *arg)
+{
+	char *new_path = NULL;
+
+	if ((order == FSOP_WALK_INORDER) && (rpath[0] != '.')) {
+		if (!(new_path = mm_alloc(strlen(fpath) + 2)))
+			return -1;
+
+		(strrchr(strcpy(new_path, fpath), '/') + 1)[0] = 0;
+		strcat(new_path, ".");
+		strcat(new_path, rpath);
+
+		if (fsop_cp(fpath, new_path, 128) < 0)
+			return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
 int users_admin_commit(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, &_commit_action, NULL) < 0) {
+		errsv = errno;
+		log_crit("users_admin_commit(): fsop_walkdir(... &_commit_action): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, &_cleanup_action, NULL) < 0) {
+		errsv = errno;
+		log_crit("users_admin_commit(): fsop_walkdir(... &_cleanup_action): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int users_admin_rollback(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, &_rollback_action, NULL) < 0) {
+		errsv = errno;
+		log_crit("users_admin_rollback(): fsop_walkdir(... &_cleanup_action): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, &_cleanup_action, NULL) < 0) {
+		errsv = errno;
+		log_crit("users_admin_rollback(): fsop_walkdir(... &_cleanup_action): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *password) {
 	int errsv = 0, len = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
-	char *result = NULL, *path = NULL;
+	char *result = NULL, *tmp_path = NULL, *path = NULL;
 	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
 	size_t edigest_out_len = 0, esalt_out_len = 0;
@@ -160,10 +267,10 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 	encode_destroy(encoded_digest);
 
 	/* Allocate filename path memory */
-	len = sizeof(CONFIG_USCHED_DIR_BASE) + sizeof(CONFIG_USCHED_DIR_USERS) + strlen(username) + 1 + 1;
-	/*    CONFIG_USCHED_DIR_BASE         / CONFIG_USCHED_DIRS_USERS        / username           \0  \0 */
+	len = sizeof(CONFIG_USCHED_DIR_BASE) + sizeof(CONFIG_USCHED_DIR_USERS) + 1 + strlen(username) + 1 + 1;
+	/*    CONFIG_USCHED_DIR_BASE         / CONFIG_USCHED_DIRS_USERS        / .   username           \0  \0 */
 
-	if (!(path = mm_alloc(len))) {
+	if (!(tmp_path = mm_alloc(len))) {
 		errsv = errno;
 		log_warn("users_admin_add(): mm_alloc(): %s\n", strerror(errno));
 		mm_free(result);
@@ -171,26 +278,39 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 		return -1;
 	}
 
+	if (!(path = mm_alloc(len))) {
+		errsv = errno;
+		log_warn("users_admin_add(): mm_alloc(): %s\n", strerror(errno));
+		mm_free(result);
+		mm_free(tmp_path);
+		errno = errsv;
+		return -1;
+	}
+
 	/* Reset path memory */
+	memset(tmp_path, 0, len);
 	memset(path, 0, len);
 
 	/* Craft the filename path */
+	snprintf(tmp_path, len - 1, "%s/%s/.%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
 	snprintf(path, len - 1, "%s/%s/%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
 
 	/* Check if file exists */
-	if (fsop_path_exists(path)) {
+	if (fsop_path_exists(tmp_path)) {
 		log_warn("users_admin_add(): User \'%s\' already exists.\n", username);
 		mm_free(result);
+		mm_free(tmp_path);
 		mm_free(path);
 		errno = EEXIST;
 		return -1;
 	}
 
 	/* Open the file for writting */
-	if (!(fp = fopen(path, "w"))) {
+	if (!(fp = fopen(tmp_path, "w"))) {
 		errsv = errno;
-		log_warn("users_admin_add(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
+		log_warn("users_admin_add(): fopen(\"%s\", \"w\"): %s", tmp_path, strerror(errno));
 		mm_free(result);
+		mm_free(tmp_path);
 		mm_free(path);
 		errno = errsv;
 		return -1;
@@ -205,25 +325,42 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 	/* Close the file */
 	fclose(fp);
 
+	/* Create an empty file for effective user configuration */
+	if (!(fp = fopen(path, "w"))) {
+		errsv = errno;
+		log_warn("users_admin_add(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
+		mm_free(result);
+		mm_free(tmp_path);
+		mm_free(path);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Close the file */
+	fclose(fp);
+
 	/* Debug info */
+	debug_printf(DEBUG_INFO, "%s\n", tmp_path);
 	debug_printf(DEBUG_INFO, "%s\n", path);
 	debug_printf(DEBUG_INFO, "%s\n", result);
 
 	/* Free unused memory */
 	mm_free(result);
+	mm_free(tmp_path);
 	mm_free(path);
 
 	/* All good */
 	return 0;
 }
 
-int users_admin_delete(const char *username) {
+static int _users_admin_delete_generic(const char *username, int create_empty_file) {
 	int errsv = 0, len = 0;
 	char *path = NULL;
+	FILE *fp = NULL;
 
 	/* Allocate filename path memory */
-	len = sizeof(CONFIG_USCHED_DIR_BASE) + sizeof(CONFIG_USCHED_DIR_USERS) + strlen(username) + 1 + 1;
-	/*    CONFIG_USCHED_DIR_BASE         / CONFIG_USCHED_DIRS_USERS        / username           \0  \0 */
+	len = sizeof(CONFIG_USCHED_DIR_BASE) + sizeof(CONFIG_USCHED_DIR_USERS) + 1 + strlen(username) + 1 + 1;
+	/*    CONFIG_USCHED_DIR_BASE         / CONFIG_USCHED_DIRS_USERS        / .   username           \0  \0 */
 
 	if (!(path = mm_alloc(len))) {
 		errsv = errno;
@@ -236,7 +373,7 @@ int users_admin_delete(const char *username) {
 	memset(path, 0, len);
 
 	/* Craft the filename path */
-	snprintf(path, len - 1, "%s/%s/%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
+	snprintf(path, len - 1, "%s/%s/.%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
 
 	/* Delete the file */
 	if (unlink(path) < 0) {
@@ -245,6 +382,20 @@ int users_admin_delete(const char *username) {
 		mm_free(path);
 		errno = errsv;
 		return -1;
+	}
+
+	if (create_empty_file) {
+		/* Create an empty file for the current (temporary) user configuration */
+		if (!(fp = fopen(path, "w"))) {
+			errsv = errno;
+			log_warn("users_admin_delete(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
+			mm_free(path);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Close the file */
+		fclose(fp);
 	}
 
 	/* Debug info */
@@ -257,11 +408,15 @@ int users_admin_delete(const char *username) {
 	return 0;
 }
 
+int users_admin_delete(const char *username) {
+	return _users_admin_delete_generic(username, 1);
+}
+
 int users_admin_change(const char *username, uid_t uid, gid_t gid, const char *password) {
 	int errsv = 0;
 
 	/* Delete the user */
-	if (users_admin_delete(username) < 0) {
+	if (_users_admin_delete_generic(username, 0) < 0) {
 		errsv = errno;
 		log_warn("users_admin_change(): users_admin_delete(): %s\n", strerror(errno));
 		errno = errsv;

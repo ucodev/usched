@@ -28,6 +28,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <fsop/file.h>
+
 #include "config.h"
 #include "network.h"
 #include "file.h"
@@ -37,13 +39,97 @@
 #include "print.h"
 
 int network_admin_commit(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* bind.addr */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* bind.port */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_PORT, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* conn.limit */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* conn.timeout */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* sock.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int network_admin_rollback(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* bind.addr */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* bind.port */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_PORT, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* conn.limit */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* conn.timeout */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* sock.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, 128) < 0) {
+		errsv = errno;
+		log_crit("network_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int network_admin_show(void) {
@@ -148,7 +234,7 @@ int network_admin_bind_addr_show(void) {
 int network_admin_bind_addr_change(const char *bind_addr) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, bind_addr) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_ADDR, bind_addr) < 0) {
 		errsv = errno;
 		log_crit("network_admin_bind_addr_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -226,7 +312,7 @@ int network_admin_bind_port_show(void) {
 int network_admin_bind_port_change(const char *bind_port) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT, bind_port) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_BIND_PORT, bind_port) < 0) {
 		errsv = errno;
 		log_crit("network_admin_bind_port_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -304,7 +390,7 @@ int network_admin_conn_limit_show(void) {
 int network_admin_conn_limit_change(const char *conn_limit) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, conn_limit) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, conn_limit) < 0) {
 		errsv = errno;
 		log_crit("network_admin_conn_limit_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -382,7 +468,7 @@ int network_admin_conn_timeout_show(void) {
 int network_admin_conn_timeout_change(const char *conn_timeout) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, conn_timeout) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, conn_timeout) < 0) {
 		errsv = errno;
 		log_crit("network_admin_conn_timeout_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -460,7 +546,7 @@ int network_admin_sock_name_show(void) {
 int network_admin_sock_name_change(const char *sock_name) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, sock_name) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/." CONFIG_USCHED_FILE_NETWORK_SOCK_NAME, sock_name) < 0) {
 		errsv = errno;
 		log_crit("network_admin_sock_name_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;

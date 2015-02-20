@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <pall/cll.h>
+#include <fsop/file.h>
 
 #include "config.h"
 #include "auth.h"
@@ -50,13 +51,113 @@ static int _l_compare(const void *l1, const void *l2) {
 }
 
 int auth_admin_commit(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* blacklist.gid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_GID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* blacklist.uid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_UID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* local.use */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_LOCAL_USE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* remote.users */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* whitelist.gid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_GID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* whitelist.uid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_UID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int auth_admin_rollback(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* blacklist.gid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_GID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* blacklist.uid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_BL_UID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* local.use */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_LOCAL_USE, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* remote.users */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* whitelist.gid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_GID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* whitelist.uid */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/." CONFIG_USCHED_FILE_AUTH_WL_UID, 128) < 0) {
+		errsv = errno;
+		log_crit("auth_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int auth_admin_show(void) {

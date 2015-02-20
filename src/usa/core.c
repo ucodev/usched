@@ -28,6 +28,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include <fsop/file.h>
+
 #include "config.h"
 #include "core.h"
 #include "file.h"
@@ -37,13 +39,193 @@
 #include "print.h"
 
 int core_admin_commit(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* delta.noexec */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* delta.reload */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* jail.dir */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_JAIL_DIR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* pmq.msgmax */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* pmq.msgsize */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* pmq.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.user */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.group */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* serialize.file */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* thread.priority */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* thread.workers */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int core_admin_rollback(void) {
-	/* TODO */
-	return -1;
+	int errsv = 0;
+
+	/* delta.noexec */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* delta.reload */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* jail.dir */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_JAIL_DIR, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* pmq.msgmax */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* pmq.msgsize */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* pmq.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.user */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.group */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* serialize.file */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* thread.priority */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* thread.workers */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, 128) < 0) {
+		errsv = errno;
+		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
 }
 
 int core_admin_show(void) {
@@ -190,7 +372,7 @@ int core_admin_delta_noexec_show(void) {
 int core_admin_delta_noexec_change(const char *delta_noexec) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, delta_noexec) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, delta_noexec) < 0) {
 		errsv = errno;
 		log_crit("core_admin_delta_noexec_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -268,7 +450,7 @@ int core_admin_delta_reload_show(void) {
 int core_admin_delta_reload_change(const char *delta_reload) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, delta_reload) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, delta_reload) < 0) {
 		errsv = errno;
 		log_crit("core_admin_delta_reload_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -346,7 +528,7 @@ int core_admin_jail_dir_show(void) {
 int core_admin_jail_dir_change(const char *jail_dir) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR, jail_dir) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_JAIL_DIR, jail_dir) < 0) {
 		errsv = errno;
 		log_crit("core_admin_jail_dir_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -424,7 +606,7 @@ int core_admin_pmq_msgmax_show(void) {
 int core_admin_pmq_msgmax_change(const char *pmq_msgmax) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, pmq_msgmax) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, pmq_msgmax) < 0) {
 		errsv = errno;
 		log_crit("core_admin_pmq_msgmax_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -502,7 +684,7 @@ int core_admin_pmq_msgsize_show(void) {
 int core_admin_pmq_msgsize_change(const char *pmq_msgsize) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, pmq_msgsize) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, pmq_msgsize) < 0) {
 		errsv = errno;
 		log_crit("core_admin_pmq_msgsize_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -580,7 +762,7 @@ int core_admin_pmq_name_show(void) {
 int core_admin_pmq_name_change(const char *pmq_name) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME, pmq_name) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME, pmq_name) < 0) {
 		errsv = errno;
 		log_crit("core_admin_pmq_name_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -658,7 +840,7 @@ int core_admin_privdrop_group_show(void) {
 int core_admin_privdrop_group_change(const char *privdrop_group) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, privdrop_group) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP, privdrop_group) < 0) {
 		errsv = errno;
 		log_crit("core_admin_privdrop_group_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -736,7 +918,7 @@ int core_admin_privdrop_user_show(void) {
 int core_admin_privdrop_user_change(const char *privdrop_user) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, privdrop_user) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PRIVDROP_USER, privdrop_user) < 0) {
 		errsv = errno;
 		log_crit("core_admin_privdrop_user_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -814,7 +996,7 @@ int core_admin_serialize_file_show(void) {
 int core_admin_serialize_file_change(const char *serialize_file) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, serialize_file) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE, serialize_file) < 0) {
 		errsv = errno;
 		log_crit("core_admin_serialize_file_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -892,7 +1074,7 @@ int core_admin_thread_priority_show(void) {
 int core_admin_thread_priority_change(const char *thread_priority) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, thread_priority) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, thread_priority) < 0) {
 		errsv = errno;
 		log_crit("core_admin_thread_priority_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
@@ -970,7 +1152,7 @@ int core_admin_thread_workers_show(void) {
 int core_admin_thread_workers_change(const char *thread_workers) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, thread_workers) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, thread_workers) < 0) {
 		errsv = errno;
 		log_crit("core_admin_thread_workers_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;

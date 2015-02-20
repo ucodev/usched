@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 18-02-2015
+ * Date: 20-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,13 +49,13 @@
 #define CONFIG_USCHED_FILE_AUTH_REMOTE_USERS	"remote.users"
 #define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
 #define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
-#define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
 #define CONFIG_USCHED_FILE_CORE_JAIL_DIR	"jail.dir"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
 #define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
 #define CONFIG_USCHED_FILE_CORE_PMQ_NAME	"pmq.name"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_USER	"privdrop.user"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP	"privdrop.group"
+#define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
 #define CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY	"thread.priority"
 #define CONFIG_USCHED_FILE_CORE_THREAD_WORKERS	"thread.workers"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_ADDR	"bind.addr"

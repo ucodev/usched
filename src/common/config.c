@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 18-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -890,6 +890,12 @@ static int _config_init_users_action(int order, const char *fpath, const char *r
 	struct usched_config_users *users = arg;
 
 	if (order != FSOP_WALK_INORDER)
+		return 0;
+
+	/* Ignore files starting with '.', as they represent temporary values and have no
+	 * meaninful username
+	 */
+	if (rpath[0] == '.')
 		return 0;
 
 	if (!fsop_path_isreg(fpath))

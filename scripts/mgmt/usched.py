@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 18-02-2015
+# Date: 21-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -42,6 +42,7 @@ USCHED_OP_FLUSH = "flush"
 USCHED_OP_RELOAD = "reload"
 USCHED_OP_START = "start"
 USCHED_OP_STOP = "stop"
+USCHED_OP_FORCE_STOP = "force_stop"
 
 # Options
 BE_QUIET = 0
@@ -89,6 +90,8 @@ def op_process():
 		return usched_start()
 	elif sys.argv[1] == USCHED_OP_STOP:
 		return usched_stop()
+	elif sys.argv[1] == USCHED_OP_FORCE_STOP:
+		return usched_force_stop()
 
 	return False
 
@@ -157,6 +160,26 @@ def usched_stop():
 	# Wait for 'use' to terminate
 	while os.path.isfile(CONFIG_USCHED_EXEC_PID_FILE):
 		time.sleep(1)
+
+	return True
+
+def usched_force_stop():
+	print_info("Force operation status: ")
+
+	try:
+		# Terminate usd
+		signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGKILL)
+
+		# Terminate use
+		signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGKILL)
+
+		# Remote the daemon pid file
+		os.unlink(CONFIG_USCHED_DAEMON_PID_FILE)
+
+		# Remote the exec pid file
+		os.unlink(CONFIG_USCHED_EXEC_PID_FILE)
+	except:
+		pass
 
 	return True
 

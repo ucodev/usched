@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 18-02-2015
+# Date: 21-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -132,6 +132,18 @@ op_stop() {
 	return 0
 }
 
+op_force_stop() {
+	print_info "Force stop operation status: "
+
+	(kill -KILL `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`) >& /dev/null
+	(kill -KILL `cat ${CONFIG_USCHED_EXEC_PID_FILE}`) >& /dev/null
+
+	rm -f ${CONFIG_USCHED_DAEMON_PID_FILE} >& /dev/null
+	rm -f ${CONFIG_USCHED_EXEC_PID_FILE} >& /dev/null
+
+	return 0
+}
+
 process_op() {
 	case "${ARG1}" in
 		flush)
@@ -148,6 +160,10 @@ process_op() {
 			;;
 		stop)
 			op_stop
+			return ${?}
+			;;
+		force_stop)
+			op_force_stop
 			return ${?}
 			;;
 		*)

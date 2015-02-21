@@ -1,7 +1,7 @@
 /**
- * @file config.c
+ * @file pmq.c
  * @brief uSched
- *        Configuration interface - Admin
+ *        POSIX Message Queueing interface - Admin
  *
  * Date: 21-02-2015
  * 
@@ -26,31 +26,37 @@
 
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
+
+#include <sys/stat.h>
+#include <mqueue.h>
 
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
+#include "pmq.h"
 
-int config_admin_init(void) {
+int pmq_admin_create(void) {
 	int errsv = 0;
-	struct usched_config *config = &runa.config;
+	int oflags = O_RDWR | O_CREAT;
+	mqd_t pmqd;
 
-	memset(config, 0, sizeof(struct usched_config));
-
-	if (config_init_core(&config->core) < 0) {
+	/* (Re)create the message queue */
+	if ((pmqd = pmq_init(runa.config.core.pmq_name, oflags, 0700, runa.config.core.pmq_msgmax, runa.config.core.pmq_msgsize)) == (mqd_t) -1) {
 		errsv = errno;
-		log_warn("config_daemon_init(): config_init_core(): %s\n", strerror(errno));
+		log_crit("pmq_admin_create(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Close the descriptor */
+	pmq_destroy(pmqd);
+
+	/* All good */
 	return 0;
 }
 
-void config_admin_destroy(void) {
-	struct usched_config *config = &runa.config;
-
-	config_destroy_core(&config->core);
-
-	memset(config, 0, sizeof(struct usched_config));
+int pmq_admin_delete(void) {
+	return pmq_unlink(runa.config.core.pmq_name);
 }
+

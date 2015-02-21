@@ -1,6 +1,4 @@
 v0.1:
- - Implement 'core.sched.tolerance' configuration variable
- - Implement support for @@pid@@ variable on request strings
  - Documentation
  - Cleanup code
 

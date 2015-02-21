@@ -18,6 +18,7 @@ install_all:
 	chmod 700 /var/cache/usched
 	mkdir -p /var/cache/usched/jail
 	chmod 700 /var/cache/usched/jail
+	usa commit all
 
 install_bindings_all:
 	cd bindings && make install_all && cd ..

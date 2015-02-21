@@ -3,7 +3,7 @@
  * @brief uSched
  *        Core configuration and administration interface
  *
- * Date: 20-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <fsop/path.h>
 #include <fsop/file.h>
 
 #include "config.h"
@@ -37,9 +38,29 @@
 #include "mm.h"
 #include "usched.h"
 #include "print.h"
+#include "pmq.h"
 
 int core_admin_commit(void) {
 	int errsv = 0;
+
+	/* Check if services are running and stop processing if they are */
+	if (fsop_path_exists(CONFIG_USCHED_DAEMON_PID_FILE)) {
+		log_crit("core_admin_commit(): uSched services are running (usd). You must stop all uSched services before you can commit core configuration changes.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	if (fsop_path_exists(CONFIG_USCHED_EXEC_PID_FILE)) {
+		log_crit("core_admin_commit(): uSched services are running (use). You must stop all uSched services before you can commit core configuration changes.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	/* Destroy the current message queue */
+	pmq_admin_delete();
+
+	/* Destroy the current configuration */
+	config_admin_destroy();
 
 	/* delta.noexec */
 	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, 128) < 0) {
@@ -125,6 +146,22 @@ int core_admin_commit(void) {
 	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Re-initialize the configuration */
+	if (config_admin_init() < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): config_admin_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Create the message queue */
+	if (pmq_admin_create() < 0) {
+		errsv = errno;
+		log_crit("core_admin_commit(): pmq_admin_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

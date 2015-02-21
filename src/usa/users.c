@@ -3,7 +3,7 @@
  * @brief uSched
  *        Users configuration and administration interface
  *
- * Date: 20-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,75 @@
 #include "runtime.h"
 #include "log.h"
 #include "print.h"
+#include "file.h"
+
+
+static int _showuser_action(
+	int order,
+	const char *fpath,
+	const char *rpath,
+	void *arg)
+{
+	char *new_path = NULL;
+	int efile_empty = 0, cfile_empty = 0, errsv = 0;
+
+	if ((order == FSOP_WALK_INORDER) && (rpath[0] == '.')) {
+		if (!(new_path = mm_alloc(strlen(fpath) + 1)))
+			return -1;
+
+		(strrchr(strcpy(new_path, fpath), '/') + 1)[0] = 0;
+		strcat(new_path, &rpath[1]);
+
+		/* Check if contents match */
+		if (file_compare(fpath, new_path)) {
+			/* Content match... */
+
+			/* Show the user without any modification marks */
+			print_admin_config_users_from_file(new_path, ' ');
+		} else {
+			/* Content mismatch... */
+
+			if ((cfile_empty = file_is_empty(fpath)) < 0) {
+				errsv = errno;
+				mm_free(new_path);
+				errno = errsv;
+				return -1;
+			}
+
+			if ((efile_empty = file_is_empty(new_path)) < 0) {
+				errsv = errno;
+				mm_free(new_path);
+				errno = errsv;
+				return -1;
+			}
+
+			/* If both files are empty, this user was created and deleted before
+			 * any configuration commit... so ignore this entry, but issue a warning
+			 * for possible inconsistency.
+			 */
+			if (cfile_empty && efile_empty) {
+				log_warn("_showuser_action(): WARNING: Possible data inconsistency detected.\n");
+				mm_free(new_path);
+				return 0;
+			}
+
+			if (cfile_empty) {
+				/* Show the effective content with deleted sign '-' as prefix */
+				print_admin_config_users_from_file(new_path, '-');
+			} else if (efile_empty) {
+				/* Show the current content with created sign '+' as prefix */
+				print_admin_config_users_from_file(fpath, '+');
+			} else {
+				/* The user already exists, but it was changed (mark with '*') */
+				print_admin_config_users_from_file(new_path, '*');
+			}
+		}
+
+		mm_free(new_path);
+	}
+
+	return 0;
+}
 
 static int _cleanup_action(
 	int order,
@@ -54,14 +123,14 @@ static int _cleanup_action(
 	const char *rpath,
 	void *arg)
 {
-	struct stat st;
+	int ret = 0;
 
 	if (order == FSOP_WALK_INORDER) {
-		if (stat(fpath, &st) < 0)
+		if ((ret = file_is_empty(fpath)) < 0)
 			return -1;
 
-		/* Delete file if it's empty */
-		if (S_ISREG(st.st_mode) && !st.st_size) {
+		if (ret > 0) {
+			/* Delete file if it's empty */
 			if (unlink(fpath) < 0)
 				return -1;
 		}
@@ -89,6 +158,8 @@ static int _commit_action(
 
 		if (fsop_cp(fpath, new_path, 128) < 0)
 			return -1;
+
+		mm_free(new_path);
 	}
 
 	/* All good */
@@ -113,6 +184,8 @@ static int _rollback_action(
 
 		if (fsop_cp(fpath, new_path, 128) < 0)
 			return -1;
+
+		mm_free(new_path);
 	}
 
 	/* All good */
@@ -161,7 +234,13 @@ int users_admin_rollback(void) {
 	return 0;
 }
 
-int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *password) {
+static int _users_admin_add(
+	const char *username,
+	uid_t uid,
+	gid_t gid,
+	const char *password,
+	int create_empty_file)
+{
 	int errsv = 0, len = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
@@ -174,6 +253,13 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 	/* Grant that username isn't empty */
 	if (!username || !username[0]) {
 		log_warn("users_admin_add(): Username is an empty string.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Grant that username doesn't start with a '.' */
+	if (username[0] == '.') {
+		log_warn("users_admin_add(): Invalid username (it cannot start with a '.')\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -325,19 +411,21 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 	/* Close the file */
 	fclose(fp);
 
-	/* Create an empty file for effective user configuration */
-	if (!(fp = fopen(path, "w"))) {
-		errsv = errno;
-		log_warn("users_admin_add(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
-		mm_free(result);
-		mm_free(tmp_path);
-		mm_free(path);
-		errno = errsv;
-		return -1;
-	}
+	if (create_empty_file) {
+		/* Create an empty file for effective user configuration */
+		if (!(fp = fopen(path, "w"))) {
+			errsv = errno;
+			log_warn("users_admin_add(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
+			mm_free(result);
+			mm_free(tmp_path);
+			mm_free(path);
+			errno = errsv;
+			return -1;
+		}
 
-	/* Close the file */
-	fclose(fp);
+		/* Close the file */
+		fclose(fp);
+	}
 
 	/* Debug info */
 	debug_printf(DEBUG_INFO, "%s\n", tmp_path);
@@ -353,42 +441,102 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 	return 0;
 }
 
+int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *password) {
+	return _users_admin_add(username, uid, gid, password, 1);
+}
+
 static int _users_admin_delete_generic(const char *username, int create_empty_file) {
 	int errsv = 0, len = 0;
-	char *path = NULL;
+	char *path = NULL, *tmp_path = NULL;
 	FILE *fp = NULL;
+
+	/* Grant that username isn't empty */
+	if (!username || !username[0]) {
+		log_warn("users_admin_delete(): Username is an empty string.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Grant that username doesn't start with a '.' */
+	if (username[0] == '.') {
+		log_warn("users_admin_delete(): Invalid username (it cannot start with a '.')\n");
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Allocate filename path memory */
 	len = sizeof(CONFIG_USCHED_DIR_BASE) + sizeof(CONFIG_USCHED_DIR_USERS) + 1 + strlen(username) + 1 + 1;
 	/*    CONFIG_USCHED_DIR_BASE         / CONFIG_USCHED_DIRS_USERS        / .   username           \0  \0 */
 
+	if (!(tmp_path = mm_alloc(len))) {
+		errsv = errno;
+		log_warn("users_admin_delete(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if (!(path = mm_alloc(len))) {
 		errsv = errno;
 		log_warn("users_admin_delete(): mm_alloc(): %s\n", strerror(errno));
+		mm_free(tmp_path);
 		errno = errsv;
 		return -1;
 	}
 
 	/* Reset path memory */
+	memset(tmp_path, 0, len);
 	memset(path, 0, len);
 
 	/* Craft the filename path */
-	snprintf(path, len - 1, "%s/%s/.%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
+	snprintf(tmp_path, len - 1, "%s/%s/.%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
+	snprintf(path, len - 1, "%s/%s/%s", CONFIG_USCHED_DIR_BASE, CONFIG_USCHED_DIR_USERS, username);
+
+	/* Check if username exists */
+	if (!fsop_path_exists(tmp_path)) {
+		log_warn("users_admin_delete(): Username %s doesn't exist.\n", username);
+		mm_free(tmp_path);
+		mm_free(path);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Check if username exists */
+	if (!fsop_path_exists(path)) {
+		log_warn("users_admin_delete(): Inconsistent data detected.\n", username);
+		mm_free(tmp_path);
+		mm_free(path);
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Delete the file */
-	if (unlink(path) < 0) {
+	if (unlink(tmp_path) < 0) {
 		errsv = errno;
-		log_warn("users_admin_delete(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("users_admin_delete(): unlink(\"%s\"): %s\n", tmp_path, strerror(errno));
+		mm_free(tmp_path);
 		mm_free(path);
 		errno = errsv;
 		return -1;
 	}
 
-	if (create_empty_file) {
-		/* Create an empty file for the current (temporary) user configuration */
-		if (!(fp = fopen(path, "w"))) {
+	/* If the effective config file is empty, then this user was created and deleted without any
+	 * commit in the middle, so we need to remote the effective config file to grant consistency
+	 */
+	if (file_is_empty(path)) {
+		if (unlink(path) < 0) {
 			errsv = errno;
-			log_warn("users_admin_delete(): fopen(\"%s\", \"w\"): %s", path, strerror(errno));
+			log_warn("users_admin_delete(): unlink(\"%s\"): %s\n", path, strerror(errno));
+			mm_free(tmp_path);
+			mm_free(path);
+			errno = errsv;
+			return -1;
+		}
+	} else if (create_empty_file) { /* Check if we need to create an empty temporary file */ 
+		/* Create an empty file for the current (temporary) user configuration */
+		if (!(fp = fopen(tmp_path, "w"))) {
+			errsv = errno;
+			log_warn("users_admin_delete(): fopen(\"%s\", \"w\"): %s", tmp_path, strerror(errno));
+			mm_free(tmp_path);
 			mm_free(path);
 			errno = errsv;
 			return -1;
@@ -399,9 +547,11 @@ static int _users_admin_delete_generic(const char *username, int create_empty_fi
 	}
 
 	/* Debug info */
+	debug_printf(DEBUG_INFO, "%s\n", tmp_path);
 	debug_printf(DEBUG_INFO, "%s\n", path);
 
 	/* Free unused memory */
+	mm_free(tmp_path);
 	mm_free(path);
 
 	/* All good */
@@ -424,7 +574,7 @@ int users_admin_change(const char *username, uid_t uid, gid_t gid, const char *p
 	}
 
 	/* Add the user */
-	if (users_admin_add(username, uid, gid, password) < 0) {
+	if (_users_admin_add(username, uid, gid, password, 0) < 0) {
 		errsv = errno;
 		log_warn("users_admin_change(): users_admin_add(): %s\n", strerror(errno));
 		errno = errsv;
@@ -436,7 +586,16 @@ int users_admin_change(const char *username, uid_t uid, gid_t gid, const char *p
 }
 
 int users_admin_show(void) {
-	print_admin_config_users(&runa.config.users);
+	int errsv = 0;
+
+	print_admin_config_users_header();
+
+	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, _showuser_action, NULL) < 0) {
+		errsv = errno;
+		log_warn("users_admin_show(): fsop_walkdir(... &_showuser_action, ...): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
 	return 0;
 }

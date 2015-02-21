@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface header
  *
- * Date: 05-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,8 @@ void print_admin_no_priv(void);
 void print_admin_config_user_added(const char *username);
 void print_admin_config_user_deleted(const char *username);
 void print_admin_config_user_changed(const char *username);
-void print_admin_config_users(const struct usched_config_users *users);
+void print_admin_config_users_header(void);
+void print_admin_config_users_from_file(const char *file, char modification);
 void print_admin_category_var_value(const char *component, const char *var, const char *value);
 void print_client_result_error(void);
 void print_client_result_empty(void);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface
  *
- * Date: 20-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,7 +30,10 @@
 #include <errno.h>
 
 #include <pall/cll.h>
+
 #include <fsop/path.h>
+
+#include <psec/hash.h>
 
 #include "config.h"
 #include "log.h"
@@ -221,5 +224,53 @@ int file_write_line_all_ordered(const char *file, struct cll_handler *l) {
 
 	/* All good */
 	return 0;
+}
+
+int file_compare(const char *file1, const char *file2) {
+	int errsv = 0, ret = 0;
+	FILE *fp1 = NULL, *fp2 = NULL;
+	unsigned char file1_hash[HASH_DIGEST_SIZE_BLAKE2B], file2_hash[HASH_DIGEST_SIZE_BLAKE2B];
+
+	if (!(fp1 = fopen(file1, "r"))) {
+		errsv = errno;
+		log_crit("file_compare(): fopen(\"%s\", \"r\"): %s\n", file1, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (!(fp2 = fopen(file2, "r"))) {
+		errsv = errno;
+		log_crit("file_compare(): fopen(\"%s\", \"r\"): %s\n", file2, strerror(errno));
+		fclose(fp1);
+		errno = errsv;
+		return -1;
+	}
+
+	ret = !memcmp(hash_file_blake2b(file1_hash, fp1), hash_file_blake2b(file2_hash, fp2), HASH_DIGEST_SIZE_BLAKE2B);
+
+	fclose(fp1);
+	fclose(fp2);
+
+	return ret;
+}
+
+int file_is_empty(const char *file) {
+	int errsv = 0;
+	struct stat st;
+
+	if (stat(file, &st) < 0) {
+		errsv = errno;
+		log_crit("file_is_empty(): stat(\"%s\", ...): %s\n", file, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (!S_ISREG(st.st_mode)) {
+		log_crit("file_is_empty(): File '%s' isn't a regular file.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	return !st.st_size;
 }
 

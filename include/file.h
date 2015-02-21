@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface header
  *
- * Date: 14-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,5 +35,8 @@ char *file_read_line_single(const char *file);
 struct cll_handler *file_read_line_all_ordered(const char *file);
 int file_write_line_single(const char *file, const char *line);
 int file_write_line_all_ordered(const char *file, struct cll_handler *lines);
+int file_compare(const char *file1, const char *file2);
+int file_is_empty(const char *file);
 
 #endif
+

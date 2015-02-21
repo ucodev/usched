@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Admin
  *
- * Date: 20-02-2015
+ * Date: 21-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,10 +25,13 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdint.h>
+#include <errno.h>
 
 #include "config.h"
 #include "print.h"
+#include "log.h"
 
 void print_admin_error(void) {
 	fprintf(stderr, "An error occured. Check your syslog entries for more details.\n");
@@ -50,25 +53,56 @@ void print_admin_config_user_changed(const char *username) {
 	printf("User \'%s\' successfuly changed.\n", username);
 }
 
-void print_admin_config_users(const struct usched_config_users *users) {
-	struct usched_config_userinfo *user = NULL;
+void print_admin_config_users_header(void) {
+	printf("          username |    uid |    gid\n");
+}
 
-	printf("         username |    uid |    gid\n");
+void print_admin_config_users_from_file(const char *file, char modification) {
+	FILE *fp = NULL;
+	char buf[8192], *saveptr = NULL, *username = NULL, *uid = NULL, *gid = NULL;
 
-	for (users->list->rewind(users->list, 0); (user = users->list->iterate(users->list)); ) {
-		if (user->username[0] == '.')
-			user->username[0] = '*';
+	memset(buf, 0, sizeof(buf));
 
-		printf(	" %16s | " \
-			"%6u | " \
-			"%6u\n",
-			user->username,
-			user->uid,
-			user->gid);
-
-		if (user->username[0] == '*')
-			user->username[0] = '.';
+	/* Open user configuration file */
+	if (!(fp = fopen(file, "r"))) {
+		fprintf(stderr, "WARNING: Cannot read file: %s\n", file);
+		log_crit("print_admin_config_users_from_file(): fopen(\"%s\", \"r\"): %s\n", strerror(errno));
+		return;
 	}
+
+	/* Get file contents */
+	fgets(buf, sizeof(buf) - 1, fp);
+
+	/* Close file */
+	fclose(fp);
+
+	/* Retrieve username */
+	if (!(username = strrchr(file, '/'))) {
+		fprintf(stderr, "WARNING: Invalid data detected on file: %s\n", file);
+		return;
+	} else {
+		if (*(++ username) == '.') username ++;
+	}
+
+	/* Retrieve UID */
+	if (!(uid = strtok_r(buf, ":", &saveptr))) {
+		fprintf(stderr, "WARNING: Invalid data detected on file: %s\n", file);
+		return;
+	}
+
+	/* Retrieve GID */
+	if (!(gid = strtok_r(NULL, ":", &saveptr))) {
+		fprintf(stderr, "WARNING: Invalid data detected on file: %s\n", file);
+		return;
+	}
+
+	printf( " %c%16s | " \
+		 "%6s | " \
+		 "%6s\n",
+		modification,
+		username,
+		uid,
+		gid);
 }
 
 void print_admin_category_var_value(const char *component, const char *var, const char *value) {

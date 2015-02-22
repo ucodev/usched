@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 21-02-2015
+# Date: 22-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -30,6 +30,7 @@ ARG0=${0}; ARG1=${1}; ARG2=${2};
 
 ## Config data ##
 CONFIG_USCHED_QUIET=0
+CONFIG_USCHED_DAEMON_BIN="/usr/sbin/usa"
 CONFIG_USCHED_DAEMON_BIN="/usr/sbin/usd"
 CONFIG_USCHED_EXEC_BIN="/usr/sbin/use"
 CONFIG_USCHED_MONITOR_BIN="/usr/sbin/usm"
@@ -48,7 +49,7 @@ print_info() {
 }
 
 usage() {
-	print_info "Usage: ${ARG0} flush|reload|start|stop [quiet]\n"
+	print_info "Usage: ${ARG0} flush|reload|start|stop|force_stop [quiet]\n"
 	exit ${EXIT_FAILURE}
 }
 
@@ -99,6 +100,14 @@ op_reload() {
 
 op_start() {
 	print_info "Start operation status: "
+
+	${CONFIG_USCHED_ADMIN_BIN} commit core
+
+	if [ ${?} -ne 0 ]; then
+		ret=${?}
+		print_info "Failed to commit uSched Core configuration: "
+		return ${ret}
+	fi
 
 	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_DAEMON_PID_FILE} -r -S ${CONFIG_USCHED_DAEMON_BIN}
 

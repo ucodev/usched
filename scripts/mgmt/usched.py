@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 21-02-2015
+# Date: 22-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -31,6 +31,7 @@ import subprocess
 import time
 
 # Config
+CONFIG_USCHED_ADMIN_BIN = "/usr/sbin/usa"
 CONFIG_USCHED_DAEMON_BIN = "/usr/sbin/usd"
 CONFIG_USCHED_EXEC_BIN = "/usr/sbin/use"
 CONFIG_USCHED_MONITOR_BIN = "/usr/sbin/usm"
@@ -56,7 +57,7 @@ def print_info(msg):
 		sys.stdout.write(msg)
 
 def usage_print():
-	print_info("Usage: %s %s|%s|%s|%s [quiet]\n" % (sys.argv[0], USCHED_OP_FLUSH, USCHED_OP_RELOAD, USCHED_OP_START, USCHED_OP_STOP))
+	print_info("Usage: %s %s|%s|%s|%s|%s [quiet]\n" % (sys.argv[0], USCHED_OP_FLUSH, USCHED_OP_RELOAD, USCHED_OP_START, USCHED_OP_STOP, USCHED_OP_FORCE_STOP))
 	sys.exit(EXIT_FAILURE)
 
 def usage_check():
@@ -116,10 +117,25 @@ def usched_reload():
 def usched_start():
 	print_info("Start operation status: ")
 
+	# Commit uSched Core configuration changes
+	try:
+		status = subprocess.call([CONFIG_USCHED_ADMIN_BIN, "commit", "core"])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to commit uSched configuration.\n")
+		return False
+
+	# Start uSched daemon
 	try:
 		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", "-S", CONFIG_USCHED_DAEMON_BIN])
 	except OSError:
 		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to start uSched Daemon\n")
+		return False
 
 	time.sleep(1)
 
@@ -127,10 +143,7 @@ def usched_start():
 	while not os.path.isfile(CONFIG_USCHED_DAEMON_PID_FILE):
 		time.sleep(1)
 
-	if status != EXIT_SUCCESS:
-		print_info("Failed: Unable to start uSched Daemon\n")
-		return False
-
+	# Start uSched executer
 	try:
 		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_EXEC_PID_FILE, "-r", "-S", CONFIG_USCHED_EXEC_BIN])
 	except OSError:

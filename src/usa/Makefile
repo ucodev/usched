@@ -28,7 +28,7 @@ all:
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS}
 
 install:
-	cp ${TARGET} /usr/bin/
+	cp ${TARGET} /usr/sbin/
 
 clean:
 	rm -f ${OBJS}

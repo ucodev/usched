@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Client
  *
- * Date: 17-01-2015
+ * Date: 23-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -77,7 +77,7 @@ int entry_client_remote_session_create(struct usched_entry *entry, const char *p
 	int errsv = 0;
 
 	/* Insert client session token into session data */
-	if (auth_client_remote_session_create(entry->session, entry->username, password, entry->context) < 0) {
+	if (auth_client_remote_session_create(entry->session, entry->username, password, entry->crypto.context) < 0) {
 		errsv = errno;
 		log_warn("entry_client_remote_session_create(): auth_client_remote_session_create(): %s\n", strerror(errno));
 		errno = errsv;
@@ -91,7 +91,7 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 	int errsv = 0;
 
 	/* Process remote session data */
-	if (auth_client_remote_session_process(entry->session, entry->username, password, entry->context, entry->agreed_key) < 0) {
+	if (auth_client_remote_session_process(entry->session, entry->username, password, entry->crypto.context, entry->crypto.agreed_key) < 0) {
 		errsv = errno;
 		log_warn("entry_client_remote_session_process(): auth_client_remote_session_process(): %s\n", strerror(errno));
 		errno = errsv;
@@ -99,7 +99,7 @@ int entry_client_remote_session_process(struct usched_entry *entry, const char *
 	}
 
 	/* Set nonce to 0 */
-	entry->nonce = 0;
+	entry->crypto.nonce = 0;
 
 	/* All good */
 	return 0;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 09-02-2015
+ * Date: 23-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -164,7 +164,7 @@ int entry_daemon_remote_session_create(struct usched_entry *entry) {
 	int errsv = 0;
 
 	/* Initialize a new entry->session field to be sent to the client */
-	if (auth_daemon_remote_session_create(entry->username, entry->session, entry->context) < 0) {
+	if (auth_daemon_remote_session_create(entry->username, entry->session, entry->crypto.context) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_remote_session_create(): auth_daemon_remote_session_create(): %s\n", strerror(errno));
 		errno = errsv;
@@ -178,7 +178,7 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	int errsv = 0;
 
 	/* Verify remote client authentication */
-	if (auth_daemon_remote_session_verify(entry->username, entry->session, entry->context, entry->agreed_key, &entry->uid, &entry->gid) < 0) {
+	if (auth_daemon_remote_session_verify(entry->username, entry->session, entry->crypto.context, entry->crypto.agreed_key, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
 		log_warn("entry_daemon_remote_session_process(): auth_daemon_remote_session_verify(): %s\n", strerror(errno));
 		errno = errsv;
@@ -186,7 +186,7 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	}
 
 	/* Set nonce to 0 */
-	entry->nonce = 0;
+	entry->crypto.nonce = 0;
 
 	/* All good */
 	return 0;

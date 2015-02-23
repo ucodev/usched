@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 16-02-2015
+ * Date: 23-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -77,6 +77,14 @@ union usched_entry_reserved {
 	unsigned char _reserved[32];
 };
 #pragma pack(pop)
+#pragma pack(push)
+#pragma pack(4)
+struct usched_entry_crypto {
+	unsigned char context[KE_CONTEXT_SIZE_CHREKE];
+	unsigned char agreed_key[KE_KEY_SIZE_CHREKE];
+	uint64_t nonce;
+};
+#pragma pack(pop)
 #define usched_entry_id(id) 	((struct usched_entry [1]) { { id, } })
 #define usched_entry_hdr_size()	(offsetof(struct usched_entry, payload))
 #pragma pack(push)
@@ -107,9 +115,8 @@ struct usched_entry {
 	union usched_entry_reserved reserved;
 
 	/* Cryptographic Data Context */
-	unsigned char context[KE_CONTEXT_SIZE_CHREKE];
-	unsigned char agreed_key[KE_KEY_SIZE_CHREKE];
-	uint64_t nonce;
+	struct usched_entry_crypto crypto;
+
 #if CONFIG_DAEMON_SPECIFIC == 1
 	time_t create_time;
 #endif
@@ -120,6 +127,8 @@ struct usched_entry {
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize);
 int entry_client_remote_session_create(struct usched_entry *entry, const char *password);
 int entry_client_remote_session_process(struct usched_entry *entry, const char *password);
+void entry_cleanup_session(struct usched_entry *entry);
+void entry_cleanup_crypto(struct usched_entry *entry);
 void entry_set_id(struct usched_entry *entry, uint32_t id);
 void entry_set_flags(struct usched_entry *entry, uint32_t flags);
 void entry_unset_flags_local(struct usched_entry *entry);
@@ -138,12 +147,14 @@ int entry_payload_decrypt(struct usched_entry *entry);
 int entry_payload_encrypt(struct usched_entry *entry, size_t lpad);
 void entry_unset_payload(struct usched_entry *entry);
 int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len);
+void entry_unset_subj(struct usched_entry *entry);
 int entry_copy(struct usched_entry *dest, struct usched_entry *src);
 int entry_compare(const void *e1, const void *e2);
 int entry_daemon_authorize(struct usched_entry *entry, int fd);
 int entry_daemon_remote_session_create(struct usched_entry *entry);
 int entry_daemon_remote_session_process(struct usched_entry *entry);
 void entry_daemon_pmq_dispatch(void *arg);
+void entry_zero(struct usched_entry *entry);
 void entry_destroy(void *elem);
 int entry_daemon_serialize(pall_fd_t fd, void *entry);
 void *entry_daemon_unserialize(pall_fd_t fd);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 04-02-2015
+ * Date: 23-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -94,6 +94,12 @@ void notify_read(struct async_op *aop) {
 			 */
 			entry_unset_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
 			entry_set_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
+
+			/* Cleanup all cryptographic data */
+			entry_cleanup_crypto(entry);
+
+			/* Cleanup all session data */
+			entry_cleanup_session(entry);
 
 			/* Set the entry creation time */
 			entry->create_time = time(NULL);

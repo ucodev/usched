@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Common
  *
- * Date: 26-01-2015
+ * Date: 23-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,14 @@
 #include "bitops.h"
 #include "log.h"
 #include "conn.h"
+
+void entry_cleanup_session(struct usched_entry *entry) {
+	memset(entry->session, 0, sizeof(entry->session));
+}
+
+void entry_cleanup_crypto(struct usched_entry *entry) {
+	memset(&entry->crypto, 0, sizeof(entry->crypto));
+}
 
 void entry_set_id(struct usched_entry *entry, uint32_t id) {
 	entry->id = id;
@@ -133,10 +141,10 @@ int entry_payload_decrypt(struct usched_entry *entry) {
 	}
 
 	/* Increment nonce */
-	entry->nonce ++;
+	entry->crypto.nonce ++;
 
 	/* Decrypt payload */
-	if (!(crypt_decrypt_chacha20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
+	if (!(crypt_decrypt_chacha20poly1305(payload_dec, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->crypto.nonce) }, entry->crypto.agreed_key))) {
 		errsv = errno;
 		log_warn("entry_payload_decrypt(): crypt_decrypt_chacha20poly1305(): %s\n", strerror(errno));
 		mm_free(payload_dec);
@@ -172,10 +180,10 @@ int entry_payload_encrypt(struct usched_entry *entry, size_t lpad) {
 	}
 
 	/* Increment nonce */
-	entry->nonce ++;
+	entry->crypto.nonce ++;
 
 	/* Encrypt payload */
-	if (!(crypt_encrypt_chacha20poly1305(payload_enc + lpad, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->nonce) }, entry->agreed_key))) {
+	if (!(crypt_encrypt_chacha20poly1305(payload_enc + lpad, &out_len, (unsigned char *) entry->payload, entry->psize, (unsigned char *) (uint64_t [1]) { htonll(entry->crypto.nonce) }, entry->crypto.agreed_key))) {
 		errsv = errno;
 		log_warn("entry_payload_encrypt(): crypt_encrypt_chacha20poly1305(): %s\n", strerror(errno));
 		mm_free(payload_enc);
@@ -198,6 +206,7 @@ int entry_payload_encrypt(struct usched_entry *entry, size_t lpad) {
 
 void entry_unset_payload(struct usched_entry *entry) {
 	if (entry->payload) {
+		memset(entry->payload, 0, entry->psize);
 		mm_free(entry->payload);
 		entry->payload = NULL;
 	}
@@ -225,6 +234,14 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 	entry_set_subj_size(entry, len);
 
 	return 0;
+}
+
+void entry_unset_subj(struct usched_entry *entry) {
+	if (entry->subj) {
+		memset(entry->subj, 0, strlen(entry->subj));
+		mm_free(entry->subj);
+		entry->subj = NULL;
+	}
 }
 
 int entry_copy(struct usched_entry *dest, struct usched_entry *src) {
@@ -266,18 +283,16 @@ int entry_compare(const void *e1, const void *e2) {
 	return 0;
 }
 
+void entry_zero(struct usched_entry *entry) {
+	memset(entry, 0, sizeof(struct usched_entry));
+}
+
 void entry_destroy(void *elem) {
 	struct usched_entry *entry = elem;
 
-	if (entry->payload) {
-		mm_free(entry->payload);
-		entry->payload = NULL;
-	}
-
-	if (entry->subj) {
-		mm_free(entry->subj);
-		entry->subj = NULL;
-	}
+	entry_unset_payload(entry);
+	entry_unset_subj(entry);
+	entry_zero(entry);
 
 	mm_free(entry);
 }

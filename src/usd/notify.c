@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 23-02-2015
+ * Date: 24-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -107,12 +107,6 @@ void notify_read(struct async_op *aop) {
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
 
-			/* If this is a GET or DEL request, we must destroy the entry after
-			 * completion.
-			 */
-			if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET) || entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL))
-				entry_destroy(entry);
-
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 			/* Serialize the entire active pool when state-changing operations are performed */
 			if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
@@ -124,6 +118,12 @@ void notify_read(struct async_op *aop) {
 				pthread_mutex_unlock(&rund.mutex_marshal);
 			}
 #endif
+
+			/* If this is a GET or DEL request, we must destroy the entry after
+			 * completion.
+			 */
+			if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET) || entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL))
+				entry_destroy(entry);
 		} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_PROGRESS) && !entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 			/* This is another acceptable state. A new entry was received but is still
 			 * unauthenticated and is in progress. Authentication is performed during the

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 09-02-2015
+ * Date: 24-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -499,6 +499,9 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	entry_set_expire(entry, ntohl(entry->expire));
 	entry_set_psize(entry, ntohl(entry->psize));
 
+	/* Set the last byte of username field to 0, so it will always be NULL terminated */
+	entry->username[sizeof(entry->username) - 1] = 0;
+
 	/* Clear all local flags that the client have possibly set */
 	entry_unset_flags_local(entry);
 
@@ -597,6 +600,16 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 		return -1;
 	}
 
+	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
+
+	/* Grant that the received data match the expected size */
+	if (aop->count != (sizeof(entry->session) + entry->psize)) {
+		log_warn("process_daemon_recv_update(): aop->count != (sizeof(entry->session) + entry->psize). This isn\'t supposed to happen (psize: %u, aop->count: %zu).\n", entry->psize, aop->count);
+		entry_destroy(entry);
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Copy the session authentication data into the entry->session field */
 	memcpy(entry->session, (void *) aop->data, sizeof(entry->session));
 
@@ -627,17 +640,6 @@ int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry)
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
 		errsv = errno;
 		log_warn("process_daemon_recv_update(): Unauthorized entry\n", strerror(errno));
-		entry_destroy(entry);
-		errno = errsv;
-		return -1;
-	}
-
-	debug_printf(DEBUG_INFO, "psize: %u, aop->count: %zu\n", entry->psize, aop->count);
-
-	/* Grant that the received data does not exceed the expected size */
-	if (aop->count != (sizeof(entry->session) + entry->psize)) {
-		errsv = errno;
-		log_warn("process_daemon_recv_update(): aop->count != (sizeof(entry->session) + entry->psize)\n");
 		entry_destroy(entry);
 		errno = errsv;
 		return -1;

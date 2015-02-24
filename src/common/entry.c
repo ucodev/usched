@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Common
  *
- * Date: 23-02-2015
+ * Date: 24-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -111,14 +111,17 @@ void entry_set_subj_size(struct usched_entry *entry, size_t size) {
 int entry_set_payload(struct usched_entry *entry, const char *payload, size_t len) {
 	int errsv = 0;
 
-	if (!(entry->payload = mm_alloc(len))) {
+	if (!(entry->payload = mm_alloc(len + 1))) {
 		errsv = errno;
 		log_warn("entry_set_payload(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	memset(entry->payload, 0, len);
+	/* Since payload sometimes may carry NULL terminated strings, lets play safe and always
+	 * force a NULL termination. Even if it isn't required... it won't hurt.
+	 */
+	memset(entry->payload, 0, len + 1);
 
 	memcpy(entry->payload, payload, len);
 
@@ -217,8 +220,20 @@ void entry_unset_payload(struct usched_entry *entry) {
 int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 	int errsv = 0;
 
-	if (!len)
+	/* WARNING: 
+	 *
+	 * If length isn't specified, calculate it through strlen(). Note that this isn't
+	 * recommended, since we have no idea from where the subject pointer is comming from.
+	 * Although the payload is forced to be NULL terminated when set, it doesn't mean
+	 * that we can assume that the *subj pointer is always NULL terminated.
+	 *
+	 * That said, we should issue a warning if it happens, in order to be corrected ASAP.
+	 *
+	 */
+	if (!len) {
 		len = strlen(subj) + 1;
+		log_warn("entry_set_subj(): Subject length wasn't specified. This is not recommended. Computed subject size through strlen() is: %zu bytes.\n", len);
+	}
 
 	if (!(entry->subj = mm_alloc(len + 1))) {
 		errsv = errno;

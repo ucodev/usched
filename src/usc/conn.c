@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 04-02-2015
+ * Date: 25-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -88,8 +88,16 @@ int conn_client_process(void) {
 		/* Convert endianness to network byte order */
 		cur->id = htonll(cur->id);
 		cur->flags = htonl(cur->flags);
-		cur->uid = htonl(cur->uid);
-		cur->gid = htonl(cur->gid);
+
+		if (conn_is_remote(runc.fd)) {
+			/* For remote connections, UID and GID must be set to 0xff */
+			cur->uid = htonl(0xff);
+			cur->gid = htonl(0xff);
+		} else {
+			cur->uid = htonl(cur->uid);
+			cur->gid = htonl(cur->gid);
+		}
+
 		cur->trigger = htonl(cur->trigger);
 		cur->step = htonl(cur->step);
 		cur->expire = htonl(cur->expire);

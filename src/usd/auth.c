@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 20-02-2015
+ * Date: 25-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,11 +44,22 @@
 
 int auth_daemon_local(int fd, uid_t *uid, gid_t *gid) {
 	int errsv = 0;
+	uid_t local_uid = 0;
+	gid_t local_gid = 0;
 
-	if (local_fd_peer_cred(fd, uid, gid) < 0) {
+	if (local_fd_peer_cred(fd, &local_uid, &local_gid) < 0) {
 		errsv = errno;
 		log_warn("auth_daemon_local(): local_fd_peer_cred(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Grant that the UID or GID received from local client matches the real values for
+	 * the user. We should log protocol manipulation attempts.
+	 */
+	if ((local_uid != *uid) || (local_gid != *gid)) {
+		log_crit("auth_daemon_local(): The real UID and/or GID for the user requesting the entry doesn't match the values sent by the user's client.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -77,6 +88,16 @@ int auth_daemon_remote_session_verify(
 	 * Total session size: 257 bytes
 	 *
 	 */
+
+	/* The UID and GID value passed to this function must be set to 0xff before the assignment.
+	 * Any other value means that the request was crafted by a client that does not meet the
+	 * specifications.
+	 */
+	if ((*uid != 0xff) || (*gid != 0xff)) {
+		log_warn("auth_daemon_remote_session_verify(): The received user or group identification doesn't match the specification for remote requests. (Remote UID: %u, Remote GID: %u)\n", *uid, *gid);
+		errno = EINVAL;
+		return -1;
+	}
 
 	/* Check if username doesn't exceed the expected size */
 	if (strlen(username) > sizeof(salt_raw)) {

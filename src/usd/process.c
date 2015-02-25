@@ -492,8 +492,8 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	/* Setup received entry */
 	entry_set_id(entry, aop->fd);
 	entry_set_flags(entry, ntohl(entry->flags));
-	entry_set_uid(entry, ntohl(entry->uid));
-	entry_set_gid(entry, ntohl(entry->gid));
+	entry_set_uid(entry, ntohl(entry->uid)); /* Untrusted. Will be used for comparison only */
+	entry_set_gid(entry, ntohl(entry->gid)); /* Untrusted. Will be used for comparison only */
 	entry_set_trigger(entry, ntohl(entry->trigger));
 	entry_set_step(entry, ntohl(entry->step));
 	entry_set_expire(entry, ntohl(entry->expire));

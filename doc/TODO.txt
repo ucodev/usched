@@ -1,16 +1,16 @@
 v0.1:
  - Documentation
- - Cleanup code
 
 v0.2:
- - Communication Protocol cleanup
+ - Communication Protocol revision
  - New operations: Hold
  - Exceptions
- - Entry Groups
- - Recursivity (full support)
- - Statistics (uss)
+ - uSched Statistics (uss)
 
 v0.3:
+ - Entry Groups
+ - Recursivity (full support)
+ - uSched Verifier (usv)
  - crontab importer
  - at importer
 

@@ -86,8 +86,13 @@ int conn_client_process(void) {
 		 * inform the remote party of size of the encrypted payload and not the current
 		 * (plain) size.
 		 */
-		if (conn_is_remote(runc.fd))
+		if (conn_is_remote(runc.fd)) {
+			/* TODO or FIXME: If we're going to encrypt this entry, why not do it right
+			 * here instead of doing lots of calculations on entry->psize along this
+			 * rountine?
+			 */
 			cur->psize += CRYPT_EXTRA_SIZE_CHACHA20POLY1305;
+		}
 
 		/* Convert endianness to network byte order */
 		cur->id = htonll(cur->id);

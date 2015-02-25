@@ -82,6 +82,10 @@ int conn_client_process(void) {
 	char *aaa_payload_data = NULL;
 
 	while ((cur = runc.epool->pop(runc.epool))) {
+		/* If this is a remote connection, the payload will be encrypted, so we need to
+		 * inform the remote party of size of the encrypted payload and not the current
+		 * (plain) size.
+		 */
 		if (conn_is_remote(runc.fd))
 			cur->psize += CRYPT_EXTRA_SIZE_CHACHA20POLY1305;
 
@@ -103,14 +107,30 @@ int conn_client_process(void) {
 		cur->expire = htonl(cur->expire);
 		cur->psize = htonl(cur->psize);
 
-		/* Set username */
-		strcpy(cur->username, runc.opt.remote_username);
-
-		/* Set session data if this is a remote connection */
+		/* Set username and session data if this is a remote connection */
 		if (conn_is_remote(runc.fd)) {
+			/* Set username */
+			if (strlen(runc.opt.remote_username) >= sizeof(cur->username)) {
+				log_crit("conn_client_process(): The requested username is too long to be processed: %s\n", runc.opt.remote_username);
+				/* The payload size is in network byte order. We need to revert it
+				 * before calling entry_destroy().
+				 */
+				cur->psize = ntohl(cur->psize) - CRYPT_EXTRA_SIZE_CHACHA20POLY1305;
+				entry_destroy(cur);
+				errno = EINVAL;
+				return -1;
+			}
+
+			strcpy(cur->username, runc.opt.remote_username);
+
+			/* Set the session data */
 			if (entry_client_remote_session_create(cur, runc.opt.remote_password) < 0) {
 				errsv = errno;
 				log_crit("conn_client_process(): entry_client_remote_session_create(): %s\n", strerror(errno));
+				/* The payload size is in network byte order. We need to revert it
+				 * before calling entry_destroy().
+				 */
+				cur->psize = ntohl(cur->psize) - CRYPT_EXTRA_SIZE_CHACHA20POLY1305;
 				entry_destroy(cur);
 				errno = errsv;
 				return -1;
@@ -121,6 +141,10 @@ int conn_client_process(void) {
 		if (panet_write(runc.fd, cur, usched_entry_hdr_size()) != usched_entry_hdr_size()) {
 			errsv = errno;
 			log_crit("conn_client_process(): panet_write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
+			/* The payload size is in network byte order. We need to revert it before
+			 * calling entry_destroy().
+			 */
+			cur->psize = ntohl(cur->psize) - (conn_is_remote(runc.fd) ? CRYPT_EXTRA_SIZE_CHACHA20POLY1305 : 0);
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
@@ -134,7 +158,7 @@ int conn_client_process(void) {
 		cur->trigger = ntohl(cur->trigger);
 		cur->step = ntohl(cur->step);
 		cur->expire = ntohl(cur->expire);
-		cur->psize = ntohl(cur->psize);
+		cur->psize = ntohl(cur->psize) - (conn_is_remote(runc.fd) ? CRYPT_EXTRA_SIZE_CHACHA20POLY1305 : 0); /* Set the original payload size if the connection is remote. */
 
 		/* Read the session token into the session field for further processing */
 		if (panet_read(runc.fd, cur->session, sizeof(cur->session)) != sizeof(cur->session)) {
@@ -159,8 +183,6 @@ int conn_client_process(void) {
 			}
 
 			/* Encrypt payload */
-			cur->psize -= CRYPT_EXTRA_SIZE_CHACHA20POLY1305; /* Set original payload size */
-
 			if (entry_payload_encrypt(cur, 0) < 0) {
 				errsv = errno;	
 				log_crit("conn_client_process(): entry_payload_encrypt(): %s\n", strerror(errno));

@@ -133,13 +133,12 @@ struct usched_entry {
 	 * - Before serialization
 	 * - After unserialization
 	 * - Before delivering entries to the uSched Executer
-	 * - Before uSched Executer executes the entry command
 	 *
 	 * The purpose of the entry signature is to identify severe data corruption due
 	 * to hardware/driver issues and/or possible bugs present on the uSched Services,
 	 * preventing the execution of a corrupted command with corrupted UIDs or GIDs.
 	 *
-	 * Note that this offers _LITTLE_ to _NO_ security enhancements if a bug is present in
+	 * Note that this offers _VERY LITTLE_ to _NO_ security enhancements if a bug is present in
 	 * the code that allows an attacker to mangle the data structure of the entry. Depending on
 	 * the severity, if the most of the structure can be re-written, the effectiveness of the
 	 * signature is reduced down to zero.

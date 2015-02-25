@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 22-02-2015
+# Date: 25-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -30,7 +30,7 @@ ARG0=${0}; ARG1=${1}; ARG2=${2};
 
 ## Config data ##
 CONFIG_USCHED_QUIET=0
-CONFIG_USCHED_DAEMON_BIN="/usr/sbin/usa"
+CONFIG_USCHED_ADMIN_BIN="/usr/sbin/usa"
 CONFIG_USCHED_DAEMON_BIN="/usr/sbin/usd"
 CONFIG_USCHED_EXEC_BIN="/usr/sbin/use"
 CONFIG_USCHED_MONITOR_BIN="/usr/sbin/usm"

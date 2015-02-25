@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 23-02-2015
+ * Date: 25-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,6 +41,7 @@
 
 #include <psec/crypt.h>
 #include <psec/ke.h>
+#include <psec/hash.h>
 
 #include "usched.h"
 
@@ -118,8 +119,33 @@ struct usched_entry {
 	struct usched_entry_crypto crypto;
 
 #if CONFIG_DAEMON_SPECIFIC == 1
-	time_t create_time;
+	uint32_t create_time;
 #endif
+
+	/*
+	 * The entry signature after USCHED_ENTRY_FLAG_COMPLETE is set.
+	 * THe entry signature is the resulting hash of the following fields concatenation:
+	 *
+	 * blake2s(entry->id + entry->uid + entry->gid + entry->subj + entry->create_time)
+	 *
+	 * This signature is always verified:
+	 *
+	 * - Before serialization
+	 * - After unserialization
+	 * - Before delivering entries to the uSched Executer
+	 * - Before uSched Executer executes the entry command
+	 *
+	 * The purpose of the entry signature is to identify severe data corruption due
+	 * to hardware/driver issues and/or possible bugs present on the uSched Services,
+	 * preventing the execution of a corrupted command with corrupted UIDs or GIDs.
+	 *
+	 * Note that this offers _LITTLE_ to _NO_ security enhancements if a bug is present in
+	 * the code that allows an attacker to mangle the data structure of the entry. Depending on
+	 * the severity, if the most of the structure can be re-written, the effectiveness of the
+	 * signature is reduced down to zero.
+	 *
+	 */
+	unsigned char signature[HASH_DIGEST_SIZE_BLAKE2S];
 };
 #pragma pack(pop)
 

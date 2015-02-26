@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Common
  *
- * Date: 24-02-2015
+ * Date: 26-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,16 @@ void entry_cleanup_session(struct usched_entry *entry) {
 
 void entry_cleanup_crypto(struct usched_entry *entry) {
 	memset(&entry->crypto, 0, sizeof(entry->crypto));
+}
+
+void entry_update_signature(struct usched_entry *entry) {
+	/* TODO */
+	return ;
+}
+
+int entry_check_signature(struct usched_entry *entry) {
+	/* TODO */
+	return 1;
 }
 
 void entry_set_id(struct usched_entry *entry, uint32_t id) {

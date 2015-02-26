@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 23-02-2015
+ * Date: 26-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -239,16 +239,27 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		goto _remove;
 	}
 
+	/* Check entry signature */
+	if (!entry_check_signature(entry)) {
+		log_warn("entry_daemon_pmq_dispatch(): Entry ID 0x%016llX signature is invalid.\n");
+
+		/* Remove entries with in valid signatures */
+		goto _remove;
+	}
+
 	/* Replace subject variables with current values */
 	if (!(cmd = vars_replace_all(entry->subj, (struct usched_vars [1]) { { entry->id, entry->username, entry->uid, entry->gid, entry->trigger, entry->step, entry->expire } })))
 		cmd = entry->subj;
 
-	/* Check if the message fits in the configured message size */
+	/* Check if the message fits in the configured message size.
+	 * Although this check was already performed when receiving the entry from the user,
+	 * this one is required since now the variables are expanded.
+	 */
 	if ((strlen(cmd) + 21) > rund.config.core.pmq_msgsize) {
-		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf)\n");
+		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
 
-		/* Remove this entry as it is invalid. FIXME: We rather mark it as invalid instead of
-		 * removing it, so we can inform the user regarding this issue.
+		/* Remove this entry as it is invalid. TODO or FIXME: We rather mark it as invalid
+		 * instead of removing it, so we can inform the user regarding this issue.
 		 */
 		goto _remove;
 	}
@@ -339,6 +350,10 @@ _finish:
 int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	int errsv = 0;
 	struct usched_entry *entry = data;
+
+	/* Validate the signature agains the current entry data */
+	if (!entry_check_signature(entry))
+		log_crit("entry_daemon_serialize(): Entry ID 0x%016llX signature is invalid. The entry will be serialized, but it will fail to load on next daemon restart.\n");
 
 	if (write(fd, &entry->id, sizeof(entry->id)) != sizeof(entry->id))
 		goto _serialize_error;
@@ -436,6 +451,15 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 	if (read(fd, entry->subj, entry->subj_size) != entry->subj_size)
 		goto _unserialize_error;
 
+	/* Check entry signature */
+	if (!entry_check_signature(entry)) {
+		log_crit("entry_daemon_unserialize(): Entry ID 0x%016llX signature is invalid.\n");
+		entry_destroy(entry);
+		errno = EINVAL;
+		return NULL;
+	}
+
+	/* All good */
 	return entry;
 
 _unserialize_error:

@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched C# Interface - Client
  *
- * Date: 25-01-2015
+ * Date: 26-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,12 +59,18 @@ namespace Usched
 			
 			public uint subj_size;		/* 4 bytes */
 			public void *subj;
-			
+
+			/* Resered union */
 			public fixed byte reserved[32];
 
+			/* Crypto structure */
 			public fixed byte context[480];
 			public fixed byte agreed_key[32];
 			public ulong nonce;		/* 8 bytes */
+
+			public uint create_time;
+
+			public fixed byte signature[32];
 		}
 
 		[DllImport("libusc.dll", EntryPoint = "usched_init", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]

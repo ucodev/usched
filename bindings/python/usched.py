@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched Python Library Module
 #
-# Date: 27-01-2015
+# Date: 26-02-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -51,7 +51,9 @@ class UschedEntryRaw(Structure):
 		("reserved",	c_char * 32),
 		("context",	c_char * 480),
 		("agreed_key",	c_char * 32),
-		("nonce",	c_uint64)
+		("nonce",	c_uint64),
+		("create_time", c_uint32),
+		("signature",   c_char * 32)
 	]
 
 # High level class

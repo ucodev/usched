@@ -36,6 +36,7 @@
 #include <sys/types.h>
 
 #include <psec/crypt.h>
+#include <psec/hash/low.h>
 
 #include "mm.h"
 #include "entry.h"
@@ -52,13 +53,34 @@ void entry_cleanup_crypto(struct usched_entry *entry) {
 }
 
 void entry_update_signature(struct usched_entry *entry) {
-	/* TODO */
-	return ;
+	psec_low_hash_t context;
+
+	hash_low_blake2s_init(&context);
+
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->id, sizeof(entry->id));
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->uid, sizeof(entry->uid));
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->gid, sizeof(entry->gid));
+	hash_low_blake2s_update(&context, (unsigned char *) entry->subj, entry->subj_size);
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->create_time, sizeof(entry->create_time));
+
+	hash_low_blake2s_final(&context, entry->signature);
 }
 
 int entry_check_signature(struct usched_entry *entry) {
-	/* TODO */
-	return 1;
+	psec_low_hash_t context;
+	unsigned char signature[HASH_DIGEST_SIZE_BLAKE2S];
+
+	hash_low_blake2s_init(&context);
+
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->id, sizeof(entry->id));
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->uid, sizeof(entry->uid));
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->gid, sizeof(entry->gid));
+	hash_low_blake2s_update(&context, (unsigned char *) entry->subj, entry->subj_size);
+	hash_low_blake2s_update(&context, (unsigned char *) &entry->create_time, sizeof(entry->create_time));
+
+	hash_low_blake2s_final(&context, signature);
+
+	return !memcmp(entry->signature, signature, sizeof(signature));
 }
 
 void entry_set_id(struct usched_entry *entry, uint32_t id) {

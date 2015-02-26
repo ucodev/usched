@@ -118,9 +118,8 @@ struct usched_entry {
 	/* Cryptographic Data Context */
 	struct usched_entry_crypto crypto;
 
-#if CONFIG_DAEMON_SPECIFIC == 1
+	/* The time when this entry was created */
 	uint32_t create_time;
-#endif
 
 	/*
 	 * The entry signature after USCHED_ENTRY_FLAG_COMPLETE is set.

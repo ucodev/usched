@@ -385,6 +385,12 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	if (write(fd, entry->subj, entry->subj_size) != entry->subj_size)
 		goto _serialize_error;
 
+	if (write(fd, &entry->create_time, sizeof(entry->create_time)) != sizeof(entry->create_time))
+		goto _serialize_error;
+
+	if (write(fd, entry->signature, sizeof(entry->signature)) != sizeof(entry->signature))
+		goto _serialize_error;
+
 	return 0;
 
 _serialize_error:
@@ -451,9 +457,15 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 	if (read(fd, entry->subj, entry->subj_size) != entry->subj_size)
 		goto _unserialize_error;
 
+	if (read(fd, &entry->create_time, sizeof(entry->create_time)) != sizeof(entry->create_time))
+		goto _unserialize_error;
+
+	if (read(fd, entry->signature, sizeof(entry->signature)) != sizeof(entry->signature))
+		goto _unserialize_error;
+
 	/* Check entry signature */
 	if (!entry_check_signature(entry)) {
-		log_crit("entry_daemon_unserialize(): Entry ID 0x%016llX signature is invalid.\n");
+		log_crit("entry_daemon_unserialize(): Entry ID 0x%016llX signature is invalid.\n", entry->id);
 		entry_destroy(entry);
 		errno = EINVAL;
 		return NULL;

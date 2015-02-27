@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface - Daemon
  *
- * Date: 16-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -48,7 +48,7 @@ static void *_delta_time_monitor(void *arg) {
 		rund.delta_last = time(NULL) - rund.time_last - CONFIG_USCHED_DELTA_CHECK_INTERVAL;
 
 		/* Check if the absolute time variation value exceeds the acceptable limits */
-		if (abs(rund.delta_last) >= rund.config.core.delta_reload) {
+		if (labs((long) rund.delta_last) >= (long) rund.config.core.delta_reload) {
 			log_warn("delta_time_monitor(): System time change detected. Reloading daemon...\n");
 
 			/* Time was changed, we need to reload the daemon */

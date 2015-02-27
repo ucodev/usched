@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 15-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -171,7 +171,7 @@ static int _file_pid_write(pid_t pid) {
 
 	memset(spid, 0, sizeof(spid));
 
-	snprintf(spid, 11, "%u", pid);
+	snprintf(spid, 11, "%u", (unsigned int) pid);
 
 	ret = write(config.fd_pidf, spid, strlen(spid)) > 0 ? 0 : -1;
 

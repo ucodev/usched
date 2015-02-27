@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Admin
  *
- * Date: 21-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,7 +42,7 @@ int pmq_admin_create(void) {
 	mqd_t pmqd;
 
 	/* (Re)create the message queue */
-	if ((pmqd = pmq_init(runa.config.core.pmq_name, oflags, 0700, runa.config.core.pmq_msgmax, runa.config.core.pmq_msgsize)) == (mqd_t) -1) {
+	if ((pmqd = pmq_init(runa.config.core.pmq_name, oflags, 0700, (long) runa.config.core.pmq_msgmax, (long) runa.config.core.pmq_msgsize)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_admin_create(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;

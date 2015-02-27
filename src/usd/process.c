@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 25-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -128,7 +128,7 @@ _update_op_new_failure_2:
 	/* Revert the entry id to its original file descriptor. This will allow the rpool cleanup
 	 * routines be aware that this entry wasn't successfully inserted into the active pool.
 	 */
-	entry->id = aop->fd;
+	entry->id = (uint64_t) aop->fd;
 
 _update_op_new_failure_1:
 	errno = errsv;
@@ -137,9 +137,9 @@ _update_op_new_failure_1:
 }
 
 static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry *entry) {
-	int errsv = 0, i = 0, cur_fd = aop->fd;
+	int errsv = 0, cur_fd = aop->fd;
 	uint64_t *entry_list_req = NULL, *entry_list_res = NULL;
-	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
+	uint32_t i = 0, entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
 
 	/* Check if the payload size if aligned with the entry->id size */
 	if ((entry->psize % sizeof(entry->id))) {
@@ -269,9 +269,9 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 }
 
 static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry *entry) {
-	int errsv = 0, i = 0, cur_fd = aop->fd;
+	int errsv = 0, cur_fd = aop->fd;
 	uint64_t *entry_list_req = NULL;
-	uint32_t entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
+	uint32_t i = 0, entry_list_req_nmemb = 0, entry_list_res_nmemb = 0;
 	size_t buf_offset = 0, len = 0;
 	struct usched_entry *entry_c = NULL;
 	char *buf = NULL;
@@ -490,7 +490,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	aop->data = NULL;
 
 	/* Setup received entry */
-	entry_set_id(entry, aop->fd);
+	entry_set_id(entry, (uint64_t) aop->fd);
 	entry_set_flags(entry, ntohl(entry->flags));
 	entry_set_uid(entry, ntohl(entry->uid)); /* Untrusted. Will be used for comparison only */
 	entry_set_gid(entry, ntohl(entry->gid)); /* Untrusted. Will be used for comparison only */
@@ -558,7 +558,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 			errno = errsv;
 			return NULL;
 		}
-	} else if (conn_is_local(entry->id)) {
+	} else if (conn_is_local(aop->fd)) {
 		memset(entry->session, 0, sizeof(entry->session));
 	} else {
 		log_warn("process_daemon_recv_create(): Unable to determine connection type.\n");
@@ -570,7 +570,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	/* Reuse 'aop' for next read request: Receive the entry command */
 	memset(aop, 0, sizeof(struct async_op));
 
-	aop->fd = entry->id;
+	aop->fd = (int) entry->id;
 	aop->count = sizeof(entry->session);
 	aop->priority = 0;
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;

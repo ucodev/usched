@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 26-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -87,7 +87,7 @@ int marshal_daemon_serialize_pools(void) {
 	/* Grant entry status correctness before serialization */
 	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
 		/* Check if we need to compensate the entry time values */
-		if (abs(rund.delta_last) >= rund.config.core.delta_reload) {
+		if (labs((long) rund.delta_last) >= (long) rund.config.core.delta_reload) {
 			/* If this entry was triggered at least once OR if has a relative trigger,
 			 * we must compensate the trigger value with the last known time variation
 			 * value.
@@ -206,9 +206,9 @@ int marshal_daemon_unserialize_pools(void) {
 		while (entry->step && (entry->trigger <= time(NULL))) {
 			/* Check if we've to align (month or year?) and update trigger accordingly */
 			if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
-				entry->trigger += schedule_step_ts_add_month(entry->trigger, entry->step / 2592000);
+				entry->trigger += schedule_step_ts_add_month(entry->trigger, (unsigned int) entry->step / 2592000);
 			} else if (entry_has_flag(entry, USCHED_ENTRY_FLAG_YEARDAY_ALIGN)) {
-				entry->trigger += schedule_step_ts_add_year(entry->trigger, entry->step / 31536000);
+				entry->trigger += schedule_step_ts_add_year(entry->trigger, (unsigned int) entry->step / 31536000);
 			} else {
 				/* No alignment required */
 				entry->trigger += entry->step;
@@ -280,7 +280,7 @@ int marshal_daemon_backup(void) {
 
 	memset(file_bak, 0, len);
 
-	snprintf(file_bak, len - 1, "%s-%lu-%u", rund.config.core.serialize_file, time(NULL), getpid());
+	snprintf(file_bak, len - 1, "%s-%lu-%u", rund.config.core.serialize_file, (unsigned long) time(NULL), (unsigned int) getpid());
 
 	if (fsop_cp(rund.config.core.serialize_file, file_bak, 8192) < 0) {
 		errsv = errno;

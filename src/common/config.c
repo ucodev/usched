@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 21-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -117,7 +117,7 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 	}
 
 	/* Read file contents */
-	while (fgets(line, sizeof(line) - 1, fp)) {
+	while (fgets(line, (int) sizeof(line) - 1, fp)) {
 		++ line_count;
 
 		/* Ignore blank lines */
@@ -125,7 +125,7 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 			continue;
 
 		/* Strip '\n' and/or '\r' */
-		strrtrim(line, "\n\r");
+		(void) strrtrim(line, "\n\r");
 
 		/* Allocate value memory */
 		if (!(val = mm_alloc(sizeof(unsigned int)))) {
@@ -138,7 +138,7 @@ static int _list_init_uint_from_file(const char *file, struct cll_handler **list
 		}
 
 		/* Retrieve line value */
-		*val = strtoul(line, &endptr, 0);
+		*val = (unsigned int) strtoul(line, &endptr, 0);
 
 		/* Check if value is acceptable */
 		if ((*endptr) || (endptr == line) || (errno == EINVAL) || (errno == ERANGE)) {
@@ -193,7 +193,7 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 	}
 
 	/* Retrieve value from file */
-	if (!fgets(line, sizeof(line) - 1, fp)) {
+	if (!fgets(line, (int) sizeof(line) - 1, fp)) {
 		errsv = errno;
 		log_warn("_value_init_uint_from_file(): fgets(): Unexpected EOF (%s).\n", file);
 		fclose(fp);
@@ -213,10 +213,10 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 	}
 
 	/* Strip '\n' and/or '\r' */
-	strrtrim(line, "\n\r");
+	(void) strrtrim(line, "\n\r");
 
 	/* Retrieve line value */
-	*val = strtoul(line, &endptr, 0);
+	*val = (unsigned int) strtoul(line, &endptr, 0);
 
 	/* Check if value is acceptable */
 	if ((*endptr) || (endptr == line) || (errno == EINVAL) || (errno == ERANGE)) {
@@ -255,7 +255,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	}
 
 	/* Retrieve value from file */
-	if (!fgets(line, sizeof(line) - 1, fp)) {
+	if (!fgets(line, (int) sizeof(line) - 1, fp)) {
 		errsv = errno;
 		log_warn("_value_init_int_from_file(): fgets(): Unexpected EOF (%s).\n", file);
 		fclose(fp);
@@ -275,7 +275,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	}
 
 	/* Strip '\n' and/or '\r' */
-	strrtrim(line, "\n\r");
+	(void) strrtrim(line, "\n\r");
 
 	/* Retrieve line value */
 	*val = strtol(line, &endptr, 0);
@@ -317,7 +317,7 @@ static char *_value_init_string_from_file(const char *file) {
 	}
 
 	/* Retrieve value from file */
-	if (!fgets(line, sizeof(line) - 1, fp)) {
+	if (!fgets(line, (int) sizeof(line) - 1, fp)) {
 		errsv = errno;
 		log_warn("_value_init_string_from_file(): fgets(): Unexpected EOF (%s).\n", file);
 		fclose(fp);

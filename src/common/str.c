@@ -3,7 +3,7 @@
  * @brief uSched
  *        String helper interface
  *
- * Date: 18-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -68,7 +68,7 @@ static char *_strrepl_generic(
 	memset(str_new, 0, len_new + 1);
 
 	/* Craft the first part of the result (if any) */
-	memcpy(str_new, haystack, occurrence - haystack);
+	memcpy(str_new, haystack, (size_t) (occurrence - haystack));
 
 	/* Replace the occurrence */
 	memcpy(str_new + (occurrence - haystack), rcontent, len_rcontent);
@@ -77,7 +77,7 @@ static char *_strrepl_generic(
 	strcat(str_new, occurrence + len_needle);
 
 	/* Update start index */
-	*start_index = occurrence - haystack + len_rcontent;
+	*start_index = ((size_t) (occurrence - haystack)) + len_rcontent;
 
 	/* Return the result */
 	return str_new;
@@ -109,7 +109,7 @@ int strisnum(const char *s) {
 	return 1;
 }
 
-int strrtrim(char *s, const char *trail) {
+size_t strrtrim(char *s, const char *trail) {
 	size_t len = strlen(s);
 	char ch = trail[0];
 	int i = 0;

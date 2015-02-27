@@ -3,7 +3,7 @@
  * @brief uSched
  *        Hashing mechanisms interface
  *
- * Date: 30-01-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,8 +32,8 @@
 #if CONFIG_USCHED_HASH_FNV1A == 1
 static uint64_t _hash_fnv1a(const char *str) {
 	int i = 0;
-	uint64_t prime = 1099511628211ULL;		/* FNV prime */
-	uint64_t hash = 14695981039346656037ULL; 	/* FNV offset basis */
+	uint64_t prime = (uint64_t) 0x100000001B3ULL;		/* FNV prime */
+	uint64_t hash = (uint64_t) 0xCBF29CE484222325ULL; 	/* FNV offset basis */
 
 	for (i = 0; str[i]; i ++) {
 		hash ^= str[i];

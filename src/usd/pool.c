@@ -3,7 +3,7 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 09-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,7 +49,7 @@ int pool_daemon_init(void) {
 	}
 
 	/* Setup CLL: No auto search, head insert, search forward */
-	rund.apool->set_config(rund.apool, CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD);
+	(void) rund.apool->set_config(rund.apool, (ui32_t) (CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD));
 
 	/* Initialize connection pool */
 	if (!(rund.rpool = pall_cll_init(&entry_compare, &entry_destroy, &entry_daemon_serialize, &entry_daemon_unserialize))) {
@@ -60,7 +60,7 @@ int pool_daemon_init(void) {
 	}
 
 	/* Setup CLL: No auto search, head insert, search forward */
-	rund.rpool->set_config(rund.rpool, CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD);
+	(void) rund.rpool->set_config(rund.rpool, (ui32_t) (CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD));
 
 	return 0;
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Admin
  *
- * Date: 21-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -71,7 +71,7 @@ void print_admin_config_users_from_file(const char *file, char modification) {
 	}
 
 	/* Get file contents */
-	fgets(buf, sizeof(buf) - 1, fp);
+	(void) fgets(buf, (int) sizeof(buf) - 1, fp);
 
 	/* Close file */
 	fclose(fp);

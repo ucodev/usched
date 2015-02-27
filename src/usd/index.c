@@ -3,7 +3,7 @@
  * @brief uSched
  *        Indexing interface
  *
- * Date: 11-01-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -50,7 +50,7 @@ int index_entry_create(struct usched_entry *e) {
 
 	memset(str, 0, len);
 
-	snprintf(str, len - 1, "%s%u%u%u%llu", e->subj, e->trigger, e->step, e->expire, (unsigned long long) clock());
+	snprintf(str, len - 1, "%s%u%u%u%llu", e->subj, (unsigned int) e->trigger, (unsigned int) e->step, (unsigned int) e->expire, (unsigned long long) clock());
 
 	e->id = hash_string_create(str);
 

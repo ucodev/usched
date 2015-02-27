@@ -3,7 +3,7 @@
  * @brief uSched
  *        Variable Processing interface - Daemon
  *
- * Date: 06-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -66,7 +66,7 @@ char *vars_replace_uid(const char *in, uid_t uid) {
 
 	memset(buf, 0, sizeof(buf));
 
-	snprintf(buf, sizeof(buf) - 1, "%u", uid);
+	snprintf(buf, sizeof(buf) - 1, "%u", (unsigned int) uid);
 
 	return _vars_replace_var(in, USCHED_VAR_NAME_UID, buf);
 }
@@ -76,7 +76,7 @@ char *vars_replace_gid(const char *in, gid_t gid) {
 
 	memset(buf, 0, sizeof(buf));
 
-	snprintf(buf, sizeof(buf) - 1, "%u", gid);
+	snprintf(buf, sizeof(buf) - 1, "%u", (unsigned int) gid);
 
 	return _vars_replace_var(in, USCHED_VAR_NAME_GID, buf);
 }

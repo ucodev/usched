@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 20-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -361,9 +361,9 @@ int schedule_entry_update(struct usched_entry *entry) {
 
 		/* Check what we've to align (month or year?) and update trigger accordingly */
 		if (entry_has_flag(entry, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN)) {
-			entry->trigger += schedule_step_ts_add_month(entry->trigger, entry->step / 2592000);
+			entry->trigger += schedule_step_ts_add_month(entry->trigger, (unsigned int) entry->step / 2592000);
 		} else { /* USCHED_ENTRY_FLAG_YEARDAY_ALIGN */
-			entry->trigger += schedule_step_ts_add_year(entry->trigger, entry->step / 31536000);
+			entry->trigger += schedule_step_ts_add_year(entry->trigger, (unsigned int) entry->step / 31536000);
 		}
 
 		/* Re-arm the entry with the correct alignments */

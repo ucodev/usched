@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 04-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -61,7 +61,7 @@ static void *_exec_cmd(void *arg) {
 	/* Check delta time before executing event (Absolute value is a safe check. Negative values
 	 * won't occur here... hopefully).
 	 */
-	if (abs(time(NULL) - trigger) >= rune.config.core.delta_noexec) {
+	if (labs((long) (time(NULL) - trigger)) >= (int) rune.config.core.delta_noexec) {
 		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - trigger, rune.config.core.delta_noexec);
 	} else if ((pid = fork()) == (pid_t) -1) {	/* Create a new process, drop privileges to
 							 * UID and GID and execute CMD
@@ -124,14 +124,14 @@ static void *_exec_cmd(void *arg) {
 #endif
 
 		/* Paranoid mode */
-		if ((getuid() != uid) || (geteuid() != uid)) {
+		if ((getuid() != (uid_t) uid) || (geteuid() != (uid_t) uid)) {
 			/* Free argument resources */
 			mm_free(arg);
 
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_UID);
 		}
 
-		if ((getgid() != gid) || (getegid() != gid)) {
+		if ((getgid() != (gid_t) gid) || (getegid() != (gid_t) gid)) {
 			/* Free argument resources */
 			mm_free(arg);
 

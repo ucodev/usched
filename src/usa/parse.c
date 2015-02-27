@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Admin
  *
- * Date: 18-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -92,7 +92,7 @@ static struct usched_admin_request *_parse_category_compound(struct usched_admin
 
 	/* Set the argument vector and argument counter of the request */
 	req->args = &argv[1];
-	req->argc = argc - 1;
+	req->argc = (size_t) argc - 1;
 
 	return req;
 

@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 08-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -97,7 +97,7 @@ static int _conn_daemon_remote_init(void) {
 	}
 
 	/* Initialize remote connections manager */
-	if ((rund.fd_remote = panet_server_ipv4(rund.config.network.bind_addr, rund.config.network.bind_port, PANET_PROTO_TCP, rund.config.network.conn_limit)) < 0) {
+	if ((rund.fd_remote = panet_server_ipv4(rund.config.network.bind_addr, rund.config.network.bind_port, PANET_PROTO_TCP, (int) rund.config.network.conn_limit)) < 0) {
 		errsv = errno;
 		log_crit("conn_daemon_remote_init(): panet_server_ipv4(\"%s\", \"%s\", ...): %s\n", rund.config.network.bind_addr, rund.config.network.bind_port, strerror(errno));
 		errno = errsv;
@@ -120,7 +120,7 @@ int conn_daemon_init(void) {
 	int errsv = 0;
 
 	/* Initialize RTSAIO */
-	if (rtsaio_init(-rund.config.core.thread_workers, SCHED_OTHER, rund.config.core.thread_priority, &notify_write, &notify_read) < 0) {
+	if (rtsaio_init(-(int) rund.config.core.thread_workers, SCHED_OTHER, rund.config.core.thread_priority, &notify_write, &notify_read) < 0) {
 		errsv = errno;
 		log_crit("conn_daemon_init(): rtsaio_init(): %s\n", strerror(errno));
 		errno = errsv;

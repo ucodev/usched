@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface
  *
- * Date: 25-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -37,7 +37,7 @@
 #include "log.h"
 #include "pmq.h"
 
-mqd_t pmq_init(const char *name, int oflags, mode_t mode, unsigned int maxmsg, unsigned int msgsize) {
+mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgsize) {
 	int errsv = 0;
 	mqd_t ret = (mqd_t) -1;
 	struct mq_attr mqattr;

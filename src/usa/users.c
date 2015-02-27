@@ -3,7 +3,7 @@
  * @brief uSched
  *        Users configuration and administration interface
  *
- * Date: 21-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -241,13 +241,13 @@ static int _users_admin_add(
 	const char *password,
 	int create_empty_file)
 {
-	int errsv = 0, len = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
+	int errsv = 0, rounds = CONFIG_USCHED_SEC_KDF_ROUNDS;
 	unsigned char digest[HASH_DIGEST_SIZE_SHA512];
 	unsigned char *encoded_digest = NULL, *encoded_salt = NULL;
 	char *result = NULL, *tmp_path = NULL, *path = NULL;
 	unsigned char salt[HASH_DIGEST_SIZE_BLAKE2S];
 	unsigned char salt_raw[CONFIG_USCHED_AUTH_USERNAME_MAX];
-	size_t edigest_out_len = 0, esalt_out_len = 0;
+	size_t edigest_out_len = 0, esalt_out_len = 0, len = 0;
 	FILE *fp = NULL;
 
 	/* Grant that username isn't empty */
@@ -346,7 +346,7 @@ static int _users_admin_add(
 	memset(result, 0, len);
 
 	/* Craft the result string */
-	snprintf(result, len - 1, "%u:%u:%s$%s", uid, gid, (char *) encoded_salt, (char *) encoded_digest);
+	snprintf(result, len - 1, "%u:%u:%s$%s", (unsigned int) uid, (unsigned int) gid, (char *) encoded_salt, (char *) encoded_digest);
 
 	/* Free unused memory */
 	encode_destroy(encoded_salt);
@@ -446,7 +446,8 @@ int users_admin_add(const char *username, uid_t uid, gid_t gid, const char *pass
 }
 
 static int _users_admin_delete_generic(const char *username, int create_empty_file) {
-	int errsv = 0, len = 0;
+	int errsv = 0;
+	size_t len = 0;
 	char *path = NULL, *tmp_path = NULL;
 	FILE *fp = NULL;
 

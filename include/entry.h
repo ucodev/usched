@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 26-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -158,7 +158,7 @@ int entry_check_signature(struct usched_entry *entry);
 void entry_set_id(struct usched_entry *entry, uint32_t id);
 void entry_set_flags(struct usched_entry *entry, uint32_t flags);
 void entry_unset_flags_local(struct usched_entry *entry);
-int entry_has_flag(struct usched_entry *entry, usched_entry_flag_t flag);
+unsigned int entry_has_flag(struct usched_entry *entry, usched_entry_flag_t flag);
 void entry_set_flag(struct usched_entry *entry, usched_entry_flag_t flag);
 void entry_unset_flag(struct usched_entry *entry, usched_entry_flag_t flag);
 void entry_set_uid(struct usched_entry *entry, uid_t uid);

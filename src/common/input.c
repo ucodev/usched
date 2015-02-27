@@ -3,7 +3,7 @@
  * @brief uSched
  *        Terminal input interface
  *
- * Date: 18-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,10 +59,10 @@ int input_password(char *password, size_t max_len) {
 	if (term_local_echo_unset() < 0)
 		return -1;
 
-	fgets(password, max_len - 1, stdin);
+	(void) fgets(password, (int) max_len - 1, stdin);
 
 	/* Strip '\n' and/or '\r' */
-	strrtrim(password, "\n\r");
+	(void) strrtrim(password, "\n\r");
 
 	if (term_local_echo_set() < 0)
 		return -1;

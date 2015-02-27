@@ -3,7 +3,7 @@
  * @brief uSched
  *        Terminal attributes control interface
  *
- * Date: 18-01-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,7 @@
 #include "term.h"
 
 #ifndef COMPILE_WIN32
-static int _term_flag_mode_input_op(unsigned int flag, unsigned int set) {
+static int _term_flag_mode_input_op(int flag, unsigned int set) {
 	struct termios tp;
 
 	memset(&tp, 0, sizeof(struct termios));
@@ -58,7 +58,7 @@ static int _term_flag_mode_input_op(unsigned int flag, unsigned int set) {
 	return 0;
 }
 
-static int _term_flag_mode_output_op(unsigned int flag, unsigned int set) {
+static int _term_flag_mode_output_op(int flag, unsigned int set) {
 	struct termios tp;
 
 	memset(&tp, 0, sizeof(struct termios));
@@ -78,7 +78,7 @@ static int _term_flag_mode_output_op(unsigned int flag, unsigned int set) {
 	return 0;
 }
 
-static int _term_flag_mode_control_op(unsigned int flag, unsigned int set) {
+static int _term_flag_mode_control_op(int flag, unsigned int set) {
 	struct termios tp;
 
 	memset(&tp, 0, sizeof(struct termios));
@@ -98,7 +98,7 @@ static int _term_flag_mode_control_op(unsigned int flag, unsigned int set) {
 	return 0;
 }
 
-static int _term_flag_mode_local_op(unsigned int flag, unsigned int set) {
+static int _term_flag_mode_local_op(int flag, unsigned int set) {
 	struct termios tp;
 
 	memset(&tp, 0, sizeof(struct termios));

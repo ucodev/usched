@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 26-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -212,7 +212,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).
 	 */
-	if (abs(time(NULL) - entry->trigger) >= rund.config.core.delta_noexec) {
+	if (labs((long) (time(NULL) - entry->trigger)) >= (long) rund.config.core.delta_noexec) {
 		log_warn("entry_daemon_pmq_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
 
 		/* Do not deliver this entry to the uSched executer (use) */
@@ -355,40 +355,40 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	if (!entry_check_signature(entry))
 		log_crit("entry_daemon_serialize(): Entry ID 0x%016llX signature is invalid. The entry will be serialized, but it will fail to load on next daemon restart.\n");
 
-	if (write(fd, &entry->id, sizeof(entry->id)) != sizeof(entry->id))
+	if (write(fd, &entry->id, sizeof(entry->id)) != (ssize_t) sizeof(entry->id))
 		goto _serialize_error;
 
-	if (write(fd, &entry->flags, sizeof(entry->flags)) != sizeof(entry->flags))
+	if (write(fd, &entry->flags, sizeof(entry->flags)) != (ssize_t) sizeof(entry->flags))
 		goto _serialize_error;
 
-	if (write(fd, &entry->uid, sizeof(entry->uid)) != sizeof(entry->uid))
+	if (write(fd, &entry->uid, sizeof(entry->uid)) != (ssize_t) sizeof(entry->uid))
 		goto _serialize_error;
 
-	if (write(fd, &entry->gid, sizeof(entry->gid)) != sizeof(entry->gid))
+	if (write(fd, &entry->gid, sizeof(entry->gid)) != (ssize_t) sizeof(entry->gid))
 		goto _serialize_error;
 
-	if (write(fd, &entry->trigger, sizeof(entry->trigger)) != sizeof(entry->trigger))
+	if (write(fd, &entry->trigger, sizeof(entry->trigger)) != (ssize_t) sizeof(entry->trigger))
 		goto _serialize_error;
 
-	if (write(fd, &entry->step, sizeof(entry->step)) != sizeof(entry->step))
+	if (write(fd, &entry->step, sizeof(entry->step)) != (ssize_t) sizeof(entry->step))
 		goto _serialize_error;
 
-	if (write(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
+	if (write(fd, &entry->expire, sizeof(entry->expire)) != (ssize_t) sizeof(entry->expire))
 		goto _serialize_error;
 
-	if (write(fd, entry->username, sizeof(entry->username)) != sizeof(entry->username))
+	if (write(fd, entry->username, sizeof(entry->username)) != (ssize_t) sizeof(entry->username))
 		goto _serialize_error;
 
-	if (write(fd, &entry->subj_size, sizeof(entry->subj_size)) != sizeof(entry->subj_size))
+	if (write(fd, &entry->subj_size, sizeof(entry->subj_size)) != (ssize_t) sizeof(entry->subj_size))
 		goto _serialize_error;
 
-	if (write(fd, entry->subj, entry->subj_size) != entry->subj_size)
+	if (write(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size)
 		goto _serialize_error;
 
-	if (write(fd, &entry->create_time, sizeof(entry->create_time)) != sizeof(entry->create_time))
+	if (write(fd, &entry->create_time, sizeof(entry->create_time)) != (ssize_t) sizeof(entry->create_time))
 		goto _serialize_error;
 
-	if (write(fd, entry->signature, sizeof(entry->signature)) != sizeof(entry->signature))
+	if (write(fd, entry->signature, sizeof(entry->signature)) != (ssize_t) sizeof(entry->signature))
 		goto _serialize_error;
 
 	return 0;
@@ -417,31 +417,31 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 
 	memset(entry, 0, sizeof(struct usched_entry));
 
-	if (read(fd, &entry->id, sizeof(entry->id)) != sizeof(entry->id))
+	if (read(fd, &entry->id, sizeof(entry->id)) != (ssize_t) sizeof(entry->id))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->flags, sizeof(entry->flags)) != sizeof(entry->flags))
+	if (read(fd, &entry->flags, sizeof(entry->flags)) != (ssize_t) sizeof(entry->flags))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->uid, sizeof(entry->uid)) != sizeof(entry->uid))
+	if (read(fd, &entry->uid, sizeof(entry->uid)) != (ssize_t) sizeof(entry->uid))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->gid, sizeof(entry->gid)) != sizeof(entry->gid))
+	if (read(fd, &entry->gid, sizeof(entry->gid)) != (ssize_t) sizeof(entry->gid))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->trigger, sizeof(entry->trigger)) != sizeof(entry->trigger))
+	if (read(fd, &entry->trigger, sizeof(entry->trigger)) != (ssize_t) sizeof(entry->trigger))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->step, sizeof(entry->step)) != sizeof(entry->step))
+	if (read(fd, &entry->step, sizeof(entry->step)) != (ssize_t) sizeof(entry->step))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->expire, sizeof(entry->expire)) != sizeof(entry->expire))
+	if (read(fd, &entry->expire, sizeof(entry->expire)) != (ssize_t) sizeof(entry->expire))
 		goto _unserialize_error;
 
-	if (read(fd, entry->username, sizeof(entry->username)) != sizeof(entry->username))
+	if (read(fd, entry->username, sizeof(entry->username)) != (ssize_t) sizeof(entry->username))
 		goto _unserialize_error;
 
-	if (read(fd, &entry->subj_size, sizeof(entry->subj_size)) != sizeof(entry->subj_size))
+	if (read(fd, &entry->subj_size, sizeof(entry->subj_size)) != (ssize_t) sizeof(entry->subj_size))
 		goto _unserialize_error;
 
 	if (!(entry->subj = mm_alloc(entry->subj_size + 1))) {
@@ -454,13 +454,13 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 
 	memset(entry->subj, 0, entry->subj_size + 1);
 
-	if (read(fd, entry->subj, entry->subj_size) != entry->subj_size)
+	if (read(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size)
 		goto _unserialize_error;
 
-	if (read(fd, &entry->create_time, sizeof(entry->create_time)) != sizeof(entry->create_time))
+	if (read(fd, &entry->create_time, sizeof(entry->create_time)) != (ssize_t) sizeof(entry->create_time))
 		goto _unserialize_error;
 
-	if (read(fd, entry->signature, sizeof(entry->signature)) != sizeof(entry->signature))
+	if (read(fd, entry->signature, sizeof(entry->signature)) != (ssize_t) sizeof(entry->signature))
 		goto _unserialize_error;
 
 	/* Check entry signature */

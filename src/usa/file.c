@@ -3,7 +3,7 @@
  * @brief uSched
  *        File contents management interface
  *
- * Date: 21-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -78,10 +78,10 @@ char *file_read_line_single(const char *file) {
 	memset(line, 0, 8192);
 
 	/* Fetch one line */
-	fgets(line, 8191, fp);
+	(void) fgets(line, 8191, fp);
 
 	/* Get rid of trailling new lines */
-	strrtrim(line, "\n\r");
+	(void) strrtrim(line, "\n\r");
 
 	/* Close the file pointer */
 	fclose(fp);
@@ -115,7 +115,7 @@ struct cll_handler *file_read_line_all_ordered(const char *file) {
 	}
 
 	/* Keep lines sorted */
-	l->set_config(l, CONFIG_SEARCH_AUTO | CONFIG_INSERT_SORTED);
+	(void) l->set_config(l, (ui32_t) (CONFIG_SEARCH_AUTO | CONFIG_INSERT_SORTED));
 
 	/* Start reading the file */
 	while (!feof(fp)) {
@@ -123,7 +123,7 @@ struct cll_handler *file_read_line_all_ordered(const char *file) {
 		memset(buf, 0, sizeof(buf));
 
 		/* Fetch one line */
-		fgets(buf, sizeof(buf) - 1, fp);
+		(void) fgets(buf, (int) sizeof(buf) - 1, fp);
 
 		/* If the line is empty, stop reading the file */
 		if (!(len = strlen(buf)))

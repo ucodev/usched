@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Client
  *
- * Date: 10-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -97,7 +97,7 @@ int logic_client_process_run(void) {
 			}
 
 			/* Set entry step */
-			entry_set_step(entry, cur->arg);
+			entry_set_step(entry, (time_t) cur->arg);
 		}
 
 		/* Check if this is an UNTIL conjunction */

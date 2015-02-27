@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Client
  *
- * Date: 26-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,14 +42,14 @@ void print_client_result_run(uint64_t entry_id) {
 }
 
 void print_client_result_del(const uint64_t *entry_list, size_t count) {
-	int i = 0;
+	size_t i = 0;
 
 	for (i = 0; i < count; i ++)
 		printf("Deleted Entry ID: 0x%016llX\n", (unsigned long long) entry_list[i]);
 }
 
 void print_client_result_show(const struct usched_entry *entry_list, size_t count) {
-	int i = 0;
+	size_t i = 0;
 
 	printf("                 id | username |   uid |   gid |     trigger |     step |      expire | cmd\n");
 
@@ -65,11 +65,11 @@ void print_client_result_show(const struct usched_entry *entry_list, size_t coun
 			"%s\n",
 			(unsigned long long) entry_list[i].id,
 			!entry_list[i].username[0] ? "-" : entry_list[i].username,
-			entry_list[i].uid,
-			entry_list[i].gid,
-			entry_list[i].trigger,
-			entry_list[i].step,
-			entry_list[i].expire,
+			(unsigned int) entry_list[i].uid,
+			(unsigned int) entry_list[i].gid,
+			(unsigned int) entry_list[i].trigger,
+			(unsigned int) entry_list[i].step,
+			(unsigned int) entry_list[i].expire,
 			entry_list[i].subj);
 	}
 }

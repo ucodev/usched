@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 18-01-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -106,7 +106,7 @@ int process_client_recv_run(struct usched_entry *entry) {
 	}
 
 	/* Read the payload data */
-	if (panet_read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
 		errsv = errno;
 		log_crit("process_client_recv_run(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
@@ -144,8 +144,8 @@ int process_client_recv_run(struct usched_entry *entry) {
 }
 
 int process_client_recv_stop(struct usched_entry *entry) {
-	int i = 0, errsv = 0;
-	uint32_t entry_list_nmemb = 0;
+	int errsv = 0;
+	uint32_t i = 0, entry_list_nmemb = 0;
 	uint64_t *entry_list = NULL;
 	size_t data_len = 0, p_offset = 0;
 
@@ -176,7 +176,7 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	}
 
 	/* Receive the payload */
-	if (panet_read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
@@ -278,7 +278,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 	}
 
 	/* Receive the payload */
-	if (panet_read(runc.fd, entry->payload, entry->psize) != entry->psize) {
+	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
 		errsv = errno;
 		log_crit("process_client_recv_show(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
@@ -324,7 +324,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 	memset(entry_list, 0, entry_list_nmemb * sizeof(struct usched_entry));
 
 	/* Receive the entries */
-	for (i = 0; i < entry_list_nmemb; i ++) {
+	for (i = 0; (uint32_t) i < entry_list_nmemb; i ++) {
 		/* Read the next entry */
 		memcpy(&entry_list[i], entry->payload + p_offset, offsetof(struct usched_entry, psize));
 		p_offset += offsetof(struct usched_entry, psize);
@@ -349,6 +349,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 		/* Convert Network to Host byte order */
 		entry_list[i].subj_size = ntohl(entry_list[i].subj_size);
 
+		/* TODO: Use entry_set_subj() */
 		/* Allocate the subject memory */
 		if (!(entry_list[i].subj = mm_alloc(entry_list[i].subj_size + 1))) {
 			errsv = errno;
@@ -381,10 +382,8 @@ int process_client_recv_show(struct usched_entry *entry) {
 	i --;
 
 _recv_show_finish:
-	for (; i >= 0; i --) {
-		if (entry_list[i].subj)
-			mm_free(entry_list[i].subj);
-	}
+	for (; i >= 0; i --)
+		entry_unset_subj(&entry_list[i]);
 
 	mm_free(entry_list);
 

@@ -346,22 +346,14 @@ int process_client_recv_show(struct usched_entry *entry) {
 		memcpy(&entry_list[i].subj_size, entry->payload + p_offset, 4);
 		p_offset += 4;
 
-		/* Convert Network to Host byte order */
-		entry_list[i].subj_size = ntohl(entry_list[i].subj_size);
+		/* Set subject and respective subject size */
+		if (entry_set_subj(&entry_list[i], entry->payload + p_offset, ntohl(entry_list[i].subj_size)) < 0) {
 
-		/* TODO: Use entry_set_subj() */
-		/* Allocate the subject memory */
-		if (!(entry_list[i].subj = mm_alloc(entry_list[i].subj_size + 1))) {
 			errsv = errno;
-			log_crit("process_client_recv_show(): mm_alloc(%d): %s\n", entry_list[i].subj_size + 1, strerror(errno));
+			log_crit("process_client_recv_show(): entry_set_subj(): %s\n", strerror(errno));
 			goto _recv_show_finish;
 		}
 
-		/* Reset subject memory */
-		memset(entry_list[i].subj, 0, entry_list[i].subj_size + 1);
-
-		/* Read the subject contents */
-		memcpy(entry_list[i].subj, entry->payload + p_offset, entry_list[i].subj_size + 1);
 		p_offset += entry_list[i].subj_size + 1;
 	}
 

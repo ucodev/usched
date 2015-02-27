@@ -48,7 +48,7 @@ static void *_delta_time_monitor(void *arg) {
 		rund.delta_last = time(NULL) - rund.time_last - CONFIG_USCHED_DELTA_CHECK_INTERVAL;
 
 		/* Check if the absolute time variation value exceeds the acceptable limits */
-		if (labs((long) rund.delta_last) >= (long) rund.config.core.delta_reload) {
+		if ((unsigned int) labs((long) rund.delta_last) >= rund.config.core.delta_reload) {
 			log_warn("delta_time_monitor(): System time change detected. Reloading daemon...\n");
 
 			/* Time was changed, we need to reload the daemon */

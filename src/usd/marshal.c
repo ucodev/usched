@@ -87,7 +87,7 @@ int marshal_daemon_serialize_pools(void) {
 	/* Grant entry status correctness before serialization */
 	for (rund.apool->rewind(rund.apool, 0); (entry = rund.apool->iterate(rund.apool)); ) {
 		/* Check if we need to compensate the entry time values */
-		if (labs((long) rund.delta_last) >= (long) rund.config.core.delta_reload) {
+		if ((unsigned int) labs((long) rund.delta_last) >= rund.config.core.delta_reload) {
 			/* If this entry was triggered at least once OR if has a relative trigger,
 			 * we must compensate the trigger value with the last known time variation
 			 * value.

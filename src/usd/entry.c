@@ -212,7 +212,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).
 	 */
-	if (labs((long) (time(NULL) - entry->trigger)) >= (long) rund.config.core.delta_noexec) {
+	if ((unsigned int) labs((long) (time(NULL) - entry->trigger)) >= rund.config.core.delta_noexec) {
 		log_warn("entry_daemon_pmq_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
 
 		/* Do not deliver this entry to the uSched executer (use) */

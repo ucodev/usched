@@ -61,7 +61,7 @@ static void *_exec_cmd(void *arg) {
 	/* Check delta time before executing event (Absolute value is a safe check. Negative values
 	 * won't occur here... hopefully).
 	 */
-	if (labs((long) (time(NULL) - trigger)) >= (int) rune.config.core.delta_noexec) {
+	if ((unsigned int) labs((long) (time(NULL) - trigger)) >= rune.config.core.delta_noexec) {
 		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - trigger, rune.config.core.delta_noexec);
 	} else if ((pid = fork()) == (pid_t) -1) {	/* Create a new process, drop privileges to
 							 * UID and GID and execute CMD

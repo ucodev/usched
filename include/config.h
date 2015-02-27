@@ -251,8 +251,8 @@ struct usched_config_core {
 	unsigned int delta_reload;
 	char *serialize_file;
 	char *jail_dir;
-	unsigned int pmq_msgmax;
-	unsigned int pmq_msgsize;
+	unsigned int pmq_msgmax; /* FIXME: This should be long type to match mq_setattr() proto */
+	unsigned int pmq_msgsize; /* FIXME: This should be long type to match mq_setattr() proto */ 
 	char *pmq_name;
 	char *privdrop_user;
 	char *privdrop_group;

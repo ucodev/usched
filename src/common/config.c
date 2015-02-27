@@ -229,7 +229,7 @@ static int _value_init_uint_from_file(const char *file, unsigned int *val) {
 	return 0;
 }
 
-static int _value_init_int_from_file(const char *file, int *val) {
+static int _value_init_long_from_file(const char *file, long *val) {
 	int errsv = 0;
 	FILE *fp = NULL;
 	char *endptr = NULL;
@@ -241,7 +241,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	/* Grant that file exists and is a regular file */
 	if (!fsop_path_isreg(file)) {
 		errsv = errno;
-		log_warn("_value_init_int_from_file(): fsop_path_isreg(\"%s\"): %s\n", file, strerror(errno));
+		log_warn("_value_init_long_from_file(): fsop_path_isreg(\"%s\"): %s\n", file, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -249,7 +249,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	/* Try to open file */
 	if (!(fp = fopen(file, "r"))) {
 		errsv = errno;
-		log_warn("_value_init_int_from_file(): fopen(\"%s\", \"r\"): %s\n", file, strerror(errno));
+		log_warn("_value_init_long_from_file(): fopen(\"%s\", \"r\"): %s\n", file, strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -257,7 +257,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	/* Retrieve value from file */
 	if (!fgets(line, (int) sizeof(line) - 1, fp)) {
 		errsv = errno;
-		log_warn("_value_init_int_from_file(): fgets(): Unexpected EOF (%s).\n", file);
+		log_warn("_value_init_long_from_file(): fgets(): Unexpected EOF (%s).\n", file);
 		fclose(fp);
 		errno = errsv;
 		return -1;
@@ -269,7 +269,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 	/* Check if line is empty */
 	if (!line[0] || (line[0] == '\n')) {
 		errsv = errno;
-		log_warn("_value_init_int_from_file(): First line of file %s is empty.\n", file);
+		log_warn("_value_init_long_from_file(): First line of file %s is empty.\n", file);
 		errno = errsv;
 		return -1;
 	}
@@ -282,7 +282,7 @@ static int _value_init_int_from_file(const char *file, int *val) {
 
 	/* Check if value is acceptable */
 	if ((*endptr) || (endptr == line) || (errno == EINVAL) || (errno == ERANGE)) {
-		log_warn("_value_init_int_from_file(): Invalid value found on file %s.\n", file);
+		log_warn("_value_init_long_from_file(): Invalid value found on file %s.\n", file);
 		errno = EINVAL;
 		return -1;
 	}
@@ -455,11 +455,11 @@ static int _config_init_core_jail_dir(struct usched_config_core *core) {
 }
 
 static int _config_init_core_pmq_msgmax(struct usched_config_core *core) {
-	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, &core->pmq_msgmax);
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, &core->pmq_msgmax);
 }
 
 static int _config_init_core_pmq_msgsize(struct usched_config_core *core) {
-	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, &core->pmq_msgsize);
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, &core->pmq_msgsize);
 }
 
 static int _config_init_core_pmq_name(struct usched_config_core *core) {
@@ -484,7 +484,7 @@ static int _config_init_core_privdrop_group(struct usched_config_core *core) {
 }
 
 static int _config_init_core_thread_priority(struct usched_config_core *core) {
-	return _value_init_int_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, &core->thread_priority);
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, &core->thread_priority);
 }
 
 static int _config_init_core_thread_workers(struct usched_config_core *core) {

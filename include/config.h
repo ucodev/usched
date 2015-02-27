@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 20-02-2015
+ * Date: 27-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -251,14 +251,14 @@ struct usched_config_core {
 	unsigned int delta_reload;
 	char *serialize_file;
 	char *jail_dir;
-	unsigned int pmq_msgmax; /* FIXME: This should be long type to match mq_setattr() proto */
-	unsigned int pmq_msgsize; /* FIXME: This should be long type to match mq_setattr() proto */ 
+	long pmq_msgmax;
+	long pmq_msgsize;
 	char *pmq_name;
 	char *privdrop_user;
 	char *privdrop_group;
 	uid_t privdrop_uid;
 	gid_t privdrop_gid;
-	int thread_priority;
+	long thread_priority;
 	unsigned int thread_workers;
 };
 

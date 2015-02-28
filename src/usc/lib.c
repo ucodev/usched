@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Client Library interface
  *
- * Date: 17-01-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -193,10 +193,10 @@ void usched_result_free_stop(void) {
 DLLIMPORT
 #endif
 void usched_result_free_show(void) {
-	int i = 0;
+	long i = 0;
 	struct usched_entry *entry_list = runc.result;
 
-	for (i = runc.result_nmemb - 1; i >= 0; i --) {
+	for (i = (long) runc.result_nmemb - 1; i >= 0; i --) {
 		if (entry_list[i].subj)
 			mm_free(entry_list[i].subj);
 	}

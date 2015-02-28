@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 18-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,10 +57,10 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 	struct tm tm;
 	long val = strtol(arg, &endptr, 10);
 
-	/* Validate 'val'. If adverbial of time is WEEKDAYS, then we can accept a non integer
+	/* Validate 'val'. If adverbial of time is WEEKDAYS, DATETIME, DATE or TIME, then we can accept a non integer
 	 * value.
 	 */
-	if (((*endptr) || (endptr == arg) || (val < 0) || (errno == EINVAL) || (errno == ERANGE)) && (req->adverb != USCHED_ADVERB_WEEKDAYS)) {
+	if (((*endptr) || (endptr == arg) || (val < 0) || (errno == EINVAL) || (errno == ERANGE)) && (req->adverb != USCHED_ADVERB_WEEKDAYS) && (req->adverb != USCHED_ADVERB_DATETIME) && (req->adverb != USCHED_ADVERB_DATE) && (req->adverb != USCHED_ADVERB_TIME)) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -97,46 +97,46 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 			case USCHED_ADVERB_SECONDS:
 				if (tm.tm_sec >= val) tm.tm_min ++;
 				tm.tm_sec = val;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_MINUTES:
 				if (tm.tm_min >= val) tm.tm_hour ++;
 				tm.tm_sec = 0;
 				tm.tm_min = val;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_HOURS:
 				if (tm.tm_hour >= val) tm.tm_mday ++;
 				tm.tm_sec = tm.tm_min = 0;
 				tm.tm_hour = val;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_DAYS:
 				if (tm.tm_mday >= val) tm.tm_mon ++;
 				tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 				tm.tm_mday = val;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_WEEKS:
 				if ((tm.tm_yday / 7) >= val) tm.tm_year ++;
 				tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 				tm.tm_mon = 0;
 				tm.tm_mday = val * 7;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_MONTHS:
 				if (tm.tm_mon >= val) tm.tm_year ++;
 				tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 				tm.tm_mday = 1;
 				tm.tm_mon = val;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_YEARS:
 				if (tm.tm_year >= val) return -1;
 				tm.tm_sec = tm.tm_min = tm.tm_hour = tm.tm_mon = 0;
 				tm.tm_mday = 1;
 				tm.tm_year = val;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_DATE:
 				if (!strptime(arg, "%Y-%m-%d", &tm)) return -1;
 				tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-				return mktime(&tm) - runc.t;
+				return (long) (mktime(&tm) - runc.t);
 			case USCHED_ADVERB_DATETIME:
-				return (strptime(arg, "%Y-%m-%d %H:%M:%S", &tm) ? mktime(&tm) : -1) - runc.t;
+				return (long) ((strptime(arg, "%Y-%m-%d %H:%M:%S", &tm) ? mktime(&tm) : -1) - runc.t);
 			case USCHED_ADVERB_TIMESTAMP:
 				return val;
 			case USCHED_ADVERB_WEEKDAYS:	/* Special case */
@@ -166,7 +166,7 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 			if ((t_off = mktime(&tm)) < runc.t)
 				t_off += 86400;
 
-			return t_off - runc.t;
+			return (long) (t_off - runc.t);
 		} else if (req->adverb == USCHED_ADVERB_WEEKDAYS) {
 			if (!strcasecmp(arg, USCHED_WEEKDAY_SUNDAY_STR) || (val == USCHED_WEEKDAY_SUNDAY)) {
 				val = USCHED_WEEKDAY_SUNDAY;
@@ -190,7 +190,7 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 
 			tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 
-			return mktime(&tm) - runc.t;
+			return (long) (mktime(&tm) - runc.t);
 		}
 	}
 

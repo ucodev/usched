@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 27-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -523,7 +523,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	}
 
 	/* If this is a new entry request, grant that subject fits in the mqueue message size */
-	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW) && ((entry->psize + 21) > rund.config.core.pmq_msgsize)) {
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_NEW) && ((entry->psize + 21) > (size_t) rund.config.core.pmq_msgsize)) {
 		log_warn("process_daemon_recv_create(): (entry->psize + 21) > rund,config.core.pmq.msgsize. This means that the subject is too long to be processed on this system.\n");
 		entry_destroy(entry);
 		errno = EINVAL;

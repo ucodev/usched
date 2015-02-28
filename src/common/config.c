@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 27-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -357,24 +357,52 @@ static int _config_init_auth_blacklist_gid(struct usched_config_auth *auth) {
 	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_GID, &auth->blacklist_gid);
 }
 
+static int _config_validate_auth_blacklist_gid(const struct usched_config_auth *auth) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_auth_whitelist_gid(struct usched_config_auth *auth) {
 	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_GID, &auth->whitelist_gid);
+}
+
+static int _config_validate_auth_whitelist_gid(const struct usched_config_auth *auth) {
+	/* TODO */
+	return 1;
 }
 
 static int _config_init_auth_blacklist_uid(struct usched_config_auth *auth) {
 	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_BL_UID, &auth->blacklist_uid);
 }
 
+static int _config_validate_auth_blacklist_uid(const struct usched_config_auth *auth) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_auth_whitelist_uid(struct usched_config_auth *auth) {
 	return _list_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_WL_UID, &auth->whitelist_uid);
+}
+
+static int _config_validate_auth_whitelist_uid(const struct usched_config_auth *auth) {
+	/* TODO */
+	return 1;
 }
 
 static int _config_init_auth_local_use(struct usched_config_auth *auth) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_LOCAL_USE, &auth->local_use);
 }
 
+static int _config_validate_auth_local_use(const struct usched_config_auth *auth) {
+	return (auth->local_use == 0) || (auth->local_use == 1);
+}
+
 static int _config_init_auth_remote_users(struct usched_config_auth *auth) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_AUTH "/" CONFIG_USCHED_FILE_AUTH_REMOTE_USERS, &auth->remote_users);
+}
+
+static int _config_validate_auth_remote_users(const struct usched_config_auth *auth) {
+	return (auth->remote_users == 0) || (auth->remote_users == 1);
 }
 
 int config_init_auth(struct usched_config_auth *auth) {
@@ -388,11 +416,25 @@ int config_init_auth(struct usched_config_auth *auth) {
 		return -1;
 	}
 
+	/* Validate GID blacklist */
+	if (!_config_validate_auth_blacklist_gid(auth)) {
+		log_warn("_config_init_auth(): _config_validate_auth_blacklist_gid(): Invalid auth.blacklist.gid value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read GID whitelist */
 	if (_config_init_auth_whitelist_gid(auth) < 0) {
 		errsv = errno;
 		log_warn("_config_init_auth(): _config_init_auth_whitelist_gid(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate GID whitelist */
+	if (!_config_validate_auth_whitelist_gid(auth)) {
+		log_warn("_config_init_auth(): _config_validate_auth_whitelist_gid(): Invalid auth.whitelist.gid value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -404,6 +446,13 @@ int config_init_auth(struct usched_config_auth *auth) {
 		return -1;
 	}
 
+	/* Validate UID blacklist */
+	if (!_config_validate_auth_blacklist_uid(auth)) {
+		log_warn("_config_init_auth(): _config_validate_auth_blacklist_uid(): Invalid auth.blacklist.uid value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read UID whitelist */
 	if (_config_init_auth_whitelist_uid(auth) < 0) {
 		errsv = errno;
@@ -412,11 +461,25 @@ int config_init_auth(struct usched_config_auth *auth) {
 		return -1;
 	}
 
-	/* Read use local */
+	/* Validate UID whitelist */
+	if (!_config_validate_auth_whitelist_uid(auth)) {
+		log_warn("_config_init_auth(): _config_validate_auth_whitelist_uid(): Invalid auth.whitelist.uid value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read local use */
 	if (_config_init_auth_local_use(auth) < 0) {
 		errsv = errno;
 		log_warn("_config_init_auth(): _config_init_auth_local_use(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate local use */
+	if (!_config_validate_auth_local_use(auth)) {
+		log_warn("_config_init_auth(): _config_validate_auth_local_use(): Invalid auth.local.use value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -428,6 +491,13 @@ int config_init_auth(struct usched_config_auth *auth) {
 		return -1;
 	}
 
+	/* Validate remote users */
+	if (!_config_validate_auth_remote_users(auth)) {
+		log_warn("_config_init_auth(): _config_validate_auth_remote_users(): Invalid auth.remote.users value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Success */
 	return 0;
 }
@@ -436,8 +506,18 @@ static int _config_init_core_delta_noexec(struct usched_config_core *core) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC, &core->delta_noexec);
 }
 
+static int _config_validate_core_delta_noexec(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_core_delta_reload(struct usched_config_core *core) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_DELTA_RELOAD, &core->delta_reload);
+}
+
+static int _config_validate_core_delta_reload(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
 }
 
 static int _config_init_core_serialize_file(struct usched_config_core *core) {
@@ -447,6 +527,11 @@ static int _config_init_core_serialize_file(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_validate_core_serialize_file(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_core_jail_dir(struct usched_config_core *core) {
 	if (!(core->jail_dir = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_JAIL_DIR)))
 		return -1;
@@ -454,12 +539,24 @@ static int _config_init_core_jail_dir(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_validate_core_jail_dir(const struct usched_config_core *core) {
+	return fsop_path_isdir(core->jail_dir);
+}
+
 static int _config_init_core_pmq_msgmax(struct usched_config_core *core) {
 	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, &core->pmq_msgmax);
 }
 
+static int _config_validate_core_pmq_msgmax(const struct usched_config_core *core) {
+	return core->pmq_msgmax > 0;
+}
+
 static int _config_init_core_pmq_msgsize(struct usched_config_core *core) {
 	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, &core->pmq_msgsize);
+}
+
+static int _config_validate_core_pmq_msgsize(const struct usched_config_core *core) {
+	return core->pmq_msgsize > 0;
 }
 
 static int _config_init_core_pmq_name(struct usched_config_core *core) {
@@ -469,11 +566,21 @@ static int _config_init_core_pmq_name(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_validate_core_pmq_name(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_core_privdrop_user(struct usched_config_core *core) {
 	if (!(core->privdrop_user = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER)))
 		return -1;
 
 	return 0;
+}
+
+static int _config_validate_core_privdrop_user(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
 }
 
 static int _config_init_core_privdrop_group(struct usched_config_core *core) {
@@ -483,12 +590,26 @@ static int _config_init_core_privdrop_group(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_validate_core_privdrop_group(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_core_thread_priority(struct usched_config_core *core) {
 	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY, &core->thread_priority);
 }
 
+static int _config_validate_core_thread_priority(const struct usched_config_core *core) {
+	return (core->thread_priority >= 0) && (core->thread_priority <= 32);
+}
+
 static int _config_init_core_thread_workers(struct usched_config_core *core) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_THREAD_WORKERS, &core->thread_workers);
+}
+
+static int _config_validate_core_thread_workers(const struct usched_config_core *core) {
+	/* TODO */
+	return 1;
 }
 
 int config_init_core(struct usched_config_core *core) {
@@ -497,11 +618,18 @@ int config_init_core(struct usched_config_core *core) {
 	struct group group_buf, *group = NULL;
 	char buf[8192];
 
-	/* Read delta no exec */
+	/* Read delta noexec */
 	if (_config_init_core_delta_noexec(core) < 0) {
 		errsv = errno;
 		log_warn("_config_init_core(): _config_init_core_delta_noexec(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate delta noexec */
+	if (!_config_validate_core_delta_noexec(core)) {
+		log_warn("_config_init_core(): _config_validate_core_delta_noexec(): Invalid core.delta.noexec value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -513,11 +641,25 @@ int config_init_core(struct usched_config_core *core) {
 		return -1;
 	}
 
-	/* Read file serialize */
+	/* Validate delta reload */
+	if (!_config_validate_core_delta_reload(core)) {
+		log_warn("_config_init_core(): _config_validate_core_delta_reload(): Invalid core.delta.reload value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read serialize file */
 	if (_config_init_core_serialize_file(core) < 0) {
 		errsv = errno;
 		log_warn("_config_init_core(): _config_init_core_serialize_file(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate serialize file */
+	if (!_config_validate_core_serialize_file(core)) {
+		log_warn("_config_init_core(): _config_validate_core_serialize_file(): Invalid core.serialize.file value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -529,11 +671,25 @@ int config_init_core(struct usched_config_core *core) {
 		return -1;
 	}
 
+	/* Validate jail dir */
+	if (!_config_validate_core_jail_dir(core)) {
+		log_warn("_config_init_core(): _config_validate_core_jail_dir(): Invalid core.jail.dir value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read pmq msg max */
 	if (_config_init_core_pmq_msgmax(core) < 0) {
 		errsv = errno;
 		log_warn("_config_init_core(): _config_init_core_pmq_msgmax(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate pmq msgmax */
+	if (!_config_validate_core_pmq_msgmax(core)) {
+		log_warn("_config_init_core(): _config_validate_core_pmq_msgmax(): Invalid core.pmq.msgmax value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -545,11 +701,25 @@ int config_init_core(struct usched_config_core *core) {
 		return -1;
 	}
 
+	/* Validate pmq msgsize */
+	if (!_config_validate_core_pmq_msgsize(core)) {
+		log_warn("_config_init_core(): _config_validate_core_pmq_msgsize(): Invalid core.pmq.msgsize value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read pmq name */
 	if (_config_init_core_pmq_name(core) < 0) {
 		errsv = errno;
 		log_warn("_config_init_core(): _config_init_core_pmq_name(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate pmq name */
+	if (!_config_validate_core_pmq_name(core)) {
+		log_warn("_config_init_core(): _config_validate_core_pmq_name(): Invalid core.pmq.name value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -574,6 +744,13 @@ int config_init_core(struct usched_config_core *core) {
 
 	core->privdrop_uid = passwd->pw_uid;
 
+	/* Validate privilege drop user */
+	if (!_config_validate_core_privdrop_user(core)) {
+		log_warn("_config_init_core(): _config_validate_core_privdrop_user(): Invalid core.privdrop.user value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read privilege drop group */
 	if (_config_init_core_privdrop_group(core) < 0) {
 		errsv = errno;
@@ -595,6 +772,13 @@ int config_init_core(struct usched_config_core *core) {
 
 	core->privdrop_gid = group->gr_gid;
 
+	/* Validate privilege drop group */
+	if (!_config_validate_core_privdrop_group(core)) {
+		log_warn("_config_init_core(): _config_validate_core_privdrop_group(): Invalid core.privdrop.group value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read thread priority */
 	if (_config_init_core_thread_priority(core) < 0) {
 		errsv = errno;
@@ -603,11 +787,25 @@ int config_init_core(struct usched_config_core *core) {
 		return -1;
 	}
 
+	/* Validate thread priority */
+	if (!_config_validate_core_thread_priority(core)) {
+		log_warn("_config_init_core(): _config_validate_core_thread_priority(): Invalid core.thread.priority value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read thread workers */
 	if (_config_init_core_thread_workers(core) < 0) {
 		errsv = errno;
 		log_warn("_config_init_core(): _config_init_core_thread_workers(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate thread workers */
+	if (!_config_validate_core_thread_workers(core)) {
+		log_warn("_config_init_core(): _config_validate_core_thread_workers(): Invalid core.thread.workers value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -622,6 +820,11 @@ static int _config_init_network_bind_addr(struct usched_config_network *network)
 	return 0;
 }
 
+static int _config_validate_network_bind_addr(const struct usched_config_network *network) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_network_bind_port(struct usched_config_network *network) {
 	if (!(network->bind_port = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_PORT)))
 		return -1;
@@ -629,12 +832,28 @@ static int _config_init_network_bind_port(struct usched_config_network *network)
 	return 0;
 }
 
+static int _config_validate_network_bind_port(const struct usched_config_network *network) {
+	long port = atol(network->bind_port);
+
+	return (port > 1) && (port <= 0xffff);
+}
+
 static int _config_init_network_conn_limit(struct usched_config_network *network) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT, &network->conn_limit);
 }
 
+static int _config_validate_network_conn_limit(const struct usched_config_network *network) {
+	/* TODO */
+	return 1;
+}
+
 static int _config_init_network_conn_timeout(struct usched_config_network *network) {
 	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT, &network->conn_timeout);
+}
+
+static int _config_validate_network_conn_timeout(const struct usched_config_network *network) {
+	/* TODO */
+	return 1;
 }
 
 static int _config_init_network_sock_name(struct usched_config_network *network) {
@@ -642,6 +861,11 @@ static int _config_init_network_sock_name(struct usched_config_network *network)
 		return -1;
 
 	return 0;
+}
+
+static int _config_validate_network_sock_name(const struct usched_config_network *network) {
+	/* TODO */
+	return 1;
 }
 
 int config_init_network(struct usched_config_network *network) {
@@ -655,11 +879,25 @@ int config_init_network(struct usched_config_network *network) {
 		return -1;
 	}
 
+	/* Validate bind addr */
+	if (!_config_validate_network_bind_addr(network)) {
+		log_warn("_config_init_network(): _config_validate_network_bind_addr(): Invalid network.bind.addr value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read bind port */
 	if (_config_init_network_bind_port(network) < 0) {
 		errsv = errno;
 		log_warn("_config_init_network(): _config_init_network_bind_port(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate bind port */
+	if (!_config_validate_network_bind_port(network)) {
+		log_warn("_config_init_network(): _config_validate_network_bind_port(): Invalid network.bind.port value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -671,6 +909,13 @@ int config_init_network(struct usched_config_network *network) {
 		return -1;
 	}
 
+	/* Validate conn limit */
+	if (!_config_validate_network_conn_limit(network)) {
+		log_warn("_config_init_network(): _config_validate_network_conn_limit(): Invalid network.conn.limit value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
 	/* Read conn timeout */
 	if (_config_init_network_conn_timeout(network) < 0) {
 		errsv = errno;
@@ -679,11 +924,25 @@ int config_init_network(struct usched_config_network *network) {
 		return -1;
 	}
 
-	/* Read sock named */
+	/* Validate conn timeout */
+	if (!_config_validate_network_conn_timeout(network)) {
+		log_warn("_config_init_network(): _config_validate_network_conn_timeout(): Invalid network.conn.timeout value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read sock name */
 	if (_config_init_network_sock_name(network) < 0) {
 		errsv = errno;
 		log_warn("_config_init_network(): _config_init_network_sock_name(): %s\n", strerror(errno));
 		errno = errsv;
+		return -1;
+	}
+
+	/* Validate sock name */
+	if (!_config_validate_network_sock_name(network)) {
+		log_warn("_config_init_network(): _config_validate_network_sock_name(): Invalid network.sock.name value.\n");
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -908,6 +1167,11 @@ static int _config_init_users_action(int order, const char *fpath, const char *r
 	return 0;
 }
 
+static int _config_validate_users(const struct usched_config_users *users) {
+	/* TODO */
+	return 1;
+}
+
 int config_init_users(struct usched_config_users *users) {
 	int errsv = 0;
 
@@ -923,6 +1187,16 @@ int config_init_users(struct usched_config_users *users) {
 	if (fsop_walkdir(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_USERS, NULL, &_config_init_users_action, users) < 0) {
 		errsv = errno;
 		log_warn("config_init_users(): fsop_walkdir(): %s\n", strerror(errno));
+		pall_cll_destroy(users->list);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate users */
+	if (!_config_validate_users(users)) {
+		errsv = errno;
+		log_warn("config_init_users(): _config_validate_users(): %s\n", strerror(errno));
+		pall_cll_destroy(users->list);
 		errno = errsv;
 		return -1;
 	}

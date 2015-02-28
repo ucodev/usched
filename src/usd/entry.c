@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 27-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -220,7 +220,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	}
 
 	/* Allocate message memory */
-	if (!(buf = mm_alloc(rund.config.core.pmq_msgsize))) {
+	if (!(buf = mm_alloc((size_t) rund.config.core.pmq_msgsize))) {
 		log_warn("entry_daemon_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
 
 		/* Force daemon to be restarted and reload a clean state */
@@ -229,7 +229,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		goto _finish;
 	}
 
-	memset(buf, 0, rund.config.core.pmq_msgsize);
+	memset(buf, 0, (size_t) rund.config.core.pmq_msgsize);
 
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
@@ -255,7 +255,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	 * Although this check was already performed when receiving the entry from the user,
 	 * this one is required since now the variables are expanded.
 	 */
-	if ((strlen(cmd) + 21) > rund.config.core.pmq_msgsize) {
+	if ((strlen(cmd) + 21) > (size_t) rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
 
 		/* Remove this entry as it is invalid. TODO or FIXME: We rather mark it as invalid
@@ -278,7 +278,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
 
 	/* Deliver message to uSched executer (use) */
-	if (mq_send(rund.pmqd, buf, rund.config.core.pmq_msgsize, 0) < 0) {
+	if (mq_send(rund.pmqd, buf, (size_t) rund.config.core.pmq_msgsize, 0) < 0) {
 		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
 
 		/* NOTE:

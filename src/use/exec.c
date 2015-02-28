@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 27-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -227,7 +227,7 @@ static void _exec_process(void) {
 		/* Allocate temporary buffer size, plus one byte that won't be written to safe guard
 		 * the subject NULL termination
 		 */
-		if (!(tbuf = mm_alloc(rune.config.core.pmq_msgsize + 1))) {
+		if (!(tbuf = mm_alloc((size_t) rune.config.core.pmq_msgsize + 1))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));
 			continue;
 		}
@@ -235,10 +235,10 @@ static void _exec_process(void) {
 		/* Reset all the memory to 0, granting the extra byte to be 0, so subject will
 		 * will always be NULL terminated regardless of the data received from the queue
 		 */
-		memset(tbuf, 0, rune.config.core.pmq_msgsize + 1);
+		memset(tbuf, 0, (size_t) rune.config.core.pmq_msgsize + 1);
 
 		/* Read message from queue */
-		if (mq_receive(rune.pmqd, tbuf, rune.config.core.pmq_msgsize, 0) < 0) {
+		if (mq_receive(rune.pmqd, tbuf, (size_t) rune.config.core.pmq_msgsize, 0) < 0) {
 			log_warn("_exec_process(): mq_receive(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;

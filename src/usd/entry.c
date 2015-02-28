@@ -475,7 +475,7 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 _unserialize_error:
 	errsv = errno;
 
-	log_warn("entry_daemon_unserialize(): read(): %s\n", strerror(errno));
+	log_warn("entry_daemon_unserialize(): %s\n", strerror(errno));
 
 	entry_destroy(entry);
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Common
  *
- * Date: 27-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -92,12 +92,11 @@ void entry_set_flags(struct usched_entry *entry, uint32_t flags) {
 }
 
 void entry_unset_flags_local(struct usched_entry *entry) {
+	unsigned int n = 0;
+
 	/* Clear all local flags */
-	entry_unset_flag(entry, USCHED_ENTRY_FLAG_INIT);
-	entry_unset_flag(entry, USCHED_ENTRY_FLAG_PROGRESS);
-	entry_unset_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED);
-	entry_unset_flag(entry, USCHED_ENTRY_FLAG_FINISH);
-	entry_unset_flag(entry, USCHED_ENTRY_FLAG_COMPLETE);
+	for (n = USCHED_ENTRY_FLAG_INIT; n < (unsigned int) (sizeof(entry->flags) - 1); n ++)
+		entry_unset_flag(entry, n);
 }
 
 unsigned int entry_has_flag(struct usched_entry *entry, usched_entry_flag_t flag) {

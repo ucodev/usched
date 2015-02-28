@@ -447,9 +447,8 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 	if (!(entry->subj = mm_alloc(entry->subj_size + 1))) {
 		errsv = errno;
 		log_warn("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
-		entry_destroy(entry);
 		errno = errsv;
-		return NULL;
+		goto _unserialize_error;
 	}
 
 	memset(entry->subj, 0, entry->subj_size + 1);
@@ -466,9 +465,8 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 	/* Check entry signature */
 	if (!entry_check_signature(entry)) {
 		log_crit("entry_daemon_unserialize(): Entry ID 0x%016llX signature is invalid.\n", entry->id);
-		entry_destroy(entry);
 		errno = EINVAL;
-		return NULL;
+		goto _unserialize_error;
 	}
 
 	/* All good */

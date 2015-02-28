@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 27-02-2015
+ * Date: 28-02-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,6 +51,7 @@
 #include "mm.h"
 #include "str.h"
 
+extern char **environ;
 extern char *optarg;
 extern int optind, optopt;
 
@@ -207,8 +208,7 @@ static int _daemonize(void) {
 
 static int _bexec(
 		const char *file,
-		char *const *args,
-		char *const *envp)
+		char *const *args)
 {
 	int status = 0;
 	pid_t ret = 0;
@@ -240,7 +240,7 @@ static int _bexec(
 		if (setsid() == (pid_t) -1)
 			_failure("setsid");
 
-		if (execve(file, args, envp) < 0)
+		if (execve(file, args, environ) < 0)
 			_failure("execve");
 
 		return -1;
@@ -392,7 +392,7 @@ void _main_loop_restart_prepare(void) {
 	log_info("_main_loop_restart_prepare(): Restarting '%s'...\n", config.binary);
 }
 
-int main(int argc, char *argv[], char *envp[]) {
+int main(int argc, char *argv[]) {
 	int status = 0;
 
 	_log_init();
@@ -418,7 +418,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			_file_pid_create(config.pidf_name);
 
 		/* Make sure that we receive a valid status value... otherwise jump out of here. */
-		if ((status = _bexec(config.binary, config.args, envp)) == -1) {
+		if ((status = _bexec(config.binary, config.args)) == -1) {
 			log_warn("main(): _bexec(): Unable to execute binary '%s': %s.\n", config.binary, strerror(errno));
 			break;
 		}

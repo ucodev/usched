@@ -5,13 +5,17 @@ v0.2:
  - Communication Protocol revision
  - Improved serialization routines
  - New operations: Hold, Change
- - Exceptions
  - uSched Statistics (uss)
 
 v0.3:
+ - Exceptions
  - Entry Groups
+
+v0.4
  - Recursivity (full support)
- - uSched Verifier (usv)
  - crontab importer
  - at importer
 
+v0.5
+ - uSched Verifier (usv)
+ 

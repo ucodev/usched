@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface - Daemon
  *
- * Date: 27-02-2015
+ * Date: 01-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -68,7 +68,13 @@ static void *_delta_time_monitor(void *arg) {
 		usleep(CONFIG_USCHED_DELTA_CHECK_INTERVAL * 1000000);
 	}
 
-	log_info("delta_time_monitor(): Thread exiting...\n");
+	/* TODO:  A __pthread_unwind() issue was once triggered inside pthread_exit(). Since the
+	 *        issue only ocurred once (despite the efforts to reproduce it again), it is
+	 *        possible that it may happen in the future. If it happens, it will cause an unclean
+	 *        termination of the uSched daemon. This issue doesn't seem to be related to
+	 *        the uSched code, although another good look into the delta monitor code seems
+	 *        to be a good idea, just to make sure... so here stands the TODO.
+	 */
 
 	/* All good */
 	pthread_exit(NULL);

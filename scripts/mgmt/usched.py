@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 22-02-2015
+# Date: 01-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -78,7 +78,7 @@ def perms_check():
 		sys.exit(EXIT_FAILURE)
 
 def op_check():
-	if sys.argv[1] != USCHED_OP_FLUSH and sys.argv[1] != USCHED_OP_RELOAD and sys.argv[1] != USCHED_OP_START and sys.argv[1] != USCHED_OP_STOP:
+	if sys.argv[1] != USCHED_OP_FLUSH and sys.argv[1] != USCHED_OP_RELOAD and sys.argv[1] != USCHED_OP_START and sys.argv[1] != USCHED_OP_STOP and sys.argv[1] != USCHED_OP_FORCE_STOP:
 		print_info("Invalid operation: " + sys.argv[1] + "\n")
 		sys.exit(EXIT_FAILURE)
 
@@ -177,14 +177,14 @@ def usched_stop():
 	return True
 
 def usched_force_stop():
-	print_info("Force operation status: ")
+	print_info("Force stop operation status: ")
 
 	try:
 		# Terminate usd
-		signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGKILL)
+		signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGKILL, True)
 
 		# Terminate use
-		signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGKILL)
+		signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGKILL, True)
 
 		# Remote the daemon pid file
 		os.unlink(CONFIG_USCHED_DAEMON_PID_FILE)
@@ -196,7 +196,7 @@ def usched_force_stop():
 
 	return True
 
-def signal_pid_file(pid_file, sig):
+def signal_pid_file(pid_file, sig, quiet = False):
 	try:
 		with open(pid_file, "r") as fp:
 			usd_pid = fp.readline().strip()
@@ -204,10 +204,12 @@ def signal_pid_file(pid_file, sig):
 			try:
 				os.kill(int(usd_pid), sig)
 			except OSError, ex:
-				print_info("Failed: %s\n" % ex[1])
+				if not quiet:
+					print_info("Failed: %s\n" % ex[1])
 				return False
 	except IOError, ex:
-		print_info("Failed: %s: '%s'\n" % (ex[1], pid_file))
+		if not quiet:
+			print_info("Failed: %s: '%s'\n" % (ex[1], pid_file))
 		return False
 
 	return True

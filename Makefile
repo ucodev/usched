@@ -67,6 +67,9 @@ install_doc:
 	cp README /usr/share/doc/usched/
 	cp doc/* /usr/share/doc/usched/
 
+test:
+	cd tests && make && cd ..
+
 clean:
 	cd src && make clean && cd ..
 	cd scripts && make clean && cd ..

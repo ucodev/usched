@@ -19,3 +19,6 @@ v0.4
 v0.5
  - uSched Verifier (usv)
  
+v0.6
+ - uSched High Availability (ush)
+

@@ -1,0 +1,4 @@
+debug_printf 1
+log_info 0
+log_warn 0
+log_crit 0

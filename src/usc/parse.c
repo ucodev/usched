@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 28-02-2015
+ * Date: 01-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -138,7 +138,7 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 			case USCHED_ADVERB_DATETIME:
 				return (long) ((strptime(arg, "%Y-%m-%d %H:%M:%S", &tm) ? mktime(&tm) : -1) - runc.t);
 			case USCHED_ADVERB_TIMESTAMP:
-				return val;
+				return val - runc.t;
 			case USCHED_ADVERB_WEEKDAYS:	/* Special case */
 			case USCHED_ADVERB_TIME:	/* Special case */
 			default:			break;

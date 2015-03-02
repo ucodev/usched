@@ -56,7 +56,7 @@ static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 
 	if (auth_daemon_local(fd, &entry->uid, &entry->gid) < 0) {
 		errsv = errno;
-		log_warn("entry_daemon_authorize_local(): auth_local(): %s\n", strerror(errno));
+		log_warn("entry_daemon_authorize_local(): auth_daemon_local(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -471,7 +471,7 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 	/* Allocate memory for entry subject */
 	if (!(entry->subj = mm_alloc(entry->subj_size + 1))) {
 		errsv = errno;
-		log_warn("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		log_crit("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
 		entry_destroy(entry);
 		errno = errsv;
 		return NULL;
@@ -482,7 +482,7 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 	/* Read the entry subject */
 	if (read(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size) {
 		errsv = errno;
-		log_warn("entry_daemon_unserialize(): read(): %s\n", strerror(errno));
+		log_crit("entry_daemon_unserialize(): read(): %s\n", strerror(errno));
 		entry_destroy(entry);
 		errno = errsv;
 		return NULL;

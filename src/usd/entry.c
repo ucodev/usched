@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 28-02-2015
+ * Date: 02-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -350,137 +350,153 @@ _finish:
 int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	int errsv = 0;
 	struct usched_entry *entry = data;
+	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
+	size_t offset = 0;
 
 	/* Validate the signature agains the current entry data */
 	if (!entry_check_signature(entry))
 		log_crit("entry_daemon_serialize(): Entry ID 0x%016llX signature is invalid. The entry will be serialized, but it will fail to load on next daemon restart.\n");
 
-	if (write(fd, &entry->id, sizeof(entry->id)) != (ssize_t) sizeof(entry->id))
-		goto _serialize_error;
+	/* Craft serialization buffer */
+	memcpy(buf + offset, &entry->id, sizeof(entry->id));
+	offset += sizeof(entry->id);
 
-	if (write(fd, &entry->flags, sizeof(entry->flags)) != (ssize_t) sizeof(entry->flags))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->flags, sizeof(entry->flags));
+	offset += sizeof(entry->flags);
 
-	if (write(fd, &entry->uid, sizeof(entry->uid)) != (ssize_t) sizeof(entry->uid))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->uid, sizeof(entry->uid));
+	offset += sizeof(entry->uid);
 
-	if (write(fd, &entry->gid, sizeof(entry->gid)) != (ssize_t) sizeof(entry->gid))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->gid, sizeof(entry->gid));
+	offset += sizeof(entry->gid);
 
-	if (write(fd, &entry->trigger, sizeof(entry->trigger)) != (ssize_t) sizeof(entry->trigger))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->trigger, sizeof(entry->trigger));
+	offset += sizeof(entry->trigger);
 
-	if (write(fd, &entry->step, sizeof(entry->step)) != (ssize_t) sizeof(entry->step))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->step, sizeof(entry->step));
+	offset += sizeof(entry->step);
 
-	if (write(fd, &entry->expire, sizeof(entry->expire)) != (ssize_t) sizeof(entry->expire))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->expire, sizeof(entry->expire));
+	offset += sizeof(entry->expire);
 
-	if (write(fd, entry->username, sizeof(entry->username)) != (ssize_t) sizeof(entry->username))
-		goto _serialize_error;
+	memcpy(buf + offset, entry->username, sizeof(entry->username));
+	offset += sizeof(entry->username);
 
-	if (write(fd, &entry->subj_size, sizeof(entry->subj_size)) != (ssize_t) sizeof(entry->subj_size))
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->subj_size, sizeof(entry->subj_size));
+	offset += sizeof(entry->subj_size);
 
-	if (write(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size)
-		goto _serialize_error;
+	memcpy(buf + offset, &entry->create_time, sizeof(entry->create_time));
+	offset += sizeof(entry->create_time);
 
-	if (write(fd, &entry->create_time, sizeof(entry->create_time)) != (ssize_t) sizeof(entry->create_time))
-		goto _serialize_error;
+	memcpy(buf + offset, entry->signature, sizeof(entry->signature));
 
-	if (write(fd, entry->signature, sizeof(entry->signature)) != (ssize_t) sizeof(entry->signature))
-		goto _serialize_error;
+	/* Serialize data */
+	if (write(fd, buf, sizeof(buf)) != (ssize_t) sizeof(buf)) {
+		errsv = errno;
+		log_crit("entry_daemon_serialize(): write(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 
+	/* Serialize subject */
+	if (write(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size) {
+		errsv = errno;
+		log_crit("entry_daemon_serialize(): write(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
 	return 0;
-
-_serialize_error:
-	errsv = errno;
-
-	log_warn("entry_daemon_serialize(): write(): %s\n", strerror(errno));
-
-	errno = errsv;
-
-	return -1;
-
 }
 
 void *entry_daemon_unserialize(pall_fd_t fd) {
 	int errsv = 0;
 	struct usched_entry *entry = NULL;
+	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
+	size_t offset = 0;
 
+	/* Allocate enough memory for the entry */
 	if (!(entry = mm_alloc(sizeof(struct usched_entry)))) {
 		errsv = errno;
-		log_warn("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		log_crit("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return NULL;
 	}
 
 	memset(entry, 0, sizeof(struct usched_entry));
 
-	if (read(fd, &entry->id, sizeof(entry->id)) != (ssize_t) sizeof(entry->id))
-		goto _unserialize_error;
+	/* Read serialized buffer */
+	if (read(fd, buf, sizeof(buf)) != (ssize_t) sizeof(buf)) {
+		errsv = errno;
+		log_crit("entry_daemon_unserialize(): read(): %s\n", strerror(errno));
+		entry_destroy(entry);
+		errno = errsv;
+		return NULL;
+	}
 
-	if (read(fd, &entry->flags, sizeof(entry->flags)) != (ssize_t) sizeof(entry->flags))
-		goto _unserialize_error;
+	/* Populate entry fields */
+	memcpy(&entry->id, buf + offset, sizeof(entry->id));
+	offset += sizeof(entry->id);
 
-	if (read(fd, &entry->uid, sizeof(entry->uid)) != (ssize_t) sizeof(entry->uid))
-		goto _unserialize_error;
+	memcpy(&entry->flags, buf + offset, sizeof(entry->flags));
+	offset += sizeof(entry->flags);
 
-	if (read(fd, &entry->gid, sizeof(entry->gid)) != (ssize_t) sizeof(entry->gid))
-		goto _unserialize_error;
+	memcpy(&entry->uid, buf + offset, sizeof(entry->uid));
+	offset += sizeof(entry->uid);
 
-	if (read(fd, &entry->trigger, sizeof(entry->trigger)) != (ssize_t) sizeof(entry->trigger))
-		goto _unserialize_error;
+	memcpy(&entry->gid, buf + offset, sizeof(entry->gid));
+	offset += sizeof(entry->gid);
 
-	if (read(fd, &entry->step, sizeof(entry->step)) != (ssize_t) sizeof(entry->step))
-		goto _unserialize_error;
+	memcpy(&entry->trigger, buf + offset, sizeof(entry->trigger));
+	offset += sizeof(entry->trigger);
 
-	if (read(fd, &entry->expire, sizeof(entry->expire)) != (ssize_t) sizeof(entry->expire))
-		goto _unserialize_error;
+	memcpy(&entry->step, buf + offset, sizeof(entry->step));
+	offset += sizeof(entry->step);
 
-	if (read(fd, entry->username, sizeof(entry->username)) != (ssize_t) sizeof(entry->username))
-		goto _unserialize_error;
+	memcpy(&entry->expire, buf + offset, sizeof(entry->expire));
+	offset += sizeof(entry->expire);
 
-	if (read(fd, &entry->subj_size, sizeof(entry->subj_size)) != (ssize_t) sizeof(entry->subj_size))
-		goto _unserialize_error;
+	memcpy(entry->username, buf + offset, sizeof(entry->username));
+	offset += sizeof(entry->username);
 
+	memcpy(&entry->subj_size, buf + offset, sizeof(entry->subj_size));
+	offset += sizeof(entry->subj_size);
+
+	memcpy(&entry->create_time, buf + offset, sizeof(entry->create_time));
+	offset += sizeof(entry->create_time);
+
+	memcpy(entry->signature, buf + offset, sizeof(entry->signature));
+
+	/* Allocate memory for entry subject */
 	if (!(entry->subj = mm_alloc(entry->subj_size + 1))) {
 		errsv = errno;
 		log_warn("entry_daemon_unserialize(): mm_alloc(): %s\n", strerror(errno));
+		entry_destroy(entry);
 		errno = errsv;
-		goto _unserialize_error;
+		return NULL;
 	}
 
 	memset(entry->subj, 0, entry->subj_size + 1);
 
-	if (read(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size)
-		goto _unserialize_error;
-
-	if (read(fd, &entry->create_time, sizeof(entry->create_time)) != (ssize_t) sizeof(entry->create_time))
-		goto _unserialize_error;
-
-	if (read(fd, entry->signature, sizeof(entry->signature)) != (ssize_t) sizeof(entry->signature))
-		goto _unserialize_error;
+	/* Read the entry subject */
+	if (read(fd, entry->subj, entry->subj_size) != (ssize_t) entry->subj_size) {
+		errsv = errno;
+		log_warn("entry_daemon_unserialize(): read(): %s\n", strerror(errno));
+		entry_destroy(entry);
+		errno = errsv;
+		return NULL;
+	}	
 
 	/* Check entry signature */
 	if (!entry_check_signature(entry)) {
 		log_crit("entry_daemon_unserialize(): Entry ID 0x%016llX signature is invalid.\n", entry->id);
+		entry_destroy(entry);
 		errno = EINVAL;
-		goto _unserialize_error;
+		return NULL;
 	}
 
 	/* All good */
 	return entry;
-
-_unserialize_error:
-	errsv = errno;
-
-	log_warn("entry_daemon_unserialize(): %s\n", strerror(errno));
-
-	entry_destroy(entry);
-
-	errno = errsv;
-
-	return NULL;
 }
 

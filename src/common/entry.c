@@ -270,7 +270,6 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 	/* Validate if subject only contains ascii characters */
 	if (!strisascii(subj, len)) {
 		log_warn("entry_set_subj(): The specified subject contains non-ascii characters. This is now allowed.\n");
-		mm_free(entry->subj);
 		errno = EINVAL;
 		return -1;
 	}

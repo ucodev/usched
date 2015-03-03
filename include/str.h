@@ -3,7 +3,7 @@
  * @brief uSched
  *        String helper interface header
  *
- * Date: 27-02-2015
+ * Date: 03-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,6 +30,7 @@
 /* Prototypes */
 char *strrepl(const char *haystack, const char *needle, const char *rcontent);
 char *strreplall(const char *haystack, const char *needle, const char *rcontent);
+int strisascii(const char *s, size_t len);
 int strisnum(const char *s);
 size_t strrtrim(char *s, const char *trail);
 

@@ -43,6 +43,7 @@
 #include "bitops.h"
 #include "log.h"
 #include "conn.h"
+#include "str.h"
 
 void entry_cleanup_session(struct usched_entry *entry) {
 	memset(entry->session, 0, sizeof(entry->session));
@@ -266,6 +267,15 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 		log_warn("entry_set_subj(): Subject length wasn't specified. This is not recommended. Computed subject size through strlen() is: %zu bytes.\n", len);
 	}
 
+	/* Validate if subject only contains ascii characters */
+	if (!strisascii(subj, len)) {
+		log_warn("entry_set_subj(): The specified subject contains non-ascii characters. This is now allowed.\n");
+		mm_free(entry->subj);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Allocate subject memory */
 	if (!(entry->subj = mm_alloc(len + 1))) {
 		errsv = errno;
 		log_warn("entry_set_subj(): mm_alloc(): %s\n", strerror(errno));
@@ -277,8 +287,10 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len) {
 
 	memcpy(entry->subj, subj, len);
 
+	/* Set subject size */
 	entry_set_subj_size(entry, len);
 
+	/* All good */
 	return 0;
 }
 

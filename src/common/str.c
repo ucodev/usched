@@ -3,7 +3,7 @@
  * @brief uSched
  *        String helper interface
  *
- * Date: 27-02-2015
+ * Date: 03-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -101,6 +101,14 @@ char *strreplall(const char *haystack, const char *needle, const char *rcontent)
 
 	/* If prev != haystack, it's safe to consider it non-const */
 	return (prev == haystack) ? NULL : (char *) prev;
+}
+
+int strisascii(const char *s, size_t len) {
+	if (!len) len = strlen(s);
+
+	for ( ; *s && len; s ++, len --) if (*s > 127) return 0;
+
+	return 1;
 }
 
 int strisnum(const char *s) {

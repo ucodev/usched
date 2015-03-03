@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Client
  *
- * Date: 27-01-2015
+ * Date: 03-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -55,7 +55,7 @@ void print_client_result_show(const struct usched_entry *entry_list, size_t coun
 
 	for (i = 0; i < count; i ++) {
 		printf(
-			" 0x%016llX | " \
+			"%c0x%016llX | " \
 			"%8s | " \
 			"%5u | " \
 			"%5u | " \
@@ -63,6 +63,7 @@ void print_client_result_show(const struct usched_entry *entry_list, size_t coun
 			"%8u | " \
 			"%11u | " \
 			"%s\n",
+			entry_has_flag(&entry_list[i], USCHED_ENTRY_FLAG_INVALID) ? '*' : ' ',
 			(unsigned long long) entry_list[i].id,
 			!entry_list[i].username[0] ? "-" : entry_list[i].username,
 			(unsigned int) entry_list[i].uid,

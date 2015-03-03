@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 02-03-2015
+ * Date: 03-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -243,8 +243,13 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if (!entry_check_signature(entry)) {
 		log_warn("entry_daemon_pmq_dispatch(): Entry ID 0x%016llX signature is invalid.\n");
 
-		/* Remove entries with in valid signatures */
-		goto _remove;
+		/* Mark this entry as invalid. */
+		entry_set_flag(entry, USCHED_ENTRY_FLAG_INVALID);
+
+		/* Serializated data is now invalid. TODO: Serialize this entry... */
+		entry_unset_flag(entry, USCHED_ENTRY_FLAG_SERIALIZED);
+
+		goto _finish;
 	}
 
 	/* Replace subject variables with current values */
@@ -258,10 +263,13 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	if ((strlen(cmd) + 21) > (size_t) rund.config.core.pmq_msgsize) {
 		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
 
-		/* Remove this entry as it is invalid. TODO or FIXME: We rather mark it as invalid
-		 * instead of removing it, so we can inform the user regarding this issue.
-		 */
-		goto _remove;
+		/* Mark this entry as invalid. */
+		entry_set_flag(entry, USCHED_ENTRY_FLAG_INVALID);
+
+		/* Serializated data is now invalid. TODO: Serialize this entry... */
+		entry_unset_flag(entry, USCHED_ENTRY_FLAG_SERIALIZED);
+
+		goto _finish;
 	}
 
 	/* Craft message */
@@ -353,8 +361,8 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
 	size_t offset = 0;
 
-	/* If this entry is INVALID or to be REMOVED, do not serialize it */
-	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_INVALID) || entry_has_flag(entry, USCHED_ENTRY_FLAG_REMOVED))
+	/* If this entry is set to be REMOVED, do not serialize it */
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_REMOVED))
 		return 0; /* No errors here, just ignore the entry and return success */
 
 	/* Validate the signature agains the current entry data */

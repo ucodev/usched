@@ -3,7 +3,7 @@
  * @brief uSched
  *        Client Library interface header
  *
- * Date: 17-01-2015
+ * Date: 03-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -83,6 +83,9 @@ void usched_result_free_stop(void);
 DLLIMPORT
 #endif
 void usched_result_free_show(void);
+#ifdef COMPILE_WIN32
+DLLIMPORT
+#endif
 usched_usage_client_err_t usched_usage_error(void);
 #ifdef COMPILE_WIN32
 DLLIMPORT

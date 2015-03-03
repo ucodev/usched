@@ -353,6 +353,10 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
 	size_t offset = 0;
 
+	/* If this entry is INVALID or to be REMOVED, do not serialize it */
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_INVALID) || entry_has_flag(entry, USCHED_ENTRY_FLAG_REMOVED))
+		return 0; /* No errors here, just ignore the entry and return success */
+
 	/* Validate the signature agains the current entry data */
 	if (!entry_check_signature(entry))
 		log_crit("entry_daemon_serialize(): Entry ID 0x%016llX signature is invalid. The entry will be serialized, but it will fail to load on next daemon restart.\n");
@@ -405,6 +409,9 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 		errno = errsv;
 		return -1;
 	}
+
+	/* Mark entry as serialized */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_SERIALIZED);
 
 	/* All good */
 	return 0;
@@ -495,6 +502,9 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 		errno = EINVAL;
 		return NULL;
 	}
+
+	/* We've just unserialized this entry, so it is serialized */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_SERIALIZED);
 
 	/* All good */
 	return entry;

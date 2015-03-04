@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface header - Daemon
  *
- * Date: 30-01-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,8 +28,8 @@
 #define USCHED_DELTA_H
 
 /* Prototypes */
-int delta_time_init(void);
-void delta_time_destroy(void);
+int delta_daemon_time_init(void);
+void delta_daemon_time_destroy(void);
 
 
 #endif

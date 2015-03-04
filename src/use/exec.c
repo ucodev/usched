@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 28-02-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -62,7 +62,7 @@ static void *_exec_cmd(void *arg) {
 	 * won't occur here... hopefully).
 	 */
 	if ((unsigned int) labs((long) (time(NULL) - trigger)) >= rune.config.core.delta_noexec) {
-		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - trigger, rune.config.core.delta_noexec);
+		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", id, time(NULL) - trigger, rune.config.core.delta_noexec);
 	} else if ((pid = fork()) == (pid_t) -1) {	/* Create a new process, drop privileges to
 							 * UID and GID and execute CMD
 							 */

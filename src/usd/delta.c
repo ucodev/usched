@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface - Daemon
  *
- * Date: 01-03-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,9 @@
 #include "log.h"
 #include "delta.h"
 
-static void *_delta_time_monitor(void *arg) {
+static void *_delta_daemon_time_monitor(void *arg) {
+	arg = NULL; /* Unused */
+
 	for (;;) {
 		/* Check if the daemon was interrupted */
 		if (runtime_daemon_interrupted())
@@ -82,7 +84,7 @@ static void *_delta_time_monitor(void *arg) {
 	return NULL;
 }
 
-int delta_time_init(void) {
+int delta_daemon_time_init(void) {
 	int errsv = 0;
 
 	/* Set the last known time reference */
@@ -92,9 +94,9 @@ int delta_time_init(void) {
 	rund.delta_last = 0;
 
 	/* Create a delta time monitor worker */
-	if (pthread_create(&rund.t_delta, NULL, &_delta_time_monitor, NULL)) {
+	if (pthread_create(&rund.t_delta, NULL, &_delta_daemon_time_monitor, NULL)) {
 		errsv = errno;
-		log_warn("delta_time_init(): pthread_create(): %s\n", strerror(errno));
+		log_warn("delta_daemon_time_init(): pthread_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -103,7 +105,7 @@ int delta_time_init(void) {
 	return 0;
 }
 
-void delta_time_destroy(void) {
+void delta_daemon_time_destroy(void) {
 	pthread_cancel(rund.t_delta);
 
 	pthread_join(rund.t_delta, NULL);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface - Daemon
  *
- * Date: 08-02-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -66,6 +66,13 @@ int thread_daemon_mutexes_init(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	if (pthread_cond_init(&rund.cond_marshal, NULL)) {
+		errsv = errno;
+		log_crit("thread_daemon_mutexes_init(): pthread_cond_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
 #endif
 	return 0;
 }
@@ -73,6 +80,7 @@ int thread_daemon_mutexes_init(void) {
 void thread_daemon_mutexes_destroy(void) {
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 	pthread_mutex_destroy(&rund.mutex_marshal);
+	pthread_cond_destroy(&rund.cond_marshal);
 #endif
 	pthread_mutex_destroy(&rund.mutex_rpool);
 	pthread_mutex_destroy(&rund.mutex_apool);

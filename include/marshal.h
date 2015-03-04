@@ -3,9 +3,9 @@
  * @brief uSched
  *        Serialization / Unserialization interface header
  *
- * Date: 09-07-2014
+ * Date: 04-03-2014
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -29,11 +29,13 @@
 #define USCHED_MARSHAL_H
 
 /* Prototypes */
+int marshal_daemon_monitor_init(void);
 int marshal_daemon_init(void);
 int marshal_daemon_serialize_pools(void);
 int marshal_daemon_unserialize_pools(void);
 int marshal_daemon_backup(void);
 void marshal_daemon_wipe(void);
+void marshal_daemon_monitor_destroy(void);
 void marshal_daemon_destroy(void);
 
 #endif

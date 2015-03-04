@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 08-02-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -239,12 +239,24 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	log_info("Marshal interface initialized.\n");
 
+	/* Initialize marshal monitor */
+	log_info("Initializing marshal monitor...\n");
+
+	if (marshal_daemon_monitor_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): marshal_daemon_monitor_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Marshal monitor initialized.\n");
+
 	/* Initialize delta T monitor */
 	log_info("Initializing delta time monitor...\n");
 
-	if (delta_time_init() < 0) {
+	if (delta_daemon_time_init() < 0) {
 		errsv = errno;
-		log_crit("runtime_daemon_init(): delta_time_init(): %s\n", strerror(errno));
+		log_crit("runtime_daemon_init(): delta_daemon_time_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -343,8 +355,13 @@ void runtime_daemon_destroy(void) {
 
 	/* Destroy delta T monitor */
 	log_info("Destroying delta time monitor...\n");
-	delta_time_destroy();
+	delta_daemon_time_destroy();
 	log_info("Delta time monitor destroyed.\n");
+
+	/* Destroy marshal monitor */
+	log_info("Destroying marshal monitor...\n");
+	marshal_daemon_monitor_destroy();
+	log_info("Marshal monitor destroyed.\n");
 
 	/* Destroy scheduling interface */
 	log_info("Destroying scheduling interface...\n");
@@ -353,13 +370,17 @@ void runtime_daemon_destroy(void) {
 
 	/* Serialize active pools before destroying them */
 	log_info("Serializing active pools...\n");
+	/* No lock required on rund.mutex_marshal because marshal monitor is stopped at this point */
 	if (marshal_daemon_serialize_pools() < 0) {
 		log_crit("runtime_daemon_destroy(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
 	} else {
 		log_info("Active pools serialized.\n");
 	}
 
+	/* Destroy marshal interface */
+	log_info("Destroying marshal interface...\n");
 	marshal_daemon_destroy();
+	log_info("Marshal interface destroyed.\n");
 
 	/* Destroy pools */
 	log_info("Destroying pools...\n");

@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 26-02-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,6 +35,7 @@
 
 #include "config.h"
 #include "debug.h"
+#include "bitops.h"
 #include "runtime.h"
 #include "mm.h"
 #include "notify.h"
@@ -111,19 +112,10 @@ void notify_read(struct async_op *aop) {
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
 
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
-			/* TODO: This is very very inefficient. We can't just serialize everything
-			 * for each new/delete request. The serialization should only affect the
-			 * current entry.
-			 */
-
-			/* Serialize the entire active pool when state-changing operations are performed */
 			if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
-				pthread_mutex_lock(&rund.mutex_marshal);
+				bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 
-				if (marshal_daemon_serialize_pools() < 0)
-					log_warn("notify_read(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
-
-				pthread_mutex_unlock(&rund.mutex_marshal);
+				pthread_cond_signal(&rund.cond_marshal);
 			}
 #endif
 

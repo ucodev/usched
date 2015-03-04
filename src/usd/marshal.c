@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 27-02-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,12 +41,73 @@
 #include <fsop/file.h>
 
 #include "config.h"
+#include "bitops.h"
 #include "debug.h"
 #include "runtime.h"
 #include "marshal.h"
 #include "log.h"
 #include "entry.h"
 #include "schedule.h"
+
+static void *_marshal_monitor(void *arg) {
+	arg = NULL; /* Unused */
+
+	for (;;) {
+		pthread_mutex_lock(&rund.mutex_marshal);
+
+		for ( ; !runtime_daemon_interrupted(); ) {
+			if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE))
+				break;
+
+			pthread_cond_wait(&rund.cond_marshal, &rund.mutex_marshal);
+		}
+
+		/* Check if the daemon was interrupted */
+		if (runtime_daemon_interrupted()) {
+			pthread_mutex_unlock(&rund.mutex_marshal);
+			break;
+		}
+
+		/* TODO: The serialization will affect all entries. This isn't efficient enough
+		 *       and should be optimized in the future.
+		 */
+		if (marshal_daemon_serialize_pools() < 0) {
+			log_warn("_marshal_monitor(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
+
+			/* TODO: Count the number of consecutive times that the serialization have
+			 * failed in order to trigger a give up threshold.
+			 */
+		} else {
+			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
+
+			log_info("_marshal_monitor(): Active pools serialized.\n");
+		}
+
+		pthread_mutex_unlock(&rund.mutex_marshal);
+	}
+
+	/* All good */
+	pthread_exit(NULL);
+
+	return NULL;
+}
+
+int marshal_daemon_monitor_init(void) {
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
+	int errsv = 0;
+
+	if (pthread_create(&rund.t_marshal, NULL, &_marshal_monitor, NULL)) {
+		errsv = errno;
+		log_warn("marshal_daemon_init(): pthread_create(): %s\n", strerror(errno));
+		close(rund.ser_fd);
+		errno = errsv;
+		return -1;
+	}
+#endif
+
+	/* ALl good */
+	return 0;
+}
 
 int marshal_daemon_init(void) {
 	int errsv = 0;
@@ -62,6 +123,7 @@ int marshal_daemon_init(void) {
 	if (lockf(rund.ser_fd, F_TLOCK, 0) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_init(): lockf(): Serialization file is locked by another process.\n");
+		close(rund.ser_fd);
 		errno = errsv;
 		return -1;
 	}
@@ -70,10 +132,12 @@ int marshal_daemon_init(void) {
 	if (lockf(rund.ser_fd, F_LOCK, 0) < 0) {
 		errsv = errno;
 		log_warn("marshal_daemon_init(): lockf(): %s\n", strerror(errno));
+		close(rund.ser_fd);
 		errno = errsv;
 		return -1;
 	}
 
+	/* All good */
 	return 0;
 }
 
@@ -298,6 +362,20 @@ int marshal_daemon_backup(void) {
 void marshal_daemon_wipe(void) {
 	if (unlink(rund.config.core.serialize_file) < 0)
 		log_warn("marshal_daemon_wipe(): unlink(\"%s\"): %s\n", rund.config.core.serialize_file, strerror(errno));
+}
+
+void marshal_daemon_monitor_destroy(void) {
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
+	pthread_mutex_lock(&rund.mutex_marshal);
+
+	pthread_cond_signal(&rund.cond_marshal);
+
+	pthread_mutex_unlock(&rund.mutex_marshal);
+
+	/* pthread_cancel(rund.t_marshal); */
+
+	pthread_join(rund.t_marshal, NULL);
+#endif
 }
 
 void marshal_daemon_destroy(void) {

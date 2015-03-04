@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 03-03-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -241,7 +241,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Check entry signature */
 	if (!entry_check_signature(entry)) {
-		log_warn("entry_daemon_pmq_dispatch(): Entry ID 0x%016llX signature is invalid.\n");
+		log_warn("entry_daemon_pmq_dispatch(): Entry ID 0x%016llX signature is invalid.\n", entry->id);
 
 		/* Mark this entry as invalid. */
 		entry_set_flag(entry, USCHED_ENTRY_FLAG_INVALID);
@@ -367,7 +367,7 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 
 	/* Validate the signature agains the current entry data */
 	if (!entry_check_signature(entry))
-		log_crit("entry_daemon_serialize(): Entry ID 0x%016llX signature is invalid. The entry will be serialized, but it will fail to load on next daemon restart.\n");
+		log_crit("entry_daemon_serialize(): Entry ID 0x%016llX signature is invalid. The entry will be serialized, but it will fail to load on next daemon restart.\n", entry->id);
 
 	/* Craft serialization buffer */
 	memcpy(buf + offset, &entry->id, sizeof(entry->id));

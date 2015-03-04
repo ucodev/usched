@@ -191,6 +191,7 @@ int runtime_exec_init(int argc, char **argv);
 int runtime_admin_interrupted(void);
 void runtime_daemon_fatal(void);
 void runtime_daemon_interrupt(void);
+int runtime_daemon_terminated(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */

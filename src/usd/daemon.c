@@ -40,9 +40,13 @@
 #include "conn.h"
 
 static void _flush(void) {
+	pthread_mutex_lock(&rund.mutex_marshal);
+
 	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 
 	pthread_cond_signal(&rund.cond_marshal);
+
+	pthread_mutex_unlock(&rund.mutex_marshal);
 }
 
 static void _init(int argc, char **argv) {

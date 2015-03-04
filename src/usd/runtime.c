@@ -161,17 +161,17 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	log_info("IPC interface initialized.\n");
 
-	/* Initialize mutexes */
-	log_info("Initializing thread mutexes...\n");
+	/* Initialize thread components (mutexes, conditions, ...)  */
+	log_info("Initializing thread components...\n");
 
-	if (thread_daemon_mutexes_init() < 0) {
+	if (thread_daemon_components_init() < 0) {
 		errsv = errno;
-		log_crit("runtime_daemon_init(): thread_mutexes_init(): %s\n", strerror(errno));
+		log_crit("runtime_daemon_init(): thread_components_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	log_info("Thread mutexes initialized.\n");
+	log_info("Thread components initialized.\n");
 
 	/* Initialize pools */
 	log_info("Initializing pools...\n");
@@ -340,6 +340,13 @@ void runtime_daemon_interrupt(void) {
 	pthread_mutex_unlock(&rund.mutex_interrupt);
 }
 
+int runtime_daemon_terminated(void) {
+	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL))
+		return 1;
+
+	return 0;
+}
+
 int runtime_daemon_interrupted(void) {
 	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT))
 		return 1;
@@ -387,10 +394,10 @@ void runtime_daemon_destroy(void) {
 	pool_daemon_destroy();
 	log_info("Pools destroyed.\n");
 
-	/* Destroy mutexes */
-	log_info("Destroying thread mutexes...\n");
-	thread_daemon_mutexes_destroy();
-	log_info("Thread mutexes destroyed.\n");
+	/* Destroy thread components */
+	log_info("Destroying thread components...\n");
+	thread_daemon_components_destroy();
+	log_info("Thread components destroyed.\n");
 
 	/* Destroy IPC interface */
 	log_info("Destroying IPC interface...\n");

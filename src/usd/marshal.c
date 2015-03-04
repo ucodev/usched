@@ -49,13 +49,14 @@
 #include "entry.h"
 #include "schedule.h"
 
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 static void *_marshal_monitor(void *arg) {
 	arg = NULL; /* Unused */
 
 	for (;;) {
 		pthread_mutex_lock(&rund.mutex_marshal);
 
-		for ( ; !runtime_daemon_interrupted(); ) {
+		for ( ; !runtime_daemon_terminated(); ) {
 			if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE))
 				break;
 
@@ -63,7 +64,7 @@ static void *_marshal_monitor(void *arg) {
 		}
 
 		/* Check if the daemon was interrupted */
-		if (runtime_daemon_interrupted()) {
+		if (runtime_daemon_terminated()) {
 			pthread_mutex_unlock(&rund.mutex_marshal);
 			break;
 		}
@@ -91,6 +92,7 @@ static void *_marshal_monitor(void *arg) {
 
 	return NULL;
 }
+#endif
 
 int marshal_daemon_monitor_init(void) {
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1

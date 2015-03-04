@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface header
  *
- * Date: 08-02-2015
+ * Date: 04-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,8 +30,8 @@
 #define USCHED_THREAD_H
 
 /* Prototypes */
-int thread_daemon_mutexes_init(void);
-void thread_daemon_mutexes_destroy(void);
+int thread_daemon_components_init(void);
+void thread_daemon_components_destroy(void);
 int thread_exec_behaviour_init(void);
 void thread_exec_behaviour_destroy(void);
 void thread_atfork_noop(void);

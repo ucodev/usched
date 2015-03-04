@@ -35,26 +35,26 @@
 #include "runtime.h"
 #include "thread.h"
 
-int thread_daemon_mutexes_init(void) {
+int thread_daemon_components_init(void) {
 	int errsv = 0;
 
 	if (pthread_mutex_init(&rund.mutex_interrupt, NULL)) {
 		errsv = errno;
-		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	if (pthread_mutex_init(&rund.mutex_rpool, NULL)) {
 		errsv = errno;
-		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	if (pthread_mutex_init(&rund.mutex_apool, NULL)) {
 		errsv = errno;
-		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -62,14 +62,14 @@ int thread_daemon_mutexes_init(void) {
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 	if (pthread_mutex_init(&rund.mutex_marshal, NULL)) {
 		errsv = errno;
-		log_crit("thread_daemon_mutexes_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	if (pthread_cond_init(&rund.cond_marshal, NULL)) {
 		errsv = errno;
-		log_crit("thread_daemon_mutexes_init(): pthread_cond_init(): %s\n", strerror(errno));
+		log_crit("thread_daemon_components_init(): pthread_cond_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -77,7 +77,7 @@ int thread_daemon_mutexes_init(void) {
 	return 0;
 }
 
-void thread_daemon_mutexes_destroy(void) {
+void thread_daemon_components_destroy(void) {
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 	pthread_mutex_destroy(&rund.mutex_marshal);
 	pthread_cond_destroy(&rund.cond_marshal);

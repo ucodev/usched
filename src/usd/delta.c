@@ -42,8 +42,8 @@ static void *_delta_daemon_time_monitor(void *arg) {
 	arg = NULL; /* Unused */
 
 	for (;;) {
-		/* Check if the daemon was interrupted */
-		if (runtime_daemon_interrupted())
+		/* Check if the daemon was interrupted with termination or reload action */
+		if (runtime_daemon_terminated())
 			break;
 
 		/* Compute delta time */

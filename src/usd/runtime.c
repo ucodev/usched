@@ -365,7 +365,7 @@ void runtime_daemon_destroy(void) {
 	delta_daemon_time_destroy();
 	log_info("Delta time monitor destroyed.\n");
 
-	/* Destroy marshal monitor */
+	/* Serialize data and destroy marshal monitor */
 	log_info("Destroying marshal monitor...\n");
 	marshal_daemon_monitor_destroy();
 	log_info("Marshal monitor destroyed.\n");
@@ -374,15 +374,6 @@ void runtime_daemon_destroy(void) {
 	log_info("Destroying scheduling interface...\n");
 	schedule_daemon_destroy();
 	log_info("Scheduling interface destroyed.\n");
-
-	/* Serialize active pools before destroying them */
-	log_info("Serializing active pools...\n");
-	/* No lock required on rund.mutex_marshal because marshal monitor is stopped at this point */
-	if (marshal_daemon_serialize_pools() < 0) {
-		log_crit("runtime_daemon_destroy(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));
-	} else {
-		log_info("Active pools serialized.\n");
-	}
 
 	/* Destroy marshal interface */
 	log_info("Destroying marshal interface...\n");

@@ -113,6 +113,8 @@ void notify_read(struct async_op *aop) {
 
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 			if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
+				pthread_mutex_lock(&rund.mutex_marshal);
+
 				/* FIXME: The SERIALIZE flag should not be set here. We don't know
 				 * if anything was changed at all (request may be valid but no
 				 * action was taken, e.g, deletion of an non-existent entry).
@@ -121,22 +123,9 @@ void notify_read(struct async_op *aop) {
 				 */
 				bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 
-				/* Do not use locks here, so we can avoid stalling requests while
-				 * marshal monitor is serializing data from previous requests.
-				 *
-				 * FIXME: Without locks, this can also prevent some entries to be
-				 * serialized if some conditions are met (like if a request is
-				 * performed while the serialization routine is running on the
-				 * marshal monitor). Although everything is serialized on daemon
-				 * termination/reload, we should fix this in the future to prevent
-				 * the worst case scenario: An entry isn't serialized on request and
-				 * the daemon isn't gracefully stopped, causing data to be lost.
-				 *
-				 * One possible solution is to implement a timer in the marshal
-				 * monitor that, upon expiration, validates if all entries are
-				 * serialized and, if not, forces the data serialization.
-				 */
 				pthread_cond_signal(&rund.cond_marshal);
+
+				pthread_mutex_unlock(&rund.mutex_marshal);
 			}
 #endif
 

@@ -57,17 +57,15 @@ static void *_marshal_monitor(void *arg) {
 		pthread_mutex_lock(&rund.mutex_marshal);
 
 		for ( ; !runtime_daemon_terminated(); ) {
-			if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE))
+			if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE)) {
+				bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 				break;
+			}
 
 			pthread_cond_wait(&rund.cond_marshal, &rund.mutex_marshal);
 		}
 
-		/* Check if the daemon was interrupted */
-		if (runtime_daemon_terminated()) {
-			pthread_mutex_unlock(&rund.mutex_marshal);
-			break;
-		}
+		pthread_mutex_unlock(&rund.mutex_marshal);
 
 		/* TODO: The serialization will affect all entries. This isn't efficient enough
 		 *       and should be optimized in the future.
@@ -78,13 +76,19 @@ static void *_marshal_monitor(void *arg) {
 			/* TODO: Count the number of consecutive times that the serialization have
 			 * failed in order to trigger a give up threshold.
 			 */
-		} else {
-			bit_clear(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
-
-			log_info("_marshal_monitor(): Active pools serialized.\n");
+			bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 		}
 
-		pthread_mutex_unlock(&rund.mutex_marshal);
+		log_info("_marshal_monitor(): Active pools serialized.\n");
+
+		/* NOTE: Even if runtime was terminated, we still need to serialize the data
+		 * in order to grant consistency on restart/reload. This is why we check for
+		 * runtime termination to break the cycle at the end of it.
+		 */
+
+		/* Check if the daemon was interrupted */
+		if (runtime_daemon_terminated())
+			break;
 	}
 
 	/* All good */

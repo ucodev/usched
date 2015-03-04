@@ -375,6 +375,16 @@ void runtime_daemon_destroy(void) {
 	schedule_daemon_destroy();
 	log_info("Scheduling interface destroyed.\n");
 
+#if CONFIG_USCHED_SERIALIZE_ON_REQ == 0
+	log_info("Serializing active pools...\n");
+
+	if (marshal_daemon_serialize_pools() < 0) {
+		log_crit("marshal_daemon_serialize_pools(): %s\n", strerror(errno)):
+	} else {
+		log_info("Active pools serialized.\n");
+	}
+#endif
+
 	/* Destroy marshal interface */
 	log_info("Destroying marshal interface...\n");
 	marshal_daemon_destroy();

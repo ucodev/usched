@@ -187,7 +187,9 @@ int marshal_daemon_serialize_pools(void) {
 
 		errno = errsv;
 
-		/* We can give up here... all the entries are serialized */
+		/* TODO: We can't give up here unless we're sure that all the data was previously
+		 * serialized.
+		 */
 		return -1;
 #else
 		/* NOTE: We can't just give up here, or all the entries will be lost.

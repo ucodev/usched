@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 04-03-2015
+ * Date: 05-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -112,17 +112,10 @@ void notify_read(struct async_op *aop) {
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);
 
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
-			if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_GET)) {
+			if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE)) {
 				pthread_mutex_lock(&rund.mutex_marshal);
 
-				/* FIXME: The SERIALIZE flag should not be set here. We don't know
-				 * if anything was changed at all (request may be valid but no
-				 * action was taken, e.g, deletion of an non-existent entry).
-				 * The SERIALIZE flag should be set while the request is processed
-				 * and only if it affects at least one entry.
-				 */
-				bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
-
+				/* Signal the marshal monitor to start serializing data */
 				pthread_cond_signal(&rund.cond_marshal);
 
 				pthread_mutex_unlock(&rund.mutex_marshal);
@@ -130,7 +123,7 @@ void notify_read(struct async_op *aop) {
 #endif
 
 			/* If this is a GET or DEL request, we must destroy the entry after
-			 * completion.
+			 * completion since it wasn't placed in the active pool.
 			 */
 			if (entry_has_flag(entry, USCHED_ENTRY_FLAG_GET) || entry_has_flag(entry, USCHED_ENTRY_FLAG_DEL))
 				entry_destroy(entry);

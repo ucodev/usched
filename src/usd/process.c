@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 28-02-2015
+ * Date: 05-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,6 +35,7 @@
 
 #include "config.h"
 #include "debug.h"
+#include "bitops.h"
 #include "mm.h"
 #include "runtime.h"
 #include "entry.h"
@@ -74,6 +75,9 @@ static int _process_recv_update_op_new(struct async_op *aop, struct usched_entry
 
 		goto _update_op_new_failure_1;
 	}
+
+	/* Inform runtime that serialization is required */
+	bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 
 	/* NOTE: After schedule_entry_create() success, a new and unique entry->id is now set. */
 
@@ -197,6 +201,10 @@ static int _process_recv_update_op_del(struct async_op *aop, struct usched_entry
 
 		entry_list_res_nmemb ++;
 
+		/* Inform runtime that serialization is required */
+		bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
+
+		/* Reallocate list memory to hold another deleted entry id */
 		if (!(entry_list_res = mm_realloc(entry_list_res, entry_list_res_nmemb * sizeof(entry->id)))) {
 			errsv = errno;
 			log_warn("_process_recv_update_op_del(): mm_realloc(): %s\n", strerror(errno));

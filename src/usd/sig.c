@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface - Daemon
  *
- * Date: 16-02-2015
+ * Date: 05-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -70,7 +70,7 @@ static void _sig_pipe_daemon_handler(int n) {
 
 static void _sig_abrt_daemon_handler(int n) {
 	/* Check if the abort signal came from the psched library */
-	if (psched_fatal(rund.psched)) {
+	if (rund.psched && psched_fatal(rund.psched)) {
 		/* If so, just reload the daemon to force a clean state */
 		bit_set(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD);
 

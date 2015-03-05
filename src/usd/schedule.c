@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 27-02-2015
+ * Date: 05-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,6 +57,8 @@ int schedule_daemon_init(void) {
 }
 
 void schedule_daemon_destroy(void) {
+	psched_t *psched_tmp = rund.psched;
+
 	/* psched_destroy() must be called before we acquire the apool lock, or a deadlock will
 	 * occur (since event_pmq_dispatch() will wait to acquire this lock, while this function will
 	 * wait for pmq_dispatch() to complete).
@@ -70,18 +72,33 @@ void schedule_daemon_destroy(void) {
 	/* Lock the active pool access to avoid races */
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	psched_handler_destroy(rund.psched);
+	/* NOTE: We need to explicitly inform that scheduling interface was destroyed to avoid entry
+	 * updates that may occur due to queued routines on psched library that were not yet executed
+	 */
+	rund.psched = NULL;
 
+	/*
+	 * We need to set rund.psched to NULL first and then use the temporary pointer as the
+	 * argument for the psched_handler_destroy() to avoid NULL pointer reference access attempts
+	 * by the SIGABRT signal handler.
+	 * Note that we can't acquire the mutex_apool lock in the SIGABRT handler since the locking
+	 * mechanism from libpthread isn't AS-safe.
+	 */
+
+	psched_handler_destroy(psched_tmp);
+
+	/* FIXME: If a SIGABRT emerges from now on and before rund.psched is set to NULL, this will
+	 * cause a NULL pointer reference access attempt. To fix this, the signal handler for
+	 * SIGABRT must acquire the mutex_apool lock... but this is not possible since the locking
+	 * mechanism isn't AS-safe. Although the probability of this event to happen is very low,
+	 * this must be corrected with some new approach in the future.
+	 *
+	 */
 
 	/* TODO or FIXME: We must grant somehow at this point that all the routines queued by
 	 * libpsched are flushed (inactive) OR grant that they won't disrupt the runtime exiting
 	 * procedures if they are triggered after this point in time.
 	 */
-
-	/* NOTE: We need to explicitly inform that scheduling interface was destroyed to avoid entry
-	 * updates that may occur due to queued routines on psched library that were not yet executed
-	 */
-	rund.psched = 0;
 
 	pthread_mutex_unlock(&rund.mutex_apool);
 }

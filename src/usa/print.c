@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Admin
  *
- * Date: 27-02-2015
+ * Date: 06-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -54,7 +54,7 @@ void print_admin_config_user_changed(const char *username) {
 }
 
 void print_admin_config_users_header(void) {
-	printf("          username |    uid |    gid\n");
+	puts("users =   username |    uid |    gid");
 }
 
 void print_admin_config_users_from_file(const char *file, char modification) {

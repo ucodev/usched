@@ -86,6 +86,7 @@ void schedule_daemon_destroy(void) {
 	 */
 
 	psched_handler_destroy(rund.psched);
+	rund.psched = NULL;
 
 	/* Leaving critical region */
 	pthread_sigmask(SIG_SETMASK, &si_prev, NULL);

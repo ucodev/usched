@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 05-03-2015
+ * Date: 06-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include <sys/types.h>
 
@@ -57,7 +58,10 @@ int schedule_daemon_init(void) {
 }
 
 void schedule_daemon_destroy(void) {
-	psched_t *psched_tmp = rund.psched;
+	sigset_t si_cur, si_prev;
+
+	sigfillset(&si_cur);
+	sigemptyset(&si_prev);
 
 	/* psched_destroy() must be called before we acquire the apool lock, or a deadlock will
 	 * occur (since event_pmq_dispatch() will wait to acquire this lock, while this function will
@@ -72,20 +76,19 @@ void schedule_daemon_destroy(void) {
 	/* Lock the active pool access to avoid races */
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	/* NOTE: We need to explicitly inform that scheduling interface was destroyed to avoid entry
-	 * updates that may occur due to queued routines on psched library that were not yet executed
-	 */
-	rund.psched = NULL;
+	/* Entering critical region */
+	pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
 
 	/*
-	 * We need to set rund.psched to NULL first and then use the temporary pointer as the
-	 * argument for the psched_handler_destroy() to avoid NULL pointer reference access attempts
-	 * by the SIGABRT signal handler.
 	 * Note that we can't acquire the mutex_apool lock in the SIGABRT handler since the locking
-	 * mechanism from libpthread isn't AS-safe.
+	 * mechanism from libpthread isn't AS-safe, so we need to destroy the psched handler while
+	 * the signals are disabled.
 	 */
 
-	psched_handler_destroy(psched_tmp);
+	psched_handler_destroy(rund.psched);
+
+	/* Leaving critical region */
+	pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 
 	/* FIXME: If a SIGABRT emerges from now on and before rund.psched is set to NULL, this will
 	 * cause a NULL pointer reference access attempt. To fix this, the signal handler for

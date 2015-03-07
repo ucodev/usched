@@ -65,7 +65,7 @@ install_systemd:
 install_doc:
 	mkdir -p /usr/share/doc/usched/
 	cp README /usr/share/doc/usched/
-	cp doc/*.txt /usr/share/doc/usched/
+	cd doc && make text_install && cd ..
 
 test:
 	cd tests && make && cd ..

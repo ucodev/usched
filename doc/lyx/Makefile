@@ -4,3 +4,7 @@ pdf:
 html:
 	lyx --export html uSched_Reference_Manual.lyx
 
+clean:
+	rm -f *.pdf
+	rm -f *.html
+

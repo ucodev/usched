@@ -13,3 +13,9 @@ man_install:
 text_install:
 	cd text && make install && cd ..
 
+doxygen_files:
+	cd doxygen && make && cd ..
+
+clean:
+	cd doxygen && make clean && cd ..
+	cd lyx && make clean && cd ..

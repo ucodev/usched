@@ -67,10 +67,14 @@ install_doc:
 	cp README /usr/share/doc/usched/
 	cd doc && make text_install && cd ..
 
+doxygen:
+	cd doc && make doxygen_files && cd ..
+
 test:
 	cd tests && make && cd ..
 
 clean:
+	cd doc && make clean && cd ..
 	cd src && make clean && cd ..
 	cd scripts && make clean && cd ..
 	cd example && make clean && cd ..

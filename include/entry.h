@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 03-03-2015
+ * Date: 07-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -91,6 +91,42 @@ struct usched_entry_crypto {
 #pragma pack(pop)
 #define usched_entry_id(id) 	((struct usched_entry [1]) { { id, } })
 #define usched_entry_hdr_size()	(offsetof(struct usched_entry, payload))
+
+/**
+ * @struct usched_entry
+ *
+ * @brief
+ *   uSched scheduler entry structure.
+ *
+ * @see usched_result_get_show()
+ *
+ * @var usched_entry::id
+ *   The Entry ID
+ *
+ * @var usched_entry::uid
+ *   The UID value associated to the scheduler entry.
+ *
+ * @var usched_entry::gid
+ *   The GID value associated to the scheduler entry.
+ *
+ * @var usched_entry::trigger
+ *   The timestamp value for the next entry execution.
+ *
+ * @var usched_entry::step
+ *   The value that will be added to the trigger value after each execution.
+ *
+ * @var usched_entry::expire
+ *   The timestamp that once triggered will force the scheduler entry to be removed.
+ *
+ * @var usched_entry::username
+ *   The username used for the remote authentication. Local authentications will have this field
+ *   unset.
+ *
+ * @var usched_entry::subj
+ *   The subject of the scheduler entry. This is the command-line value that will be executed at the
+ *   next trigger value.
+ *
+ */
 #pragma pack(push)
 #pragma pack(4)
 struct usched_entry {

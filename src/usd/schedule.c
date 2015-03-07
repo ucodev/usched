@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 06-03-2015
+ * Date: 07-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -58,11 +58,6 @@ int schedule_daemon_init(void) {
 }
 
 void schedule_daemon_destroy(void) {
-	sigset_t si_cur, si_prev;
-
-	sigfillset(&si_cur);
-	sigemptyset(&si_prev);
-
 	/* psched_destroy() must be called before we acquire the apool lock, or a deadlock will
 	 * occur (since event_pmq_dispatch() will wait to acquire this lock, while this function will
 	 * wait for pmq_dispatch() to complete).
@@ -76,20 +71,14 @@ void schedule_daemon_destroy(void) {
 	/* Lock the active pool access to avoid races */
 	pthread_mutex_lock(&rund.mutex_apool);
 
-	/* Entering critical region */
-	pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
-
 	/*
 	 * Note that we can't acquire the mutex_apool lock in the SIGABRT handler since the locking
 	 * mechanism from libpthread isn't AS-safe, so we need to destroy the psched handler while
-	 * the signals are disabled.
+	 * the signals are disabled. This is granted by the _destroy() function from daemon.c file.
 	 */
 
 	psched_handler_destroy(rund.psched);
 	rund.psched = NULL;
-
-	/* Leaving critical region */
-	pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 
 	/* FIXME: If a SIGABRT emerges from now on and before rund.psched is set to NULL, this will
 	 * cause a NULL pointer reference access attempt. To fix this, the signal handler for

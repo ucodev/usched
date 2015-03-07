@@ -3,7 +3,7 @@
  * @brief uSched
  *        Daemon Main Component
  *
- * Date: 04-03-2015
+ * Date: 07-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -50,14 +50,44 @@ static void _flush(void) {
 }
 
 static void _init(int argc, char **argv) {
+	sigset_t si_cur, si_prev;
+
+	sigfillset(&si_cur);
+	sigemptyset(&si_prev);
+
+	/* Entering critical region. Prevent the main thread from receiving signals while
+	 * it is initializing
+	 */
+	pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
+
 	if (runtime_daemon_init(argc, argv) < 0) {
 		log_crit("_init(): runtime_daemon_init(): %s\n", strerror(errno));
+
+		/* Leaving critical region */
+		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+
 		exit(PROCESS_EXIT_STATUS_CUSTOM_BAD_RUNTIME_OR_CONFIG);
 	}
+
+	/* Leaving critical region */
+	pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 }
 
 static void _destroy(void) {
+	sigset_t si_cur, si_prev;
+
+	sigfillset(&si_cur);
+	sigemptyset(&si_prev);
+
+	/* Entering critical region. Prevent the main thread from receiving signals while it's
+	 * being destroyed.
+	 */
+	pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
+
 	runtime_daemon_destroy();
+
+	/* Leaving critical region */
+	pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 }
 
 static int _loop(int argc, char **argv) {

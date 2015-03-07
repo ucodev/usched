@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 04-03-2015
+ * Date: 07-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,6 +51,11 @@
 
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 static void *_marshal_monitor(void *arg) {
+	sigset_t si_cur, si_prev;
+
+	sigfillset(&si_cur);
+	sigemptyset(&si_prev);
+
 	arg = NULL; /* Unused */
 
 	for (;;) {
@@ -67,6 +72,9 @@ static void *_marshal_monitor(void *arg) {
 
 		pthread_mutex_unlock(&rund.mutex_marshal);
 
+		/* Entering critical region */
+		pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
+
 		/* TODO: The serialization will affect all entries. This isn't efficient enough
 		 *       and should be optimized in the future.
 		 */
@@ -78,6 +86,11 @@ static void *_marshal_monitor(void *arg) {
 			 */
 			bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 		}
+
+		/* TODO: Make a file system copy of the current serialization file in order to
+		 *       grant a consistent backup.
+		 */
+		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 
 		log_info("_marshal_monitor(): Active pools serialized.\n");
 

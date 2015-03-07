@@ -1,0 +1,1695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta name="generator" content="http://www.nongnu.org/elyxer/"/>
+<meta name="create-date" content="2015-03-07"/>
+<link rel="stylesheet" href="http://elyxer.nongnu.org/lyx.css" type="text/css" media="all"/>
+<title>uSched Services and Tools</title>
+</head>
+<body>
+<div id="globalWrapper">
+<h1 class="title">
+uSched Services and Tools
+</h1>
+<h2 class="author">
+Reference Manual - Rev. A01
+</h2>
+<h2 class="Date">
+7th March 2015
+</h2>
+<div class="fulltoc">
+<div class="tocheader">
+Table of Contents
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Part-I">Part I: Overview</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Section-1">Section 1: Introduction</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Section-2">Section 2: Components</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsection-2.1">Subsection 2.1: uSched Admin (usa)</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-2.2">Subsection 2.2: uSched Client (usc)</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-2.3">Subsection 2.3: uSched Daemon (usd)</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-2.4">Subsection 2.4: uSched Executer (use)</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-2.5">Subsection 2.5: uSched Monitor (usm)</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Section-3">Section 3: Portability</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Part-II">Part II: Installation</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Section-4">Section 4: Getting uSched</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Section-5">Section 5: Generic Setup</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Section-6">Section 6: System-Specific Procedures</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsection-6.1">Subsection 6.1: Linux/Debian</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-6.2">Subsection 6.2: Linux/RedHat</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-6.3">Subsection 6.3: BSD/FreeBSD</a>
+</div>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Part-III">Part III: Usage</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Section-7">Section 7: uSched Client</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.1">Subsection 7.1: Generic Usage</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.2">Subsection 7.2: Options</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.3">Subsection 7.3: Operations</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.3.1">Subsubsection 7.3.1: RUN</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.3.2">Subsubsection 7.3.2: STOP</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.3.3">Subsubsection 7.3.3: SHOW</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.4">Subsection 7.4: Subjects</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.4.1">Subsubsection 7.4.1: Subjects of RUN Operation</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.4.2">Subsubsection 7.4.2: Subjects of SHOW Operation</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.4.3">Subsubsection 7.4.3: Subjects of STOP Operation</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.5">Subsection 7.5: Prepositions</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.5.1">Subsubsection 7.5.1: EVERY</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.5.2">Subsubsection 7.5.2: IN</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.5.3">Subsubsection 7.5.3: NOW</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.5.4">Subsubsection 7.5.4: ON</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.5.5">Subsubsection 7.5.5: TO</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.6">Subsection 7.6: Adverbials of Time</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.1">Subsubsection 7.6.1: SECONDS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.2">Subsubsection 7.6.2: MINUTES</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.3">Subsubsection 7.6.3: HOURS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.4">Subsubsection 7.6.4: DAYS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.5">Subsubsection 7.6.5: WEEKS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.6">Subsubsection 7.6.6: MONTHS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.7">Subsubsection 7.6.7: YEARS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.8">Subsubsection 7.6.8: WEEKDAYS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.9">Subsubsection 7.6.9: TIME</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.10">Subsubsection 7.6.10: DATE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.11">Subsubsection 7.6.11: DATETIME</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.6.12">Subsubsection 7.6.12: TIMESTAMP</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-7.7">Subsection 7.7: Conjunctions</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.7.1">Subsubsection 7.7.1: AND</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.7.2">Subsubsection 7.7.2: THEN</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.7.3">Subsubsection 7.7.3: UNTIL</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-7.7.4">Subsubsection 7.7.4: WHILE</a>
+</div>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Section-8">Section 8: uSched Admin</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsection-8.1">Subsection 8.1: Generic Usage</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-8.2">Subsection 8.2: Operations</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.2.1">Subsubsection 8.2.1: ADD</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.2.2">Subsubsection 8.2.2: CHANGE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.2.3">Subsubsection 8.2.3: COMMIT</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.2.4">Subsubsection 8.2.4: DELETE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.2.5">Subsubsection 8.2.5: ROLLBACK</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.2.6">Subsubsection 8.2.6: SHOW</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-8.3">Subsection 8.3: Categories</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.3.1">Subsubsection 8.3.1: ALL</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.3.2">Subsubsection 8.3.2: AUTH</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.3.3">Subsubsection 8.3.3: CORE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.3.4">Subsubsection 8.3.4: NETWORK</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.3.5">Subsubsection 8.3.5: USERS</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-8.4">Subsection 8.4: Components</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.1">Subsubsection 8.4.1: BIND</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.2">Subsubsection 8.4.2: BLACKLIST</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.3">Subsubsection 8.4.3: CONN</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.4">Subsubsection 8.4.4: DELTA</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.5">Subsubsection 8.4.5: JAIL</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.6">Subsubsection 8.4.6: LOCAL</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.7">Subsubsection 8.4.7: PMQ</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.8">Subsubsection 8.4.8: PRIVDROP</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.9">Subsubsection 8.4.9: REMOTE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.10">Subsubsection 8.4.10: SERIALIZE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.11">Subsubsection 8.4.11: SOCK</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.12">Subsubsection 8.4.12: THREAD</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.4.13">Subsubsection 8.4.13: WHITELIST</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-8.5">Subsection 8.5: Properties</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.1">Subsubsection 8.5.1: ADDR</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.2">Subsubsection 8.5.2: DIR</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.3">Subsubsection 8.5.3: FILE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.4">Subsubsection 8.5.4: GID</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.5">Subsubsection 8.5.5: GROUP</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.6">Subsubsection 8.5.6: LIMIT</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.7">Subsubsection 8.5.7: MSGMAX</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.8">Subsubsection 8.5.8: MSGSIZE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.9">Subsubsection 8.5.9: NAME</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.10">Subsubsection 8.5.10: NOEXEC</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.11">Subsubsection 8.5.11: PORT</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.12">Subsubsection 8.5.12: PRIORITY</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.13">Subsubsection 8.5.13: RELOAD</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.14">Subsubsection 8.5.14: TIMEOUT</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.15">Subsubsection 8.5.15: UID</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.16">Subsubsection 8.5.16: USE</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.17">Subsubsection 8.5.17: USER</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.18">Subsubsection 8.5.18: USERS</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsubsection-8.5.19">Subsubsection 8.5.19: WORKERS</a>
+</div>
+</div>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Part-IV">Part IV: Administration and Configuration</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Section-9">Section 9: uSched Services Management</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsection-9.1">Subsection 9.1: Starting uSched Services</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-9.2">Subsection 9.2: Stopping uSched Services</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-9.3">Subsection 9.3: Reloading uSched Services</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-9.4">Subsection 9.4: Flushing uSched Services state</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-9.5">Subsection 9.5: Forcing the stop of uSched Services</a>
+</div>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Section-10">Section 10: uSched Services Configuration</a>
+</div>
+<div class="tocindent">
+<div class="toc">
+<a class="Link" href="#toc-Subsection-10.1">Subsection 10.1: Setting up remote access</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-10.2">Subsection 10.2: Changing unprivileged user and group</a>
+</div>
+<div class="toc">
+<a class="Link" href="#toc-Subsection-10.3">Subsection 10.3: Managing blacklists and whitelists</a>
+</div>
+</div>
+</div>
+
+</div>
+<div class="fulltoc">
+<div class="tocheader">
+List of Tables
+</div>
+<div class="toc">
+<a class="Link" href="#Table-1">Table 1: Scheduler Entry Structure</a>
+</div>
+<div class="toc">
+<a class="Link" href="#Table-2">Table 2: RUN Subject Variables</a>
+</div>
+
+</div>
+<h1 class="Part">
+<a class="toc" name="toc-Part-I">Part I.</a> Overview
+</h1>
+<h1 class="Section">
+<a class="toc" name="toc-Section-1">1</a> Introduction
+</h1>
+<div class="Unindented">
+uSched Services and Tools (or simply uSched) provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time. It provides a simple and intuitive structured language that is intepreted via a command line client, but can also be integrated into any programming language through its client libraries and bindings. It also operates as a client/server, where requests performed by clients can affect local or remote machines where uSched services are running.
+</div>
+<h1 class="Section">
+<a class="toc" name="toc-Section-2">2</a> Components
+</h1>
+<div class="Unindented">
+uSched architecture is divided into five (5) main components: The uSched Admin, uSched Client, uSched Daemon, uSched Executer and uSched Monitor. There are only two components that require direct user interaction: uSched Admin (usa) for configuration and uSched Client (usc) for scheduling requests. All the other components are self-managed and shall not be called directly.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-2.1">2.1</a> uSched Admin (usa)
+</h2>
+<div class="Unindented">
+The uSched Admin component is a command line binary utility named ’usa’. Its purpose is to manage and handle configuration parameters that affect the core, network, authentication and users used by the other uSched components. Changes performed using uSched Admin won’t be effective until a COMMIT operation is performed. Also any uncommitted changes can be rolled back by issuing the ROLLBACK operation. This utility requires super-user privileges to be used.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-2.2">2.2</a> uSched Client (usc)
+</h2>
+<div class="Unindented">
+The uSched Client component is a command line binary utility named ’usc’. It allows the users to perform scheduling requests to the uSched Daemon component. This is the only component that can be executed by any non-blacklisted (or all white-listed) users. With a default installation, all the other uSched components will require super-user privileges to be used.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-2.3">2.3</a> uSched Daemon (usd)
+</h2>
+<div class="Unindented">
+The uSched Daemon component is a system service that receives and processes all the scheduling requests performed by uSched clients. It manages the authentication and authorization, schedulers and is the only component that directly communicates with the uSched Executer. With a default installation, this component requires super-user privileges to be started, although it will drop it’s privileges after start-up routines are performed.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-2.4">2.4</a> uSched Executer (use)
+</h2>
+<div class="Unindented">
+The uSched Executer component is a system service that receives execution requests from the uSched Daemon. Every time a scheduled entry is triggered by the uSched Daemon scheduler, it will be passed to the uSched Executer to be executed with the required privileges. This component requires super-user privileges with a default installation in order to be able to execute scheduled entries for all the users.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-2.5">2.5</a> uSched Monitor (usm)
+</h2>
+<div class="Unindented">
+The uSched Monitor component is a simple command line binary utility that starts and daemonizes the uSched Daemon and uSched Executer and monitors their processes state. It will restart or reload the services whenever it is required to do so. This utility requires super-user privileges to operate correctly.
+</div>
+<h1 class="Section">
+<a class="toc" name="toc-Section-3">3</a> Portability
+</h1>
+<div class="Unindented">
+uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_FULL definition to 1 in the include/config.h file. uSched Client will also compile on most Windows versions and the API bindings for C# are promptly available on the project bindings/csharp directory.
+</div>
+<h1 class="Part">
+<a class="toc" name="toc-Part-II">Part II.</a> Installation
+</h1>
+<h1 class="Section">
+<a class="toc" name="toc-Section-4">4</a> Getting uSched
+</h1>
+<div class="Unindented">
+Currently, uSched Services and Tools can be downloaded from the following GitHub URL:
+</div>
+<blockquote class="Quotation">
+<a class="URL" href="https://github.com/ucodev/usched">https://github.com/ucodev/usched</a>
+</blockquote>
+<div class="Unindented">
+To clone the repository performed the following command (GIT must be installed on the system):
+</div>
+<blockquote class="Quotation">
+$ git clone https://github.com/ucodev/usched
+</blockquote>
+<div class="Unindented">
+It can also be downloaded as a ZIP package via ’wget’ utility:
+</div>
+<blockquote class="Quotation">
+$ wget https://github.com/ucodev/usched/archive/master.zip<br/>
+$ unzip -d usched master.zip<br/>
+$ cd usched
+</blockquote>
+<div class="Unindented">
+Or via ’curl’ utility:
+</div>
+<blockquote class="Quotation">
+$ curl -o https://github.com/ucodev/usched/archive/master.zip<br/>
+$ unzip -d usched master.zip<br/>
+$ cd usched
+</blockquote>
+<h1 class="Section">
+<a class="toc" name="toc-Section-5">5</a> Generic Setup
+</h1>
+<div class="Unindented">
+After downloading (and extracting) the uSched source package, it is recommended to read the version specific README.txt and INSTALL.txt files that are present on the doc/ direcotry. Typically, it can be built and installed by executing the following single command from the source base directory, as super-user:
+</div>
+<blockquote class="Quotation">
+# ./deploy
+</blockquote>
+<div class="Unindented">
+This will install all the required dependencies and uSched base system daemons and tools. For System-Specific initialization scripts and utilities, please refer to the next section (6).
+</div>
+<h1 class="Section">
+<a class="toc" name="toc-Section-6">6</a> System-Specific Procedures
+</h1>
+<div class="Unindented">
+Since initialization scripts differ on many systems, they currently need to be installed through a separe procedure that isn’t included in the ’deploy’ script. The generic usage to install System-Specific utilieies is:
+</div>
+<blockquote class="Quotation">
+# make install_&lt;system&gt;
+</blockquote>
+<div class="Unindented">
+Where &lt;system&gt; is a keyword that identifies the target system. The supported keywords are described in the following sub-sections.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-6.1">6.1</a> Linux/Debian
+</h2>
+<div class="Unindented">
+The available keywords are:
+</div>
+<blockquote class="Quotation">
+classic_debian<br/>
+systemd
+</blockquote>
+<div class="Unindented">
+If the Debian version doesn’t fully support systemd by default, the classic_debian keyword shall be used:
+</div>
+<blockquote class="Quotation">
+# make install_classic_debian
+</blockquote>
+<div class="Unindented">
+Otherwise, for Debian versions with systemd enabled:
+</div>
+<blockquote class="Quotation">
+# make install_systemd
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-6.2">6.2</a> Linux/RedHat
+</h2>
+<div class="Unindented">
+The available keywords are:
+</div>
+<blockquote class="Quotation">
+classic_redhat<br/>
+systemd
+</blockquote>
+<div class="Unindented">
+If the RedHat version doesn’t fully support systemd by default, the classic_redhat keyword shall be used:
+</div>
+<blockquote class="Quotation">
+# make install_classic_redhat
+</blockquote>
+<div class="Unindented">
+Otherwise, for RedHat versions with systemd enabled:
+</div>
+<blockquote class="Quotation">
+# make install_systemd
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-6.3">6.3</a> BSD/FreeBSD
+</h2>
+<div class="Unindented">
+The available keywords are:
+</div>
+<blockquote class="Quotation">
+freebsd
+</blockquote>
+<div class="Unindented">
+To install the FreeBSD initialization scripts, execute:
+</div>
+<blockquote class="Quotation">
+# make install_freebsd
+</blockquote>
+<h1 class="Part">
+<a class="toc" name="toc-Part-III">Part III.</a> Usage
+</h1>
+<h1 class="Section">
+<a class="toc" name="toc-Section-7">7</a> uSched Client
+</h1>
+<div class="Unindented">
+The uSched Client component is the interface between the users and the uSched Daemon. It allows the user to install, remove or show Scheduled Entries.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.1">7.1</a> Generic Usage
+</h2>
+<div class="Unindented">
+The generic usage for uSched Client is:
+</div>
+<blockquote class="Quotation">
+usc [ OPTIONS ] OP SUBJ { PREP [ AVERB ARG | ARG ADVERB ] [ CONJ ... ] }
+</blockquote>
+<div class="Unindented">
+Usage examples:
+</div>
+<blockquote class="Quotation">
+$ usc run ’df -h &gt; /tmp/output’ in 10 seconds<br/>
+$ usc run ’take_screenshot.sh’ on hour 8 then every 30 minutes<br/>
+$ usc run ’do_work.py’ on hour 8 then every 1 hour until to hour 17<br/>
+$ usc run ’do_weekend_stuff.pl’ on weekday saturday then every week<br/>
+# usc run ’tcpdump -i eth0 &gt; /tmp/tcpdump.log’ now and ’kill -TERM ‘pidof tcpdump‘’ in 1 hour<br/>
+$ usc show all
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.2">7.2</a> Options
+</h2>
+<div class="Unindented">
+The available command lines options are:
+</div>
+<blockquote class="Quotation">
+<b>-h</b> Displays help
+</blockquote>
+<blockquote class="Quotation">
+<b>-H</b> IP Address of the remote server
+</blockquote>
+<blockquote class="Quotation">
+<b>-p</b> TCP port of the remote server
+</blockquote>
+<blockquote class="Quotation">
+<b>-U</b> Username for remote authentication
+</blockquote>
+<blockquote class="Quotation">
+<b>-P</b> Password for remote authentication
+</blockquote>
+<div class="Unindented">
+Example:
+</div>
+<blockquote class="Quotation">
+$ usc -H 192.168.0.1 -U testuser -P testpass show all
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.3">7.3</a> Operations
+</h2>
+<div class="Unindented">
+uSched Client Operations are the first mandaory argument. The Client expects at least two (2) mandatory arguments to be accepted for the Operations SHOW and STOP (the Operation itself and a Subject), and three (3) mandatory arguments for the RUN Operation (the Operation itself, a Subject and a Preposition): The following sub-sections describe in more detail the usage for the currently supported Operations..
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.3.1">7.3.1</a> RUN
+</h3>
+<div class="Unindented">
+The RUN Operation translates and requests the installation of one or more Scheduler Entries on uSched Services..A Scheduler Entry structure is described by the following table:
+</div>
+<blockquote class="Quotation">
+<div class="float">
+<a class="Label" name="Table-1"> </a><div class="table">
+<table>
+<tr>
+<td align="center" valign="top">
+Field
+</td>
+<td align="center" valign="top">
+Type
+</td>
+<td align="center" valign="top">
+Description
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+ID
+</td>
+<td align="center" valign="top">
+64-bit UINT
+</td>
+<td align="center" valign="top">
+Scheduler Entry ID
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+Username
+</td>
+<td align="center" valign="top">
+String
+</td>
+<td align="center" valign="top">
+Username, if remotely requested
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+UID
+</td>
+<td align="center" valign="top">
+64-bit UINT
+</td>
+<td align="center" valign="top">
+Command must be executed as UID
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+GID
+</td>
+<td align="center" valign="top">
+64-bit UINT
+</td>
+<td align="center" valign="top">
+Command must be executed as GID
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+Trigger
+</td>
+<td align="center" valign="top">
+64-bit UINT
+</td>
+<td align="center" valign="top">
+Next execution of entry (UNIX Timestamp)
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+Step
+</td>
+<td align="center" valign="top">
+64-bit UINT
+</td>
+<td align="center" valign="top">
+Incrementation value for Trigger
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+Expire
+</td>
+<td align="center" valign="top">
+64-bit UINT
+</td>
+<td align="center" valign="top">
+Remove Entry after this UNIX Timestamp
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+Command
+</td>
+<td align="center" valign="top">
+String
+</td>
+<td align="center" valign="top">
+Shell command (Subject)
+</td>
+
+</tr>
+
+</table>
+<div class="caption">
+Table 1 Scheduler Entry Structure
+</div>
+
+</div>
+
+</div>
+
+</blockquote>
+<div class="Unindented">
+Generic RUN Usage:
+</div>
+<blockquote class="Quotation">
+run SUBJ PREP [ ADVERB ARG | ARG ADVERB ] [ CONJ ... ]
+</blockquote>
+<div class="Unindented">
+Usage examples:
+</div>
+<blockquote class="Quotation">
+run ’ntpdate’ now<br/>
+run ’ntpdate’ in 1 hour<br/>
+run ’ntpdate’ on hour 22<br/>
+run ’ntpdate’ now then every 6 hours<br/>
+run ’ntpdate’ on weekday monday then every 1 week<br/>
+run ’ntpdate’ on day 15 then every 1 month until datetime is ’2018/01/01 01:00:00’<br/>
+run ’ntpdate’ now then every 3 hours and ’date &gt;&gt; /tmp/date.log’ in 3 hours then every 3 hours<br/>
+run ’tcpdump -i eth1 &gt; /tmp/tcpdump_eth1.log’ in 5 minutes and ’kill -TERM ‘pidof tcpdump‘’ in 10 minutes<br/>
+run ’free &gt;&gt; /tmp/mem_info.log’ now then every 5 seconds while in 10 minutes
+</blockquote>
+<div class="Unindented">
+After each successfully installed request, the uSched Client will return the corresponding Entry ID for each of the installed Scheduled Entries. To retrieve information regarding the currently installed Scheduled Entries, please refer to section <b>7.3.3 SHOW</b>.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.3.2">7.3.2</a> STOP
+</h3>
+<div class="Unindented">
+The STOP operation cancels and removes a previously installed Scheduled Entry. The generic STOP Usage is:
+</div>
+<blockquote class="Quotation">
+stop SUBJ
+</blockquote>
+<div class="Unindented">
+Where SUBJ (Subject) must be at least a valid and installed Entry ID, or the special SUBJ value ’all’, which will stop all the currently installed Scheduled Entries for the calling user. Multiple Entry IDs can be specified in a comma separated list, as specified in the following usage examples:
+</div>
+<blockquote class="Quotation">
+stop 0xD9947D5E546B3707<br/>
+stop 0xD9947D5E546B3707,0x0B30462B97160FC4<br/>
+stop 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642<br/>
+stop all
+</blockquote>
+<div class="Unindented">
+Note that although in the examples above the hexadecimal format was used, the Entry ID value can be also specified in decimal format.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.3.3">7.3.3</a> SHOW
+</h3>
+<div class="Unindented">
+The SHOW operation displays the currently installed Scheduled Entries. It’s generic Usage is:
+</div>
+<blockquote class="Quotation">
+show SUBJ
+</blockquote>
+<div class="Unindented">
+Where SUBJ (Subject) must be at least a valid and installed Entry ID, or the special SUBJ value ’all’, which will display all the currently installed entries for the calling user. Multiple Entry IDs can be specified in a comma separated list, as specified in the following usage examples:
+</div>
+<blockquote class="Quotation">
+show 0xD9947D5E546B3707<br/>
+show 0xD9947D5E546B3707,0x0B30462B97160FC4<br/>
+show 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642<br/>
+show all
+</blockquote>
+<div class="Unindented">
+Note that although in the examples above the haxadecimal format was used, the Entry ID value can be also specified in decimal format.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.4">7.4</a> Subjects
+</h2>
+<div class="Unindented">
+A Subject is the second mandatory argument of the uSched Client. Its meaning is directly related to the Operation that preceeds it. The following subsections describe the acceptable subjects for each uSched Client operation.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.4.1">7.4.1</a> Subjects of RUN Operation
+</h3>
+<div class="Unindented">
+The RUN Operation Subject is any valid shell (/bin/sh) command. Each subject is passed to the -c option of /bin/sh. There are several uSched specific variables that can be used in the Subject string that are replaced each time the Entry ID is triggered to be executed by the uSched Daemon scheduler. These variables are described in the table below:
+</div>
+<blockquote class="Quotation">
+<div class="float">
+<a class="Label" name="Table-2"> </a><div class="table">
+<table>
+<tr>
+<td align="center" valign="top">
+Variable
+</td>
+<td align="center" valign="top">
+Description
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@id@@
+</td>
+<td align="center" valign="top">
+Current Entry ID
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@username@@
+</td>
+<td align="center" valign="top">
+Username used in the remote authentication for the current Entry
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@uid@@
+</td>
+<td align="center" valign="top">
+The UID of the current Entry
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@gid@@
+</td>
+<td align="center" valign="top">
+The GID of the current Entry
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@trigger@@
+</td>
+<td align="center" valign="top">
+The current trigger value of the Entry (UNIX timestamp)
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@step@@
+</td>
+<td align="center" valign="top">
+The current step value of the Entry (in seconds)
+</td>
+
+</tr>
+<tr>
+<td align="center" valign="top">
+@@expire@@
+</td>
+<td align="center" valign="top">
+The expire value of the Entry (UNIX timestamp)
+</td>
+
+</tr>
+
+</table>
+<div class="caption">
+Table 2 RUN Subject Variables
+</div>
+
+</div>
+
+</div>
+
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.4.2">7.4.2</a> Subjects of SHOW Operation
+</h3>
+<div class="Unindented">
+The SHOW Operation Subject is any valid Entry ID or a comma separated list of Entry IDs present on the uSched Daemon scheduling list, or the special subject ’all’ that targets all the Entry IDs.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.4.3">7.4.3</a> Subjects of STOP Operation
+</h3>
+<div class="Unindented">
+The STOP Operation Subject is any valid Entry ID or a comma separated list of Entry IDs present on the uSched Daemon scheduling list, or the special subject ’all’ that targets all the Entry IDs.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.5">7.5</a> Prepositions
+</h2>
+<div class="Unindented">
+Prepositions are the third mandatory argument of the uSched Client and the acceptable keywords after a Subject and/or after a Conjunction. Valid Prepositions after a Subject are the IN, NOW and ON, while the valid Prepositions after a Conjunction are the EVERY and TO.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.5.1">7.5.1</a> EVERY
+</h3>
+<div class="Unindented">
+Indicates that the following adverbial of time value is the step of the scheduled entry. The following example will execute the command ’df -h &gt;&gt; /tmp/out.txt’ now, then every 5 seconds:
+</div>
+<blockquote class="Quotation">
+$ usc run ’df -h &gt;&gt; /tmp/out.txt’ now then every 5 seconds
+</blockquote>
+<div class="Unindented">
+EVERY Preposition always take the adverbial of time format as ARG ADVERB (as in, &lt;value&gt; &lt;unit&gt;).
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.5.2">7.5.2</a> IN
+</h3>
+<div class="Unindented">
+If used after a Subject, it indicates that the entry should be first triggered in a specified amount of time, defined by the value of the following adverbial of time. If used after a WHILE conjunction, it indicates that the entry should be stopped in a specified amount of time, defined by the value of the following adverbial of time. The followig example will execute the command ’ntpdate’ in 10 minutes:
+</div>
+<blockquote class="Quotation">
+$ usc run ntpdate in 10 minutes
+</blockquote>
+<div class="Unindented">
+IN Preposition always take the adverbial of time format as ARG ADVERB (as in, &lt;value&gt; &lt;unit&gt;).
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.5.3">7.5.3</a> NOW
+</h3>
+<div class="Unindented">
+Indicates that the entry should be first triggered right after it is installed. The following example will execute the command ’take_shot.sh’ right after the entry is installed:
+</div>
+<blockquote class="Quotation">
+$ usc run take_shot.sh now
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.5.4">7.5.4</a> ON
+</h3>
+<div class="Unindented">
+Indicates that the entry should be first triggered on a specified point in time, defined by the value of the following adverbial of time. The following command will execute the command ’do_backups.sh’ on day 15 of the month March of the year 2015:
+</div>
+<blockquote class="Quotation">
+$ usc run do_backups.sh on date 2015-03-15
+</blockquote>
+<div class="Unindented">
+ON Preposition always take the adverbial of time format as ADVERG ARG (as in, &lt;unit&gt; &lt;value&gt;).
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.5.5">7.5.5</a> TO
+</h3>
+<div class="Unindented">
+Only acceptable after an UNTIL conjuction, indicating that the entry should be stopped on a specified point in time, defined by the value of the following adverbial of time. The following command will execute the command ntpdate now, then every 6 hours, and stop the entry when the month is May:
+</div>
+<blockquote class="Quotation">
+$ usc run ntpdate now then every 6 hours until to month 5
+</blockquote>
+<div class="Unindented">
+TO Preposition always take the adverbial of time format as ADVERG ARG (as in, &lt;unit&gt; &lt;value&gt;).
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.6">7.6</a> Adverbials of Time
+</h2>
+<div class="Unindented">
+The Adverbials of Time defines a time value based on the specified unit. Units ranges from seconds to years and also may take the form of special values such as weekdays, dates, datetimes and timestamps.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.1">7.6.1</a> SECONDS
+</h3>
+<div class="Unindented">
+Define a time value in seconds as a positive integer (ARG ADVERB), or a specific second.ranging from 0 to 59 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh now then every 30 seconds
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.2">7.6.2</a> MINUTES
+</h3>
+<div class="Unindented">
+Define a time value in minutes as a positive integer (ARG ADVERB), or a specific minute ranging from 0 to 59 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on minute 10 then every 10 minutes
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.3">7.6.3</a> HOURS
+</h3>
+<div class="Unindented">
+Define a time value in hours as a positive integer (ARG ADVERB), or a specific hour ranging from 0 to 23 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on hour 6 then every 24 hours
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.4">7.6.4</a> DAYS
+</h3>
+<div class="Unindented">
+Define a time value in days as a positive integer (ARG ADVERB), or a specific day ranging from 1 to 31 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on day 11 then every 2 days
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.5">7.6.5</a> WEEKS
+</h3>
+<div class="Unindented">
+Define a time value in weeks as a positive integer (ARG ADVERB), or a specific week ranging from 1 to 52 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on week 32 then every 2 weeks
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.6">7.6.6</a> MONTHS
+</h3>
+<div class="Unindented">
+Define a time value in months as a positive integer (ARG ADVERB), or a specific month ranging from 1 to 12 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on month 4 then every 1 month
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.7">7.6.7</a> YEARS
+</h3>
+<div class="Unindented">
+Define a time value in years as a positive integer (ARG ADVERB), or a specific year ranging from 0 to 2100 (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on year 2016 then every 1 year
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.8">7.6.8</a> WEEKDAYS
+</h3>
+<div class="Unindented">
+Define a specific weekday ranging from 0 to 6 (ADVERB ARG), or the special keywords sunday, monday, thursday, wednesday, tuesday, friday and saturday.
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on weekday monday then every 2 weeks
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.9">7.6.9</a> TIME
+</h3>
+<div class="Unindented">
+Define a specific time in the format HH:MM:SS (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on time 18:00:00 then every 10 minutes
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.10">7.6.10</a> DATE
+</h3>
+<div class="Unindented">
+Define a specific date in the format YYYY-MM-DD (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on date 2015/03/15 then every 15 days
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.11">7.6.11</a> DATETIME
+</h3>
+<div class="Unindented">
+Define a specific datetime in the format YYYY-MM-DD HH:MM:SS (ADVERB ARG).
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on datetime ’2015/03/15 18:00:00’ then every 10 minutes until to datetime ’2015/04/30 10:00:00’
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.6.12">7.6.12</a> TIMESTAMP
+</h3>
+<div class="Unindented">
+Define a specific timestamp. The value must be a positive integer (ADVERB ARG). Timestamp values lower than the current timestamp are automatically replaced with the current timestamp.
+</div>
+<blockquote class="Quotation">
+$ usc run sync_routine.sh on timestamp 1425544000 then every 3600 seconds until to timestamp 1425644000
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-7.7">7.7</a> Conjunctions
+</h2>
+<div class="Unindented">
+Conjunctions are used to aggregate prepositions. There is no limit for the number of conjunctions that can be used in a single uSched Client command. The expected keyword after a conjunction is always a preposition.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.7.1">7.7.1</a> AND
+</h3>
+<div class="Unindented">
+The AND Conjunction indicates that the next Preposition specifies another scheduling entry for the current subject. The following command will execute the ’sync’ binary now and on month May:
+</div>
+<blockquote class="Quotation">
+$ usc run ’sync’ now and on month 5
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.7.2">7.7.2</a> THEN
+</h3>
+<div class="Unindented">
+The THEN Conjunction expects an EVERY Preposition, being this the only valid preposition after this Conjunction. The following command will execute the ’sync’ binary every 5 seconds:
+</div>
+<blockquote class="Quotation">
+$ usc run sync now then every 5 seconds
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.7.3">7.7.3</a> UNTIL
+</h3>
+<div class="Unindented">
+The UNTIL Conjunction expects a TO Preposition, being this the only valid prepostion after this Conjunction. The UNTIL TO statement indicates that the scheduling entry will be stopped after this point in time is reached. The following command will execute the ’sync’ binary every 5 seconds until to time is ’18:00:00’:
+</div>
+<blockquote class="Quotation">
+$ usc run sync now then every 5 seconds until to time 18:00:00
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-7.7.4">7.7.4</a> WHILE
+</h3>
+<div class="Unindented">
+The WHILE Conjunction expects a IN Preposition, being this the only valid preposition after this Conjunction. The WHILE IN statement indicates that the scheduling entry will be executed during the specified value as its adverbial of time, and stopped after it expires. For example, the following command will execute the binary ’sync’ every 5 seconds while in the next 30 seconds (as in, it will be executed 6 times):
+</div>
+<blockquote class="Quotation">
+$ usc run sync now then every 5 seconds while in 30 seconds
+</blockquote>
+<h1 class="Section">
+<a class="toc" name="toc-Section-8">8</a> uSched Admin
+</h1>
+<div class="Unindented">
+The uSched Admin component is one of the interfaces between the system administrator and the uSched Daemon and uSched Executer. It allows the administrator to configure the daemon.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-8.1">8.1</a> Generic Usage
+</h2>
+<div class="Unindented">
+The generic usage for uSched Admin is:
+</div>
+<blockquote class="Quotation">
+usa OP CATEGORY [ ARG1 ARG2 ... ]<br/>
+usa OP CATEGORY [ COMPONENT PROPERTY VALUE ]
+</blockquote>
+<div class="Unindented">
+Usage examples:
+</div>
+<blockquote class="Quotation">
+$ usa change auth remote users 1<br/>
+$ usa commit auth<br/>
+$ usa add users testuser 10000 10000<br/>
+$ usa show users<br/>
+$ usa rollback users<br/>
+$ usa show all<br/>
+$ usa commit all
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-8.2">8.2</a> Operations
+</h2>
+<div class="Unindented">
+The uSched Admin Operations affect the current configuration of the uSched Daemon and uSched Executer. Each Operation will mangle the target category accordingly.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.2.1">8.2.1</a> ADD
+</h3>
+<div class="Unindented">
+Adds a new Component Property to the target Category. This operation is only valid on AUTH and USERS Categories. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa add users testuser 10000 10000<br/>
+Password:<br/>
+# usa commit users
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.2.2">8.2.2</a> CHANGE
+</h3>
+<div class="Unindented">
+Changes a Component Property on the target Category. This operation is valid for all Categories, except the ALL category. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa change auth remote users 1<br/>
+# usa commit auth<br/>
+# usa change users testuser 5000 5000<br/>
+Password:<br/>
+# usa commit users
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.2.3">8.2.3</a> COMMIT
+</h3>
+<div class="Unindented">
+Commits the current Component Properties to the target Category. This operation is valid for all Categories. If the ALL Category is used, all the Categories are affected. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa commit all<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.2.4">8.2.4</a> DELETE
+</h3>
+<div class="Unindented">
+Deletes a Property from the target Category. This operation is only valid on AUTH and USERS Categories. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa delete users testuser<br/>
+# usa commit users
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.2.5">8.2.5</a> ROLLBACK
+</h3>
+<div class="Unindented">
+Rollback the uncommited changes from the target Category. This operation is valid for all Categories. If the ALL Category is used, all the Categories are affected. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa rollback users<br/>
+# usa rollback all
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.2.6">8.2.6</a> SHOW
+</h3>
+<div class="Unindented">
+Shows the Component Properties of the target Categoy. This operation is valid for all Categories. If the ALL Category is used, all the Categories are shown. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa show core<br/>
+# usa show all<br/>
+# usa show network<br/>
+# usa show auth<br/>
+# usa show core<br/>
+# usa show users
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-8.3">8.3</a> Categories
+</h2>
+<div class="Unindented">
+There are four (4) main configuration Categories available: The AUTH, CORE, NETWORK and USERS. There is a fifth special category named ALL that do not implement Components nor Properties, being its purpose to affect all the four main categories at once.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.3.1">8.3.1</a> ALL
+</h3>
+<div class="Unindented">
+The ALL Category doesn’t contain Components nor Properties. It should only be used on Operations that are intended to affect all the main Categories.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.3.2">8.3.2</a> AUTH
+</h3>
+<div class="Unindented">
+The AUTH Category configures the authentication and authorization mechanisms of the uSched Daemon and Executer. It contains the BLACKLIST, LOCAL, REMOTE and WHITELIST Components.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.3.3">8.3.3</a> CORE
+</h3>
+<div class="Unindented">
+The CORE Category configures the core parameters of the uSched Daemon and Executer. It contains the DELTA, JAIL, PMQ, PRIVDROP, SERIALIZE and THREAD Components.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.3.4">8.3.4</a> NETWORK
+</h3>
+<div class="Unindented">
+The NETWORK Category configures the network parameters of the uSched Daemon. It contains the BIND, CONN and SOCK Components.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.3.5">8.3.5</a> USERS
+</h3>
+<div class="Unindented">
+The USERS Category configures the authorized remote users that connect to the uSched Daemon. This Category does not implement any Components and uses a special syntax for the ADD, CHANGE and DELETE Operations:
+</div>
+<blockquote class="Quotation">
+# usa add users USERNAME UID GID<br/>
+# usa change users USERNAME UID GID<br/>
+# usa delete users USERNAME
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-8.4">8.4</a> Components
+</h2>
+<div class="Unindented">
+The Categories CORE, NETWORK and AUTH contain a set of configurable Components. The following subsections describe all the available Components respective Category from which they belong.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.1">8.4.1</a> BIND
+</h3>
+<div class="Unindented">
+Available on NETWORK Category. Contains the Properties ADDR and PORT. Used to configure the binding address and port of the uSched Daemon TCP service. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change network bind addr 127.0.0.1<br/>
+# usa change network bind port 7600<br/>
+# usa commit network
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.2">8.4.2</a> BLACKLIST
+</h3>
+<div class="Unindented">
+Available on AUTH Category. Contains the Properties UID and GID. Used to disallow specific GIDs and UIDs to authenticate on the uSched Daemon. Blacklists take precedence over whitelists. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change auth blacklist uid 10000,20000<br/>
+# usa add auth blacklist uid 30000<br/>
+# usa delete auth blacklist uid 20000<br/>
+# usa commit auth<br/>
+# usa change auth blacklist uid ’’<br/>
+# usa commit auth
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.3">8.4.3</a> CONN
+</h3>
+<div class="Unindented">
+Available on NETWORK Category. Contains the Properties LIMIT and TIMEOUT. Used to specify the connection controls of the uSched Daemon. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change network conn addr 0.0.0.0<br/>
+# usa change network conn port 7600<br/>
+# usa commit network
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.4">8.4.4</a> DELTA
+</h3>
+<div class="Unindented">
+Available on CORE Category. Contains the Properties NOEXEC and RELOAD. Used to control the no execution and reload tolerances of the uSched Daemon. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change core delta noexec 5<br/>
+# usa change core delta reload 900<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.5">8.4.5</a> JAIL
+</h3>
+<div class="Unindented">
+Available on CORE Category. Contains the Property DIR. Used to specify a jail directory that the uSched Daemon will chroot() into. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change core jail dir /var/cache/usched/jail<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.6">8.4.6</a> LOCAL
+</h3>
+<div class="Unindented">
+Available on AUTH Category. Contains the Property USE. Used to enable or disable the access of the local system users to the uSched Daemon. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change auth local use 1<br/>
+# usa commit auth
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.7">8.4.7</a> PMQ
+</h3>
+<div class="Unindented">
+Available on CORE Category. Contains the Properties MSGMAX, MSGSIZE and NAME. Used to configure the Posix Message Queue that allows the communication between the uSched Daemon and uSched Executer. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change core pmq msgmax 128<br/>
+# usa change core pmq msgsize 1024<br/>
+# usa change core name /uschedpmq01<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.8">8.4.8</a> PRIVDROP
+</h3>
+<div class="Unindented">
+Available on CORE Category. Contains the Properties GROUP and USER. Used to indicate an unprivileged user and group that uSched Daemon will drop privileges to. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change core privdrop group nogroup<br/>
+# usa change core privdrop user nobody<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.9">8.4.9</a> REMOTE
+</h3>
+<div class="Unindented">
+Available on AUTH Category. Contains the Property USERS. Used to enable or disable the remote access to the uSched Daemon. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa change auth remote users 1<br/>
+# usa commit auth
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.10">8.4.10</a> SERIALIZE
+</h3>
+<div class="Unindented">
+Available on CORE Category. Contains the Property FILE. Used to speficy the serialization file used by the uSched Daemon to serialize states. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa change core serialize file /var/cache/usched/daemon.dat<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.11">8.4.11</a> SOCK
+</h3>
+<div class="Unindented">
+Available on NETWORK Category. Contains the Property NAME. Used to define the named socket, used by uSched Client and uSched Daemon. Usage example:
+</div>
+<blockquote class="Quotation">
+# usa change network sock name /var/run/usched.sock<br/>
+# usa commit network
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.12">8.4.12</a> THREAD
+</h3>
+<div class="Unindented">
+Available on CORE Category. Contains the Properties PRIORITY and WORKERS. Used to control the priority and number of uSched Daemon workers. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change core thread priority 20<br/>
+# usa change core thread workers 5<br/>
+# usa commit core
+</blockquote>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.4.13">8.4.13</a> WHITELIST
+</h3>
+<div class="Unindented">
+Available on AUTH Category. Contains the Properties GID and UID. Used to allow specific GIDs and UIDs to authenticate on the uSched Daemon. Usage examples:
+</div>
+<blockquote class="Quotation">
+# usa change auth whitelist uid 10000,20000<br/>
+# usa add auth whitelist uid 30000<br/>
+# usa delete auth whitelist uid 20000<br/>
+# usa commit auth<br/>
+# usa change auth whitelist uid ’’<br/>
+# usa commit auth
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-8.5">8.5</a> Properties
+</h2>
+<div class="Unindented">
+The following subsections describe the available Component Properties.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.1">8.5.1</a> ADDR
+</h3>
+<div class="Unindented">
+An IPv4 address.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.2">8.5.2</a> DIR
+</h3>
+<div class="Unindented">
+A valid directory. This is a string value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.3">8.5.3</a> FILE
+</h3>
+<div class="Unindented">
+A valid, or possible to be created, filename. This is a string value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.4">8.5.4</a> GID
+</h3>
+<div class="Unindented">
+A Group ID. This is an integer value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.5">8.5.5</a> GROUP
+</h3>
+<div class="Unindented">
+A system group name. This is a string value.and must be a valid system group name.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.6">8.5.6</a> LIMIT
+</h3>
+<div class="Unindented">
+The upper limit of a Component. This is a value greater than 0.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.7">8.5.7</a> MSGMAX
+</h3>
+<div class="Unindented">
+The maximum number of messages a Component can hold. This is an integer value greater than 0.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.8">8.5.8</a> MSGSIZE
+</h3>
+<div class="Unindented">
+The maximum size of the messages belonging to a Component. This is an integer value greater than 0.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.9">8.5.9</a> NAME
+</h3>
+<div class="Unindented">
+The name of a component. This is a string value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.10">8.5.10</a> NOEXEC
+</h3>
+<div class="Unindented">
+The number of seconds after which a Component should ignore executions. This is an integer value greater than 0.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.11">8.5.11</a> PORT
+</h3>
+<div class="Unindented">
+The port number of a Component. This is an integer ranging from 1 to 65535.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.12">8.5.12</a> PRIORITY
+</h3>
+<div class="Unindented">
+The priority of a component. This is an integer value ranging from 0 (highest priority) and 30 (lowest priority).
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.13">8.5.13</a> RELOAD
+</h3>
+<div class="Unindented">
+The number of elapsed seconds that trigger a component to be reloaded. This is an integer value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.14">8.5.14</a> TIMEOUT
+</h3>
+<div class="Unindented">
+The number of seconds of inactivity to consider a component as expired. This is an integer value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.15">8.5.15</a> UID
+</h3>
+<div class="Unindented">
+A User ID. This is an integer value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.16">8.5.16</a> USE
+</h3>
+<div class="Unindented">
+Whether a Component shall be used. This is a boolean value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.17">8.5.17</a> USER
+</h3>
+<div class="Unindented">
+A system user name. This is a string value and must be a valid system user name.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.18">8.5.18</a> USERS
+</h3>
+<div class="Unindented">
+The availability of users for a Component. This is a boolean value.
+</div>
+<h3 class="Subsubsection">
+<a class="toc" name="toc-Subsubsection-8.5.19">8.5.19</a> WORKERS
+</h3>
+<div class="Unindented">
+The maximum number of workers that a Component will use. This is a positive, greater than zero, integer.
+</div>
+<h1 class="Part">
+<a class="toc" name="toc-Part-IV">Part IV.</a> Administration and Configuration
+</h1>
+<h1 class="Section">
+<a class="toc" name="toc-Section-9">9</a> uSched Services Management
+</h1>
+<div class="Unindented">
+The uSched Services are managed by the ’usched’ command that is installed by default in /usr/sbin/usched. Although it is possible to manage the services directly through this command, it is advisable to install the initialization scripts and manage the services with the appropriate operating system managing interface. All the operations implemented in /usr/sbin/usched are available for the installed initialization scripts.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-9.1">9.1</a> Starting uSched Services
+</h2>
+<div class="Unindented">
+The following command will start all the required uSched Services:
+</div>
+<blockquote class="Quotation">
+# usched start
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-9.2">9.2</a> Stopping uSched Services
+</h2>
+<div class="Unindented">
+The following command will stop all uSched services:
+</div>
+<blockquote class="Quotation">
+# usched stop
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-9.3">9.3</a> Reloading uSched Services
+</h2>
+<div class="Unindented">
+To reload the uSched services, execute:
+</div>
+<blockquote class="Quotation">
+# usched reload
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-9.4">9.4</a> Flushing uSched Services state
+</h2>
+<div class="Unindented">
+To force the serialization of the uSched Services state, execute:
+</div>
+<blockquote class="Quotation">
+# usched flush
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-9.5">9.5</a> Forcing the stop of uSched Services
+</h2>
+<div class="Unindented">
+If for some reason the uSched Services weren’t stopped gracefully (caused by a power cut, operating system crash, etc) and the ’usched start’ command isn’t being able to start the services, it is possible to force stop of the uSched Services, reseting the status of the service to unitialized:
+</div>
+<blockquote class="Quotation">
+# usched force_stop<br/>
+# usched start
+</blockquote>
+<h1 class="Section">
+<a class="toc" name="toc-Section-10">10</a> uSched Services Configuration
+</h1>
+<div class="Unindented">
+The following subsections will describe a few common configuration examples for the uSched Services. Typically, all the other properties fit most of the systems with their default values. For more advanced configurations, refer to section <b>8. uSched Admin</b>.
+</div>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-10.1">10.1</a> Setting up remote access
+</h2>
+<div class="Unindented">
+The following example will enable remote access on port 7600 on all network interfaces. It will also authorize remote users to authenticate and will add a new remote user called ’myusername’ with UID 1000 and GID 1000:
+</div>
+<blockquote class="Quotation">
+# usa change network bind addr 0.0.0.0<br/>
+# usa change network bind port 7600<br/>
+# usa change auth remote users 1<br/>
+# usa add users myusername 1000 1000<br/>
+# usa commit all
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-10.2">10.2</a> Changing unprivileged user and group
+</h2>
+<div class="Unindented">
+The following example will change the default unprivileged user and group (nobody, nogroup) to user ’someuser’ and group ’somegroup’:
+</div>
+<blockquote class="Quotation">
+# usa change core privdrop user someuser<br/>
+# usa change core privdrop group somegroup<br/>
+# usa commit core
+</blockquote>
+<h2 class="Subsection">
+<a class="toc" name="toc-Subsection-10.3">10.3</a> Managing blacklists and whitelists
+</h2>
+<div class="Unindented">
+The following example will blacklist the UID 1000 and UID 2000, preventing any request from these UIDs to be accepted:
+</div>
+<blockquote class="Quotation">
+# usa change auth blacklist uid 1000,2000<br/>
+# usa commit auth
+</blockquote>
+<div class="Unindented">
+If we want to authorize only the UID 1000 and UID 2000, rejecting request from any possible other UID, we should insert them in the whitelist:
+</div>
+<blockquote class="Quotation">
+# usa change auth blacklist uid ’’<br/>
+# usa change auth whitelist uid 1000,2000<br/>
+# usa commit auth
+</blockquote>
+<div class="Unindented">
+If the same value is present in both white and blacklist, the blacklist takes precedence over the whitelist.
+</div>
+
+<hr class="footer"/>
+<div class="footer" id="generated-by">
+Document generated by <a href="http://elyxer.nongnu.org/">eLyXer 1.2.5 (2013-03-10)</a> on <span class="create-date">2015-03-07T00:29:23.833000</span>
+</div>
+</div>
+</body>
+</html>

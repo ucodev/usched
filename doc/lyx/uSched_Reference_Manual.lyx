@@ -1,0 +1,2575 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+uSched Services and Tools
+\end_layout
+
+\begin_layout Author
+Reference Manual - Rev.
+ A01
+\end_layout
+
+\begin_layout Date
+7th March 2015
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset FloatList table
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+Overview
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+uSched Services and Tools (or simply uSched) provide an interface to schedule
+ commands to be executed at a particular time, optionally repeating them
+ over a specificied interval, and optionally stopping them at any other
+ particular time.
+ It provides a simple and intuitive structured language that is intepreted
+ via a command line client, but can also be integrated into any programming
+ language through its client libraries and bindings.
+ It also operates as a client/server, where requests performed by clients
+ can affect local or remote machines where uSched services are running.
+\end_layout
+
+\begin_layout Section
+Components
+\end_layout
+
+\begin_layout Standard
+uSched architecture is divided into five (5) main components: The uSched
+ Admin, uSched Client, uSched Daemon, uSched Executer and uSched Monitor.
+ There are only two components that require direct user interaction: uSched
+ Admin (usa) for configuration and uSched Client (usc) for scheduling requests.
+ All the other components are self-managed and shall not be called directly.
+\end_layout
+
+\begin_layout Subsection
+uSched Admin (usa)
+\end_layout
+
+\begin_layout Standard
+The uSched Admin component is a command line binary utility named 'usa'.
+ Its purpose is to manage and handle configuration parameters that affect
+ the core, network, authentication and users used by the other uSched components.
+ Changes performed using uSched Admin won't be effective until a COMMIT
+ operation is performed.
+ Also any uncommitted changes can be rolled back by issuing the ROLLBACK
+ operation.
+ This utility requires super-user privileges to be used.
+\end_layout
+
+\begin_layout Subsection
+uSched Client (usc)
+\end_layout
+
+\begin_layout Standard
+The uSched Client component is a command line binary utility named 'usc'.
+ It allows the users to perform scheduling requests to the uSched Daemon
+ component.
+ This is the only component that can be executed by any non-blacklisted
+ (or all white-listed) users.
+ With a default installation, all the other uSched components will require
+ super-user privileges to be used.
+\end_layout
+
+\begin_layout Subsection
+uSched Daemon (usd)
+\end_layout
+
+\begin_layout Standard
+The uSched Daemon component is a system service that receives and processes
+ all the scheduling requests performed by uSched clients.
+ It manages the authentication and authorization, schedulers and is the
+ only component that directly communicates with the uSched Executer.
+ With a default installation, this component requires super-user privileges
+ to be started, although it will drop it's privileges after start-up routines
+ are performed.
+\end_layout
+
+\begin_layout Subsection
+uSched Executer (use)
+\end_layout
+
+\begin_layout Standard
+The uSched Executer component is a system service that receives execution
+ requests from the uSched Daemon.
+ Every time a scheduled entry is triggered by the uSched Daemon scheduler,
+ it will be passed to the uSched Executer to be executed with the required
+ privileges.
+ This component requires super-user privileges with a default installation
+ in order to be able to execute scheduled entries for all the users.
+\end_layout
+
+\begin_layout Subsection
+uSched Monitor (usm)
+\end_layout
+
+\begin_layout Standard
+The uSched Monitor component is a simple command line binary utility that
+ starts and daemonizes the uSched Daemon and uSched Executer and monitors
+ their processes state.
+ It will restart or reload the services whenever it is required to do so.
+ This utility requires super-user privileges to operate correctly.
+\end_layout
+
+\begin_layout Section
+Portability
+\end_layout
+
+\begin_layout Standard
+uSched is designed to be compliant with any POSIX operating system.
+ There are some features that may not be enabled by default in the case
+ that some non-portable calls being unavailable for the target operating
+ system, such as chroot().
+ To disable such calls and features, set the CONFIG_POSIX_FULL definition
+ to 1 in the include/config.h file.
+ uSched Client will also compile on most Windows versions and the API bindings
+ for C# are promptly available on the project bindings/csharp directory.
+\end_layout
+
+\begin_layout Part
+Installation
+\end_layout
+
+\begin_layout Section
+Getting uSched
+\end_layout
+
+\begin_layout Standard
+Currently, uSched Services and Tools can be downloaded from the following
+ GitHub URL:
+\end_layout
+
+\begin_layout Quotation
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/ucodev/usched"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To clone the repository performed the following command (GIT must be installed
+ on the system):
+\end_layout
+
+\begin_layout Quotation
+$ git clone https://github.com/ucodev/usched
+\end_layout
+
+\begin_layout Standard
+It can also be downloaded as a ZIP package via 'wget' utility:
+\end_layout
+
+\begin_layout Quotation
+$ wget https://github.com/ucodev/usched/archive/master.zip
+\end_layout
+
+\begin_layout Quotation
+$ unzip -d usched master.zip
+\end_layout
+
+\begin_layout Quotation
+$ cd usched
+\end_layout
+
+\begin_layout Standard
+Or via 'curl' utility:
+\end_layout
+
+\begin_layout Quotation
+$ curl -o https://github.com/ucodev/usched/archive/master.zip
+\end_layout
+
+\begin_layout Quotation
+$ unzip -d usched master.zip
+\end_layout
+
+\begin_layout Quotation
+$ cd usched
+\end_layout
+
+\begin_layout Section
+Generic Setup
+\end_layout
+
+\begin_layout Standard
+After downloading (and extracting) the uSched source package, it is recommended
+ to read the version specific README.txt and INSTALL.txt files that are present
+ on the doc/ direcotry.
+ Typically, it can be built and installed by executing the following single
+ command from the source base directory, as super-user:
+\end_layout
+
+\begin_layout Quotation
+# ./deploy
+\end_layout
+
+\begin_layout Standard
+This will install all the required dependencies and uSched base system daemons
+ and tools.
+ For System-Specific initialization scripts and utilities, please refer
+ to the next section (6).
+\end_layout
+
+\begin_layout Section
+System-Specific Procedures
+\end_layout
+
+\begin_layout Standard
+Since initialization scripts differ on many systems, they currently need
+ to be installed through a separe procedure that isn't included in the 'deploy'
+ script.
+ The generic usage to install System-Specific utilieies is:
+\end_layout
+
+\begin_layout Quotation
+# make install_<system>
+\end_layout
+
+\begin_layout Standard
+Where <system> is a keyword that identifies the target system.
+ The supported keywords are described in the following sub-sections.
+\end_layout
+
+\begin_layout Subsection
+Linux/Debian
+\end_layout
+
+\begin_layout Standard
+The available keywords are:
+\end_layout
+
+\begin_layout Quotation
+classic_debian
+\end_layout
+
+\begin_layout Quotation
+systemd
+\end_layout
+
+\begin_layout Standard
+If the Debian version doesn't fully support systemd by default, the classic_debi
+an keyword shall be used:
+\end_layout
+
+\begin_layout Quotation
+# make install_classic_debian
+\end_layout
+
+\begin_layout Standard
+Otherwise, for Debian versions with systemd enabled:
+\end_layout
+
+\begin_layout Quotation
+# make install_systemd
+\end_layout
+
+\begin_layout Subsection
+Linux/RedHat
+\end_layout
+
+\begin_layout Standard
+The available keywords are:
+\end_layout
+
+\begin_layout Quotation
+classic_redhat
+\end_layout
+
+\begin_layout Quotation
+systemd
+\end_layout
+
+\begin_layout Standard
+If the RedHat version doesn't fully support systemd by default, the classic_redh
+at keyword shall be used:
+\end_layout
+
+\begin_layout Quotation
+# make install_classic_redhat
+\end_layout
+
+\begin_layout Standard
+Otherwise, for RedHat versions with systemd enabled:
+\end_layout
+
+\begin_layout Quotation
+# make install_systemd
+\end_layout
+
+\begin_layout Subsection
+BSD/FreeBSD
+\end_layout
+
+\begin_layout Standard
+The available keywords are:
+\end_layout
+
+\begin_layout Quotation
+freebsd
+\end_layout
+
+\begin_layout Standard
+To install the FreeBSD initialization scripts, execute:
+\end_layout
+
+\begin_layout Quotation
+# make install_freebsd
+\end_layout
+
+\begin_layout Part
+Usage
+\end_layout
+
+\begin_layout Section
+uSched Client
+\end_layout
+
+\begin_layout Standard
+The uSched Client component is the interface between the users and the uSched
+ Daemon.
+ It allows the user to install, remove or show Scheduled Entries.
+\end_layout
+
+\begin_layout Subsection
+Generic Usage
+\end_layout
+
+\begin_layout Standard
+The generic usage for uSched Client is:
+\end_layout
+
+\begin_layout Quotation
+usc [ OPTIONS ] OP SUBJ { PREP [ AVERB ARG | ARG ADVERB ] [ CONJ ...
+ ] }
+\end_layout
+
+\begin_layout Standard
+Usage examples:
+\end_layout
+
+\begin_layout Quotation
+$ usc run 'df -h > /tmp/output' in 10 seconds
+\end_layout
+
+\begin_layout Quotation
+$ usc run 'take_screenshot.sh' on hour 8 then every 30 minutes
+\end_layout
+
+\begin_layout Quotation
+$ usc run 'do_work.py' on hour 8 then every 1 hour until to hour 17
+\end_layout
+
+\begin_layout Quotation
+$ usc run 'do_weekend_stuff.pl' on weekday saturday then every week
+\end_layout
+
+\begin_layout Quotation
+# usc run 'tcpdump -i eth0 > /tmp/tcpdump.log' now and 'kill -TERM `pidof
+ tcpdump`' in 1 hour
+\end_layout
+
+\begin_layout Quotation
+$ usc show all
+\end_layout
+
+\begin_layout Subsection
+Options
+\end_layout
+
+\begin_layout Standard
+The available command lines options are:
+\end_layout
+
+\begin_layout Quotation
+
+\series bold
+-h
+\series default
+ Displays help
+\end_layout
+
+\begin_layout Quotation
+
+\series bold
+-H
+\series default
+ IP Address of the remote server
+\end_layout
+
+\begin_layout Quotation
+
+\series bold
+-p
+\series default
+ TCP port of the remote server
+\end_layout
+
+\begin_layout Quotation
+
+\series bold
+-U
+\series default
+ Username for remote authentication
+\end_layout
+
+\begin_layout Quotation
+
+\series bold
+-P
+\series default
+ Password for remote authentication
+\end_layout
+
+\begin_layout Standard
+Example:
+\end_layout
+
+\begin_layout Quotation
+$ usc -H 192.168.0.1 -U testuser -P testpass show all
+\end_layout
+
+\begin_layout Subsection
+Operations
+\end_layout
+
+\begin_layout Standard
+uSched Client Operations are the first mandaory argument.
+ The Client expects at least two (2) mandatory arguments to be accepted
+ for the Operations SHOW and STOP (the Operation itself and a Subject),
+ and three (3) mandatory arguments for the RUN Operation (the Operation
+ itself, a Subject and a Preposition): The following sub-sections describe
+ in more detail the usage for the currently supported Operations..
+\end_layout
+
+\begin_layout Subsubsection
+RUN
+\end_layout
+
+\begin_layout Standard
+The RUN Operation translates and requests the installation of one or more
+ Scheduler Entries on uSched Services..A Scheduler Entry structure is described
+ by the following table:
+\end_layout
+
+\begin_layout Quotation
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="3">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Field
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Type
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64-bit UINT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Scheduler Entry ID
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Username
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+String
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Username, if remotely requested
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+UID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64-bit UINT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Command must be executed as UID
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+GID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64-bit UINT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Command must be executed as GID
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Trigger
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64-bit UINT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Next execution of entry (UNIX Timestamp)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Step
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64-bit UINT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Incrementation value for Trigger
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Expire
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64-bit UINT
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Remove Entry after this UNIX Timestamp
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Command
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+String
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Shell command (Subject)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Scheduler Entry Structure
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Generic RUN Usage:
+\end_layout
+
+\begin_layout Quotation
+run SUBJ PREP [ ADVERB ARG | ARG ADVERB ] [ CONJ ...
+ ]
+\end_layout
+
+\begin_layout Standard
+Usage examples:
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' now
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' in 1 hour
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' on hour 22
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' now then every 6 hours
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' on weekday monday then every 1 week
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' on day 15 then every 1 month until datetime is '2018/01/01
+ 01:00:00'
+\end_layout
+
+\begin_layout Quotation
+run 'ntpdate' now then every 3 hours and 'date >> /tmp/date.log' in 3 hours
+ then every 3 hours
+\end_layout
+
+\begin_layout Quotation
+run 'tcpdump -i eth1 > /tmp/tcpdump_eth1.log' in 5 minutes and 'kill -TERM
+ `pidof tcpdump`' in 10 minutes
+\end_layout
+
+\begin_layout Quotation
+run 'free >> /tmp/mem_info.log' now then every 5 seconds while in 10 minutes
+\end_layout
+
+\begin_layout Standard
+After each successfully installed request, the uSched Client will return
+ the corresponding Entry ID for each of the installed Scheduled Entries.
+ To retrieve information regarding the currently installed Scheduled Entries,
+ please refer to section 
+\series bold
+7.3.3 SHOW
+\series default
+.
+\end_layout
+
+\begin_layout Subsubsection
+STOP
+\end_layout
+
+\begin_layout Standard
+The STOP operation cancels and removes a previously installed Scheduled
+ Entry.
+ The generic STOP Usage is:
+\end_layout
+
+\begin_layout Quotation
+stop SUBJ
+\end_layout
+
+\begin_layout Standard
+Where SUBJ (Subject) must be at least a valid and installed Entry ID, or
+ the special SUBJ value 'all', which will stop all the currently installed
+ Scheduled Entries for the calling user.
+ Multiple Entry IDs can be specified in a comma separated list, as specified
+ in the following usage examples:
+\end_layout
+
+\begin_layout Quotation
+stop 0xD9947D5E546B3707
+\end_layout
+
+\begin_layout Quotation
+stop 0xD9947D5E546B3707,0x0B30462B97160FC4
+\end_layout
+
+\begin_layout Quotation
+stop 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642
+\end_layout
+
+\begin_layout Quotation
+stop all
+\end_layout
+
+\begin_layout Standard
+Note that although in the examples above the hexadecimal format was used,
+ the Entry ID value can be also specified in decimal format.
+\end_layout
+
+\begin_layout Subsubsection
+SHOW
+\end_layout
+
+\begin_layout Standard
+The SHOW operation displays the currently installed Scheduled Entries.
+ It's generic Usage is:
+\end_layout
+
+\begin_layout Quotation
+show SUBJ
+\end_layout
+
+\begin_layout Standard
+Where SUBJ (Subject) must be at least a valid and installed Entry ID, or
+ the special SUBJ value 'all', which will display all the currently installed
+ entries for the calling user.
+ Multiple Entry IDs can be specified in a comma separated list, as specified
+ in the following usage examples:
+\end_layout
+
+\begin_layout Quotation
+show 0xD9947D5E546B3707
+\end_layout
+
+\begin_layout Quotation
+show 0xD9947D5E546B3707,0x0B30462B97160FC4
+\end_layout
+
+\begin_layout Quotation
+show 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642
+\end_layout
+
+\begin_layout Quotation
+show all
+\end_layout
+
+\begin_layout Standard
+Note that although in the examples above the haxadecimal format was used,
+ the Entry ID value can be also specified in decimal format.
+\end_layout
+
+\begin_layout Subsection
+Subjects
+\end_layout
+
+\begin_layout Standard
+A Subject is the second mandatory argument of the uSched Client.
+ Its meaning is directly related to the Operation that preceeds it.
+ The following subsections describe the acceptable subjects for each uSched
+ Client operation.
+\end_layout
+
+\begin_layout Subsubsection
+Subjects of RUN Operation
+\end_layout
+
+\begin_layout Standard
+The RUN Operation Subject is any valid shell (/bin/sh) command.
+ Each subject is passed to the -c option of /bin/sh.
+ There are several uSched specific variables that can be used in the Subject
+ string that are replaced each time the Entry ID is triggered to be executed
+ by the uSched Daemon scheduler.
+ These variables are described in the table below:
+\end_layout
+
+\begin_layout Quotation
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Variable
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@id@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Current Entry ID
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@username@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Username used in the remote authentication for the current Entry
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@uid@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The UID of the current Entry
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@gid@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The GID of the current Entry
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@trigger@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The current trigger value of the Entry (UNIX timestamp)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@step@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The current step value of the Entry (in seconds)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+@@expire@@
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The expire value of the Entry (UNIX timestamp)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+RUN Subject Variables
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Subjects of SHOW Operation
+\end_layout
+
+\begin_layout Standard
+The SHOW Operation Subject is any valid Entry ID or a comma separated list
+ of Entry IDs present on the uSched Daemon scheduling list, or the special
+ subject 'all' that targets all the Entry IDs.
+\end_layout
+
+\begin_layout Subsubsection
+Subjects of STOP Operation
+\end_layout
+
+\begin_layout Standard
+The STOP Operation Subject is any valid Entry ID or a comma separated list
+ of Entry IDs present on the uSched Daemon scheduling list, or the special
+ subject 'all' that targets all the Entry IDs.
+\end_layout
+
+\begin_layout Subsection
+Prepositions
+\end_layout
+
+\begin_layout Standard
+Prepositions are the third mandatory argument of the uSched Client and the
+ acceptable keywords after a Subject and/or after a Conjunction.
+ Valid Prepositions after a Subject are the IN, NOW and ON, while the valid
+ Prepositions after a Conjunction are the EVERY and TO.
+\end_layout
+
+\begin_layout Subsubsection
+EVERY
+\end_layout
+
+\begin_layout Standard
+Indicates that the following adverbial of time value is the step of the
+ scheduled entry.
+ The following example will execute the command 'df -h >> /tmp/out.txt' now,
+ then every 5 seconds:
+\end_layout
+
+\begin_layout Quotation
+$ usc run 'df -h >> /tmp/out.txt' now then every 5 seconds
+\end_layout
+
+\begin_layout Standard
+EVERY Preposition always take the adverbial of time format as ARG ADVERB
+ (as in, <value> <unit>).
+\end_layout
+
+\begin_layout Subsubsection
+IN
+\end_layout
+
+\begin_layout Standard
+If used after a Subject, it indicates that the entry should be first triggered
+ in a specified amount of time, defined by the value of the following adverbial
+ of time.
+ If used after a WHILE conjunction, it indicates that the entry should be
+ stopped in a specified amount of time, defined by the value of the following
+ adverbial of time.
+ The followig example will execute the command 'ntpdate' in 10 minutes:
+\end_layout
+
+\begin_layout Quotation
+$ usc run ntpdate in 10 minutes
+\end_layout
+
+\begin_layout Standard
+IN Preposition always take the adverbial of time format as ARG ADVERB (as
+ in, <value> <unit>).
+\end_layout
+
+\begin_layout Subsubsection
+NOW
+\end_layout
+
+\begin_layout Standard
+Indicates that the entry should be first triggered right after it is installed.
+ The following example will execute the command 'take_shot.sh' right after
+ the entry is installed:
+\end_layout
+
+\begin_layout Quotation
+$ usc run take_shot.sh now
+\end_layout
+
+\begin_layout Subsubsection
+ON
+\end_layout
+
+\begin_layout Standard
+Indicates that the entry should be first triggered on a specified point
+ in time, defined by the value of the following adverbial of time.
+ The following command will execute the command 'do_backups.sh' on day 15
+ of the month March of the year 2015:
+\end_layout
+
+\begin_layout Quotation
+$ usc run do_backups.sh on date 2015-03-15
+\end_layout
+
+\begin_layout Standard
+ON Preposition always take the adverbial of time format as ADVERG ARG (as
+ in, <unit> <value>).
+\end_layout
+
+\begin_layout Subsubsection
+TO
+\end_layout
+
+\begin_layout Standard
+Only acceptable after an UNTIL conjuction, indicating that the entry should
+ be stopped on a specified point in time, defined by the value of the following
+ adverbial of time.
+ The following command will execute the command ntpdate now, then every
+ 6 hours, and stop the entry when the month is May:
+\end_layout
+
+\begin_layout Quotation
+$ usc run ntpdate now then every 6 hours until to month 5
+\end_layout
+
+\begin_layout Standard
+TO Preposition always take the adverbial of time format as ADVERG ARG (as
+ in, <unit> <value>).
+\end_layout
+
+\begin_layout Subsection
+Adverbials of Time
+\end_layout
+
+\begin_layout Standard
+The Adverbials of Time defines a time value based on the specified unit.
+ Units ranges from seconds to years and also may take the form of special
+ values such as weekdays, dates, datetimes and timestamps.
+\end_layout
+
+\begin_layout Subsubsection
+SECONDS
+\end_layout
+
+\begin_layout Standard
+Define a time value in seconds as a positive integer (ARG ADVERB), or a
+ specific second.ranging from 0 to 59 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh now then every 30 seconds
+\end_layout
+
+\begin_layout Subsubsection
+MINUTES
+\end_layout
+
+\begin_layout Standard
+Define a time value in minutes as a positive integer (ARG ADVERB), or a
+ specific minute ranging from 0 to 59 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on minute 10 then every 10 minutes
+\end_layout
+
+\begin_layout Subsubsection
+HOURS
+\end_layout
+
+\begin_layout Standard
+Define a time value in hours as a positive integer (ARG ADVERB), or a specific
+ hour ranging from 0 to 23 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on hour 6 then every 24 hours
+\end_layout
+
+\begin_layout Subsubsection
+DAYS
+\end_layout
+
+\begin_layout Standard
+Define a time value in days as a positive integer (ARG ADVERB), or a specific
+ day ranging from 1 to 31 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on day 11 then every 2 days
+\end_layout
+
+\begin_layout Subsubsection
+WEEKS
+\end_layout
+
+\begin_layout Standard
+Define a time value in weeks as a positive integer (ARG ADVERB), or a specific
+ week ranging from 1 to 52 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on week 32 then every 2 weeks
+\end_layout
+
+\begin_layout Subsubsection
+MONTHS
+\end_layout
+
+\begin_layout Standard
+Define a time value in months as a positive integer (ARG ADVERB), or a specific
+ month ranging from 1 to 12 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on month 4 then every 1 month
+\end_layout
+
+\begin_layout Subsubsection
+YEARS
+\end_layout
+
+\begin_layout Standard
+Define a time value in years as a positive integer (ARG ADVERB), or a specific
+ year ranging from 0 to 2100 (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on year 2016 then every 1 year
+\end_layout
+
+\begin_layout Subsubsection
+WEEKDAYS
+\end_layout
+
+\begin_layout Standard
+Define a specific weekday ranging from 0 to 6 (ADVERB ARG), or the special
+ keywords sunday, monday, thursday, wednesday, tuesday, friday and saturday.
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on weekday monday then every 2 weeks
+\end_layout
+
+\begin_layout Subsubsection
+TIME
+\end_layout
+
+\begin_layout Standard
+Define a specific time in the format HH:MM:SS (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on time 18:00:00 then every 10 minutes
+\end_layout
+
+\begin_layout Subsubsection
+DATE
+\end_layout
+
+\begin_layout Standard
+Define a specific date in the format YYYY-MM-DD (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on date 2015/03/15 then every 15 days
+\end_layout
+
+\begin_layout Subsubsection
+DATETIME
+\end_layout
+
+\begin_layout Standard
+Define a specific datetime in the format YYYY-MM-DD HH:MM:SS (ADVERB ARG).
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on datetime '2015/03/15 18:00:00' then every 10
+ minutes until to datetime '2015/04/30 10:00:00'
+\end_layout
+
+\begin_layout Subsubsection
+TIMESTAMP
+\end_layout
+
+\begin_layout Standard
+Define a specific timestamp.
+ The value must be a positive integer (ADVERB ARG).
+ Timestamp values lower than the current timestamp are automatically replaced
+ with the current timestamp.
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync_routine.sh on timestamp 1425544000 then every 3600 seconds
+ until to timestamp 1425644000
+\end_layout
+
+\begin_layout Subsection
+Conjunctions
+\end_layout
+
+\begin_layout Standard
+Conjunctions are used to aggregate prepositions.
+ There is no limit for the number of conjunctions that can be used in a
+ single uSched Client command.
+ The expected keyword after a conjunction is always a preposition.
+\end_layout
+
+\begin_layout Subsubsection
+AND
+\end_layout
+
+\begin_layout Standard
+The AND Conjunction indicates that the next Preposition specifies another
+ scheduling entry for the current subject.
+ The following command will execute the 'sync' binary now and on month May:
+\end_layout
+
+\begin_layout Quotation
+$ usc run 'sync' now and on month 5
+\end_layout
+
+\begin_layout Subsubsection
+THEN
+\end_layout
+
+\begin_layout Standard
+The THEN Conjunction expects an EVERY Preposition, being this the only valid
+ preposition after this Conjunction.
+ The following command will execute the 'sync' binary every 5 seconds:
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync now then every 5 seconds
+\end_layout
+
+\begin_layout Subsubsection
+UNTIL
+\end_layout
+
+\begin_layout Standard
+The UNTIL Conjunction expects a TO Preposition, being this the only valid
+ prepostion after this Conjunction.
+ The UNTIL TO statement indicates that the scheduling entry will be stopped
+ after this point in time is reached.
+ The following command will execute the 'sync' binary every 5 seconds until
+ to time is '18:00:00':
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync now then every 5 seconds until to time 18:00:00
+\end_layout
+
+\begin_layout Subsubsection
+WHILE
+\end_layout
+
+\begin_layout Standard
+The WHILE Conjunction expects a IN Preposition, being this the only valid
+ preposition after this Conjunction.
+ The WHILE IN statement indicates that the scheduling entry will be executed
+ during the specified value as its adverbial of time, and stopped after
+ it expires.
+ For example, the following command will execute the binary 'sync' every
+ 5 seconds while in the next 30 seconds (as in, it will be executed 6 times):
+\end_layout
+
+\begin_layout Quotation
+$ usc run sync now then every 5 seconds while in 30 seconds
+\end_layout
+
+\begin_layout Section
+uSched Admin
+\end_layout
+
+\begin_layout Standard
+The uSched Admin component is one of the interfaces between the system administr
+ator and the uSched Daemon and uSched Executer.
+ It allows the administrator to configure the daemon.
+\end_layout
+
+\begin_layout Subsection
+Generic Usage
+\end_layout
+
+\begin_layout Standard
+The generic usage for uSched Admin is:
+\end_layout
+
+\begin_layout Quotation
+usa OP CATEGORY [ ARG1 ARG2 ...
+ ]
+\end_layout
+
+\begin_layout Quotation
+usa OP CATEGORY [ COMPONENT PROPERTY VALUE ]
+\end_layout
+
+\begin_layout Standard
+Usage examples:
+\end_layout
+
+\begin_layout Quotation
+$ usa change auth remote users 1
+\end_layout
+
+\begin_layout Quotation
+$ usa commit auth
+\end_layout
+
+\begin_layout Quotation
+$ usa add users testuser 10000 10000
+\end_layout
+
+\begin_layout Quotation
+$ usa show users
+\end_layout
+
+\begin_layout Quotation
+$ usa rollback users
+\end_layout
+
+\begin_layout Quotation
+$ usa show all
+\end_layout
+
+\begin_layout Quotation
+$ usa commit all
+\end_layout
+
+\begin_layout Subsection
+Operations
+\end_layout
+
+\begin_layout Standard
+The uSched Admin Operations affect the current configuration of the uSched
+ Daemon and uSched Executer.
+ Each Operation will mangle the target category accordingly.
+\end_layout
+
+\begin_layout Subsubsection
+ADD
+\end_layout
+
+\begin_layout Standard
+Adds a new Component Property to the target Category.
+ This operation is only valid on AUTH and USERS Categories.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa add users testuser 10000 10000
+\end_layout
+
+\begin_layout Quotation
+Password:
+\end_layout
+
+\begin_layout Quotation
+# usa commit users
+\end_layout
+
+\begin_layout Subsubsection
+CHANGE
+\end_layout
+
+\begin_layout Standard
+Changes a Component Property on the target Category.
+ This operation is valid for all Categories, except the ALL category.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth remote users 1
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Quotation
+# usa change users testuser 5000 5000
+\end_layout
+
+\begin_layout Quotation
+Password:
+\end_layout
+
+\begin_layout Quotation
+# usa commit users
+\end_layout
+
+\begin_layout Subsubsection
+COMMIT
+\end_layout
+
+\begin_layout Standard
+Commits the current Component Properties to the target Category.
+ This operation is valid for all Categories.
+ If the ALL Category is used, all the Categories are affected.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa commit all
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+DELETE
+\end_layout
+
+\begin_layout Standard
+Deletes a Property from the target Category.
+ This operation is only valid on AUTH and USERS Categories.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa delete users testuser
+\end_layout
+
+\begin_layout Quotation
+# usa commit users
+\end_layout
+
+\begin_layout Subsubsection
+ROLLBACK
+\end_layout
+
+\begin_layout Standard
+Rollback the uncommited changes from the target Category.
+ This operation is valid for all Categories.
+ If the ALL Category is used, all the Categories are affected.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa rollback users
+\end_layout
+
+\begin_layout Quotation
+# usa rollback all
+\end_layout
+
+\begin_layout Subsubsection
+SHOW
+\end_layout
+
+\begin_layout Standard
+Shows the Component Properties of the target Categoy.
+ This operation is valid for all Categories.
+ If the ALL Category is used, all the Categories are shown.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa show core
+\end_layout
+
+\begin_layout Quotation
+# usa show all
+\end_layout
+
+\begin_layout Quotation
+# usa show network
+\end_layout
+
+\begin_layout Quotation
+# usa show auth
+\end_layout
+
+\begin_layout Quotation
+# usa show core
+\end_layout
+
+\begin_layout Quotation
+# usa show users
+\end_layout
+
+\begin_layout Subsection
+Categories
+\end_layout
+
+\begin_layout Standard
+There are four (4) main configuration Categories available: The AUTH, CORE,
+ NETWORK and USERS.
+ There is a fifth special category named ALL that do not implement Components
+ nor Properties, being its purpose to affect all the four main categories
+ at once.
+\end_layout
+
+\begin_layout Subsubsection
+ALL
+\end_layout
+
+\begin_layout Standard
+The ALL Category doesn't contain Components nor Properties.
+ It should only be used on Operations that are intended to affect all the
+ main Categories.
+\end_layout
+
+\begin_layout Subsubsection
+AUTH
+\end_layout
+
+\begin_layout Standard
+The AUTH Category configures the authentication and authorization mechanisms
+ of the uSched Daemon and Executer.
+ It contains the BLACKLIST, LOCAL, REMOTE and WHITELIST Components.
+\end_layout
+
+\begin_layout Subsubsection
+CORE
+\end_layout
+
+\begin_layout Standard
+The CORE Category configures the core parameters of the uSched Daemon and
+ Executer.
+ It contains the DELTA, JAIL, PMQ, PRIVDROP, SERIALIZE and THREAD Components.
+\end_layout
+
+\begin_layout Subsubsection
+NETWORK
+\end_layout
+
+\begin_layout Standard
+The NETWORK Category configures the network parameters of the uSched Daemon.
+ It contains the BIND, CONN and SOCK Components.
+\end_layout
+
+\begin_layout Subsubsection
+USERS
+\end_layout
+
+\begin_layout Standard
+The USERS Category configures the authorized remote users that connect to
+ the uSched Daemon.
+ This Category does not implement any Components and uses a special syntax
+ for the ADD, CHANGE and DELETE Operations:
+\end_layout
+
+\begin_layout Quotation
+# usa add users USERNAME UID GID
+\end_layout
+
+\begin_layout Quotation
+# usa change users USERNAME UID GID
+\end_layout
+
+\begin_layout Quotation
+# usa delete users USERNAME
+\end_layout
+
+\begin_layout Subsection
+Components
+\end_layout
+
+\begin_layout Standard
+The Categories CORE, NETWORK and AUTH contain a set of configurable Components.
+ The following subsections describe all the available Components respective
+ Category from which they belong.
+\end_layout
+
+\begin_layout Subsubsection
+BIND
+\end_layout
+
+\begin_layout Standard
+Available on NETWORK Category.
+ Contains the Properties ADDR and PORT.
+ Used to configure the binding address and port of the uSched Daemon TCP
+ service.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change network bind addr 127.0.0.1
+\end_layout
+
+\begin_layout Quotation
+# usa change network bind port 7600
+\end_layout
+
+\begin_layout Quotation
+# usa commit network
+\end_layout
+
+\begin_layout Subsubsection
+BLACKLIST
+\end_layout
+
+\begin_layout Standard
+Available on AUTH Category.
+ Contains the Properties UID and GID.
+ Used to disallow specific GIDs and UIDs to authenticate on the uSched Daemon.
+ Blacklists take precedence over whitelists.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth blacklist uid 10000,20000
+\end_layout
+
+\begin_layout Quotation
+# usa add auth blacklist uid 30000
+\end_layout
+
+\begin_layout Quotation
+# usa delete auth blacklist uid 20000
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Quotation
+# usa change auth blacklist uid ''
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Subsubsection
+CONN
+\end_layout
+
+\begin_layout Standard
+Available on NETWORK Category.
+ Contains the Properties LIMIT and TIMEOUT.
+ Used to specify the connection controls of the uSched Daemon.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change network conn addr 0.0.0.0
+\end_layout
+
+\begin_layout Quotation
+# usa change network conn port 7600
+\end_layout
+
+\begin_layout Quotation
+# usa commit network
+\end_layout
+
+\begin_layout Subsubsection
+DELTA
+\end_layout
+
+\begin_layout Standard
+Available on CORE Category.
+ Contains the Properties NOEXEC and RELOAD.
+ Used to control the no execution and reload tolerances of the uSched Daemon.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change core delta noexec 5
+\end_layout
+
+\begin_layout Quotation
+# usa change core delta reload 900
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+JAIL
+\end_layout
+
+\begin_layout Standard
+Available on CORE Category.
+ Contains the Property DIR.
+ Used to specify a jail directory that the uSched Daemon will chroot() into.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change core jail dir /var/cache/usched/jail
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+LOCAL
+\end_layout
+
+\begin_layout Standard
+Available on AUTH Category.
+ Contains the Property USE.
+ Used to enable or disable the access of the local system users to the uSched
+ Daemon.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth local use 1
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Subsubsection
+PMQ
+\end_layout
+
+\begin_layout Standard
+Available on CORE Category.
+ Contains the Properties MSGMAX, MSGSIZE and NAME.
+ Used to configure the Posix Message Queue that allows the communication
+ between the uSched Daemon and uSched Executer.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change core pmq msgmax 128
+\end_layout
+
+\begin_layout Quotation
+# usa change core pmq msgsize 1024
+\end_layout
+
+\begin_layout Quotation
+# usa change core name /uschedpmq01
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+PRIVDROP
+\end_layout
+
+\begin_layout Standard
+Available on CORE Category.
+ Contains the Properties GROUP and USER.
+ Used to indicate an unprivileged user and group that uSched Daemon will
+ drop privileges to.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change core privdrop group nogroup
+\end_layout
+
+\begin_layout Quotation
+# usa change core privdrop user nobody
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+REMOTE
+\end_layout
+
+\begin_layout Standard
+Available on AUTH Category.
+ Contains the Property USERS.
+ Used to enable or disable the remote access to the uSched Daemon.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth remote users 1
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Subsubsection
+SERIALIZE
+\end_layout
+
+\begin_layout Standard
+Available on CORE Category.
+ Contains the Property FILE.
+ Used to speficy the serialization file used by the uSched Daemon to serialize
+ states.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa change core serialize file /var/cache/usched/daemon.dat
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+SOCK
+\end_layout
+
+\begin_layout Standard
+Available on NETWORK Category.
+ Contains the Property NAME.
+ Used to define the named socket, used by uSched Client and uSched Daemon.
+ Usage example:
+\end_layout
+
+\begin_layout Quotation
+# usa change network sock name /var/run/usched.sock
+\end_layout
+
+\begin_layout Quotation
+# usa commit network
+\end_layout
+
+\begin_layout Subsubsection
+THREAD
+\end_layout
+
+\begin_layout Standard
+Available on CORE Category.
+ Contains the Properties PRIORITY and WORKERS.
+ Used to control the priority and number of uSched Daemon workers.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change core thread priority 20
+\end_layout
+
+\begin_layout Quotation
+# usa change core thread workers 5
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsubsection
+WHITELIST
+\end_layout
+
+\begin_layout Standard
+Available on AUTH Category.
+ Contains the Properties GID and UID.
+ Used to allow specific GIDs and UIDs to authenticate on the uSched Daemon.
+ Usage examples:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth whitelist uid 10000,20000
+\end_layout
+
+\begin_layout Quotation
+# usa add auth whitelist uid 30000
+\end_layout
+
+\begin_layout Quotation
+# usa delete auth whitelist uid 20000
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Quotation
+# usa change auth whitelist uid ''
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Subsection
+Properties
+\end_layout
+
+\begin_layout Standard
+The following subsections describe the available Component Properties.
+\end_layout
+
+\begin_layout Subsubsection
+ADDR
+\end_layout
+
+\begin_layout Standard
+An IPv4 address.
+\end_layout
+
+\begin_layout Subsubsection
+DIR
+\end_layout
+
+\begin_layout Standard
+A valid directory.
+ This is a string value.
+\end_layout
+
+\begin_layout Subsubsection
+FILE
+\end_layout
+
+\begin_layout Standard
+A valid, or possible to be created, filename.
+ This is a string value.
+\end_layout
+
+\begin_layout Subsubsection
+GID
+\end_layout
+
+\begin_layout Standard
+A Group ID.
+ This is an integer value.
+\end_layout
+
+\begin_layout Subsubsection
+GROUP
+\end_layout
+
+\begin_layout Standard
+A system group name.
+ This is a string value.and must be a valid system group name.
+\end_layout
+
+\begin_layout Subsubsection
+LIMIT
+\end_layout
+
+\begin_layout Standard
+The upper limit of a Component.
+ This is a value greater than 0.
+\end_layout
+
+\begin_layout Subsubsection
+MSGMAX
+\end_layout
+
+\begin_layout Standard
+The maximum number of messages a Component can hold.
+ This is an integer value greater than 0.
+\end_layout
+
+\begin_layout Subsubsection
+MSGSIZE
+\end_layout
+
+\begin_layout Standard
+The maximum size of the messages belonging to a Component.
+ This is an integer value greater than 0.
+\end_layout
+
+\begin_layout Subsubsection
+NAME
+\end_layout
+
+\begin_layout Standard
+The name of a component.
+ This is a string value.
+\end_layout
+
+\begin_layout Subsubsection
+NOEXEC
+\end_layout
+
+\begin_layout Standard
+The number of seconds after which a Component should ignore executions.
+ This is an integer value greater than 0.
+\end_layout
+
+\begin_layout Subsubsection
+PORT
+\end_layout
+
+\begin_layout Standard
+The port number of a Component.
+ This is an integer ranging from 1 to 65535.
+\end_layout
+
+\begin_layout Subsubsection
+PRIORITY
+\end_layout
+
+\begin_layout Standard
+The priority of a component.
+ This is an integer value ranging from 0 (highest priority) and 30 (lowest
+ priority).
+\end_layout
+
+\begin_layout Subsubsection
+RELOAD
+\end_layout
+
+\begin_layout Standard
+The number of elapsed seconds that trigger a component to be reloaded.
+ This is an integer value.
+\end_layout
+
+\begin_layout Subsubsection
+TIMEOUT
+\end_layout
+
+\begin_layout Standard
+The number of seconds of inactivity to consider a component as expired.
+ This is an integer value.
+\end_layout
+
+\begin_layout Subsubsection
+UID
+\end_layout
+
+\begin_layout Standard
+A User ID.
+ This is an integer value.
+\end_layout
+
+\begin_layout Subsubsection
+USE
+\end_layout
+
+\begin_layout Standard
+Whether a Component shall be used.
+ This is a boolean value.
+\end_layout
+
+\begin_layout Subsubsection
+USER
+\end_layout
+
+\begin_layout Standard
+A system user name.
+ This is a string value and must be a valid system user name.
+\end_layout
+
+\begin_layout Subsubsection
+USERS
+\end_layout
+
+\begin_layout Standard
+The availability of users for a Component.
+ This is a boolean value.
+\end_layout
+
+\begin_layout Subsubsection
+WORKERS
+\end_layout
+
+\begin_layout Standard
+The maximum number of workers that a Component will use.
+ This is a positive, greater than zero, integer.
+\end_layout
+
+\begin_layout Part
+Administration and Configuration
+\end_layout
+
+\begin_layout Section
+uSched Services Management
+\end_layout
+
+\begin_layout Standard
+The uSched Services are managed by the 'usched' command that is installed
+ by default in /usr/sbin/usched.
+ Although it is possible to manage the services directly through this command,
+ it is advisable to install the initialization scripts and manage the services
+ with the appropriate operating system managing interface.
+ All the operations implemented in /usr/sbin/usched are available for the
+ installed initialization scripts.
+\end_layout
+
+\begin_layout Subsection
+Starting uSched Services
+\end_layout
+
+\begin_layout Standard
+The following command will start all the required uSched Services:
+\end_layout
+
+\begin_layout Quotation
+# usched start
+\end_layout
+
+\begin_layout Subsection
+Stopping uSched Services
+\end_layout
+
+\begin_layout Standard
+The following command will stop all uSched services:
+\end_layout
+
+\begin_layout Quotation
+# usched stop
+\end_layout
+
+\begin_layout Subsection
+Reloading uSched Services
+\end_layout
+
+\begin_layout Standard
+To reload the uSched services, execute:
+\end_layout
+
+\begin_layout Quotation
+# usched reload
+\end_layout
+
+\begin_layout Subsection
+Flushing uSched Services state
+\end_layout
+
+\begin_layout Standard
+To force the serialization of the uSched Services state, execute:
+\end_layout
+
+\begin_layout Quotation
+# usched flush
+\end_layout
+
+\begin_layout Subsection
+Forcing the stop of uSched Services
+\end_layout
+
+\begin_layout Standard
+If for some reason the uSched Services weren't stopped gracefully (caused
+ by a power cut, operating system crash, etc) and the 'usched start' command
+ isn't being able to start the services, it is possible to force stop of
+ the uSched Services, reseting the status of the service to unitialized:
+\end_layout
+
+\begin_layout Quotation
+# usched force_stop
+\end_layout
+
+\begin_layout Quotation
+# usched start
+\end_layout
+
+\begin_layout Section
+uSched Services Configuration
+\end_layout
+
+\begin_layout Standard
+The following subsections will describe a few common configuration examples
+ for the uSched Services.
+ Typically, all the other properties fit most of the systems with their
+ default values.
+ For more advanced configurations, refer to section 
+\series bold
+8.
+ uSched Admin
+\series default
+.
+\end_layout
+
+\begin_layout Subsection
+Setting up remote access
+\end_layout
+
+\begin_layout Standard
+The following example will enable remote access on port 7600 on all network
+ interfaces.
+ It will also authorize remote users to authenticate and will add a new
+ remote user called 'myusername' with UID 1000 and GID 1000:
+\end_layout
+
+\begin_layout Quotation
+# usa change network bind addr 0.0.0.0
+\end_layout
+
+\begin_layout Quotation
+# usa change network bind port 7600
+\end_layout
+
+\begin_layout Quotation
+# usa change auth remote users 1
+\end_layout
+
+\begin_layout Quotation
+# usa add users myusername 1000 1000
+\end_layout
+
+\begin_layout Quotation
+# usa commit all
+\end_layout
+
+\begin_layout Subsection
+Changing unprivileged user and group
+\end_layout
+
+\begin_layout Standard
+The following example will change the default unprivileged user and group
+ (nobody, nogroup) to user 'someuser' and group 'somegroup':
+\end_layout
+
+\begin_layout Quotation
+# usa change core privdrop user someuser
+\end_layout
+
+\begin_layout Quotation
+# usa change core privdrop group somegroup
+\end_layout
+
+\begin_layout Quotation
+# usa commit core
+\end_layout
+
+\begin_layout Subsection
+Managing blacklists and whitelists
+\end_layout
+
+\begin_layout Standard
+The following example will blacklist the UID 1000 and UID 2000, preventing
+ any request from these UIDs to be accepted:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth blacklist uid 1000,2000
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Standard
+If we want to authorize only the UID 1000 and UID 2000, rejecting request
+ from any possible other UID, we should insert them in the whitelist:
+\end_layout
+
+\begin_layout Quotation
+# usa change auth blacklist uid ''
+\end_layout
+
+\begin_layout Quotation
+# usa change auth whitelist uid 1000,2000
+\end_layout
+
+\begin_layout Quotation
+# usa commit auth
+\end_layout
+
+\begin_layout Standard
+If the same value is present in both white and blacklist, the blacklist
+ takes precedence over the whitelist.
+\end_layout
+
+\end_body
+\end_document

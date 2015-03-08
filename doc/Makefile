@@ -4,10 +4,10 @@ pdf_ref:
 html_ref:
 	cd lyx && make html && cd ..
 
-man:
+manpages:
 	cd man && make && cd ..
 
-man_install:
+manpages_install:
 	cd man && make install && cd ..
 
 text_install:
@@ -19,3 +19,5 @@ doxygen_files:
 clean:
 	cd doxygen && make clean && cd ..
 	cd lyx && make clean && cd ..
+	cd man && make clean && cd ..
+

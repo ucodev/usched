@@ -1,0 +1,99 @@
+.\" This file is part of the uCodev uSched project (http://www.usched.org)
+.TH USC "1" "March 2015" "uCodev uSched v0.1" "User Commands"
+.SH NAME
+usc \- Perform a uSched scheduling request
+.SH SYNOPSIS
+.B usc
+[ \fIOPTIONS\fR ] \fIOP\fR \fISUBJ\fR { \fIPREP\fR [ \fIADVERB ARG\fR | \fIARG ADVERB\fR ] [ \fICONJ\fR ] ... }
+.SH DESCRIPTION
+.PP
+The \fBusc\fR(1) (uSched Client) component is a command line binary utility that allows the users to perform scheduling requests to the uSched Daemon component \fBusd\fR(1). This command can be successfully used by any non-blacklisted (or all white-listed) users.
+.PP
+.PP
+The available command line OPTIONS are:
+.PP
+.TP
+\fB\-h\fR
+Prints the help.
+.TP
+\fB\-H\fR
+Hostname or IP Address of the remote server.
+.TP
+\fB\-p\fR
+TCP port of the remote server.
+.TP
+\fB\-U\fR
+Username for remote authentication.
+.TP
+\fB\-P\fR
+Password for remote authentication.
+.TP
+All the \fIOPTIONS\fR can be ommited if a local request is intended.
+.PP
+The \fIOP\fR argument is any valid uSched Operation:
+.PP
+.TP
+\fBrun\fR
+\fIExecutes\fR the \fISUBJ\fR with the based on the supplied scheduling request parameters.
+.TP
+\fBstop\fR
+\fIStops\fR the scheduling entry (or entries) identified by the Entry ID (or IDs) passed as the \fISUBJ\fR. If multiple Entry IDs are to be passed, it must be a comma separated list with no white spaces. The \fBall\fR keyword can be used as \fISUBJ\fR to target all the scheduling entries installed on the target uSched Daemon for the user performing the request.
+.TP
+\fBshow\fR
+\fIShows\fR the scheduling entry (or entries) identified by the Entry ID (or IDs) passed as the \fISUBJ\fR. If multiple Entry IDs are to be passed, it must be a comma separated list with no white spaces. The \fBall\fR keyword can be used as \fISUBJ\fR to target all the scheduling entries installed on the target uSched Daemon for the user performing the request.
+.PP
+Implemented \fIPREP\fR (prepositions):
+.PP
+.TP
+\fBevery\fR, \fBin\fR, \fBnow\fR, \fBon\fR, \fBto\fR
+.PP
+Implemented \fIADVERB\fR (adverbials of time):
+.PP
+.TP
+\fBseconds\fR, \fBminutes\fR, \fBhours\fR, \fBdays\fR, \fBweeks\fR, \fBmonths\fR, \fByears\fR, \fBweekdays\fR, \fBtime\fR, \fBdate\fR, \fBdatetime\fR, \fBtimestamp\fR
+.PP
+Implemented \fICONJ\fR (conjunctions):
+.PP
+.TP
+\fBand\fR, \fBthen\fR, \fBuntil\fR, \fBwhile\fR
+.PP
+For detailed documentation regarding \fIPREP\fR, \fIADVERB\fR, \fICONJ\fR and more, please refer to the following official documentation link: \fIhttp://www.usched.org/doc/uSched_Reference_Manual.html\fR
+.PP
+.SH EXAMPLE
+.TP
+$ usc run 'df -h > /tmp/data.dat' now then every 5 seconds
+.TP
+$ usc run 'tcpdump -i eth0' in 5 minutes and 'killall -TERM tcpdump' in 10 minutes
+.TP
+# usc run /usr/local/bin/do_backups.sh on hour 23 then every 24 hours
+.TP
+# usc run /usr/local/bin/do_extra.sh on hour 2 then every 24 hours until to weekday friday
+.TP
+$ usc run /usr/local/bin/my_birthday.sh on date '01/01/2016' then every 1 year
+.TP
+$ usc show all
+.TP
+$ usc stop 0x2043D725E83E88F2,0x6645AD63730F2944
+.SH AUTHOR
+Written by Pedro A. Hortas (pah@ucodev.org).
+.SH "REPORTING BUGS"
+Report uSched bugs to \fIbugs@usched.org\fR
+.PP
+uSched home page: <http://www.usched.org>
+.PP
+.SH COPYRIGHT
+Copyright \(co 2014-2015  Pedro A. Hortas (pah@ucodev.org)
+.br
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+.PP
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH "SEE ALSO"
+The full documentation for
+.B uSched
+is available at:
+.PP
+  \fIhttp://www.usched.org/doc/uSched_Reference_Manual.html\fR
+.PP

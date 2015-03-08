@@ -66,6 +66,7 @@ install_doc:
 	mkdir -p /usr/share/doc/usched/
 	cp README /usr/share/doc/usched/
 	cd doc && make text_install && cd ..
+	cd doc && make man_install && cd ..
 
 doxygen:
 	cd doc && make doxygen_files && cd ..

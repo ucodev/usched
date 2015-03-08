@@ -3,7 +3,7 @@
  * @brief uSched PHP Extension
  *        uSched PHP Extension interface header - Client
  *
- * Date: 11-01-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,8 +30,12 @@
 #define PHP_USC_VERSION "0.9a"
 #define PHP_USC_EXTNAME "usc"
 
-PHP_MINIT_FUNCTION(usc_init);
-PHP_MSHUTDOWN_FUNCTION(usc_shutdown);
+PHP_MINIT_FUNCTION(usc_minit);
+PHP_MSHUTDOWN_FUNCTION(usc_mshutdown);
+PHP_RINIT_FUNCTION(usc_rinit);
+PHP_RSHUTDOWN_FUNCTION(usc_rshutdown);
+PHP_FUNCTION(usc_init);
+PHP_FUNCTION(usc_shutdown);
 PHP_FUNCTION(usc_test);
 PHP_FUNCTION(usc_opt_set_remote_hostname);
 PHP_FUNCTION(usc_opt_set_remote_port);

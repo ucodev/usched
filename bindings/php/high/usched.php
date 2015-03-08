@@ -5,7 +5,7 @@
  * @brief uSched PHP Library
  *        uSched PHP Library interface - Client
  *
- * Date: 27-01-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,14 @@
 
 
 class Usched {
+	function __construct() {
+		usc_init();
+	}
+
+	function __destruct() {
+		usc_shutdown();
+	}
+
 	public function SetHostname($hostname) {
 		usc_opt_set_remote_hostname($hostname);
 	}

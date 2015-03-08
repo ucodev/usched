@@ -3,7 +3,7 @@
  * @brief uSched PHP Extension
  *        uSched PHP Extension interface - Client
  *
- * Date: 11-01-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -37,6 +37,8 @@
 #include <usched/lib.h>
 
 static zend_function_entry usc_functions[] = {
+	PHP_FE(usc_init, NULL)
+	PHP_FE(usc_shutdown, NULL)
 	PHP_FE(usc_test, NULL)
 	PHP_FE(usc_opt_set_remote_hostname, NULL)
 	PHP_FE(usc_opt_set_remote_port, NULL)
@@ -60,10 +62,10 @@ zend_module_entry usc_module_entry = {
 #endif
 	PHP_USC_EXTNAME, /* mod name */
 	usc_functions, /* mod funcs */
-	PHP_MINIT(usc_init), /* init */
-	PHP_MSHUTDOWN(usc_shutdown), /* shutdown */
-	NULL, /* req init */
-	NULL, /* req shutdown */
+	PHP_MINIT(usc_minit), /* module init */
+	PHP_MSHUTDOWN(usc_mshutdown), /* module shutdown */
+	PHP_RINIT(usc_rinit), /* req init */
+	PHP_RSHUTDOWN(usc_rshutdown), /* req shutdown */
 	NULL, /* mod info */
 #if ZEND_MODULE_API_NO >= 20010901
 	PHP_USC_VERSION, /* version */
@@ -75,16 +77,33 @@ zend_module_entry usc_module_entry = {
 ZEND_GET_MODULE(usc)
 #endif
 
-PHP_MINIT_FUNCTION(usc_init) {
-	usched_init();
-
+PHP_MINIT_FUNCTION(usc_minit) {
 	return SUCCESS;
 }
 
-PHP_MSHUTDOWN_FUNCTION(usc_shutdown) {
+PHP_MSHUTDOWN_FUNCTION(usc_mshutdown) {
+	return SUCCESS;
+}
+
+PHP_RINIT_FUNCTION(usc_rinit) {
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(usc_rshutdown) {
+	return SUCCESS;
+}
+
+PHP_FUNCTION(usc_init) {
+	if (usched_init() < 0)
+		RETURN_BOOL(0);
+
+	RETURN_BOOL(1);
+}
+
+PHP_FUNCTION(usc_shutdown) {
 	usched_destroy();
 
-	return SUCCESS;
+	RETURN_BOOL(1);
 }
 
 PHP_FUNCTION(usc_test) {

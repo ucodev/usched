@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 07-03-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -87,9 +87,15 @@ static void *_marshal_monitor(void *arg) {
 			bit_set(&rund.flags, USCHED_RUNTIME_FLAG_SERIALIZE);
 		}
 
-		/* TODO: Make a file system copy of the current serialization file in order to
-		 *       grant a consistent backup.
+#if CONFIG_USCHED_DROP_PRIVS == 0
+		/* Make a file system copy of the current serialization file in order to
+		 * grant a consistent backup.
 		 */
+		if (marshal_daemon_backup() < 0)
+			log_warn("_marshal_monitor(): marshal_daemo_backup(): %s\n", strerror(errno));
+#endif
+
+		/* Leaving critical region */
 		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 
 		log_info("_marshal_monitor(): Active pools serialized.\n");

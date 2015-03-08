@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 04-03-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -209,18 +209,39 @@ int runtime_daemon_init(int argc, char **argv) {
 
 	log_info("Marshal interface initialized.\n");
 
+#if CONFIG_USCHED_DROP_PRIVS == 1
+	log_info("Backing up the current serialization file...\n");
+
+	if (marshal_daemon_backup() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): marshal_daemon_backup(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Serialization file backed up.\n");
+#endif
+
 	/* Unserialize data, if any */
 	log_info("Unserializing active pools...\n");
 
 	if (marshal_daemon_unserialize_pools() < 0) {
+#if CONFIG_USCHED_DROP_PRIVS == 0
 		log_info("Unable to unserialize active pools.\n");
+
 		log_info("Backing up the current serialization file...\n");
 
 		if (marshal_daemon_backup() < 0) {
 			log_info("runtime_daemon_init(): marshal_daemon_backup(): %s\n", strerror(errno));
 		} else {
-			log_info("Serialization file backed up.\n");
+			log_info("Serialization file backed up. Manual recovery is required to restore the previous uSched Daemon state.\n");
 		}
+#else
+		errsv = errno;
+		log_crit("runtime_daemon_init(): marshal_daemon_unserialize_pools(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+#endif
 	} else {
 		log_info("Active pools unserialized.\n");
 	}

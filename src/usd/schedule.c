@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 07-03-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -80,17 +80,8 @@ void schedule_daemon_destroy(void) {
 	psched_handler_destroy(rund.psched);
 	rund.psched = NULL;
 
-	/* FIXME: If a SIGABRT emerges from now on and before rund.psched is set to NULL, this will
-	 * cause a NULL pointer reference access attempt. To fix this, the signal handler for
-	 * SIGABRT must acquire the mutex_apool lock... but this is not possible since the locking
-	 * mechanism isn't AS-safe. Although the probability of this event to happen is very low,
-	 * this must be corrected with some new approach in the future.
-	 *
-	 */
-
-	/* TODO or FIXME: We must grant somehow at this point that all the routines queued by
-	 * libpsched are flushed (inactive) OR grant that they won't disrupt the runtime exiting
-	 * procedures if they are triggered after this point in time.
+	/* NOTE: All the routines from libpsched should now be destroyed. This should be granted by
+	 * libpsched and not by usched.
 	 */
 
 	pthread_mutex_unlock(&rund.mutex_apool);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 27-02-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -66,8 +66,14 @@ int pool_daemon_init(void) {
 }
 
 void pool_daemon_destroy(void) {
-	/* FIXME: Check if there are active notification threads. If so, we need to wait until
-	 * all the notification threads finish execution before destroyed the active pool...
+	/* TODO: Grant that conn_daemon_destroy() and schedule_daemon_destroy() were already called
+	 * before stepping ahead this point.
+	 */
+
+	/* NOTE: Any notification threads and scheduled routines are disabled at this point. This
+	 * is granted by libpsched and librtsaio. Assuming that the libraries are doing it right and
+	 * conn_daemon_destroy() and schedule_daemon_destroy() functions are called before this one,
+	 * there's no risk of destroying the active pool.
 	 */
 
 	pthread_mutex_lock(&rund.mutex_apool);
@@ -77,8 +83,8 @@ void pool_daemon_destroy(void) {
 	}
 	pthread_mutex_unlock(&rund.mutex_apool);
 
-	/* TODO: Evaluate if there isn't a risk of after active pool is destroyed, some entries that
-	 * may be shared with the remote connections pool have become invalid.
+	/* NOTE: conn_daemon_destroy() must have been called at this time in order to ensure that
+	 * the destruction of remote connections pool won't cause any invalid memory accesses.
 	 */
 	pthread_mutex_lock(&rund.mutex_rpool);
 	if (rund.rpool) {

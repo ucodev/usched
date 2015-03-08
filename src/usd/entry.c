@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 04-03-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -196,12 +196,6 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	int ret = 0, errsv = 0;
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
-
-	/* FIXME: Grant that we don't pass this point if a pool_daemon_destroy() is in progress.
-	 * To avoid such thing, we need to check here if it's safe to proceed, and we need to
-	 * check in pool_daemon_destroy() if there are active notification threads before
-	 * destroying the pools.
-	 */
 
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);

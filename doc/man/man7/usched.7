@@ -1,0 +1,60 @@
+.\" This file is part of the uCodev uSched project (http://www.usched.org)
+.TH USCHED "7" "March 2015" "uCodev uSched v0.1" "User Commands"
+.SH NAME
+usched \- overview of uSched Services and Tools
+.SH DESCRIPTION
+.PP
+uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time.
+.PP
+.PP
+It provides a simple and intuitive structured language that is intepreted via a command line client, but can also be integrated into any programming language through its client libraries and bindings.
+.PP
+.PP
+It also operates as a client/server, where requests performed by clients can affect local or remote machines where uSched services are running.
+.PP
+.SS
+\fBComponents\fR
+uSched architecture is divided into five (5) main components: The uSched Admin \fBusa\fR(1), uSched Client \fBusc\fR(1), uSched Daemon \fBusd\fR(1), uSched Executer \fBuse\fR(1) and uSched Monitor \fBusm\fR(1). There are only two components that require direct user interaction: uSched Admin \fBusa\fR(1) for configuration and uSched Client \fBusc\fR(1) for scheduling requests. All the other components are self-managed and shall not be called directly.
+.PP
+The uSched Admin component is a command line binary utility named \fBusa\fR(1). Its purpose is to manage and handle configuration parameters that affect the core, network, authentication and users used by the other uSched components. Changes performed using uSched Admin won’t be effective until a COMMIT operation is performed. Also any uncommitted changes can be rolled back by issuing the ROLLBACK operation. This utility requires super-user privileges to be used.
+.PP
+.PP
+The uSched Client component is a command line binary utility named \fBusc\fR(1). It allows the users to perform scheduling requests to the uSched Daemon component. This is the only component that can be executed by any non-blacklisted (or all white-listed) users. With a default installation, all the other uSched components will require super-user privileges to be used.
+.PP
+.PP
+The uSched Daemon component \fBusd\fR(1) is a system service that receives and processes all the scheduling requests performed by uSched clients. It manages the authentication and authorization, schedulers and is the only component that directly communicates with the uSched Executer. With a default installation, this component requires super-user privileges to be started, although it will drop it’s privileges after start-up routines are performed.
+.PP
+.PP
+The uSched Executer component \fBuse\fR(1) is a system service that receives execution requests from the uSched Daemon. Every time a scheduled entry is triggered by the uSched Daemon scheduler, it will be passed to the uSched Executer to be executed with the required privileges. This component requires super-user privileges with a default installation in order to be able to execute scheduled entries for all the users.
+.PP
+.PP
+The uSched Monitor component \fBusm\fR(1) is a simple command line binary utility that starts and daemonizes the uSched Daemon and uSched Executer and monitors their processes state. It will restart or reload the services whenever it is required to do so. This utility requires super-user privileges to operate correctly.
+.PP
+.SH CONFORMING TO
+uSched Services are designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as \fBchroot\fR(2). To disable such calls and features, set the \fBCONFIG_POSIX_FULL\fR definition to 1 in the include/config.h file. uSched Client will also compile on most Windows versions and the API bindings for C# are promptly available on the project bindings/csharp directory.
+.SH AUTHOR
+Written by Pedro A. Hortas (pah@ucodev.org).
+.SH "REPORTING BUGS"
+Report uSched bugs to \fIbugs@usched.org\fR
+.PP
+uSched home page: <http://www.usched.org>
+.PP
+.SH COPYRIGHT
+Copyright \(co 2014-2015  Pedro A. Hortas (pah@ucodev.org)
+.br
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+.PP
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH "SEE ALSO"
+\fBusched\fR(1), \fBusa\fR(1), \fBusc\fR(1), \fBusd\fR(1), \fBuse\fR(1), \fBusm\fR(1)
+.PP
+The full documentation for
+.B uSched
+is available at:
+.PP
+.PP
+  \fIhttp://www.usched.org/doc/uSched_Reference_Manual.html\fR
+.PP

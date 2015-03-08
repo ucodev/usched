@@ -1,0 +1,184 @@
+.\" This file is part of the uCodev uSched project (http://www.usched.org)
+.TH USA "1" "March 2015" "uCodev uSched v0.1" "User Commands"
+.SH NAME
+usa \- Configures the uSched Services parameters
+.SH SYNOPSIS
+.B usa
+\fIOP\fR \fICATEGORY\fR [ \fIARG1\fR \fIARG2\fR ... ]
+.br
+.B usa
+\fIOP\fR \fICATEGORY\fR [ \fICOMPONENT\fR \fIPROPERTY\fR \fIVALUE\fR ]
+.br
+.SH DESCRIPTION
+.PP
+The \fBusa\fR(1) (uSched Admin) component is a command line binary utility to manage and handle configuration parameters that affect the core, network, authentication and users used by the other uSched components. Changes performed using uSched Admin won’t be effective until a \fBcommit\fR operation is performed. Also any uncommitted changes can be rolled back by issuing the \fBrollback\fR operation. This utility requires super-user privileges to be used.
+.PP
+.PP
+The \fIOP\fR argument is any valid uSched Admin Operation:
+.PP
+.TP
+\fBadd\fR
+\fIAdds\fR a value to a \fICATEGORY\fR. This operation can only be used on categories \fBauth\fR and \fBusers\fR.
+.TP
+\fBdelete\fR
+\fIDeletes\fR a value from a \fICATEGORY\fR. This operation can only be used on categories \fBauth\fR and \fBusers\fR.
+.TP
+\fBchange\fR
+\fIChanges\fR a value on a \fICATEGORY\fR.
+.TP
+\fBcommit\fR
+\fICommits\fR the changes performed to a \fICATEGORY\fR.
+.TP
+\fBrollback\fR
+\fIRollback\fR the changes performed to a \fICATEGORY\fR before a \fBcommit\fR is issued.
+.TP
+\fBshow\fR
+\fIShows\fR the current values configured in a \fICATEGORY\fR.
+.PP
+Currently supported \fICATEGORY\fR values:
+.PP
+.TP
+\fBall\fR, \fBauth\fR, \fBcore\fR, \fBnetwork\fR, \fBusers\fR
+.PP
+.SH EXAMPLE
+.TP
+Show the current values for \fBall\fR categories:
+.PP
+.br
+# \fBusa show all\fR
+.br
+.br
+auth.blacklist.gid = 
+.br
+.br
+auth.blacklist.uid = 
+.br
+.br
+auth.local.use = 1
+.br
+.br
+auth.remote.users = 0
+.br
+.br
+auth.whitelist.gid = 
+.br
+.br
+auth.whitelist.uid = 
+.br
+.br
+core.delta.noexec = 5
+.br
+.br
+core.delta.reload = 900
+.br
+.br
+core.jail.dir = /var/cache/usched/jail
+.br
+.br
+core.pmq.msgmax = 128
+.br
+.br
+core.pmq.msgsize = 1024
+.br
+.br
+core.pmq.name = /uschedpmq01
+.br
+.br
+core.privdrop.group = nogroup
+.br
+.br
+core.privdrop.user = nobody
+.br
+.br
+core.serialize.file = /var/cache/usched/daemon.dat
+.br
+.br
+core.thread.priority = 20
+.br
+.br
+core.thread.workers = 5
+.br
+.br
+network.bind.addr = 0.0.0.0
+.br
+.br
+network.bind.port = 7600
+.br
+.br
+network.conn.limit = 100
+.br
+.br
+network.conn.timeout = 5
+.br
+.br
+network.sock.name = /var/run/usched.sock
+.br
+.br
+users =   username |    uid |    gid
+.br
+.br
+           example |  10000 |  10000
+.br
+.br
+#
+.br
+.PP
+.TP
+Change the current value of \fIcore.thread.priority\fR:
+.PP
+# \fBusa change core thread priority 15\fR
+.br
+core.thread.priority = 15*
+.br
+.br
+# \fBusa commit core\fR
+.br
+.br
+#
+.br
+.TP
+Create a new user for remote authentication:
+.PP
+# \fBusa add users myusername 1000 1000\fR
+.br
+Password:
+.br
+.br
+Repeat password:
+.br
+.br
+User 'myusername' successfuly added.
+.br
+.br
+# \fBusa commit users\fR
+.br
+.br
+#
+.br
+.PP
+.SH AUTHOR
+Written by Pedro A. Hortas (pah@ucodev.org).
+.SH "REPORTING BUGS"
+Report uSched bugs to \fIbugs@usched.org\fR
+.PP
+uSched home page: <http://www.usched.org>
+.PP
+.SH COPYRIGHT
+Copyright \(co 2014-2015  Pedro A. Hortas (pah@ucodev.org)
+.br
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+.PP
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH "SEE ALSO"
+\fBusched\fR(1), \fBusc\fR(1), \fBusd\fR(1), \fBuse\fR(1), \fBusm\fR(1)
+.PP
+The full documentation for
+.B uSched
+is available at:
+.PP
+.PP
+  \fIhttp://www.usched.org/doc/uSched_Reference_Manual.html\fR
+.PP

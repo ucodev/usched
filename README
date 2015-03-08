@@ -98,8 +98,12 @@
       usched_opt_set_remote_hostname(3), usched_opt_set_remote_port(3)
       usched_opt_set_remote_username(3), usched_opt_set_remote_password(3),
       usched_request(3),
-      usched_result_free_run(3), usched_result_free_show(3), usched_result_free_stop(3),
-      usched_result_get_run(3), usched_result_get_show(3), usched_result_get_stop(3),
+      usched_result_free_run(3),
+      usched_result_free_show(3),
+      usched_result_free_stop(3),
+      usched_result_get_run(3),
+      usched_result_get_show(3),
+      usched_result_get_stop(3),
       usched_usage_error(3), usched_usage_error_str(3)
 
   Generate Doxygen HTML files (into doc/doxygen/doxyfiles/):

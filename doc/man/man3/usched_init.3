@@ -1,0 +1,70 @@
+.\" This file is part of the uCodev uSched project (http://www.usched.org)
+.TH USCHED_INIT "3" "March 2015" "uCodev uSched" "uSched Programmer's Manual"
+.SH NAME
+usched_init \- initializes the uSched Client library interface
+.SH SYNOPSIS
+.B #include <usched/lib.h>
+
+.BI "int usched_init(void);
+.sp
+Link with \fI\-lusc\fP.
+.fi
+.SH DESCRIPTION
+The
+.BR usched_init ()
+function initializes the uSched Client library interface.
+.br
+It must be called before any other uSched Client library function.
+.br
+.SH RETURN VALUE
+On success,
+.BR usched_init ()
+returns 0; on error, it returns -1 and \fIerrno\fR is set appropriately.
+.SH ERRORS
+.TP
+.B ENOMEM
+Not enough memory.
+.SH AUTHOR
+Written by Pedro A. Hortas (pah@ucodev.org).
+.SH "REPORTING BUGS"
+Report uSched bugs to \fIbugs@usched.org\fR
+.PP
+uSched home page: <http://www.usched.org>
+.PP
+.SH COPYRIGHT
+Copyright \(co 2014-2015  Pedro A. Hortas (pah@ucodev.org)
+.br
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+.PP
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.PP
+.SH "SEE ALSO"
+\fBusched_destroy\fR(3),
+.br
+\fBusched_opt_set_remote_hostname\fR(3), \fBusched_opt_set_remote_port\fR(3),
+.br
+.br
+\fBusched_opt_set_remote_username\fR(3), \fBusched_opt_set_remote_password\fR(1),
+.br
+.br
+\fBusched_request\fR(3),
+.br
+.br
+\fBusched_result_free_run\fR(3), \fBusched_result_free_show\fR(3), \fBusched_result_free_stop\fR(3),
+.br
+.br
+\fBusched_result_get_run\fR(3), \fBusched_result_get_show\fR(3), \fBusched_result_get_stop\fR(3),
+.br
+.br
+\fBusched_usage_error\fR(3), \fBusched_usage_error_str\fR(3)
+.br
+.PP
+The full documentation for
+.B uSched
+is available at:
+.PP
+.PP
+  \fIhttp://www.usched.org/doc/uSched_Reference_Manual.html\fR
+.PP

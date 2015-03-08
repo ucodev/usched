@@ -1,5 +1,5 @@
 v0.1:
- - Documentation
+ - Revision and testing
 
 v0.2:
  - Communication Protocol revision

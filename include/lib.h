@@ -3,7 +3,7 @@
  * @brief uSched
  *        Client Library interface header
  *
- * Date: 07-03-2015
+ * Date: 08-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -179,7 +179,7 @@ int usched_opt_set_remote_password(char *password);
  * @brief
  *   Retrieves the results of a successful RUN request, performed by usched_request(). The results
  *   are stored into the 'entry_list' parameter. The number of entries contained in the 'entry_list'
- *   are stored by the variable pointed by 'nmemb'.
+ *   are stored in the variable pointed by 'nmemb'.
  *
  * @param entry_list
  *   An array of type 'uint64_t'. Each entry contains the ID of the successfully installed entries.
@@ -201,7 +201,7 @@ void usched_result_get_run(uint64_t **entry_list, size_t *nmemb);
  * @brief
  *   Retrieves the results of a successful STOP request, performed by usched_request(). The results
  *   are stored into the 'entry_list' parameter. The number of entries contained in the 'entry_list'
- *   are stored by the variable pointed by 'nmemb'.
+ *   are stored in the variable pointed by 'nmemb'.
  *
  * @param entry_list
  *   An array of type 'uint64_t'. Each entry contains the ID of the successfully removed entries.
@@ -223,7 +223,7 @@ void usched_result_get_stop(uint64_t **entry_list, size_t *nmemb);
  * @brief
  *   Retrieves the results of a successful SHOW request, performed by usched_request(). The results
  *   are stored into the 'entry_list' parameter. The number of entries contained in the 'entry_list'
- *   are stored by the variable pointed by 'nmemb'.
+ *   are stored in the variable pointed by 'nmemb'.
  *
  * @param entry_list
  *   An array of type 'struct usched_entry'. Each element of the array is an installed scheduled

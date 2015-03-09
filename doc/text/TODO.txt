@@ -2,11 +2,11 @@ v0.2:
  - Improved documentation
  - Communication Protocol revision
  - Improved serialization routines
- - New operations: Hold, Change
+ - New operations: hold, change
  - uSched Statistics (uss)
 
 v0.3:
- - Exceptions
+ - Exceptions (new conjunctions: except, only)
  - Entry Groups
 
 v0.4

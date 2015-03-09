@@ -75,6 +75,10 @@
 
    # usched start
 
+ On FreeBSD operating systems, grant that the mqueuefs kernel module is loaded before starting the uSched Services:
+
+   # kldload mqueuefs
+   # usched start
 
 
 5. Stopping uSched Services

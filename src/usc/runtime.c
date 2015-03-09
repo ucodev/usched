@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Client
  *
- * Date: 04-02-2015
+ * Date: 09-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -70,6 +70,7 @@ int runtime_client_init(int argc, char **argv) {
 		return -1;
 	}
 
+#ifndef COMPILE_WIN32
 	/* Initialize signals interface */
 	if (sig_client_init() < 0) {
 		errsv = errno;
@@ -77,6 +78,7 @@ int runtime_client_init(int argc, char **argv) {
 		errno = errsv;
 		return -1;
 	}
+#endif
 
 	/* Parse command line options */
 	if ((opt_index = opt_client_process(argc, argv, &runc.opt)) < 0) {
@@ -154,6 +156,7 @@ int runtime_client_lib_init(void) {
 		return -1;
 	}
 
+#ifndef COMPILE_WIN32
 	/* Initialize signals interface */
 	if (sig_client_init() < 0) {
 		errsv = errno;
@@ -161,6 +164,7 @@ int runtime_client_lib_init(void) {
 		errno = errsv;
 		return -1;
 	}
+#endif
 
 	/* This is a client library */
 	bit_set(&runc.flags, USCHED_RUNTIME_FLAG_LIB);
@@ -209,8 +213,10 @@ void runtime_client_destroy(void) {
 	parse_client_req_destroy(runc.req);
 	runc.req = NULL;
 
+#ifndef COMPILE_WIN32
 	/* Destroy signals interface */
 	sig_client_destroy();
+#endif
 
 	/* Destroy configuration */
 	config_client_destroy();
@@ -236,8 +242,10 @@ void runtime_client_lib_destroy(void) {
 	parse_client_req_destroy(runc.req);
 	runc.req = NULL;
 
+#ifndef COMPILE_WIN32
 	/* Destroy signals interface */
 	sig_client_destroy();
+#endif
 
 	/* Destroy configuration */
 	config_client_destroy();

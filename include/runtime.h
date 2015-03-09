@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 04-03-2015
+ * Date: 09-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -79,7 +79,10 @@ struct usched_runtime_client {
 	sock_t fd;
 
 	volatile usched_runtime_flag_t flags;
+
+#ifndef COMPILE_WIN32
 	struct sigaction sa_save;
+#endif
 
 	struct usched_config config;
 

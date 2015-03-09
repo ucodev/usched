@@ -1,17 +1,17 @@
 # Project: usc
-# Makefile created by Dev-C++ 5.8.3
+# Makefile created by Dev-C++ 5.9.2
 
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = ../../src/common/bitops.o ../../src/common/config.o ../../src/common/conn.o ../../src/common/debug.o ../../src/common/entry.o ../../src/common/input.o ../../src/common/log.o ../../src/common/mm.o ../../src/common/runtime.o ../../src/common/term.o ../../src/usc/auth.o ../../src/usc/client.o ../../src/usc/config.o ../../src/usc/conn.o ../../src/usc/entry.o ../../src/usc/logic.o ../../src/usc/op.o ../../src/usc/opt.o ../../src/usc/parse.o ../../src/usc/pool.o ../../src/usc/print.o ../../src/usc/process.o ../../src/usc/runtime.o ../../src/usc/usage.o ../common/strptime.o
-LINKOBJ  = ../../src/common/bitops.o ../../src/common/config.o ../../src/common/conn.o ../../src/common/debug.o ../../src/common/entry.o ../../src/common/input.o ../../src/common/log.o ../../src/common/mm.o ../../src/common/runtime.o ../../src/common/term.o ../../src/usc/auth.o ../../src/usc/client.o ../../src/usc/config.o ../../src/usc/conn.o ../../src/usc/entry.o ../../src/usc/logic.o ../../src/usc/op.o ../../src/usc/opt.o ../../src/usc/parse.o ../../src/usc/pool.o ../../src/usc/print.o ../../src/usc/process.o ../../src/usc/runtime.o ../../src/usc/usage.o ../common/strptime.o
+OBJ      = ../../src/common/bitops.o ../../src/common/conn.o ../../src/common/debug.o ../../src/common/entry.o ../../src/common/input.o ../../src/common/log.o ../../src/common/mm.o ../../src/common/runtime.o ../../src/common/term.o ../../src/usc/auth.o ../../src/usc/client.o ../../src/usc/config.o ../../src/usc/conn.o ../../src/usc/entry.o ../../src/usc/logic.o ../../src/usc/op.o ../../src/usc/opt.o ../../src/usc/parse.o ../../src/usc/pool.o ../../src/usc/print.o ../../src/usc/process.o ../../src/usc/runtime.o ../../src/usc/usage.o ../common/strptime.o ../../src/common/str.o
+LINKOBJ  = ../../src/common/bitops.o ../../src/common/conn.o ../../src/common/debug.o ../../src/common/entry.o ../../src/common/input.o ../../src/common/log.o ../../src/common/mm.o ../../src/common/runtime.o ../../src/common/term.o ../../src/usc/auth.o ../../src/usc/client.o ../../src/usc/config.o ../../src/usc/conn.o ../../src/usc/entry.o ../../src/usc/logic.o ../../src/usc/op.o ../../src/usc/opt.o ../../src/usc/parse.o ../../src/usc/pool.o ../../src/usc/print.o ../../src/usc/process.o ../../src/usc/runtime.o ../../src/usc/usage.o ../common/strptime.o ../../src/common/str.o
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -lfsop -lpall -lpanet -lpsec -lws2_32
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"../../include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.8.1/include/c++" -I"../../include"
 BIN      = usc.exe
-CXXFLAGS = $(CXXINCS) -DCOMPILE_WIN32=1
-CFLAGS   = $(INCS) -DCOMPILE_WIN32=1
+CXXFLAGS = $(CXXINCS) -DCOMPILE_WIN32=1 -DCONFIG_CLIENT_SPECIFIC=1 -DCONFIG_CLIENT_ONLY=1
+CFLAGS   = $(INCS) -DCOMPILE_WIN32=1 -DCONFIG_CLIENT_SPECIFIC=1 -DCONFIG_CLIENT_ONLY=1
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -26,9 +26,6 @@ $(BIN): $(OBJ)
 
 ../../src/common/bitops.o: ../../src/common/bitops.c
 	$(CC) -c ../../src/common/bitops.c -o ../../src/common/bitops.o $(CFLAGS)
-
-../../src/common/config.o: ../../src/common/config.c
-	$(CC) -c ../../src/common/config.c -o ../../src/common/config.o $(CFLAGS)
 
 ../../src/common/conn.o: ../../src/common/conn.c
 	$(CC) -c ../../src/common/conn.c -o ../../src/common/conn.o $(CFLAGS)
@@ -98,3 +95,6 @@ $(BIN): $(OBJ)
 
 ../common/strptime.o: ../common/strptime.c
 	$(CC) -c ../common/strptime.c -o ../common/strptime.o $(CFLAGS)
+
+../../src/common/str.o: ../../src/common/str.c
+	$(CC) -c ../../src/common/str.c -o ../../src/common/str.o $(CFLAGS)

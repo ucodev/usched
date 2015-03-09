@@ -9,8 +9,8 @@ Libs=
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
-Compiler=-DBUILDING_DLL=1_@@_-DCOMPILE_WIN32=1_@@_
-CppCompiler=-DBUILDING_DLL=1_@@_-DCOMPILE_WIN32_@@_
+Compiler=-DBUILDING_DLL=1_@@_-DCOMPILE_WIN32=1_@@_-DCONFIG_CLIENT_SPECIFIC=1_@@_
+CppCompiler=-DBUILDING_DLL=1_@@_-DCOMPILE_WIN32_@@_-DCONFIG_CLIENT_SPECIFIC=1_@@_
 Linker=-lpsec_@@_-lpall_@@_-lfsop_@@_-lpanet_@@_-lws2_32_@@_
 IsCpp=0
 Icon=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=60
+UnitCount=61
 
 [VersionInfo]
 Major=1
@@ -550,27 +550,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit51]
-FileName=..\..\src\common\config.c
-CompileCpp=0
-Folder=src/common
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit52]
-FileName=..\..\src\common\conn.c
-CompileCpp=0
-Folder=src/common
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit53]
 FileName=..\..\src\common\debug.c
 CompileCpp=0
 Folder=src/common
@@ -580,7 +560,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit54]
+[Unit53]
 FileName=..\..\src\common\entry.c
 CompileCpp=0
 Folder=src/common
@@ -590,7 +570,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit55]
+[Unit54]
 FileName=..\..\src\common\input.c
 CompileCpp=0
 Folder=src/common
@@ -600,7 +580,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit56]
+[Unit55]
 FileName=..\..\src\common\log.c
 CompileCpp=0
 Folder=src/common
@@ -610,7 +590,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit57]
+[Unit56]
 FileName=..\..\src\common\mm.c
 CompileCpp=0
 Folder=src/common
@@ -620,7 +600,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit58]
+[Unit57]
 FileName=..\..\src\common\runtime.c
 CompileCpp=0
 Folder=src/common
@@ -630,7 +610,7 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit59]
+[Unit58]
 FileName=..\..\src\common\term.c
 CompileCpp=0
 Folder=src/common
@@ -640,10 +620,40 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit60]
+[Unit59]
 FileName=..\common\strptime.c
 CompileCpp=0
 Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit60]
+FileName=..\..\src\common\str.c
+CompileCpp=0
+Folder=src/usc
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit51]
+FileName=..\..\src\common\conn.c
+CompileCpp=0
+Folder=src/common
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit61]
+FileName=..\..\include\str.h
+CompileCpp=0
+Folder=include
 Compile=1
 Link=1
 Priority=1000

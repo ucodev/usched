@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 08-03-2015
+ * Date: 09-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -76,7 +76,9 @@ static void *_marshal_monitor(void *arg) {
 		pthread_sigmask(SIG_SETMASK, &si_cur, &si_prev);
 
 		/* TODO: The serialization will affect all entries. This isn't efficient enough
-		 *       and should be optimized in the future.
+		 *       and should be optimized in the future. Also, the serialization routine
+		 *       will lock the active pool mutex, causing any pending operations to be
+		 *       halted until the routine completes.
 		 */
 		if (marshal_daemon_serialize_pools() < 0) {
 			log_warn("_marshal_monitor(): marshal_daemon_serialize_pools(): %s\n", strerror(errno));

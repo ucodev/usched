@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if [ `id -u` -eq 0 ]; then
+	echo "Cannot run this test as root"
+	exit 1
+fi
+
+touch /var/cache/usched/daemon.dat 2> /dev/null
+
+if [ ${?} -eq 0 ]; then
+	echo "Cache files are writable by non-root"
+	exit 1
+fi
+
+cat /var/cache/usched/daemon.dat 2> /dev/null
+
+if [ ${?} -eq 0 ]; then
+	echo "Cache files are readable by non-root"
+	exit 1
+fi
+
+echo "OK"
+
+exit 0
+

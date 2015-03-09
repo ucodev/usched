@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if [ `id -u` -eq 0 ]; then
+	echo "Cannot run this test as root"
+	exit 1
+fi
+
+touch /etc/usched/core/jail.dir 2> /dev/null
+
+if [ ${?} -eq 0 ]; then
+	echo "Core configuration directory is readable by non-root"
+	exit 1
+fi
+
+touch /etc/usched/auth/local.use 2> /dev/null
+
+if [ ${?} -eq 0 ]; then
+	echo "Auth configuration directory is readable by non-root"
+	exit 1
+fi
+
+touch /etc/usched/auth/example 2> /dev/null
+
+if [ ${?} -eq 0 ]; then
+	echo "Users configuration directory is readable by non-root"
+	exit 1
+fi
+
+echo "OK"
+
+exit 0
+

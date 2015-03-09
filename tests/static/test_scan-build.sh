@@ -2,7 +2,7 @@
 
 printf "Analyzing uSched source code with scan-build...\n\n"
 
-cd ..
+cd ../../
 
 # Build uSched
 printf " * Building uSched... "

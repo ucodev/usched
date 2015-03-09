@@ -300,7 +300,7 @@ _process:
 	/* This lock is required in order to sync the scheduling interface init/destroy engine with
 	 * the async routines that may be triggered by libpsched. We must grant that the
 	 * schedule_daemon_active() routine that is executed inside the schedule_entry_update() have
-	 * the rund.mutex_apool lock acquired (which is same the lock that schedule_daemon_destroy()
+	 * the rund.mutex_apool lock acquired (which is the same lock that schedule_daemon_destroy()
 	 * acquires).
 	 */
 	pthread_mutex_lock(&rund.mutex_apool);

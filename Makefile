@@ -80,4 +80,5 @@ clean:
 	cd scripts && make clean && cd ..
 	cd example && make clean && cd ..
 	cd bindings && make clean && cd ..
+	cd tests && make clean && cd ..
 

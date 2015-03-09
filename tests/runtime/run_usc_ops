@@ -1,0 +1,44 @@
+#!/bin/sh
+
+echo "Running basic runtime checks..."
+echo ""
+
+# Test run
+printf " * Testing RUN operation...  "
+ENTRY_ID=`usc run 'touch' now then every 5 seconds | cut -d'x' -f2`
+
+if [ ${?} -ne 0 ]; then
+	echo "Failed"
+	exit 1;
+else
+	echo "OK"
+fi
+
+# Test run
+printf " * Testing SHOW operation... "
+usc show 0x${ENTRY_ID} > /dev/null
+
+if [ ${?} -ne 0 ]; then
+	echo "Failed"
+	exit 1;
+else
+	echo "OK"
+fi
+
+# Test run
+printf " * Testing STOP operation... "
+usc stop 0x${ENTRY_ID} > /dev/null
+
+if [ ${?} -ne 0 ]; then
+	echo "Failed"
+	exit 1;
+else
+	echo "OK"
+fi
+
+# All good
+echo ""
+echo "Runtime checks complete."
+
+exit 0
+

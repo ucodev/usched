@@ -253,18 +253,32 @@ int marshal_daemon_serialize_pools(void) {
 
 int marshal_daemon_unserialize_pools(void) {
 	int ret = -1, errsv = errno;
+	struct stat st;
 	struct usched_entry *entry = NULL;
+
+	memset(&st, 0, sizeof(struct stat));
 
 	pthread_mutex_lock(&rund.mutex_apool);
 
 	/* Always set the file descriptor position to the beggining of the serialization file */
 	if (lseek(rund.ser_fd, 0, SEEK_SET) == (off_t) -1) {
 		errsv = errno;
-		pthread_mutex_unlock(&rund.mutex_apool);
-		log_warn("marshal_daemon_serialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errsv));
-		errno = errsv;
+		log_warn("marshal_daemon_unserialize_pools(): lseek(%d, 0, SEEK_SET): %s\n", rund.ser_fd, strerror(errsv));
+		goto _unserialize_finish;
+	}
 
-		return -1;
+	/* Retrieve serialization fd properties */
+	if (fstat(rund.ser_fd, &st) < 0) {
+		errsv = errno;
+		log_warn("marshal_daemon_unserialize_pools(): fstat(): %s\n", strerror(errno));
+		goto _unserialize_finish;
+	}
+
+	/* Check if file is empty */
+	if (!st.st_size) {
+		/* This is a new file. There's nothing to unserialize... */
+		ret = 0;
+		goto _unserialize_finish;
 	}
 
 	/* Unserialize active pool */

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Local utilities and handlers interface
  *
- * Date: 30-01-2015
+ * Date: 11-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,6 +36,7 @@
  #include <unistd.h>
 #elif CONFIG_SYS_BSD == 1
  #include <sys/types.h>
+ #include <sys/socket.h>
  #include <unistd.h>
 #elif CONFIG_SYS_SOLARIS == 1
  #include <sys/types.h>

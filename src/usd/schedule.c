@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 08-03-2015
+ * Date: 13-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,8 +59,8 @@ int schedule_daemon_init(void) {
 
 void schedule_daemon_destroy(void) {
 	/* psched_destroy() must be called before we acquire the apool lock, or a deadlock will
-	 * occur (since event_pmq_dispatch() will wait to acquire this lock, while this function will
-	 * wait for pmq_dispatch() to complete).
+	 * occur (since event_exec_dispatch() will wait to acquire this lock, while this function will
+	 * wait for exec_dispatch() to complete).
 	 *
 	 * This will not cause any races nor corruptions, since psched library prevent any new
 	 * entries from being created, while granting integrity of the current entries until they
@@ -111,7 +111,7 @@ int schedule_entry_create(struct usched_entry *entry) {
 	} while (rund.apool->search(rund.apool, entry) || !entry->id);
 
 	/* Install a new scheduling entry based on the current entry parameters */
-	if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+	if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_exec_dispatch, entry)) == (pschedid_t) -1) {
 		errsv = errno;
 
 		log_warn("schedule_entry_create(): psched_timestamp_arm(): %s\n", strerror(errno));
@@ -368,7 +368,7 @@ int schedule_entry_update(struct usched_entry *entry) {
 		}
 
 		/* Re-arm the entry with the correct alignments */
-		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_exec_dispatch, entry)) == (pschedid_t) -1) {
 			errsv = errno;
 
 			runtime_daemon_fatal();

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 07-03-2015
+ * Date: 13-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -218,7 +218,7 @@ int entry_compare(const void *e1, const void *e2);
 int entry_daemon_authorize(struct usched_entry *entry, int fd);
 int entry_daemon_remote_session_create(struct usched_entry *entry);
 int entry_daemon_remote_session_process(struct usched_entry *entry);
-void entry_daemon_pmq_dispatch(void *arg);
+void entry_daemon_exec_dispatch(void *arg);
 void entry_zero(struct usched_entry *entry);
 void entry_destroy(void *elem);
 int entry_daemon_serialize(pall_fd_t fd, void *entry);

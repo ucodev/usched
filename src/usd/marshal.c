@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 09-03-2015
+ * Date: 13-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -343,7 +343,7 @@ int marshal_daemon_unserialize_pools(void) {
 		debug_printf(DEBUG_INFO, "[TIME: %lu]: entry->id: 0x%016llX, entry->trigger: %lu, entry->step: %lu, entry->expire: %lu\n", time(NULL), entry->id, entry->trigger, entry->step, entry->expire);
 
 		/* Install a new scheduling entry based on the current entry parameters */
-		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_pmq_dispatch, entry)) == (pschedid_t) -1) {
+		if ((entry->reserved.psched_id = psched_timestamp_arm(rund.psched, entry->trigger, entry->step, entry->expire, &entry_daemon_exec_dispatch, entry)) == (pschedid_t) -1) {
 			log_warn("marshal_daemon_unserialize_pools(): psched_timestamp_arm(): %s\n", strerror(errno));
 
 			/* libpall grants that it's safe to remove a node while iterating the list */

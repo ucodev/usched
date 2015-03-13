@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 08-03-2015
+ * Date: 13-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -131,7 +131,7 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	if (bl->count(bl)) {
 		if (bl->search(bl, (unsigned int [1]) { entry->uid }))
 			ret = 0;
-	} else if (!bl->count(bl) && wl->count(wl)) {
+	} else if (wl->count(wl)) {
 		if (!wl->search(wl, (unsigned int [1]) { entry->uid }))
 			ret = 0;
 	}
@@ -144,7 +144,7 @@ int entry_daemon_authorize(struct usched_entry *entry, int fd) {
 	if (bl->count(bl)) {
 		if (bl->search(bl, (unsigned int [1]) { entry->gid }))
 			ret = 0;
-	} else if (!bl->count(bl) && wl->count(wl)) {
+	} else if (wl->count(wl)) {
 		if (!wl->search(wl, (unsigned int [1]) { entry->gid }))
 			ret = 0;
 	}
@@ -192,7 +192,7 @@ int entry_daemon_remote_session_process(struct usched_entry *entry) {
 	return 0;
 }
 
-void entry_daemon_pmq_dispatch(void *arg) {
+void entry_daemon_exec_dispatch(void *arg) {
 	int ret = 0, errsv = 0;
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
@@ -207,7 +207,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	 * won't ocurr here... hopefully).
 	 */
 	if ((unsigned int) labs((long) (time(NULL) - entry->trigger)) >= rund.config.core.delta_noexec) {
-		log_warn("entry_daemon_pmq_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
+		log_warn("entry_daemon_exec_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
 
 		/* Do not deliver this entry to the uSched executer (use) */
 		goto _process;
@@ -215,7 +215,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Allocate message memory */
 	if (!(buf = mm_alloc((size_t) rund.config.core.pmq_msgsize))) {
-		log_warn("entry_daemon_pmq_dispatch(): mm_alloc(): %s\n", strerror(errno));
+		log_warn("entry_daemon_exec_dispatch(): mm_alloc(): %s\n", strerror(errno));
 
 		/* Force daemon to be restarted and reload a clean state */
 		runtime_daemon_fatal();
@@ -227,7 +227,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {
-		log_warn("entry_daemon_pmq_dispatch(): Unauthorized entry found. Discarding...\n");
+		log_warn("entry_daemon_exec_dispatch(): Unauthorized entry found. Discarding...\n");
 
 		/* Remove this entry as it is invalid */
 		goto _remove;
@@ -235,7 +235,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Check entry signature */
 	if (!entry_check_signature(entry)) {
-		log_warn("entry_daemon_pmq_dispatch(): Entry ID 0x%016llX signature is invalid.\n", entry->id);
+		log_warn("entry_daemon_exec_dispatch(): Entry ID 0x%016llX signature is invalid.\n", entry->id);
 
 		/* Mark this entry as invalid. */
 		entry_set_flag(entry, USCHED_ENTRY_FLAG_INVALID);
@@ -255,7 +255,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 	 * this one is required since now the variables are expanded.
 	 */
 	if ((strlen(cmd) + 21) > (size_t) rund.config.core.pmq_msgsize) {
-		log_warn("entry_daemon_pmq_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
+		log_warn("entry_daemon_exec_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
 
 		/* Mark this entry as invalid. */
 		entry_set_flag(entry, USCHED_ENTRY_FLAG_INVALID);
@@ -281,7 +281,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 
 	/* Deliver message to uSched executer (use) */
 	if (mq_send(rund.pmqd, buf, (size_t) rund.config.core.pmq_msgsize, 0) < 0) {
-		log_warn("entry_daemon_pmq_dispatch(): mq_send(): %s\n", strerror(errno));
+		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
 
 		/* NOTE:
 		 *
@@ -293,7 +293,7 @@ void entry_daemon_pmq_dispatch(void *arg) {
 		 *
 		 */
 
-		log_crit("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
+		log_crit("entry_daemon_exec_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
 	}
 
 _process:
@@ -320,7 +320,7 @@ _process:
 	if (ret < 0) {
 		errno = errsv;
 
-		log_info("entry_daemon_pmq_dispatch(): schedule_entry_update(): %s. (Entry ID: 0x%016llX)\n", strerror(errno), entry->id);
+		log_info("entry_daemon_exec_dispatch(): schedule_entry_update(): %s. (Entry ID: 0x%016llX)\n", strerror(errno), entry->id);
 
 		/* Unlock only after the last use of 'entry' reference */
 		pthread_mutex_unlock(&rund.mutex_apool);
@@ -336,7 +336,7 @@ _process:
 	 * It should be deleted from the active pool.
 	 */
 
-	log_info("entry_daemon_pmq_dispatch(): The Entry ID 0x%016llX isn't recurrent and will be deleted from the active pool.", entry->id);
+	log_info("entry_daemon_exec_dispatch(): The Entry ID 0x%016llX isn't recurrent and will be deleted from the active pool.", entry->id);
 
 _remove:
 	/* Remove the entry from active pool */

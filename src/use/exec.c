@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 04-03-2015
+ * Date: 13-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -70,6 +70,9 @@ static void *_exec_cmd(void *arg) {
 		log_warn("Entry[0x%016llX]: _exec_cmd(): fork(): %s\n", id, strerror(errno));
 	} else if (!pid) {
 		/* Child */
+
+		/* Close message queue descriptor */
+		mq_close(rune.pmqd);
 
 		/* Get child pid */
 		pid = getpid();

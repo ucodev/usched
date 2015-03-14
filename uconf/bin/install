@@ -12,7 +12,7 @@ fi
 
 if [ -e ./uconf/params/default/install ]; then
 	while read cmd; do
-		${cmd}
+		/bin/sh -c "${cmd}"
 
 		if [ $? -ne 0 ]; then
 			echo "Failed to execute: ${cmd}"
@@ -23,7 +23,7 @@ fi
 
 if [ -e ./uconf/params/`cat .osname`/install ]; then
 	while read cmd; do
-		${cmd}
+		/bin/sh -c "${cmd}"
 
 		if [ $? -ne 0 ]; then
 			echo "Failed to execute: ${cmd}"

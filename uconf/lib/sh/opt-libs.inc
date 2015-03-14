@@ -1,5 +1,5 @@
 #
-# Operating System specific options scripting library
+# Feature testing shell scripting library
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -42,50 +42,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-## Test functions ##
-check_lib()
+test_opt_lib()
 {
-	printf -- " * Checking support for ${1}... "
-	# remove '-' prefix
-	libname=`echo ${1} | cut -d'-' -f2`
+	printf -- " * Checking for lib${lib}... "
 
-	# Check if build directory exists
-	if [ ! -e ./build ]; then
-		mkdir build
-	fi
-
-	# check if lib is installed
-	echo 'int main(void) { return 0; }' > build/${libname}.c && `cat .compiler` -o build/${libname} build/${libname}.c -${libname}
+	# test lib support
+	echo 'int main(void) { return 0; }' > build/${1}.c && `cat .compiler` -o build/${1} build/${1}.c -l${1}
 
 	if [ $? -eq 0 ]; then
+		touch .l${1}
+		printf -- "-l${1} "  >> .libs
 		echo "OK"
 	else
-		echo "Failed"
-		exit 1
+		echo "Not supported"
 	fi
 }
 
-## Default options ##
-cat ./uconf/default/ccflags | tr -d '\n' > .ecflags
-printf -- " " >> .ecflags
-cat ./uconf/default/ldflags | tr -d '\n' > .elflags
-printf -- " " >> .elflags
+mkdir -p build
+rm -f .l*
 
-## OS-Specific options ##
-if [ -e "./uconf/`uname`/ccflags" ]; then
-	echo "Target operating system is: `uname`. Configuring..."
+echo "Testing optional libraries..."
 
-	for lib in $(cat ./uconf/`uname`/ldflags); do
-		check_lib ${lib}
-	done
+for lib in `cat ./uconf/params/default/optlibs`; do
+	test_opt_lib ${lib}
+done
 
-	echo "Done."
-	echo ""
-
-	cat ./uconf/`uname`/ccflags | tr -d '\n' >> .ecflags
-	cat ./uconf/`uname`/ldflags | tr -d '\n' >> .elflags
-else
-	cat ./uconf/unknown/ccflags | tr -d '\n' >> .ecflags
-	cat ./uconf/unknown/ldflags | tr -d '\n' >> .elflags
-fi
-
+echo "Done."
+echo ""

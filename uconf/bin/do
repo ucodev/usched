@@ -1,0 +1,28 @@
+#!/bin/sh
+
+## Detect compiler ##
+. ./uconf/lib/sh/compiler.inc
+
+## Detect architecture ##
+. ./uconf/lib/sh/arch.inc
+
+## OS-Specific options ##
+. ./uconf/lib/sh/os-spec.inc
+
+## Test optional libraries ##
+. ./uconf/lib/sh/opt-libs.inc
+
+## Build ##
+make
+
+if [ $? -ne 0 ]; then
+	echo "Build failed."
+	exit 1
+fi
+
+touch .done
+
+echo "Build completed."
+
+exit 0
+

@@ -24,11 +24,13 @@ if [ $? -ne 0 ]; then
 	exit 1;
 fi
 
-ldconfig
+if [ ! -z `which ldconfig` ]; then
+	ldconfig
 
-if [ $? -ne 0 ]; then
-	echo "Failed to execute ldconfig"
-	exit 1;
+	if [ $? -ne 0 ]; then
+		echo "Failed to execute ldconfig"
+		exit 1;
+	fi
 fi
 
 echo "Installation complete."

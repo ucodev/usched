@@ -45,7 +45,7 @@
 test_lib()
 {
 	# test lib support
-	echo 'int main(void) { return 0; }' > build/${1}.c && clang -o build/${1} build/${1}.c -l${1}
+	echo 'int main(void) { return 0; }' > build/${1}.c && `cat .compiler` -o build/${1} build/${1}.c -l${1}
 
 	if [ $? -eq 0 ]; then
 		touch .l${1}

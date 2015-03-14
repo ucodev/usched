@@ -1,5 +1,5 @@
 #
-# Compiler detection scripting library
+# Operating System specific options scripting library
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -42,6 +42,29 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+## Test functions ##
+check_lib()
+{
+	printf -- " * Checking support for ${1}... "
+	# remove '-' prefix
+	libname=`echo ${1} | cut -d'-' -f2`
+
+	# Check if build directory exists
+	if [ ! -e ./build ]; then
+		mkdir build
+	fi
+
+	# check if lib is installed
+	echo 'int main(void) { return 0; }' > build/${libname}.c && `cat .compiler` -o build/${libname} build/${libname}.c -${libname}
+
+	if [ $? -eq 0 ]; then
+		echo "OK"
+	else
+		echo "Failed"
+		exit 1
+	fi
+}
+
 ## Default options ##
 cat ./uconf/default/ccflags | tr -d '\n' > .ecflags
 printf -- " " >> .ecflags
@@ -50,6 +73,15 @@ printf -- " " >> .elflags
 
 ## OS-Specific options ##
 if [ -e "./uconf/`uname`/ccflags" ]; then
+	echo "Target operating system is: `uname`. Configuring..."
+
+	for lib in $(cat ./uconf/`uname`/ldflags); do
+		check_lib ${lib}
+	done
+
+	echo "Done."
+	echo ""
+
 	cat ./uconf/`uname`/ccflags | tr -d '\n' >> .ecflags
 	cat ./uconf/`uname`/ldflags | tr -d '\n' >> .elflags
 else

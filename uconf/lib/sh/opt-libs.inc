@@ -66,9 +66,18 @@ rm -f .l*
 
 echo "Testing optional libraries..."
 
-for lib in `cat ./uconf/params/default/optlibs`; do
-	test_opt_lib ${lib}
-done
+if [ -e ./uconf/params/default/optlibs ]; then
+	for lib in `cat ./uconf/params/default/optlibs`; do
+		test_opt_lib ${lib}
+	done
+fi
+
+if [ -e ./uconf/params/`cat .osname`/optlibs ]; then
+	for lib in $(cat ./uconf/params/`cat .osname`/optlibs); do
+		test_opt_lib ${lib}
+	done
+fi
 
 echo "Done."
 echo ""
+

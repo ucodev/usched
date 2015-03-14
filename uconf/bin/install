@@ -21,7 +21,7 @@ if [ -e ./uconf/params/default/install ]; then
 	done < ./uconf/params/default/install
 fi
 
-if [ -e ./uconf/params/`cat .osname`/install ]; then
+if [ -e ./uconf/params/`cat .osname 2> /dev/null`/install ]; then
 	while read cmd; do
 		/bin/sh -c "${cmd}"
 

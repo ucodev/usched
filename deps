@@ -4,8 +4,8 @@ install_lib()
 {
 	lib=${1}
 	cd ${lib}
-	wget https://github.com/ucodev/${lib}/archive/master.zip
-	unzip master.zip
+	wget https://github.com/ucodev/${lib}/archive/master.tar.gz
+	tar zxvf master.tar.gz
 	cd ${lib}-master
 
 	if [ -e "target" ]; then
@@ -30,9 +30,15 @@ if [ `id -u` -ne 0 ]; then
 	exit 1
 fi
 
-# Check if unzip is installed
-if ! [ -e "`which unzip`" ]; then
-	echo "unzip isn't installed"
+# Check if tar is installed
+if ! [ -e "`which tar`" ]; then
+	echo "tar isn't installed"
+	exit 1
+fi
+
+# Check if gunzip is installed
+if ! [ -e "`which gunzip`" ]; then
+	echo "gunzip isn't installed"
 	exit 1
 fi
 

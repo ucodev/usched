@@ -29,14 +29,14 @@
 
       # cd /usr/src
       # mkdir usched
-      # wget https://github.com/ucodev/usched/archive/master.zip
-      # unzip -d usched master.zip
+      # wget https://github.com/ucodev/usched/archive/master.tar.gz
+      # tar zxvf master.tar.gz -C usched
       # cd usched
       # ./deploy
 
   or
 
-  See INSTALL.txt
+      See INSTALL.txt
 
 
 

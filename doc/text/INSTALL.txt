@@ -23,7 +23,7 @@
   - fsma Library
     * https://github.com/ucodev/libfsma
 
- The 'deps' script depends on 'wget', 'zip' and 'unzip'. Make sure they are installed on the system.
+ The 'deps' script depends on 'wget', 'tar' and 'gunzip'. Make sure they are installed on the system.
 
 
 

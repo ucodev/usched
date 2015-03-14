@@ -1,5 +1,5 @@
 CC=`cat ../../.compiler`
-ECFLAGS=`cat ../../.defines`
+ECFLAGS=`cat ../../.ecflags`
 CCFLAGS=-std=c99 -fPIC -D_POSIX_C_SOURCE=199309L -DCONFIG_COMMON=1 -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include

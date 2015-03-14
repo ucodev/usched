@@ -1,5 +1,5 @@
 CC=`cat ../../.compiler`
-ECFLAGS=`cat ../../.defines`
+ECFLAGS=`cat ../../.ecflags`
 CCFLAGS=-std=c99 -DCONFIG_DAEMON_SPECIFIC=1 -D_POSIX_C_SOURCE=199309L -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
 LDFLAGS=-g -lgcc_s -lpsched -lpall -lfsma -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
 ELFLAGS=`cat ../../.elflags`

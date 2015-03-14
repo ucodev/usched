@@ -10,7 +10,6 @@ make clean
 rm -rf build
 rm -f .target
 rm -f .compiler
-rm -f .defines
 rm -f .ecflags
 rm -f .elflags
 rm -f .archflags

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 27-02-2015
+ * Date: 14-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -82,6 +82,7 @@
 #define CONFIG_POSIX_FULL			0
 
 /* #define CONFIG_SYS_LINUX			0 */
+/* #define CONFIG_SYS_MINIX			0 */
 /* #define CONFIG_SYS_NETBSD			0 */
 /* #define CONFIG_SYS_BSD			0 */
 /* #define CONFIG_SYS_SOLARIS			0 */

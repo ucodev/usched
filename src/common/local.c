@@ -3,7 +3,7 @@
  * @brief uSched
  *        Local utilities and handlers interface
  *
- * Date: 11-03-2015
+ * Date: 14-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,7 +51,7 @@
 int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 	int errsv = 0;
 
-#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1
+#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1 || CONFIG_SYS_MINIX == 1
 	socklen_t uc_len = 0;
  #if defined(SO_PEERCRED)
   #define uc_get_uid(uc)		(uc.uid)

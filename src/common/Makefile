@@ -1,6 +1,6 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.ecflags`
-CCFLAGS=-std=c99 -fPIC -D_POSIX_C_SOURCE=199309L -DCONFIG_COMMON=1 -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -Wall -Werror -Wstack-protector -g
+CCFLAGS=-DCONFIG_COMMON=1
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
 OBJS=bitops.o config.o conn.o debug.o entry.o gc.o hash.o input.o local.o log.o mm.o pmq.o runtime.o str.o term.o thread.o

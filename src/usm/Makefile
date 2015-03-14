@@ -1,7 +1,7 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.ecflags`
-CCFLAGS=-std=c99 -D_POSIX_C_SOURCE=199309L -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -Wall -Werror -Wstack-protector -g
-LDFLAGS=-g -lfsma
+CCFLAGS=-DCONFIG_MONITOR_SPECIFIC=1
+LDFLAGS=-lfsma
 ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include

@@ -42,12 +42,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+## Default options ##
+cat ./uconf/default/ccflags | tr -d '\n' > .ecflags
+printf -- " " >> .ecflags
+cat ./uconf/default/ldflags | tr -d '\n' > .elflags
+printf -- " " >> .elflags
+
 ## OS-Specific options ##
 if [ -e "./uconf/`uname`/ccflags" ]; then
-	cat ./uconf/`uname`/ccflags > .ecflags
-	cat ./uconf/`uname`/ldflags > .elflags
+	cat ./uconf/`uname`/ccflags | tr -d '\n' >> .ecflags
+	cat ./uconf/`uname`/ldflags | tr -d '\n' >> .elflags
 else
-	cat ./uconf/Unknown/ccflags > .ecflags
-	cat ./uconf/Unknown/ldflags > .elflags
+	cat ./uconf/unknown/ccflags | tr -d '\n' >> .ecflags
+	cat ./uconf/unknown/ldflags | tr -d '\n' >> .elflags
 fi
 

@@ -32,6 +32,7 @@ rm -f .target
 rm -f .osname
 rm -f .extlib
 rm -f .compiler
+rm -f .olinker
 rm -f .ecflags
 rm -f .elflags
 rm -f .archflags

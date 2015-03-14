@@ -74,32 +74,29 @@ printf -- " " >> .ecflags
 cat ./uconf/params/default/ldflags | tr -d '\n' > .elflags
 printf -- " " >> .elflags
 
-## OS-Specific options ##
-if [ -e "./uconf/params/`uname`/ccflags" ]; then
-	echo "Target operating system is: `uname`. Configuring..."
+if [ -e "./uconf/params/`uname`" ]; then
 	echo `uname` > .osname
-
-	for lib in $(cat ./uconf/params/`uname`/ldflags); do
-		check_lib ${lib}
-	done
-
-	cat ./uconf/params/`uname`/ccflags | tr -d '\n' >> .ecflags
-	cat ./uconf/params/`uname`/ldflags | tr -d '\n' >> .elflags
-
-	echo "Done."
-	echo ""
 else
-	echo "Target operating system is: `uname` (Not supported). Configuring..."
-	echo "unknown" > .osname
-
-	for lib in $(cat ./uconf/params/`uname`/ldflags); do
-		check_lib ${lib}
-	done
-
-	cat ./uconf/params/unknown/ccflags | tr -d '\n' >> .ecflags
-	cat ./uconf/params/unknown/ldflags | tr -d '\n' >> .elflags
-
-	echo "Done."
-	echo ""
+	echo "unsupported" > .osname
 fi
+
+## OS-Specific options ##
+echo "Target operating system is: `cat .osname`. Configuring..."
+
+for lib in $(cat ./uconf/params/`cat .osname`/ldflags); do
+	check_lib ${lib}
+done
+
+if [ -e "./uconf/params/`cat .osname`/ccflags" ]; then
+	cat ./uconf/params/`cat .osname`/ccflags | tr -d '\n' >> .ecflags
+fi
+
+if [ -e "./uconf/params/`cat .osname`/ldflags" ]; then
+	cat ./uconf/params/`cat .osname`/ldflags | tr -d '\n' >> .elflags
+fi
+
+cp ./uconf/params/`cat .osname`/extlib .extlib
+
+echo "Done."
+echo ""
 

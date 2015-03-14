@@ -8,7 +8,7 @@ INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/input.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/str.o ../common/term.o
 OBJS_LIB=auth.o config.o conn.o entry.o lib.o logic.o op.o opt.o parse.o pool.o print.o process.o runtime.o sig.o usage.o
 OBJS_CLIENT=auth.o config.o client.o conn.o entry.o logic.o op.o opt.o parse.o pool.o print.o process.o runtime.o sig.o usage.o
-TARGET_LIB=libusc.so
+TARGET_LIB=libusc.`cat ../../.extlib`
 TARGET_CLIENT=usc
 
 all:

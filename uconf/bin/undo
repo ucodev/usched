@@ -30,6 +30,7 @@ fi
 rm -rf build
 rm -f .target
 rm -f .osname
+rm -f .extlib
 rm -f .compiler
 rm -f .ecflags
 rm -f .elflags

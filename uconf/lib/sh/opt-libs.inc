@@ -47,14 +47,17 @@ test_opt_lib()
 	printf -- " * Checking for lib${lib}... "
 
 	# test lib support
-	echo 'int main(void) { return 0; }' > build/${1}.c && `cat .compiler` -o build/${1} build/${1}.c -l${1}
+	echo 'int main(void) { return 0; }' > build/${1}.c && `cat .compiler` -o build/${1} build/${1}.c -l${1} 2> /dev/null
 
 	if [ $? -eq 0 ]; then
 		touch .l${1}
 		printf -- "-l${1} "  >> .libs
 		echo "OK"
+		rm -f build/${1}
+		rm -f build/${1}.c
 	else
 		echo "Not supported"
+		rm -f build/${1}.c
 	fi
 }
 

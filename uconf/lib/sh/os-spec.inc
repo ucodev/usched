@@ -55,7 +55,7 @@ check_lib()
 	fi
 
 	# check if lib is installed
-	echo 'int main(void) { return 0; }' > build/os-spec-lib-test.c && `cat .compiler` -o build/os-spec-lib-test build/os-spec-lib-test.c ${libname}
+	echo 'int main(void) { return 0; }' > build/os-spec-lib-test.c && `cat .compiler` -o build/os-spec-lib-test build/os-spec-lib-test.c ${libname} 2> /dev/null
 
 	if [ $? -eq 0 ]; then
 		echo "OK"
@@ -63,7 +63,6 @@ check_lib()
 		rm -f build/os-spec-lib-test.c
 	else
 		echo "Failed"
-		rm -f build/os-spec-lib-test
 		rm -f build/os-spec-lib-test.c
 		exit 1
 	fi

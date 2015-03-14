@@ -74,18 +74,29 @@ printf -- " " >> .elflags
 ## OS-Specific options ##
 if [ -e "./uconf/params/`uname`/ccflags" ]; then
 	echo "Target operating system is: `uname`. Configuring..."
+	echo `uname` > .osname
 
 	for lib in $(cat ./uconf/params/`uname`/ldflags); do
 		check_lib ${lib}
 	done
 
-	echo "Done."
-	echo ""
-
 	cat ./uconf/params/`uname`/ccflags | tr -d '\n' >> .ecflags
 	cat ./uconf/params/`uname`/ldflags | tr -d '\n' >> .elflags
+
+	echo "Done."
+	echo ""
 else
+	echo "Target operating system is: `uname` (Not supported). Configuring..."
+	echo "unknown" > .osname
+
+	for lib in $(cat ./uconf/params/`uname`/ldflags); do
+		check_lib ${lib}
+	done
+
 	cat ./uconf/params/unknown/ccflags | tr -d '\n' >> .ecflags
 	cat ./uconf/params/unknown/ldflags | tr -d '\n' >> .elflags
+
+	echo "Done."
+	echo ""
 fi
 

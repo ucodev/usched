@@ -1,7 +1,8 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.defines`
 CCFLAGS=-std=c99 -D_POSIX_C_SOURCE=199309L -DCONFIG_ADMIN_SPECIFIC=1 -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
-LDFLAGS=-g -lrt -pthread -lpall -lfsma -lfsop -lpsec `cat ../../.libs`
+LDFLAGS=-g -lpall -lfsma -lfsop -lpsec `cat ../../.libs`
+ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/config.o ../common/debug.o ../common/input.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/term.o
@@ -25,7 +26,7 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c usage.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c users.c
-	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS}
+	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
 
 install:
 	cp ${TARGET} /usr/sbin/

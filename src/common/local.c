@@ -38,6 +38,10 @@
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <unistd.h>
+ #if CONFIG_SYS_MINIX == 1
+  /* Make prototype visible to clang under Minix 3.x */
+  int getpeereid(int, uid_t, gid_t);
+ #endif
 #elif CONFIG_SYS_SOLARIS == 1
  #include <sys/types.h>
  #include <ucred.h>

@@ -1,7 +1,8 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.defines`
 CCFLAGS=-std=c99 -fPIC -D_POSIX_C_SOURCE=199309L -DCONFIG_CLIENT_SPECIFIC=1 -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
-LDFLAGS=-g -lrt -pthread -lpall -lfsma -lfsop -lpanet -lpsec `cat ../../.libs`
+LDFLAGS=-g -lpall -lfsma -lfsop -lpanet -lpsec `cat ../../.libs`
+ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/input.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/str.o ../common/term.o
@@ -27,8 +28,8 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c sig.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c usage.c
-	${CC} -o ${TARGET_CLIENT} ${OBJS_CLIENT} ${OBJS_COMMON} ${LDFLAGS}
-	${CC} -shared -o ${TARGET_LIB} ${OBJS_LIB} ${OBJS_COMMON} ${LDFLAGS}
+	${CC} -o ${TARGET_CLIENT} ${OBJS_CLIENT} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
+	${CC} -shared -o ${TARGET_LIB} ${OBJS_LIB} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
 
 install:
 	cp ${TARGET_CLIENT} /usr/bin/

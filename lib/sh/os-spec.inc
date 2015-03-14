@@ -43,26 +43,11 @@
 #
 
 ## OS-Specific options ##
-if [ `uname` = "Linux" ]; then
-	echo "-DCONFIG_SYS_LINUX=1 -D_GNU_SOURCE=1 -D_XOPEN_SOURCE=700" > .ecflags
-	echo "-pthread -lrt " > .elflags
-elif [ `uname` = "Darwin" ]; then
-	echo "-DCONFIG_SYS_BSD=1 -D_BSD_SOURCE=1 -D__BSD_VISIBLE=1 -D_XOPEN_SOURCE=700" > .ecflags
-	echo "-pthread -lrt " > .elflags
-elif [ `uname` = "FreeBSD" ]; then
-	echo "-DCONFIG_SYS_BSD=1 -D_BSD_SOURCE=1 -D__BSD_VISIBLE=1 -D_XOPEN_SOURCE=700" > .ecflags
-	echo "-pthread -lrt " > .elflags
-elif [ `uname` = "OpenBSD" ]; then
-	echo "-DCONFIG_SYS_BSD=1 -D_BSD_SOURCE=1 -D__BSD_VISIBLE=1 -D_XOPEN_SOURCE=700 -DPSCHED_INTERNAL_SIGEVENT=1 -DPSCHED_INTERNAL_TIMER_UL=1" > .ecflags
-	echo "-pthread -lrt " > .elflags
-elif [ `uname` = "Minix" ]; then
-	echo "-I/usr/pkg/include -DCONFIG_SYS_MINIX=1 -D_XOPEN_SOURCE=700 -DPSCHED_INTERNAL_TIMER_UL=1" > .ecflags
-	echo "/usr/pkg/lib/libpthread.so " > .elflags
-elif [ `uname` = "SunOS" ]; then
-	echo "-DCONFIG_SYS_SOLARIS=1 -D_XOPEN_SOURCE=700" > .ecflags
-	echo "-pthread -lrt " > .elflags
+if [ -e "./uconf/`uname`/ccflags" ]; then
+	cat ./uconf/`uname`/ccflags > .ecflags
+	cat ./uconf/`uname`/ldflags > .elflags
 else
-	echo "-DCONFIG_SYS_UNKNOWN=1 -D_XOPEN_SOURCE=700" > .ecflags
-	echo "-lpthread -lrt " > .elflags
+	cat ./uconf/Unknown/ccflags > .ecflags
+	cat ./uconf/Unknown/ldflags > .elflags
 fi
 

@@ -1,6 +1,6 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.ecflags`
-CCFLAGS=-std=c99 -D_POSIX_C_SOURCE=199309L -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -pthread -Wall -Werror -Wstack-protector -g
+CCFLAGS=-std=c99 -D_POSIX_C_SOURCE=199309L -D_REENTRANT -fstrict-aliasing -fstack-protector-all -pedantic -Wall -Werror -Wstack-protector -g
 LDFLAGS=-g -lfsma
 ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`

@@ -29,12 +29,12 @@
 #include <string.h>
 #include <errno.h>
 
-#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1 || CONFIG_SYS_MINIX == 1
+#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <sys/un.h>
  #include <unistd.h>
-#elif CONFIG_SYS_BSD == 1
+#elif CONFIG_SYS_BSD == 1 || CONFIG_SYS_MINIX == 1
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <unistd.h>
@@ -51,7 +51,7 @@
 int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 	int errsv = 0;
 
-#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1 || CONFIG_SYS_MINIX == 1
+#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1
 	socklen_t uc_len = 0;
  #if defined(SO_PEERCRED)
   #define uc_get_uid(uc)		(uc.uid)
@@ -85,7 +85,7 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
  #undef uc_get_gid
 
 	return 0;
-#elif CONFIG_SYS_BSD == 1
+#elif CONFIG_SYS_BSD == 1 || CONFIG_SYS_MINIX == 1
 	if (getpeereid(fd, uid, gid) < 0) {
 		errsv = errno;
 		log_warn("local_fd_peer_cred(): getpeereid(): %s\n", strerror(errno));

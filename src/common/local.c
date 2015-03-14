@@ -29,7 +29,7 @@
 #include <string.h>
 #include <errno.h>
 
-#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1
+#if CONFIG_SYS_LINUX == 1 || CONFIG_SYS_NETBSD == 1 || CONFIG_SYS_MINIX == 1
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <sys/un.h>

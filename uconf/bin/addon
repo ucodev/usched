@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if [ ${#} -ne 1 ]; then
+	echo "Usage: ${0} <addon>"
+	exit 1
+fi
+
+if [ -e ./uconf/addons/${1} ]; then
+	if [ ! -e .addons ]; then
+		echo ${1} >> .addons
+	else
+		while read addon; do
+			if [ "${addon}" = "${1}" ]; then
+				echo "Addon already enabled."
+				exit 1
+			fi
+		done < .addons
+
+		echo ${1} > .addons
+	fi
+else
+	echo "No such addon: ${1}"
+	exit 1
+fi
+
+echo "Addon enabled: ${1}"
+
+exit 0
+

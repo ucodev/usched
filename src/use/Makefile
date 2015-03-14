@@ -1,7 +1,7 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.ecflags`
 CCFLAGS=-DCONFIG_EXEC_SPECIFIC=1
-LDFLAGS=-lfsma -lfsop -lpall
+LDFLAGS=-lfsop -lpall
 ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include

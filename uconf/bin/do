@@ -12,6 +12,9 @@
 ## OS-Specific options ##
 . ./uconf/lib/sh/os-spec.inc
 
+## Addon options ##
+. ./uconf/lib/sh/addons.inc
+
 ## Test optional libraries ##
 . ./uconf/lib/sh/opt-libs.inc
 

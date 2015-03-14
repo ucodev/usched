@@ -36,6 +36,7 @@ rm -f .olinker
 rm -f .ecflags
 rm -f .elflags
 rm -f .archflags
+rm -f .addons
 rm -f .done
 rm -f .l*
 

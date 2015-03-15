@@ -64,20 +64,25 @@ test_opt_lib()
 mkdir -p build
 rm -f .l*
 
-echo "Testing optional libraries..."
-
 if [ -e ./uconf/params/default/optlibs ]; then
+	echo "Testing default optional libraries..."
+
 	for lib in `cat ./uconf/params/default/optlibs`; do
 		test_opt_lib ${lib}
 	done
+
+	echo "Done."
+	echo ""
 fi
 
 if [ -e ./uconf/params/`cat .osname`/optlibs ]; then
+	echo "Testing `cat .osname` optional libraries..."
+
 	for lib in $(cat ./uconf/params/`cat .osname`/optlibs); do
 		test_opt_lib ${lib}
 	done
-fi
 
-echo "Done."
-echo ""
+	echo "Done."
+	echo ""
+fi
 

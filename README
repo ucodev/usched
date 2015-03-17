@@ -102,7 +102,7 @@
 
   Generate Doxygen HTML files (into doc/doxygen/doxyfiles/):
 
-      $ make doxygen
+      ~$ make doxygen
 
   Brief installation guide:
 

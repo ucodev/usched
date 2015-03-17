@@ -81,11 +81,11 @@ Stop all scheduled entries for the user by running the following command:
 
 Reference Manual in HTML format:
 
-  * [http://www.usched.org/doc/uSched_Reference_Manual.html](http://www.usched.org/doc/uSched_Reference_Manual.html)
+  * [http://doc.usched.org/uSched_Reference_Manual.html](http://doc.usched.org/uSched_Reference_Manual.html)
 
 Reference Manual in PDF format:
 
-  * [http://www.usched.org/doc/uSched_Reference_Manual.pdf](http://www.usched.org/doc/uSched_Reference_Manual.pdf)
+  * [http://doc.usched.org/uSched_Reference_Manual.pdf](http://doc.usched.org/uSched_Reference_Manual.pdf)
 
 Overview manual page:
 

@@ -1,11 +1,11 @@
-## 1. Summary
+# uSched 
 
 A command-line scheduler with an almost-natural language interpreter.
 It also delivers a powerful programming interface for multiple programming languages.
 
 
 
-## 2. Description
+## Description
 
 uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time.
 
@@ -15,7 +15,7 @@ It also operates as a client/server, where requests performed by clients can aff
 
 
 
-## 3. Portability
+## Portability
 
 uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the include/config.h file.
 
@@ -23,7 +23,7 @@ uSched client will compile on most Windows versions and the API bindings are ava
 
 
 
-## 4. Installation
+## Installation
 
 Perform the following commands:
 
@@ -40,7 +40,7 @@ or
 
 
 
-## 5. Command-Line Usage Examples
+## Command-Line Usage Examples
 
 Run the do_backups.sh script at 23:00 and then run it every 24 hours:
 
@@ -68,7 +68,7 @@ Stop all scheduled entries for the user by running the following command:
 
 
 
-## 6. Documentation
+## Documentation
 
 Reference Manual in HTML format:
 
@@ -110,13 +110,13 @@ Brief installation guide:
 
 
 
-## 7. Library Usage Examples
+## Library Usage Examples
 
 See example/ directory for library usage examples in C, C#, Java, PHP, and more.
 
 
 
-## 8. Notes
+## Notes
 
 The current project revision is on an **alpha stage** and shall not be used beyond testing purposes.
 

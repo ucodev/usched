@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 14-03-2015
+ * Date: 17-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -79,7 +79,7 @@
 #define CONFIG_USCHED_HASH_FNV1A		1
 #define CONFIG_USCHED_HASH_DJB2			0
 
-#define CONFIG_POSIX_FULL			0
+#define CONFIG_POSIX_STRICT			0
 
 /* #define CONFIG_SYS_LINUX			0 */
 /* #define CONFIG_SYS_MINIX			0 */
@@ -118,8 +118,8 @@
 
 
 /* Configuration compliance checks */
-#if CONFIG_POSIX_FULL == 1 && (CONFIG_USCHED_JAIL == 1 || CONFIG_USE_SYNCFS == 1)
- #error "CONFIG_POSIX_FULL is incompatible with the following options: CONFIG_USCHED_JAIL, CONFIG_USE_SYNCFS"
+#if CONFIG_POSIX_STRICT == 1 && (CONFIG_USCHED_JAIL == 1 || CONFIG_USE_SYNCFS == 1)
+ #error "CONFIG_POSIX_STRICT is incompatible with the following options: CONFIG_USCHED_JAIL, CONFIG_USE_SYNCFS"
 #endif
 #if CONFIG_USCHED_DROP_PRIVS == 0
  #warning "CONFIG_USCHED_DROP_PRIVS is disabled. It's strongly recommended to drop privileges by default."

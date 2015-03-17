@@ -1,11 +1,11 @@
-1. Summary
+## 1. Summary
 
   A command-line scheduler with an almost-natural language interpreter.
   It also delivers a powerful programming interface for multiple programming languages.
 
 
 
-2. Description
+## 2. Description
 
   uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time.
 
@@ -15,7 +15,7 @@
 
 
 
-3. Portability
+## 3. Portability
 
   uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the include/config.h file.
 
@@ -23,16 +23,16 @@
 
 
 
-4. Installation
+## 4. Installation
 
   Perform the following commands:
 
-      ~# cd /usr/src
-      ~# mkdir usched
-      ~# wget https://github.com/ucodev/usched/archive/master.tar.gz
-      ~# tar zxvf master.tar.gz -C usched
-      ~# cd usched
-      ~# ./deploy
+      ~# **cd /usr/src**
+      ~# **mkdir usched**
+      ~# **wget https://github.com/ucodev/usched/archive/master.tar.gz**
+      ~# **tar zxvf master.tar.gz -C usched**
+      ~# **cd usched**
+      ~# **./deploy**
 
   or
 
@@ -40,41 +40,41 @@
 
 
 
-5. Command-Line Usage Examples
+## 5. Command-Line Usage Examples
 
   Run the do_backups.sh script at 23:00 and then run it every 24 hours:
 
-      ~$ usc run '/usr/local/bin/do_backups.sh' on hour 23 then every 24 hours
+      ~$ **usc run '/usr/local/bin/do_backups.sh' on hour 23 then every 24 hours**
 
 
   Dump 'df -h' output into /tmp/disk_stats.log after 10 minutes of running this command, and run it again every 30 minutes:
 
-      ~$ usc run '/bin/df -h >> /tmp/disk_stats.log' in 10 minutes then every 30 minutes
+      ~$ **usc run '/bin/df -h >> /tmp/disk_stats.log' in 10 minutes then every 30 minutes**
 
 
   Run the command 'sync' now, repeat every 45 seconds and stop when the time is 12:00:
 
-      ~$ usc run '/bin/sync' now then every 45 seconds until to time '12:00:00'
+      ~$ **usc run '/bin/sync' now then every 45 seconds until to time '12:00:00'**
 
 
   Show all scheduled entries for the user by running the following command:
 
-      ~$ usc show all
+      ~$ **usc show all**
 
 
   Stop all scheduled entries for the user by running the following command:
 
-      ~$ usc stop all
+      ~$ **usc stop all**
 
 
 
-6. Library Usage Examples
+## 6. Library Usage Examples
 
   See example/*
 
 
 
-7. Documentation
+## 7. Documentation
 
   Reference Manual in HTML format:
 
@@ -116,7 +116,7 @@
 
 
 
-8. Notes
+## 8. Notes
 
   The current project revision is on an alpha stage and shall not be used beyond testing purposes.
 

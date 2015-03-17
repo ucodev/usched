@@ -84,11 +84,11 @@ uSched Services and Tools
 
 \begin_layout Author
 Reference Manual - Rev.
- A01
+ A02
 \end_layout
 
 \begin_layout Date
-7th March 2015
+17th March 2015
 \end_layout
 
 \begin_layout Standard
@@ -179,7 +179,7 @@ The uSched Daemon component is a system service that receives and processes
  It manages the authentication and authorization, schedulers and is the
  only component that directly communicates with the uSched Executer.
  With a default installation, this component requires super-user privileges
- to be started, although it will drop it's privileges after start-up routines
+ to be started, although it will drop its privileges after start-up routines
  are performed.
 \end_layout
 
@@ -218,7 +218,7 @@ uSched is designed to be compliant with any POSIX operating system.
  There are some features that may not be enabled by default in the case
  that some non-portable calls being unavailable for the target operating
  system, such as chroot().
- To disable such calls and features, set the CONFIG_POSIX_FULL definition
+ To disable such calls and features, set the CONFIG_POSIX_STRICT definition
  to 1 in the include/config.h file.
  uSched Client will also compile on most Windows versions and the API bindings
  for C# are promptly available on the project bindings/csharp directory.
@@ -253,7 +253,7 @@ To clone the repository performed the following command (GIT must be installed
 \end_layout
 
 \begin_layout Quotation
-$ git clone https://github.com/ucodev/usched
+~$ git clone https://github.com/ucodev/usched
 \end_layout
 
 \begin_layout Standard
@@ -261,15 +261,15 @@ It can also be downloaded as a ZIP package via 'wget' utility:
 \end_layout
 
 \begin_layout Quotation
-$ wget https://github.com/ucodev/usched/archive/master.zip
+~$ wget https://github.com/ucodev/usched/archive/master.tar.gz
 \end_layout
 
 \begin_layout Quotation
-$ unzip -d usched master.zip
+~$ tar zxvf master.tar.gz -C usched
 \end_layout
 
 \begin_layout Quotation
-$ cd usched
+~$ cd usched
 \end_layout
 
 \begin_layout Standard
@@ -277,15 +277,15 @@ Or via 'curl' utility:
 \end_layout
 
 \begin_layout Quotation
-$ curl -o https://github.com/ucodev/usched/archive/master.zip
+~$ curl -o https://github.com/ucodev/usched/archive/master.tar.gz
 \end_layout
 
 \begin_layout Quotation
-$ unzip -d usched master.zip
+~$ tar zxvf master.tar.gz -C usched
 \end_layout
 
 \begin_layout Quotation
-$ cd usched
+~$ cd usched
 \end_layout
 
 \begin_layout Section
@@ -301,7 +301,7 @@ After downloading (and extracting) the uSched source package, it is recommended
 \end_layout
 
 \begin_layout Quotation
-# ./deploy
+~# ./deploy
 \end_layout
 
 \begin_layout Standard
@@ -323,7 +323,7 @@ Since initialization scripts differ on many systems, they currently need
 \end_layout
 
 \begin_layout Quotation
-# make install_<system>
+~# make install_<system>
 \end_layout
 
 \begin_layout Standard
@@ -353,7 +353,7 @@ an keyword shall be used:
 \end_layout
 
 \begin_layout Quotation
-# make install_classic_debian
+~# make install_classic_debian
 \end_layout
 
 \begin_layout Standard
@@ -361,7 +361,7 @@ Otherwise, for Debian versions with systemd enabled:
 \end_layout
 
 \begin_layout Quotation
-# make install_systemd
+~# make install_systemd
 \end_layout
 
 \begin_layout Subsection
@@ -386,7 +386,7 @@ at keyword shall be used:
 \end_layout
 
 \begin_layout Quotation
-# make install_classic_redhat
+~# make install_classic_redhat
 \end_layout
 
 \begin_layout Standard
@@ -394,7 +394,7 @@ Otherwise, for RedHat versions with systemd enabled:
 \end_layout
 
 \begin_layout Quotation
-# make install_systemd
+~# make install_systemd
 \end_layout
 
 \begin_layout Subsection
@@ -414,7 +414,7 @@ To install the FreeBSD initialization scripts, execute:
 \end_layout
 
 \begin_layout Quotation
-# make install_freebsd
+~# make install_freebsd
 \end_layout
 
 \begin_layout Part
@@ -449,28 +449,28 @@ Usage examples:
 \end_layout
 
 \begin_layout Quotation
-$ usc run 'df -h > /tmp/output' in 10 seconds
+~$ usc run 'df -h > /tmp/output' in 10 seconds
 \end_layout
 
 \begin_layout Quotation
-$ usc run 'take_screenshot.sh' on hour 8 then every 30 minutes
+~$ usc run 'take_screenshot.sh' on hour 8 then every 30 minutes
 \end_layout
 
 \begin_layout Quotation
-$ usc run 'do_work.py' on hour 8 then every 1 hour until to hour 17
+~$ usc run 'do_work.py' on hour 8 then every 1 hour until to hour 17
 \end_layout
 
 \begin_layout Quotation
-$ usc run 'do_weekend_stuff.pl' on weekday saturday then every week
+~$ usc run 'do_weekend_stuff.pl' on weekday saturday then every 1 week
 \end_layout
 
 \begin_layout Quotation
-# usc run 'tcpdump -i eth0 > /tmp/tcpdump.log' now and 'kill -TERM `pidof
+~# usc run 'tcpdump -i eth0 > /tmp/tcpdump.log' now and 'kill -TERM `pidof
  tcpdump`' in 1 hour
 \end_layout
 
 \begin_layout Quotation
-$ usc show all
+~$ usc show all
 \end_layout
 
 \begin_layout Subsection
@@ -526,7 +526,7 @@ Example:
 \end_layout
 
 \begin_layout Quotation
-$ usc -H 192.168.0.1 -U testuser -P testpass show all
+~$ usc -H 192.168.0.1 -U testuser -P testpass show all
 \end_layout
 
 \begin_layout Subsection
@@ -865,42 +865,47 @@ Usage examples:
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' now
+~$ usc run 'ntpdate' now
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' in 1 hour
+~$ usc run 'ntpdate' in 1 hour
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' on hour 22
+~$ usc run 'ntpdate' on hour 22
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' now then every 6 hours
+~$ usc run 'ntpdate' now then every 6 hours
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' on weekday monday then every 1 week
+~$ usc run 'ntpdate' on weekday monday then every 1 week
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' on day 15 then every 1 month until datetime is '2018/01/01
+~$ usc run 'ntpdate' on day 15 then every 1 month until datetime is '2018/01/01
  01:00:00'
 \end_layout
 
 \begin_layout Quotation
-run 'ntpdate' now then every 3 hours and 'date >> /tmp/date.log' in 3 hours
- then every 3 hours
+~$ usc run 'ntpdate' now then every 3 hours and 'date >> /tmp/date.log' in
+ 3 hours then every 3 hours
 \end_layout
 
 \begin_layout Quotation
-run 'tcpdump -i eth1 > /tmp/tcpdump_eth1.log' in 5 minutes and 'kill -TERM
- `pidof tcpdump`' in 10 minutes
+~# usc run 'tcpdump -i eth1 > /tmp/tcpdump_eth1.log' in 5 minutes and 'killall
+ tcpdump' in 10 minutes
 \end_layout
 
 \begin_layout Quotation
-run 'free >> /tmp/mem_info.log' now then every 5 seconds while in 10 minutes
+~$ usc run 'free >> /tmp/mem_info.log' now then every 5 seconds while in
+ 10 minutes
+\end_layout
+
+\begin_layout Quotation
+~$ usc run 'echo @@id@@ > /tmp/entry_id' now
 \end_layout
 
 \begin_layout Standard
@@ -937,19 +942,19 @@ Where SUBJ (Subject) must be at least a valid and installed Entry ID, or
 \end_layout
 
 \begin_layout Quotation
-stop 0xD9947D5E546B3707
+~$ usc stop 0xD9947D5E546B3707
 \end_layout
 
 \begin_layout Quotation
-stop 0xD9947D5E546B3707,0x0B30462B97160FC4
+~$ usc stop 0xD9947D5E546B3707,0x0B30462B97160FC4
 \end_layout
 
 \begin_layout Quotation
-stop 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642
+~$ usc stop 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642
 \end_layout
 
 \begin_layout Quotation
-stop all
+~$ usc stop all
 \end_layout
 
 \begin_layout Standard
@@ -979,19 +984,19 @@ Where SUBJ (Subject) must be at least a valid and installed Entry ID, or
 \end_layout
 
 \begin_layout Quotation
-show 0xD9947D5E546B3707
+~$ usc show 0xD9947D5E546B3707
 \end_layout
 
 \begin_layout Quotation
-show 0xD9947D5E546B3707,0x0B30462B97160FC4
+~$ usc show 0xD9947D5E546B3707,0x0B30462B97160FC4
 \end_layout
 
 \begin_layout Quotation
-show 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642
+~$ usc show 0xD9947D5E546B3707,0x0B30462B97160FC4,0xEEAD3BBAC6BBF642
 \end_layout
 
 \begin_layout Quotation
-show all
+~$ usc show all
 \end_layout
 
 \begin_layout Standard
@@ -1220,6 +1225,31 @@ RUN Subject Variables
 
 \end_layout
 
+\begin_layout Standard
+The following examples make use of some of the supported variables:
+\end_layout
+
+\begin_layout Quotation
+~$ usc run 'echo 
+\begin_inset Quotes eld
+\end_inset
+
+@@uid@@;@@gid@@;
+\begin_inset Quotes erd
+\end_inset
+
+ >> /tmp/my_ids.txt' now then every 5 seconds while in 30 seconds
+\end_layout
+
+\begin_layout Quotation
+~$ usc run 'echo @@trigger@@' >> /tmp/my_trigger.txt' now then every 3 seconds
+\end_layout
+
+\begin_layout Quotation
+~$ usc run 'echo @@expire@@' >> /tmp/my_trigger.txt' now then every 5 seconds
+ until to day 10
+\end_layout
+
 \begin_layout Subsubsection
 Subjects of SHOW Operation
 \end_layout
@@ -1263,7 +1293,7 @@ Indicates that the following adverbial of time value is the step of the
 \end_layout
 
 \begin_layout Quotation
-$ usc run 'df -h >> /tmp/out.txt' now then every 5 seconds
+~$ usc run 'df -h >> /tmp/out.txt' now then every 5 seconds
 \end_layout
 
 \begin_layout Standard
@@ -1286,7 +1316,7 @@ If used after a Subject, it indicates that the entry should be first triggered
 \end_layout
 
 \begin_layout Quotation
-$ usc run ntpdate in 10 minutes
+~$ usc run ntpdate in 10 minutes
 \end_layout
 
 \begin_layout Standard
@@ -1305,7 +1335,7 @@ Indicates that the entry should be first triggered right after it is installed.
 \end_layout
 
 \begin_layout Quotation
-$ usc run take_shot.sh now
+~$ usc run take_shot.sh now
 \end_layout
 
 \begin_layout Subsubsection
@@ -1320,7 +1350,7 @@ Indicates that the entry should be first triggered on a specified point
 \end_layout
 
 \begin_layout Quotation
-$ usc run do_backups.sh on date 2015-03-15
+~$ usc run do_backups.sh on date 2015-03-15
 \end_layout
 
 \begin_layout Standard
@@ -1341,7 +1371,7 @@ Only acceptable after an UNTIL conjuction, indicating that the entry should
 \end_layout
 
 \begin_layout Quotation
-$ usc run ntpdate now then every 6 hours until to month 5
+~$ usc run ntpdate now then every 6 hours until to month 5
 \end_layout
 
 \begin_layout Standard
@@ -1369,7 +1399,7 @@ Define a time value in seconds as a positive integer (ARG ADVERB), or a
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh now then every 30 seconds
+~$ usc run sync_routine.sh now then every 30 seconds
 \end_layout
 
 \begin_layout Subsubsection
@@ -1382,7 +1412,7 @@ Define a time value in minutes as a positive integer (ARG ADVERB), or a
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on minute 10 then every 10 minutes
+~$ usc run sync_routine.sh on minute 10 then every 10 minutes
 \end_layout
 
 \begin_layout Subsubsection
@@ -1395,7 +1425,7 @@ Define a time value in hours as a positive integer (ARG ADVERB), or a specific
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on hour 6 then every 24 hours
+~$ usc run sync_routine.sh on hour 6 then every 24 hours
 \end_layout
 
 \begin_layout Subsubsection
@@ -1408,7 +1438,7 @@ Define a time value in days as a positive integer (ARG ADVERB), or a specific
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on day 11 then every 2 days
+~$ usc run sync_routine.sh on day 11 then every 2 days
 \end_layout
 
 \begin_layout Subsubsection
@@ -1421,7 +1451,7 @@ Define a time value in weeks as a positive integer (ARG ADVERB), or a specific
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on week 32 then every 2 weeks
+~$ usc run sync_routine.sh on week 32 then every 2 weeks
 \end_layout
 
 \begin_layout Subsubsection
@@ -1434,7 +1464,7 @@ Define a time value in months as a positive integer (ARG ADVERB), or a specific
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on month 4 then every 1 month
+~$ usc run sync_routine.sh on month 4 then every 1 month
 \end_layout
 
 \begin_layout Subsubsection
@@ -1447,7 +1477,7 @@ Define a time value in years as a positive integer (ARG ADVERB), or a specific
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on year 2016 then every 1 year
+~$ usc run sync_routine.sh on year 2016 then every 1 year
 \end_layout
 
 \begin_layout Subsubsection
@@ -1460,7 +1490,7 @@ Define a specific weekday ranging from 0 to 6 (ADVERB ARG), or the special
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on weekday monday then every 2 weeks
+~$ usc run sync_routine.sh on weekday monday then every 2 weeks
 \end_layout
 
 \begin_layout Subsubsection
@@ -1472,7 +1502,7 @@ Define a specific time in the format HH:MM:SS (ADVERB ARG).
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on time 18:00:00 then every 10 minutes
+~$ usc run sync_routine.sh on time 18:00:00 then every 10 minutes
 \end_layout
 
 \begin_layout Subsubsection
@@ -1484,7 +1514,7 @@ Define a specific date in the format YYYY-MM-DD (ADVERB ARG).
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on date 2015/03/15 then every 15 days
+~$ usc run sync_routine.sh on date 2015/03/15 then every 15 days
 \end_layout
 
 \begin_layout Subsubsection
@@ -1496,7 +1526,7 @@ Define a specific datetime in the format YYYY-MM-DD HH:MM:SS (ADVERB ARG).
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on datetime '2015/03/15 18:00:00' then every 10
+~$ usc run sync_routine.sh on datetime '2015/03/15 18:00:00' then every 10
  minutes until to datetime '2015/04/30 10:00:00'
 \end_layout
 
@@ -1512,7 +1542,7 @@ Define a specific timestamp.
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync_routine.sh on timestamp 1425544000 then every 3600 seconds
+~$ usc run sync_routine.sh on timestamp 1425544000 then every 3600 seconds
  until to timestamp 1425644000
 \end_layout
 
@@ -1538,7 +1568,7 @@ The AND Conjunction indicates that the next Preposition specifies another
 \end_layout
 
 \begin_layout Quotation
-$ usc run 'sync' now and on month 5
+~$ usc run 'sync' now and on month 5
 \end_layout
 
 \begin_layout Subsubsection
@@ -1552,7 +1582,7 @@ The THEN Conjunction expects an EVERY Preposition, being this the only valid
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync now then every 5 seconds
+~$ usc run sync now then every 5 seconds
 \end_layout
 
 \begin_layout Subsubsection
@@ -1569,7 +1599,7 @@ The UNTIL Conjunction expects a TO Preposition, being this the only valid
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync now then every 5 seconds until to time 18:00:00
+~$ usc run sync now then every 5 seconds until to time 18:00:00
 \end_layout
 
 \begin_layout Subsubsection
@@ -1587,7 +1617,7 @@ The WHILE Conjunction expects a IN Preposition, being this the only valid
 \end_layout
 
 \begin_layout Quotation
-$ usc run sync now then every 5 seconds while in 30 seconds
+~$ usc run sync now then every 5 seconds while in 30 seconds
 \end_layout
 
 \begin_layout Section
@@ -1622,31 +1652,31 @@ Usage examples:
 \end_layout
 
 \begin_layout Quotation
-$ usa change auth remote users 1
+~# usa change auth remote users 1
 \end_layout
 
 \begin_layout Quotation
-$ usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Quotation
-$ usa add users testuser 10000 10000
+~# usa add users testuser 10000 10000
 \end_layout
 
 \begin_layout Quotation
-$ usa show users
+~# usa show users
 \end_layout
 
 \begin_layout Quotation
-$ usa rollback users
+~# usa rollback users
 \end_layout
 
 \begin_layout Quotation
-$ usa show all
+~# usa show all
 \end_layout
 
 \begin_layout Quotation
-$ usa commit all
+~# usa commit all
 \end_layout
 
 \begin_layout Subsection
@@ -1670,7 +1700,7 @@ Adds a new Component Property to the target Category.
 \end_layout
 
 \begin_layout Quotation
-# usa add users testuser 10000 10000
+~# usa add users testuser 10000 10000
 \end_layout
 
 \begin_layout Quotation
@@ -1678,7 +1708,7 @@ Password:
 \end_layout
 
 \begin_layout Quotation
-# usa commit users
+~# usa commit users
 \end_layout
 
 \begin_layout Subsubsection
@@ -1692,15 +1722,15 @@ Changes a Component Property on the target Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change auth remote users 1
+~# usa change auth remote users 1
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Quotation
-# usa change users testuser 5000 5000
+~# usa change users testuser 5000 5000
 \end_layout
 
 \begin_layout Quotation
@@ -1708,7 +1738,7 @@ Password:
 \end_layout
 
 \begin_layout Quotation
-# usa commit users
+~# usa commit users
 \end_layout
 
 \begin_layout Subsubsection
@@ -1723,11 +1753,11 @@ Commits the current Component Properties to the target Category.
 \end_layout
 
 \begin_layout Quotation
-# usa commit all
+~# usa commit all
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -1741,11 +1771,11 @@ Deletes a Property from the target Category.
 \end_layout
 
 \begin_layout Quotation
-# usa delete users testuser
+~# usa delete users testuser
 \end_layout
 
 \begin_layout Quotation
-# usa commit users
+~# usa commit users
 \end_layout
 
 \begin_layout Subsubsection
@@ -1760,11 +1790,11 @@ Rollback the uncommited changes from the target Category.
 \end_layout
 
 \begin_layout Quotation
-# usa rollback users
+~# usa rollback users
 \end_layout
 
 \begin_layout Quotation
-# usa rollback all
+~# usa rollback all
 \end_layout
 
 \begin_layout Subsubsection
@@ -1779,27 +1809,27 @@ Shows the Component Properties of the target Categoy.
 \end_layout
 
 \begin_layout Quotation
-# usa show core
+~# usa show core
 \end_layout
 
 \begin_layout Quotation
-# usa show all
+~# usa show all
 \end_layout
 
 \begin_layout Quotation
-# usa show network
+~# usa show network
 \end_layout
 
 \begin_layout Quotation
-# usa show auth
+~# usa show auth
 \end_layout
 
 \begin_layout Quotation
-# usa show core
+~# usa show core
 \end_layout
 
 \begin_layout Quotation
-# usa show users
+~# usa show users
 \end_layout
 
 \begin_layout Subsection
@@ -1865,15 +1895,15 @@ The USERS Category configures the authorized remote users that connect to
 \end_layout
 
 \begin_layout Quotation
-# usa add users USERNAME UID GID
+~# usa add users USERNAME UID GID
 \end_layout
 
 \begin_layout Quotation
-# usa change users USERNAME UID GID
+~# usa change users USERNAME UID GID
 \end_layout
 
 \begin_layout Quotation
-# usa delete users USERNAME
+~# usa delete users USERNAME
 \end_layout
 
 \begin_layout Subsection
@@ -1899,15 +1929,15 @@ Available on NETWORK Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change network bind addr 127.0.0.1
+~# usa change network bind addr 127.0.0.1
 \end_layout
 
 \begin_layout Quotation
-# usa change network bind port 7600
+~# usa change network bind port 7600
 \end_layout
 
 \begin_layout Quotation
-# usa commit network
+~# usa commit network
 \end_layout
 
 \begin_layout Subsubsection
@@ -1923,27 +1953,27 @@ Available on AUTH Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change auth blacklist uid 10000,20000
+~# usa change auth blacklist uid 10000,20000
 \end_layout
 
 \begin_layout Quotation
-# usa add auth blacklist uid 30000
+~# usa add auth blacklist uid 30000
 \end_layout
 
 \begin_layout Quotation
-# usa delete auth blacklist uid 20000
+~# usa delete auth blacklist uid 20000
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Quotation
-# usa change auth blacklist uid ''
+~# usa change auth blacklist uid ''
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Subsubsection
@@ -1958,15 +1988,15 @@ Available on NETWORK Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change network conn addr 0.0.0.0
+~# usa change network conn addr 0.0.0.0
 \end_layout
 
 \begin_layout Quotation
-# usa change network conn port 7600
+~# usa change network conn port 7600
 \end_layout
 
 \begin_layout Quotation
-# usa commit network
+~# usa commit network
 \end_layout
 
 \begin_layout Subsubsection
@@ -1981,15 +2011,15 @@ Available on CORE Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change core delta noexec 5
+~# usa change core delta noexec 5
 \end_layout
 
 \begin_layout Quotation
-# usa change core delta reload 900
+~# usa change core delta reload 900
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -2004,11 +2034,11 @@ Available on CORE Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change core jail dir /var/cache/usched/jail
+~# usa change core jail dir /var/cache/usched/jail
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -2024,11 +2054,11 @@ Available on AUTH Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change auth local use 1
+~# usa change auth local use 1
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Subsubsection
@@ -2044,19 +2074,19 @@ Available on CORE Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change core pmq msgmax 128
+~# usa change core pmq msgmax 128
 \end_layout
 
 \begin_layout Quotation
-# usa change core pmq msgsize 1024
+~# usa change core pmq msgsize 1024
 \end_layout
 
 \begin_layout Quotation
-# usa change core name /uschedpmq01
+~# usa change core name /uschedpmq01
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -2072,15 +2102,15 @@ Available on CORE Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change core privdrop group nogroup
+~# usa change core privdrop group nogroup
 \end_layout
 
 \begin_layout Quotation
-# usa change core privdrop user nobody
+~# usa change core privdrop user nobody
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -2095,11 +2125,11 @@ Available on AUTH Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change auth remote users 1
+~# usa change auth remote users 1
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Subsubsection
@@ -2115,11 +2145,11 @@ Available on CORE Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change core serialize file /var/cache/usched/daemon.dat
+~# usa change core serialize file /var/cache/usched/daemon.dat
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -2134,11 +2164,11 @@ Available on NETWORK Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change network sock name /var/run/usched.sock
+~# usa change network sock name /var/run/usched.sock
 \end_layout
 
 \begin_layout Quotation
-# usa commit network
+~# usa commit network
 \end_layout
 
 \begin_layout Subsubsection
@@ -2153,15 +2183,15 @@ Available on CORE Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change core thread priority 20
+~# usa change core thread priority 20
 \end_layout
 
 \begin_layout Quotation
-# usa change core thread workers 5
+~# usa change core thread workers 5
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsubsection
@@ -2176,27 +2206,27 @@ Available on AUTH Category.
 \end_layout
 
 \begin_layout Quotation
-# usa change auth whitelist uid 10000,20000
+~# usa change auth whitelist uid 10000,20000
 \end_layout
 
 \begin_layout Quotation
-# usa add auth whitelist uid 30000
+~# usa add auth whitelist uid 30000
 \end_layout
 
 \begin_layout Quotation
-# usa delete auth whitelist uid 20000
+~# usa delete auth whitelist uid 20000
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Quotation
-# usa change auth whitelist uid ''
+~# usa change auth whitelist uid ''
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Subsection
@@ -2405,7 +2435,7 @@ The following command will start all the required uSched Services:
 \end_layout
 
 \begin_layout Quotation
-# usched start
+~# usched start
 \end_layout
 
 \begin_layout Subsection
@@ -2417,7 +2447,7 @@ The following command will stop all uSched services:
 \end_layout
 
 \begin_layout Quotation
-# usched stop
+~# usched stop
 \end_layout
 
 \begin_layout Subsection
@@ -2429,7 +2459,7 @@ To reload the uSched services, execute:
 \end_layout
 
 \begin_layout Quotation
-# usched reload
+~# usched reload
 \end_layout
 
 \begin_layout Subsection
@@ -2441,7 +2471,7 @@ To force the serialization of the uSched Services state, execute:
 \end_layout
 
 \begin_layout Quotation
-# usched flush
+~# usched flush
 \end_layout
 
 \begin_layout Subsection
@@ -2456,11 +2486,11 @@ If for some reason the uSched Services weren't stopped gracefully (caused
 \end_layout
 
 \begin_layout Quotation
-# usched force_stop
+~# usched force_stop
 \end_layout
 
 \begin_layout Quotation
-# usched start
+~# usched start
 \end_layout
 
 \begin_layout Section
@@ -2492,23 +2522,23 @@ The following example will enable remote access on port 7600 on all network
 \end_layout
 
 \begin_layout Quotation
-# usa change network bind addr 0.0.0.0
+~# usa change network bind addr 0.0.0.0
 \end_layout
 
 \begin_layout Quotation
-# usa change network bind port 7600
+~# usa change network bind port 7600
 \end_layout
 
 \begin_layout Quotation
-# usa change auth remote users 1
+~# usa change auth remote users 1
 \end_layout
 
 \begin_layout Quotation
-# usa add users myusername 1000 1000
+~# usa add users myusername 1000 1000
 \end_layout
 
 \begin_layout Quotation
-# usa commit all
+~# usa commit all
 \end_layout
 
 \begin_layout Subsection
@@ -2521,15 +2551,15 @@ The following example will change the default unprivileged user and group
 \end_layout
 
 \begin_layout Quotation
-# usa change core privdrop user someuser
+~# usa change core privdrop user someuser
 \end_layout
 
 \begin_layout Quotation
-# usa change core privdrop group somegroup
+~# usa change core privdrop group somegroup
 \end_layout
 
 \begin_layout Quotation
-# usa commit core
+~# usa commit core
 \end_layout
 
 \begin_layout Subsection
@@ -2542,11 +2572,11 @@ The following example will blacklist the UID 1000 and UID 2000, preventing
 \end_layout
 
 \begin_layout Quotation
-# usa change auth blacklist uid 1000,2000
+~# usa change auth blacklist uid 1000,2000
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Standard
@@ -2555,15 +2585,15 @@ If we want to authorize only the UID 1000 and UID 2000, rejecting request
 \end_layout
 
 \begin_layout Quotation
-# usa change auth blacklist uid ''
+~# usa change auth blacklist uid ''
 \end_layout
 
 \begin_layout Quotation
-# usa change auth whitelist uid 1000,2000
+~# usa change auth whitelist uid 1000,2000
 \end_layout
 
 \begin_layout Quotation
-# usa commit auth
+~# usa commit auth
 \end_layout
 
 \begin_layout Standard

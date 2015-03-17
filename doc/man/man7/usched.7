@@ -31,7 +31,7 @@ The uSched Executer component \fBuse\fR(1) is a system service that receives exe
 The uSched Monitor component \fBusm\fR(1) is a simple command line binary utility that starts and daemonizes the uSched Daemon and uSched Executer and monitors their processes state. It will restart or reload the services whenever it is required to do so. This utility requires super-user privileges to operate correctly.
 .PP
 .SH CONFORMING TO
-uSched Services are designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as \fBchroot\fR(2). To disable such calls and features, set the \fBCONFIG_POSIX_FULL\fR definition to 1 in the include/config.h file. uSched Client will also compile on most Windows versions and the API bindings for C# are promptly available on the project bindings/csharp directory.
+uSched Services are designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as \fBchroot\fR(2). To disable such calls and features, set the \fBCONFIG_POSIX_STRICT\fR definition to 1 in the include/config.h file. uSched Client will also compile on most Windows versions and the API bindings for C# are promptly available on the project bindings/csharp directory.
 .SH AUTHOR
 Written by Pedro A. Hortas (pah@ucodev.org).
 .SH "REPORTING BUGS"

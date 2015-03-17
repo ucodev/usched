@@ -55,6 +55,17 @@ Run the command 'sync' now, repeat every 45 seconds and stop when the time is 12
       ~$ usc run '/bin/sync' now then every 45 seconds until to time '12:00:00'
 
 
+Send a some sort of notification in 30 minutes:
+
+      ~$ usc run '/usr/local/bin/notify.sh something' in 30 minutes
+
+
+Capture network traffic on interface eth0 between 8:00 and 18:00, every day:
+
+      ~# usc run 'tcpdump -i eth0 -w /tmp/traffic_`date +%Y%m%d`.dump' on hour 8 every 1 day
+      ~# usc run 'killall tcpdump' on hour 18 every 1 day
+
+
 Show all scheduled entries for the user by running the following command:
 
       ~$ usc show all

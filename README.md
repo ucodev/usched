@@ -1,4 +1,4 @@
-# uSched 
+## Summary 
 
 A command-line scheduler with an almost-natural language interpreter.
 It also delivers a powerful programming interface for multiple programming languages.

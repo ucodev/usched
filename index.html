@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="uSched : A command-line scheduler with an almost-natural language interpreter.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>uSched</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ucodev/usched">View on GitHub</a>
+
+          <h1 id="project_title">uSched</h1>
+          <h2 id="project_tagline">A command-line scheduler with an almost-natural language interpreter.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ucodev/usched/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ucodev/usched/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="usched" class="anchor" href="#usched" aria-hidden="true"><span class="octicon octicon-link"></span></a>uSched</h1>
+
+<p>A command-line scheduler with an almost-natural language interpreter.
+It also delivers a powerful programming interface for multiple programming languages.</p>
+
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
+
+<p>uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time.</p>
+
+<p>It provides a simple and intuitive structured language that is intepreted via a command line client, but can also be integrated into any programming language through its client libraries and bindings.</p>
+
+<p>It also operates as a client/server, where requests performed by clients can affect local or remote machines where uSched services are running.</p>
+
+<h2>
+<a id="portability" class="anchor" href="#portability" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portability</h2>
+
+<p>uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the include/config.h file.</p>
+
+<p>uSched client will compile on most Windows versions and the API bindings are available for C#.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Perform the following commands:</p>
+
+<pre><code>  ~# cd /usr/src
+  ~# mkdir usched
+  ~# wget https://github.com/ucodev/usched/archive/master.tar.gz
+  ~# tar zxvf master.tar.gz -C usched
+  ~# cd usched
+  ~# ./deploy
+</code></pre>
+
+<p>or</p>
+
+<pre><code>  See INSTALL.txt
+</code></pre>
+
+<h2>
+<a id="command-line-usage-examples" class="anchor" href="#command-line-usage-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Command-Line Usage Examples</h2>
+
+<p>Run the do_backups.sh script at 23:00 and then run it every 24 hours:</p>
+
+<pre><code>  ~$ usc run '/usr/local/bin/do_backups.sh' on hour 23 then every 24 hours
+</code></pre>
+
+<p>Dump 'df -h' output into /tmp/disk_stats.log after 10 minutes of running this command, and run it again every 30 minutes:</p>
+
+<pre><code>  ~$ usc run '/bin/df -h &gt;&gt; /tmp/disk_stats.log' in 10 minutes then every 30 minutes
+</code></pre>
+
+<p>Run the command 'sync' now, repeat every 45 seconds and stop when the time is 12:00:</p>
+
+<pre><code>  ~$ usc run '/bin/sync' now then every 45 seconds until to time '12:00:00'
+</code></pre>
+
+<p>Show all scheduled entries for the user by running the following command:</p>
+
+<pre><code>  ~$ usc show all
+</code></pre>
+
+<p>Stop all scheduled entries for the user by running the following command:</p>
+
+<pre><code>  ~$ usc stop all
+</code></pre>
+
+<h2>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
+
+<p>Reference Manual in HTML format:</p>
+
+<ul>
+<li><a href="http://www.usched.org/doc/uSched_Reference_Manual.html">http://www.usched.org/doc/uSched_Reference_Manual.html</a></li>
+</ul>
+
+<p>Reference Manual in PDF format:</p>
+
+<ul>
+<li><a href="http://www.usched.org/doc/uSched_Reference_Manual.pdf">http://www.usched.org/doc/uSched_Reference_Manual.pdf</a></li>
+</ul>
+
+<p>Overview manual page:</p>
+
+<pre><code>  usched(7)
+</code></pre>
+
+<p>Command-line manual pages:</p>
+
+<pre><code>  usched(1), usa(1), usc(1), usd(1), use(1), usm(1)
+</code></pre>
+
+<p>Programmer's manual pages:</p>
+
+<pre><code>  usched_destroy(3), usched_init(3),
+  usched_opt_set_remote_hostname(3), usched_opt_set_remote_port(3)
+  usched_opt_set_remote_username(3), usched_opt_set_remote_password(3),
+  usched_request(3),
+  usched_result_free_run(3),
+  usched_result_free_show(3),
+  usched_result_free_stop(3),
+  usched_result_get_run(3),
+  usched_result_get_show(3),
+  usched_result_get_stop(3),
+  usched_usage_error(3), usched_usage_error_str(3)
+</code></pre>
+
+<p>Generate Doxygen HTML files (into doc/doxygen/doxyfiles/):</p>
+
+<pre><code>  $ make doxygen
+</code></pre>
+
+<p>Brief installation guide:</p>
+
+<pre><code>  INSTALL.txt
+</code></pre>
+
+<h2>
+<a id="library-usage-examples" class="anchor" href="#library-usage-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Library Usage Examples</h2>
+
+<p>See example/ directory for library usage examples in C, C#, Java, PHP, and more.</p>
+
+<h2>
+<a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes</h2>
+
+<p>The current project revision is on an <strong>alpha stage</strong> and shall not be used beyond testing purposes.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">uSched maintained by <a href="https://github.com/ucodev">ucodev</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>

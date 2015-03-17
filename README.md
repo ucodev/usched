@@ -78,11 +78,11 @@
 
   Reference Manual in HTML format:
 
-      http://www.usched.org/doc/uSched_Reference_Manual.html
+  * [http://www.usched.org/doc/uSched_Reference_Manual.html](http://www.usched.org/doc/uSched_Reference_Manual.html)
 
   Reference Manual in PDF format:
 
-      http://www.usched.org/doc/uSched_Reference_Manual.pdf
+  * [http://www.usched.org/doc/uSched_Reference_Manual.pdf](http://www.usched.org/doc/uSched_Reference_Manual.pdf)
 
   Overview manual page:
 

@@ -68,13 +68,7 @@
 
 
 
-6. Library Usage Examples
-
-  See example/*
-
-
-
-7. Documentation
+6. Documentation
 
   Reference Manual in HTML format:
 
@@ -113,6 +107,12 @@
   Brief installation guide:
 
       INSTALL.txt
+
+
+
+7. Library Usage Examples
+
+  See example/ directory for library usage examples in C, C#, Java, PHP, and more.
 
 
 

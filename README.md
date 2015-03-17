@@ -68,13 +68,7 @@ Stop all scheduled entries for the user by running the following command:
 
 
 
-## 6. Library Usage Examples
-
-See example/ directory for library usage examples in C, C#, Java, PHP, and more.
-
-
-
-## 7. Documentation
+## 6. Documentation
 
 Reference Manual in HTML format:
 
@@ -116,7 +110,13 @@ Brief installation guide:
 
 
 
+## 7. Library Usage Examples
+
+See example/ directory for library usage examples in C, C#, Java, PHP, and more.
+
+
+
 ## 8. Notes
 
-The current project revision is on an alpha stage and shall not be used beyond testing purposes.
+The current project revision is on an **alpha stage** and shall not be used beyond testing purposes.
 

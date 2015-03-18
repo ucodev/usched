@@ -134,6 +134,8 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
           
           usched_result_free_run();
           
+          usched_destroy();
+          
           return 0;
       }
 

@@ -121,7 +121,63 @@ Brief installation guide:
 
 ## Library Usage Examples
 
-See [example/](https://github.com/ucodev/usched/tree/master/example) directory for library usage examples in C, C#, Java, PHP, and more.
+See [example/](https://github.com/ucodev/usched/tree/master/example) directory for library usage examples in C, C#, Java, PHP, Python and more yet to come. The following sections illustrate some code snippets for some of the supported programming languages.
+
+### C
+
+      #include <usched/lib.h>
+      
+      int main(void) {
+          usched_init();
+          
+          usched_request("run \'df -h >> /tmp/disk.txt\' now then every 30 seconds);
+          
+          usched_result_free_run();
+          
+          return 0;
+      }
+
+### C#
+
+      using Usched;
+
+      namespace UschedExample {
+          class Program {
+              public static void Main(string[] args) {
+                  Usched usc = new Usched();
+                  
+                  usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
+              }
+          }
+      }
+
+### Java
+
+      class UschedExample {
+          public static void main(String[] args) {
+              Usched usc = new Usched();
+              
+              usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
+              
+              usc.destroy();
+          }
+      }
+
+### PHP
+
+      include("usched.php");
+      
+      $usc = new Usched();
+      
+      $usc->Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
+
+### Python
+
+      from usched import *
+      
+      usc = Usched()
+      
+      usc.Request("run 'df -h >> /tmp/disk.txt now then every 30 seconds")
 
 
 

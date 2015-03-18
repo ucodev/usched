@@ -182,7 +182,7 @@ It also delivers a powerful programming interface for multiple programming langu
 <h3>
 <a id="csharp" class="anchor" href="#csharp" aria-hidden="true"><span class="octicon octicon-link"></span></a>Csharp</h3>
 
-<pre><code>  using Usched;
+<pre><code>  using UschedAPI;
 
   namespace UschedExample {
       class Program {
@@ -203,8 +203,6 @@ It also delivers a powerful programming interface for multiple programming langu
           Usched usc = new Usched();
 
           usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
-
-          usc.destroy();
       }
   }
 </code></pre>

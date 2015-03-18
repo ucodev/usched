@@ -177,7 +177,7 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       
       usc = Usched()
       
-      usc.Request("run 'df -h >> /tmp/disk.txt now then every 30 seconds")
+      usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds")
 
 
 

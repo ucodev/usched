@@ -137,7 +137,7 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
           return 0;
       }
 
-### C#
+### Csharp
 
       using Usched;
 

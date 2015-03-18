@@ -3,7 +3,7 @@
  * @brief uSched JAVA Testing
  *        uSched JAVA Testing interface - Client
  *
- * Date: 12-01-2015
+ * Date: 27-01-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,21 +28,17 @@ class UschedTest {
 	public static void main(String[] args) {
 		Usched usc = new Usched();
 
-		usc.init();
-
 		usc.test();
 
-		usc.request("run '/bin/ls -lah /' in 10 seconds then every 5 seconds");
+		usc.Request("run '/bin/ls -lah /' in 10 seconds then every 5 seconds");
 
-		long[] entry = usc.resultGetRun();
+		long[] entry = usc.ResultRun();
 
 		System.out.println("Installed Entry ID: 0x" + Long.toHexString(entry[0]) + "\n");
 
-		usc.resultFreeRun();
+		usc.Request("show all");
 
-		usc.request("show all");
-
-		UschedEntry[] entries = usc.resultGetShow();
+		UschedEntry[] entries = usc.ResultShow();
 
 		for (int i = 0; i < entries.length; i ++) {
 			System.out.println("-----------------------------");
@@ -57,8 +53,6 @@ class UschedTest {
 			System.out.println("-----------------------------\n");
 		}
 
-		usc.resultFreeShow();
-
-		usc.destroy();
+		/* usc.Destroy(); */
 	}
 }

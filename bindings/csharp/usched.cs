@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched C# Interface - Client
  *
- * Date: 26-02-2015
+ * Date: 18-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,7 +27,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Usched
+namespace UschedAPI
 {
 	public struct UschedEntry {
 		public UInt64 Id;
@@ -40,7 +40,7 @@ namespace Usched
 		public String Command;
 	}
 	
-	public class Usc {
+	public class Usched {
 		[StructLayout(LayoutKind.Sequential, Pack = 4)]
 		private unsafe struct usched_entry {
 			public ulong id;		/* 8 bytes */
@@ -209,11 +209,11 @@ namespace Usched
 			return usched_usage_error_str(error);
 		}
 
-		public Usc() {
+		public Usched() {
 			usched_init();
 		}
 		
-		~Usc() {
+		~Usched() {
 			usched_destroy();
 		}
 	}

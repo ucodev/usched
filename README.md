@@ -139,7 +139,7 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
 
 ### Csharp
 
-      using Usched;
+      using UschedAPI;
 
       namespace UschedExample {
           class Program {
@@ -158,8 +158,6 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
               Usched usc = new Usched();
               
               usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
-              
-              usc.destroy();
           }
       }
 

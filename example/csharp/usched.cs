@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched C# Interface - Client
  *
- * Date: 25-01-2015
+ * Date: 18-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,7 +25,7 @@
  */
 
 using System;
-using Usched;
+using UschedAPI;
 
 namespace UschedExample
 {
@@ -33,7 +33,7 @@ namespace UschedExample
 	{
 		public static void Main(string[] args)
 		{
-			Usc req = new Usc();
+			Usched req = new Usc();
 			UschedEntry[] result;
 
 			req.SetHostname("192.168.1.1");

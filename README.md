@@ -130,7 +130,7 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       int main(void) {
           usched_init();
           
-          usched_request("run \'df -h >> /tmp/disk.txt\' now then every 30 seconds);
+          usched_request("run \'df -h >> /tmp/disk.txt\' now then every 30 seconds");
           
           usched_result_free_run();
           

@@ -161,7 +161,73 @@ It also delivers a powerful programming interface for multiple programming langu
 <h2>
 <a id="library-usage-examples" class="anchor" href="#library-usage-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Library Usage Examples</h2>
 
-<p>See <a href="https://github.com/ucodev/usched/tree/master/example">example/</a> directory for library usage examples in C, C#, Java, PHP, and more.</p>
+<p>See <a href="https://github.com/ucodev/usched/tree/master/example">example/</a> directory for library usage examples in C, C#, Java, PHP, Python and more yet to come. The following sections illustrate some code snippets for some of the supported programming languages.</p>
+
+<h3>
+<a id="c" class="anchor" href="#c" aria-hidden="true"><span class="octicon octicon-link"></span></a>C</h3>
+
+<pre><code>  #include &lt;usched/lib.h&gt;
+
+  int main(void) {
+      usched_init();
+
+      usched_request("run \'df -h &gt;&gt; /tmp/disk.txt\' now then every 30 seconds);
+
+      usched_result_free_run();
+
+      return 0;
+  }
+</code></pre>
+
+<h3>
+<a id="csharp" class="anchor" href="#csharp" aria-hidden="true"><span class="octicon octicon-link"></span></a>Csharp</h3>
+
+<pre><code>  using Usched;
+
+  namespace UschedExample {
+      class Program {
+          public static void Main(string[] args) {
+              Usched usc = new Usched();
+
+              usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
+          }
+      }
+  }
+</code></pre>
+
+<h3>
+<a id="java" class="anchor" href="#java" aria-hidden="true"><span class="octicon octicon-link"></span></a>Java</h3>
+
+<pre><code>  class UschedExample {
+      public static void main(String[] args) {
+          Usched usc = new Usched();
+
+          usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
+
+          usc.destroy();
+      }
+  }
+</code></pre>
+
+<h3>
+<a id="php" class="anchor" href="#php" aria-hidden="true"><span class="octicon octicon-link"></span></a>PHP</h3>
+
+<pre><code>  include("usched.php");
+
+  $usc = new Usched();
+
+  $usc-&gt;Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
+</code></pre>
+
+<h3>
+<a id="python" class="anchor" href="#python" aria-hidden="true"><span class="octicon octicon-link"></span></a>Python</h3>
+
+<pre><code>  from usched import *
+
+  usc = Usched()
+
+  usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt now then every 30 seconds")
+</code></pre>
 
 <h2>
 <a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes</h2>

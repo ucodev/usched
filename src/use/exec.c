@@ -235,8 +235,12 @@ static void _exec_process(void) {
 	gid_t fd_gid = (gid_t) -1;
 
 	/* Wait for the first event */
-	if ((usd_fd = (sock_t) accept(rune.ipcd, NULL, NULL)) < 0)
+	if ((usd_fd = (sock_t) accept(rune.ipcd, NULL, NULL)) < 0) {
 		log_warn("_exec_process(): accept(): %s\n", strerror(errno));
+
+		/* If the accept() fails, reload the daemon */
+		bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
+	}
 #endif
 
 	for (;;) {
@@ -298,6 +302,9 @@ static void _exec_process(void) {
 		if (panet_read(usd_fd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
 			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
 			mm_free(tbuf);
+
+			/* When a read fails, reload the uSched Executer to perform new accept() */
+			bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD)
 			continue;
 		}
 #else

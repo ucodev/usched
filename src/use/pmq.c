@@ -30,7 +30,10 @@
 #include <fcntl.h>
 
 #include <sys/stat.h>
-#include <mqueue.h>
+
+#if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
+#endif
 
 #include "config.h"
 #include "runtime.h"

@@ -1,7 +1,7 @@
 CC=`cat ../../.compiler`
 ECFLAGS=`cat ../../.ecflags`
 CCFLAGS=-DCONFIG_DAEMON_SPECIFIC=1
-LDFLAGS=-lgcc_s -lpsched -lpall -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
+LDFLAGS=-lpsched -lpall -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
 ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include

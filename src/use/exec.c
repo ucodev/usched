@@ -76,8 +76,13 @@ static void *_exec_cmd(void *arg) {
 	} else if (!pid) {
 		/* Child */
 
+#if CONFIG_USE_IPC_PMQ == 1
 		/* Close message queue descriptor */
 		mq_close(rune.ipcd);
+#elif CONFIG_USE_IPC_SOCK == 1
+		/* Close unix socket descriptor */
+		panet_safe_close(rune.ipcd);
+#endif
 
 		/* Get child pid */
 		pid = getpid();
@@ -216,11 +221,14 @@ static void *_exec_cmd(void *arg) {
 static void _exec_process(void) {
 	pthread_t ptid;
 	char *tbuf = NULL;
+#if CONFIG_USE_IPC_PMQ == 1
 	struct mq_attr mqattr;
+#endif
 
 	for (;;) {
 		/* Check for rutime interruptions */
 		if (runtime_exec_interrupted()) {
+#if CONFIG_USE_IPC_PMQ == 1
 			/* Get posix queue attributes */
 			if (mq_getattr(rune.ipcd, &mqattr) < 0) {
 				log_warn("_exec_process(): mq_getattr(): %s\n", strerror(errno));
@@ -229,6 +237,7 @@ static void _exec_process(void) {
 
 			/* Interrupt execution only when there are no messages in the queue */
 			if (!mqattr.mq_curmsgs)
+#endif
 				break;
 		}
 

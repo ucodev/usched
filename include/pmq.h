@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface header
  *
- * Date: 27-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,7 +31,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include <mqueue.h>
+#if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
+#else
+ typedef unsigned int mqd_t;
+#endif
 
 #include <sys/types.h>
 

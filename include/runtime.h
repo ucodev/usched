@@ -33,9 +33,12 @@
 #include "config.h"
 
 #ifndef COMPILE_WIN32
-#include <pthread.h>
-#include <mqueue.h>
+ #include <pthread.h>
+ #if CONFIG_USE_IPC_PMQ == 1
+  #include <mqueue.h>
+ #endif
 #endif
+
 #include <signal.h>
 
 #include <pall/fifo.h>

@@ -1,1 +1,1 @@
-/usr/pkg/lib/libpthread.so
+/usr/pkg/lib/libpthread.so -lgcc_s

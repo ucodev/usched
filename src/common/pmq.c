@@ -28,7 +28,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <mqueue.h>
 
 #include <sys/stat.h>
 
@@ -36,6 +35,10 @@
 #include "runtime.h"
 #include "log.h"
 #include "pmq.h"
+
+#if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
+#endif
 
 mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgsize) {
 #if CONFIG_USE_IPC_PMQ == 1

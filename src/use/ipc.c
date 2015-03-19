@@ -30,6 +30,7 @@
 
 
 #include "config.h"
+#include "runtime.h"
 #include "log.h"
 #include "ipc.h"
 #if CONFIG_USE_IPC_PMQ == 1

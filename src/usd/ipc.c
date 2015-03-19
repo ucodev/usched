@@ -29,6 +29,7 @@
 
 
 #include "config.h"
+#include "runtime.h"
 #include "log.h"
 #include "ipc.h"
 #if CONFIG_USE_IPC_PMQ == 1
@@ -70,7 +71,7 @@ void ipc_daemon_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	pmq_daemon_destroy();
 #elif CONFIG_USE_IPC_SOCK == 1
-	panet_safe_close(rund.core.ipc_name);
+	panet_safe_close(rund.config.core.ipc_name);
 #else
 	return;
 #endif

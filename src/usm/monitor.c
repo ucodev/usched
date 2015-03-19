@@ -3,7 +3,7 @@
  * @brief uSched
  *        Monitoring and Daemonizer interface
  *
- * Date: 28-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -83,9 +83,15 @@ struct cmdline_params {
 
 
 /* Implementation */
+#if CONFIG_USE_SIGINFO == 1
 static void _sigah(int sig, siginfo_t *si, void *ucontext) {
 	kill(config.cpid, sig);
 }
+#else
+static void _sigah(int sig) {
+	kill(config.cpid, sig);
+}
+#endif
 
 static void _close_safe(int fd) {
 	/* SA_RESTART set */
@@ -352,9 +358,15 @@ static int _signal_init(void) {
 
 	memset(&sa, 0, sizeof(struct sigaction));
 
-	sa.sa_flags = SA_SIGINFO | SA_RESTART;
 	sigemptyset(&sa.sa_mask);
+
+#if CONFIG_USE_SIGINFO == 1
+	sa.sa_flags = SA_SIGINFO | SA_RESTART;
 	sa.sa_sigaction = &_sigah;
+#else
+	sa.sa_flags = SA_RESTART;
+	sa.sa_handler = &_sigah;
+#endif
 
 	if (sigaction(SIGHUP, &sa, NULL) < 0)
 		return -1;

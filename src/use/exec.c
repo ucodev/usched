@@ -226,6 +226,8 @@ static void _exec_process(void) {
 	struct mq_attr mqattr;
 #elif CONFIG_USE_IPC_SOCK == 1
 	int fd = 0;
+	uid_t fd_uid = (uid_t) -1;
+	gid_t fd_gid = (gid_t) -1;
 #endif
 
 	for (;;) {
@@ -268,6 +270,27 @@ static void _exec_process(void) {
 		/* Wait for event */
 		if ((fd = accept(rune.ipcd, NULL, NULL)) < 0) {
 			log_warn("_exec_process(): accept(): %s\n", strerror(errno));
+			continue;
+		}
+
+		/* Get peer credentials */
+		if (local_fd_peer_cred(fd, &fd_uid, &fd_gid) < 0) {
+			log_warn("_exec_process(): local_fd_peer_cred(): %s\n", strerror(errno));
+			panet_safe_close(fd);
+			continue;
+		}
+
+		/* Validate peer UID */
+		if (fd_uid != rune.config.core.privdrop_uid) {
+			log_warn("_exec_process(): fd_uid[%u] != rune.config.core.privdrop_uid[%u]\n", (unsigned) fd_uid, (unsigned) rune.config.core.privdrop_uid);
+			panet_safe_close(fd);
+			continue;
+		}
+
+		/* Validate peer GID */
+		if (fd_gid != rune.config.core.privdrop_gid) {
+			log_warn("_exec_process(): fd_gid[%u] != rune.config.core.privdrop_gid[%u]\n", (unsigned) fd_gid, (unsigned) rune.config.core.privdrop_gid);
+			panet_safe_close(fd);
 			continue;
 		}
 

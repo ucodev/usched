@@ -53,6 +53,7 @@
 #define CONFIG_USCHED_FILE_CORE_IPC_MSGMAX	"ipc.msgmax"
 #define CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE	"ipc.msgsize"
 #define CONFIG_USCHED_FILE_CORE_IPC_NAME	"ipc.name"
+#define CONFIG_USCHED_FILE_CORE_IPC_KEY		"ipc.key"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_USER	"privdrop.user"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
@@ -271,6 +272,7 @@ struct usched_config_core {
 	long ipc_msgmax;
 	long ipc_msgsize;
 	char *ipc_name;
+	char *ipc_key;
 	char *privdrop_user;
 	char *privdrop_group;
 	uid_t privdrop_uid;

@@ -571,6 +571,20 @@ static int _config_validate_core_ipc_name(const struct usched_config_core *core)
 	return 1;
 }
 
+static int _config_init_core_ipc_key(struct usched_config_core *core) {
+	if (!(core->ipc_key = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_KEY)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_core_ipc_key(const struct usched_config_core *core) {
+	if (strlen(core->ipc_key) < 24)
+		return 0;
+
+	return 1;
+}
+
 static int _config_init_core_privdrop_user(struct usched_config_core *core) {
 	if (!(core->privdrop_user = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PRIVDROP_USER)))
 		return -1;
@@ -719,6 +733,21 @@ int config_init_core(struct usched_config_core *core) {
 	/* Validate ipc name */
 	if (!_config_validate_core_ipc_name(core)) {
 		log_warn("_config_init_core(): _config_validate_core_ipc_name(): Invalid core.ipc.name value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc key */
+	if (_config_init_core_ipc_key(core) < 0) {
+		errsv = errno;
+		log_warn("_config_init_core(): _config_init_core_ipc_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc key */
+	if (!_config_validate_core_ipc_key(core)) {
+		log_warn("_config_init_core(): _config_validate_core_ipc_key(): Invalid core.ipc.key value.\n");
 		errno = EINVAL;
 		return -1;
 	}

@@ -53,6 +53,7 @@
 #define USCHED_PROPERTY_FILE_STR	"file"
 #define USCHED_PROPERTY_GID_STR		"gid"
 #define USCHED_PROPERTY_GROUP_STR	"group"
+#define USCHED_PROPERTY_KEY_STR		"key"
 #define USCHED_PROPERTY_LIMIT_STR	"limit"
 #define USCHED_PROPERTY_MSGMAX_STR	"msgmax"
 #define USCHED_PROPERTY_MSGSIZE_STR	"msgsize"

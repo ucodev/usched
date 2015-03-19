@@ -709,6 +709,17 @@ int category_core_change(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
+			/* set ipc.key */
+			if (core_admin_ipc_key_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_core_change(): core_admin_ipc_key_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
 		}
 
 		/* Unknown property */
@@ -910,7 +921,19 @@ int category_core_show(size_t argc, char **args) {
 
 			/* All good */
 			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
+			/* show ipc.name */
+			if (core_admin_ipc_key_show() < 0) {
+				errsv = errno;
+				log_warn("category_core_show(): core_admin_ipc_key_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
 		}
+ 
 
 		/* Unknown property */
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show core ipc");

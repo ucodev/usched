@@ -310,6 +310,13 @@ int core_admin_show(void) {
 		return -1;
 	}
 
+	if (core_admin_ipc_key_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_show(): core_admin_ipc_key_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if (core_admin_privdrop_group_show() < 0) {
 		errsv = errno;
 		log_crit("core_admin_show(): core_admin_privdrop_group_show(): %s\n", strerror(errno));
@@ -815,6 +822,85 @@ int core_admin_ipc_name_change(const char *ipc_name) {
 
 	return 0;
 }
+
+int core_admin_ipc_key_show(void) {
+	int errsv = 0;
+	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
+
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_KEY))) {
+		errsv = errno;
+		log_crit("core_admin_ipc_key_show(): file_read_line_single(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_KEY))) {
+		errsv = errno;
+		log_crit("core_admin_ipc_key_show(): file_read_line_single(): %s\n", strerror(errno));
+		mm_free(value_tmp);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Check which value to print */
+	if (!strcmp(value, value_tmp)) {
+		if (!(value_print = mm_alloc(strlen(value) + 1))) {
+			errsv = errno;
+			log_crit("core_admin_ipc_key_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		strcpy(value_print, value);
+	} else {
+		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
+			errsv = errno;
+			log_crit("core_admin_ipc_key_show(): mm_alloc(): %s\n", strerror(errno));
+			mm_free(value);
+			mm_free(value_tmp);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Show the temporary value with a trailing '*' */
+		strcpy(value_print, value_tmp);
+		strcat(value_print, "*");
+	}
+
+	/* Print the output */
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_IPC_KEY, value_print);
+
+	/* Free memory */
+	mm_free(value);
+	mm_free(value_tmp);
+	mm_free(value_print);
+
+	/* All good */
+	return 0;
+}
+
+int core_admin_ipc_key_change(const char *ipc_key) {
+	int errsv = 0;
+
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_KEY, ipc_key) < 0) {
+		errsv = errno;
+		log_crit("core_admin_ipc_key_change(): file_write_line_single(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (core_admin_ipc_key_show() < 0) {
+		errsv = errno;
+		log_crit("core_admin_ipc_key_change(): core_admin_ipc_key_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
 
 int core_admin_privdrop_group_show(void) {
 	int errsv = 0;

@@ -1,1 +1,1 @@
--I/usr/pkg/include -DCONFIG_SYS_MINIX=1 -D_XOPEN_SOURCE=700 -DPSCHED_INTERNAL_TIMER_UL=1 -DCONFIG_USE_IPC_SOCK=1 -DCONFIG_USE_SELECT=1 -DCONFIG_USE_SIGINFO=0 -Dsetreuid(ruid,euid)=setuid(ruid) -Dsetregid(rgid,egid)=setgid(rgid)
+-I/usr/pkg/include -DCONFIG_SYS_MINIX=1 -D_XOPEN_SOURCE=700 -DPSCHED_INTERNAL_TIMER_UL=1 -DCONFIG_USE_IPC_SOCK=1 -DCONFIG_USE_SELECT=1 -DCONFIG_USE_SIGINFO=0 -Dsetreuid(ruid,euid)=setuid(ruid) -Dsetregid(rgid,egid)=setgid(rgid) -Dsched_get_priority_min(policy)=1 -Dsched_get_priority_max(policy)=32

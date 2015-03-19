@@ -235,10 +235,8 @@ static void _exec_process(void) {
 	gid_t fd_gid = (gid_t) -1;
 
 	/* Wait for the first event */
-	if ((usd_fd = (sock_t) accept(rune.ipcd, NULL, NULL)) < 0) {
+	if ((usd_fd = (sock_t) accept(rune.ipcd, NULL, NULL)) < 0)
 		log_warn("_exec_process(): accept(): %s\n", strerror(errno));
-		continue;
-	}
 #endif
 
 	for (;;) {
@@ -291,7 +289,7 @@ static void _exec_process(void) {
 		}
 
 		/* Validate peer GID */
-		if (fd_gid != getgid) {
+		if (fd_gid != getgid()) {
 			log_warn("_exec_process(): fd_gid[%u] != getgid[%u]\n", (unsigned) fd_gid, (unsigned) getgid());
 			continue;
 		}

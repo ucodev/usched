@@ -1,6 +1,7 @@
 all:
 	cd src && make && cd ..
 	cd scripts && make && cd ..
+	cd tools && make && cd ..
 
 install_all:
 	cd src && make install && cd ..
@@ -81,4 +82,5 @@ clean:
 	cd example && make clean && cd ..
 	cd bindings && make clean && cd ..
 	cd tests && make clean && cd ..
+	cd tools && make clean && cd ..
 

@@ -1,2 +1,4 @@
 make install_all
 make install_doc
+usa change core ipc key "`./tools/ipc_pwgen`"
+usa commit core

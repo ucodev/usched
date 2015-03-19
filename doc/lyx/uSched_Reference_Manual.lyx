@@ -84,11 +84,11 @@ uSched Services and Tools
 
 \begin_layout Author
 Reference Manual - Rev.
- A02
+ A04
 \end_layout
 
 \begin_layout Date
-17th March 2015
+19th March 2015
 \end_layout
 
 \begin_layout Standard
@@ -465,8 +465,8 @@ Usage examples:
 \end_layout
 
 \begin_layout Quotation
-~# usc run 'tcpdump -i eth0 > /tmp/tcpdump.log' now and 'kill -TERM `pidof
- tcpdump`' in 1 hour
+~# usc run 'tcpdump -i eth0 > /tmp/tcpdump.log' now && usc run 'kill -TERM
+ `pidof tcpdump`' in 1 hour
 \end_layout
 
 \begin_layout Quotation
@@ -890,13 +890,12 @@ Usage examples:
 \end_layout
 
 \begin_layout Quotation
-~$ usc run 'ntpdate' now then every 3 hours and 'date >> /tmp/date.log' in
- 3 hours then every 3 hours
+~$ usc run 'ntpdate' in 5 days and in 7 days then every 3 days
 \end_layout
 
 \begin_layout Quotation
-~# usc run 'tcpdump -i eth1 > /tmp/tcpdump_eth1.log' in 5 minutes and 'killall
- tcpdump' in 10 minutes
+~# usc run 'tcpdump -i eth1 > /tmp/tcpdump_eth1.log' in 5 minutes && usc
+ run 'killall tcpdump' in 10 minutes
 \end_layout
 
 \begin_layout Quotation
@@ -1871,7 +1870,7 @@ CORE
 \begin_layout Standard
 The CORE Category configures the core parameters of the uSched Daemon and
  Executer.
- It contains the DELTA, JAIL, PMQ, PRIVDROP, SERIALIZE and THREAD Components.
+ It contains the DELTA, JAIL, IPC, PRIVDROP, SERIALIZE and THREAD Components.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2062,27 +2061,27 @@ Available on AUTH Category.
 \end_layout
 
 \begin_layout Subsubsection
-PMQ
+IPC
 \end_layout
 
 \begin_layout Standard
 Available on CORE Category.
  Contains the Properties MSGMAX, MSGSIZE and NAME.
- Used to configure the Posix Message Queue that allows the communication
- between the uSched Daemon and uSched Executer.
+ Used to configure the properties of the IPC interface that allows the communica
+tion between the uSched Daemon and uSched Executer.
  Usage examples:
 \end_layout
 
 \begin_layout Quotation
-~# usa change core pmq msgmax 128
+~# usa change core ipc msgmax 128
 \end_layout
 
 \begin_layout Quotation
-~# usa change core pmq msgsize 1024
+~# usa change core ipc msgsize 1024
 \end_layout
 
 \begin_layout Quotation
-~# usa change core name /uschedpmq01
+~# usa change core ipc name /uschedpmq01
 \end_layout
 
 \begin_layout Quotation

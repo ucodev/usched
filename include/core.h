@@ -43,6 +43,8 @@ int core_admin_ipc_msgsize_show(void);
 int core_admin_ipc_msgsize_change(const char *ipc_msgsize);
 int core_admin_ipc_name_show(void);
 int core_admin_ipc_name_change(const char *ipc_name);
+int core_admin_ipc_key_show(void);
+int core_admin_ipc_key_change(const char *ipc_name);
 int core_admin_privdrop_group_show(void);
 int core_admin_privdrop_group_change(const char *privdrop_group);
 int core_admin_privdrop_user_show(void);

@@ -48,6 +48,8 @@
 #elif CONFIG_USE_IPC_SOCK == 1
  #include <sys/socket.h>
  #include <panet/panet.h>
+
+ static sock_t usd_fd = (sock_t) -1;
 #endif
 
 extern char **environ;
@@ -84,6 +86,9 @@ static void *_exec_cmd(void *arg) {
 #elif CONFIG_USE_IPC_SOCK == 1
 		/* Close unix socket descriptor */
 		panet_safe_close(rune.ipcd);
+
+		/* Close current uSched daemon descriptor */
+		panet_safe_close(usd_fd);
 #endif
 
 		/* Get child pid */
@@ -226,9 +231,14 @@ static void _exec_process(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	struct mq_attr mqattr;
 #elif CONFIG_USE_IPC_SOCK == 1
-	int fd = 0;
 	uid_t fd_uid = (uid_t) -1;
 	gid_t fd_gid = (gid_t) -1;
+
+	/* Wait for the first event */
+	if ((usd_fd = (sock_t) accept(rune.ipcd, NULL, NULL)) < 0) {
+		log_warn("_exec_process(): accept(): %s\n", strerror(errno));
+		continue;
+	}
 #endif
 
 	for (;;) {
@@ -268,42 +278,30 @@ static void _exec_process(void) {
 			continue;
 		}
 #elif CONFIG_USE_IPC_SOCK == 1
-		/* Wait for event */
-		if ((fd = accept(rune.ipcd, NULL, NULL)) < 0) {
-			log_warn("_exec_process(): accept(): %s\n", strerror(errno));
-			continue;
-		}
-
 		/* Get peer credentials */
-		if (local_fd_peer_cred(fd, &fd_uid, &fd_gid) < 0) {
+		if (local_fd_peer_cred(usd_fd, &fd_uid, &fd_gid) < 0) {
 			log_warn("_exec_process(): local_fd_peer_cred(): %s\n", strerror(errno));
-			panet_safe_close(fd);
 			continue;
 		}
 
 		/* Validate peer UID */
-		if (fd_uid != rune.config.core.privdrop_uid) {
-			log_warn("_exec_process(): fd_uid[%u] != rune.config.core.privdrop_uid[%u]\n", (unsigned) fd_uid, (unsigned) rune.config.core.privdrop_uid);
-			panet_safe_close(fd);
+		if (fd_uid != getuid()) {
+			log_warn("_exec_process(): fd_uid[%u] != getuid()[%u]\n", (unsigned) fd_uid, (unsigned) getuid());
 			continue;
 		}
 
 		/* Validate peer GID */
-		if (fd_gid != rune.config.core.privdrop_gid) {
-			log_warn("_exec_process(): fd_gid[%u] != rune.config.core.privdrop_gid[%u]\n", (unsigned) fd_gid, (unsigned) rune.config.core.privdrop_gid);
-			panet_safe_close(fd);
+		if (fd_gid != getgid) {
+			log_warn("_exec_process(): fd_gid[%u] != getgid[%u]\n", (unsigned) fd_gid, (unsigned) getgid());
 			continue;
 		}
 
 		/* Read message from unix socket */
-		if (panet_read(fd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
+		if (panet_read(usd_fd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
 			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;
 		}
-
-		/* Close socket */
-		panet_safe_close(fd);
 #else
  #error "No IPC mechanism defined."
 #endif

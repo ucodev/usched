@@ -305,7 +305,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 		 *
 		 */
 
-		log_crit("entry_daemon_exec_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing mq_send().\n", entry->id, entry->trigger);
+		log_crit("entry_daemon_exec_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing an event write.\n", entry->id, entry->trigger);
 	}
 
 _process:

@@ -304,7 +304,8 @@ static void _exec_process(void) {
 			mm_free(tbuf);
 
 			/* When a read fails, reload the uSched Executer to perform new accept() */
-			bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD)
+			bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
+
 			continue;
 		}
 #else

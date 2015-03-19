@@ -33,8 +33,6 @@
 
 #if CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>
-#else
- typedef unsigned int mqd_t;
 #endif
 
 #include <sys/types.h>

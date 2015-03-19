@@ -3,7 +3,7 @@
  * @brief uSched
  *        Variable Processing interface - Daemon
  *
- * Date: 27-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -86,7 +86,7 @@ char *vars_replace_trigger(const char *in, time_t trigger) {
 
 	memset(buf, 0, sizeof(buf));
 
-	snprintf(buf, sizeof(buf) - 1, "%lu", trigger);
+	snprintf(buf, sizeof(buf) - 1, "%llu", (unsigned long long) trigger);
 
 	return _vars_replace_var(in, USCHED_VAR_NAME_TRIGGER, buf);
 }
@@ -96,7 +96,7 @@ char *vars_replace_step(const char *in, time_t step) {
 
 	memset(buf, 0, sizeof(buf));
 
-	snprintf(buf, sizeof(buf) - 1, "%lu", step);
+	snprintf(buf, sizeof(buf) - 1, "%llu", (unsigned long long) step);
 
 	return _vars_replace_var(in, USCHED_VAR_NAME_STEP, buf);
 }
@@ -106,7 +106,7 @@ char *vars_replace_expire(const char *in, time_t expire) {
 
 	memset(buf, 0, sizeof(buf));
 
-	snprintf(buf, sizeof(buf) - 1, "%lu", expire);
+	snprintf(buf, sizeof(buf) - 1, "%llu", (unsigned long long) expire);
 
 	return _vars_replace_var(in, USCHED_VAR_NAME_EXPIRE, buf);
 }

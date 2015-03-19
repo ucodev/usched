@@ -45,6 +45,7 @@
 #if CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>
 #elif CONFIG_USE_IPC_SOCK == 1
+ #include <sys/socket.h>
  #include <panet/panet.h>
 #endif
 
@@ -223,6 +224,8 @@ static void _exec_process(void) {
 	char *tbuf = NULL;
 #if CONFIG_USE_IPC_PMQ == 1
 	struct mq_attr mqattr;
+#elif CONFIG_USE_IPC_SOCK == 1
+	int fd = 0;
 #endif
 
 	for (;;) {
@@ -262,12 +265,21 @@ static void _exec_process(void) {
 			continue;
 		}
 #elif CONFIG_USE_IPC_SOCK == 1
+		/* Wait for event */
+		if ((fd = accept(rune.ipcd, NULL, NULL)) < 0) {
+			log_warn("_exec_process(): accept(): %s\n", strerror(errno));
+			continue;
+		}
+
 		/* Read message from unix socket */
-		if (panet_read(rune.ipcd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
+		if (panet_read(fd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
 			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;
 		}
+
+		/* Close socket */
+		panet_safe_close(fd);
 #else
  #error "No IPC mechanism defined."
 #endif

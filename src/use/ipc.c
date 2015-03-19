@@ -61,6 +61,20 @@ int ipc_exec_init(void) {
 		return -1;
 	}
 
+	if (chown(rune.config.core.ipc_name, 0, 0) < 0) {
+		errsv = errno;
+		log_warn("ipc_exec_init(): chown(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (chmod(rune.config.core.ipc_name, 0600) < 0) {
+		errsv = errno;
+		log_warn("ipc_exec_init(): chmod(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	return 0;
 #else
 	errno = ENOSYS;

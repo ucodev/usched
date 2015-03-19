@@ -27,7 +27,9 @@
 
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
+#include <sys/stat.h>
 
 #include "config.h"
 #include "runtime.h"

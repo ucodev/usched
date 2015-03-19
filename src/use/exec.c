@@ -41,6 +41,7 @@
 #include "runtime.h"
 #include "log.h"
 #include "bitops.h"
+#include "local.h"
 
 #if CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>

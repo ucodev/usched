@@ -5,7 +5,7 @@ LDFLAGS=-lfsop -lpall -lpanet
 ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/bitops.o ../common/config.o ../common/debug.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
+OBJS_COMMON=../common/bitops.o ../common/config.o ../common/debug.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
 OBJS=config.o exec.o ipc.o pmq.o runtime.o sig.o thread.o
 TARGET=use
 

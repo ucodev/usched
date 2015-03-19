@@ -3,7 +3,7 @@
  * @brief uSched
  *        Core configuration and administration interface
  *
- * Date: 21-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,7 @@
 #include "mm.h"
 #include "usched.h"
 #include "print.h"
-#include "pmq.h"
+#include "ipc.h"
 
 int core_admin_commit(void) {
 	int errsv = 0;
@@ -57,7 +57,7 @@ int core_admin_commit(void) {
 	}
 
 	/* Destroy the current message queue */
-	pmq_admin_delete();
+	ipc_admin_delete();
 
 	/* Destroy the current configuration */
 	config_admin_destroy();
@@ -86,24 +86,24 @@ int core_admin_commit(void) {
 		return -1;
 	}
 
-	/* pmq.msgmax */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, 128) < 0) {
+	/* ipc.msgmax */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* pmq.msgsize */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, 128) < 0) {
+	/* ipc.msgsize */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* pmq.name */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME, 128) < 0) {
+	/* ipc.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_NAME, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_commit(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
@@ -159,9 +159,9 @@ int core_admin_commit(void) {
 	}
 
 	/* Create the message queue */
-	if (pmq_admin_create() < 0) {
+	if (ipc_admin_create() < 0) {
 		errsv = errno;
-		log_crit("core_admin_commit(): pmq_admin_create(): %s\n", strerror(errno));
+		log_crit("core_admin_commit(): ipc_admin_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -197,24 +197,24 @@ int core_admin_rollback(void) {
 		return -1;
 	}
 
-	/* pmq.msgmax */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, 128) < 0) {
+	/* ipc.msgmax */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* pmq.msgsize */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, 128) < 0) {
+	/* ipc.msgsize */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* pmq.name */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME, 128) < 0) {
+	/* ipc.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_NAME, 128) < 0) {
 		errsv = errno;
 		log_crit("core_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
@@ -289,23 +289,23 @@ int core_admin_show(void) {
 		return -1;
 	}
 
-	if (core_admin_pmq_msgmax_show() < 0) {
+	if (core_admin_ipc_msgmax_show() < 0) {
 		errsv = errno;
-		log_crit("core_admin_show(): core_admin_pmq_msgmax_show(): %s\n", strerror(errno));
+		log_crit("core_admin_show(): core_admin_ipc_msgmax_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (core_admin_pmq_msgsize_show() < 0) {
+	if (core_admin_ipc_msgsize_show() < 0) {
 		errsv = errno;
-		log_crit("core_admin_show(): core_admin_pmq_msgsize_show(): %s\n", strerror(errno));
+		log_crit("core_admin_show(): core_admin_ipc_msgsize_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (core_admin_pmq_name_show() < 0) {
+	if (core_admin_ipc_name_show() < 0) {
 		errsv = errno;
-		log_crit("core_admin_show(): core_admin_pmq_name_show(): %s\n", strerror(errno));
+		log_crit("core_admin_show(): core_admin_ipc_name_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -582,20 +582,20 @@ int core_admin_jail_dir_change(const char *jail_dir) {
 	return 0;
 }
 
-int core_admin_pmq_msgmax_show(void) {
+int core_admin_ipc_msgmax_show(void) {
 	int errsv = 0;
 	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGMAX))) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX))) {
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGMAX))) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
 		mm_free(value_tmp);
 		errno = errsv;
 		return -1;
@@ -605,7 +605,7 @@ int core_admin_pmq_msgmax_show(void) {
 	if (!strcmp(value, value_tmp)) {
 		if (!(value_print = mm_alloc(strlen(value) + 1))) {
 			errsv = errno;
-			log_crit("core_admin_pmq_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
+			log_crit("core_admin_ipc_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
 			mm_free(value);
 			mm_free(value_tmp);
 			errno = errsv;
@@ -616,7 +616,7 @@ int core_admin_pmq_msgmax_show(void) {
 	} else {
 		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
 			errsv = errno;
-			log_crit("core_admin_pmq_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
+			log_crit("core_admin_ipc_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
 			mm_free(value);
 			mm_free(value_tmp);
 			errno = errsv;
@@ -629,7 +629,7 @@ int core_admin_pmq_msgmax_show(void) {
 	}
 
 	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, value_print);
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, value_print);
 
 	/* Free memory */
 	mm_free(value);
@@ -640,19 +640,19 @@ int core_admin_pmq_msgmax_show(void) {
 	return 0;
 }
 
-int core_admin_pmq_msgmax_change(const char *pmq_msgmax) {
+int core_admin_ipc_msgmax_change(const char *ipc_msgmax) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, pmq_msgmax) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, ipc_msgmax) < 0) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgmax_change(): file_write_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgmax_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (core_admin_pmq_msgmax_show() < 0) {
+	if (core_admin_ipc_msgmax_show() < 0) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgmax_change(): core_admin_pmq_msgmax_show(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgmax_change(): core_admin_ipc_msgmax_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -660,20 +660,20 @@ int core_admin_pmq_msgmax_change(const char *pmq_msgmax) {
 	return 0;
 }
 
-int core_admin_pmq_msgsize_show(void) {
+int core_admin_ipc_msgsize_show(void) {
 	int errsv = 0;
 	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE))) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE))) {
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE))) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
 		mm_free(value_tmp);
 		errno = errsv;
 		return -1;
@@ -683,7 +683,7 @@ int core_admin_pmq_msgsize_show(void) {
 	if (!strcmp(value, value_tmp)) {
 		if (!(value_print = mm_alloc(strlen(value) + 1))) {
 			errsv = errno;
-			log_crit("core_admin_pmq_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
+			log_crit("core_admin_ipc_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
 			mm_free(value);
 			mm_free(value_tmp);
 			errno = errsv;
@@ -694,7 +694,7 @@ int core_admin_pmq_msgsize_show(void) {
 	} else {
 		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
 			errsv = errno;
-			log_crit("core_admin_pmq_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
+			log_crit("core_admin_ipc_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
 			mm_free(value);
 			mm_free(value_tmp);
 			errno = errsv;
@@ -707,7 +707,7 @@ int core_admin_pmq_msgsize_show(void) {
 	}
 
 	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, value_print);
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, value_print);
 
 	/* Free memory */
 	mm_free(value);
@@ -718,19 +718,19 @@ int core_admin_pmq_msgsize_show(void) {
 	return 0;
 }
 
-int core_admin_pmq_msgsize_change(const char *pmq_msgsize) {
+int core_admin_ipc_msgsize_change(const char *ipc_msgsize) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, pmq_msgsize) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, ipc_msgsize) < 0) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgsize_change(): file_write_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgsize_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (core_admin_pmq_msgsize_show() < 0) {
+	if (core_admin_ipc_msgsize_show() < 0) {
 		errsv = errno;
-		log_crit("core_admin_pmq_msgsize_change(): core_admin_pmq_msgsize_show(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_msgsize_change(): core_admin_ipc_msgsize_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -738,20 +738,20 @@ int core_admin_pmq_msgsize_change(const char *pmq_msgsize) {
 	return 0;
 }
 
-int core_admin_pmq_name_show(void) {
+int core_admin_ipc_name_show(void) {
 	int errsv = 0;
 	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
 
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME))) {
+	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_NAME))) {
 		errsv = errno;
-		log_crit("core_admin_pmq_name_show(): file_read_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_name_show(): file_read_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME))) {
+	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_NAME))) {
 		errsv = errno;
-		log_crit("core_admin_pmq_name_show(): file_read_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_name_show(): file_read_line_single(): %s\n", strerror(errno));
 		mm_free(value_tmp);
 		errno = errsv;
 		return -1;
@@ -761,7 +761,7 @@ int core_admin_pmq_name_show(void) {
 	if (!strcmp(value, value_tmp)) {
 		if (!(value_print = mm_alloc(strlen(value) + 1))) {
 			errsv = errno;
-			log_crit("core_admin_pmq_name_show(): mm_alloc(): %s\n", strerror(errno));
+			log_crit("core_admin_ipc_name_show(): mm_alloc(): %s\n", strerror(errno));
 			mm_free(value);
 			mm_free(value_tmp);
 			errno = errsv;
@@ -772,7 +772,7 @@ int core_admin_pmq_name_show(void) {
 	} else {
 		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
 			errsv = errno;
-			log_crit("core_admin_pmq_name_show(): mm_alloc(): %s\n", strerror(errno));
+			log_crit("core_admin_ipc_name_show(): mm_alloc(): %s\n", strerror(errno));
 			mm_free(value);
 			mm_free(value_tmp);
 			errno = errsv;
@@ -785,7 +785,7 @@ int core_admin_pmq_name_show(void) {
 	}
 
 	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_PMQ_NAME, value_print);
+	print_admin_category_var_value(USCHED_CATEGORY_CORE_STR, CONFIG_USCHED_FILE_CORE_IPC_NAME, value_print);
 
 	/* Free memory */
 	mm_free(value);
@@ -796,19 +796,19 @@ int core_admin_pmq_name_show(void) {
 	return 0;
 }
 
-int core_admin_pmq_name_change(const char *pmq_name) {
+int core_admin_ipc_name_change(const char *ipc_name) {
 	int errsv = 0;
 
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_PMQ_NAME, pmq_name) < 0) {
+	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/." CONFIG_USCHED_FILE_CORE_IPC_NAME, ipc_name) < 0) {
 		errsv = errno;
-		log_crit("core_admin_pmq_name_change(): file_write_line_single(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_name_change(): file_write_line_single(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (core_admin_pmq_name_show() < 0) {
+	if (core_admin_ipc_name_show() < 0) {
 		errsv = errno;
-		log_crit("core_admin_pmq_name_change(): core_admin_pmq_name_show(): %s\n", strerror(errno));
+		log_crit("core_admin_ipc_name_change(): core_admin_ipc_name_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

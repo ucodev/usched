@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 19-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -675,12 +675,12 @@ int category_core_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PMQ_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
 		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* set pmq.msgmax */
-			if (core_admin_pmq_msgmax_change(args[2]) < 0) {
+			/* set ipc.msgmax */
+			if (core_admin_ipc_msgmax_change(args[2]) < 0) {
 				errsv = errno;
-				log_warn("category_core_change(): core_admin_pmq_msgmax_change(): %s\n", strerror(errno));
+				log_warn("category_core_change(): core_admin_ipc_msgmax_change(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -688,10 +688,10 @@ int category_core_change(size_t argc, char **args) {
 			/* All good */
 			return 0;
 		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* set pmq.msgsize */
-			if (core_admin_pmq_msgsize_change(args[2]) < 0) {
+			/* set ipc.msgsize */
+			if (core_admin_ipc_msgsize_change(args[2]) < 0) {
 				errsv = errno;
-				log_warn("category_core_change(): core_admin_pmq_msgsize_change(): %s\n", strerror(errno));
+				log_warn("category_core_change(): core_admin_ipc_msgsize_change(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -699,10 +699,10 @@ int category_core_change(size_t argc, char **args) {
 			/* All good */
 			return 0;
 		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* set pmq.name */
-			if (core_admin_pmq_name_change(args[2]) < 0) {
+			/* set ipc.name */
+			if (core_admin_ipc_name_change(args[2]) < 0) {
 				errsv = errno;
-				log_warn("category_core_change(): core_admin_pmq_name_change(): %s\n", strerror(errno));
+				log_warn("category_core_change(): core_admin_ipc_name_change(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -712,8 +712,8 @@ int category_core_change(size_t argc, char **args) {
 		}
 
 		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change core pmq");
-		log_warn("category_core_change(): Invalid 'pmq' property: %s\n", args[1]);
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change core ipc");
+		log_warn("category_core_change(): Invalid 'ipc' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;
@@ -876,12 +876,12 @@ int category_core_show(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PMQ_STR)) {
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
 		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* show pmq.msgmax */
-			if (core_admin_pmq_msgmax_show() < 0) {
+			/* show ipc.msgmax */
+			if (core_admin_ipc_msgmax_show() < 0) {
 				errsv = errno;
-				log_warn("category_core_show(): core_admin_pmq_msgmax_show(): %s\n", strerror(errno));
+				log_warn("category_core_show(): core_admin_ipc_msgmax_show(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -889,10 +889,10 @@ int category_core_show(size_t argc, char **args) {
 			/* All good */
 			return 0;
 		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* show pmq.msgsize */
-			if (core_admin_pmq_msgsize_show() < 0) {
+			/* show ipc.msgsize */
+			if (core_admin_ipc_msgsize_show() < 0) {
 				errsv = errno;
-				log_warn("category_core_show(): core_admin_pmq_msgsize_show(): %s\n", strerror(errno));
+				log_warn("category_core_show(): core_admin_ipc_msgsize_show(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -900,10 +900,10 @@ int category_core_show(size_t argc, char **args) {
 			/* All good */
 			return 0;
 		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* show pmq.name */
-			if (core_admin_pmq_name_show() < 0) {
+			/* show ipc.name */
+			if (core_admin_ipc_name_show() < 0) {
 				errsv = errno;
-				log_warn("category_core_show(): core_admin_pmq_name_show(): %s\n", strerror(errno));
+				log_warn("category_core_show(): core_admin_ipc_name_show(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -913,8 +913,8 @@ int category_core_show(size_t argc, char **args) {
 		}
 
 		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show core pmq");
-		log_warn("category_core_show(): Invalid 'pmq' property: %s\n", args[1]);
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show core ipc");
+		log_warn("category_core_show(): Invalid 'ipc' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;

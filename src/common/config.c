@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 28-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -543,30 +543,30 @@ static int _config_validate_core_jail_dir(const struct usched_config_core *core)
 	return fsop_path_isdir(core->jail_dir);
 }
 
-static int _config_init_core_pmq_msgmax(struct usched_config_core *core) {
-	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX, &core->pmq_msgmax);
+static int _config_init_core_ipc_msgmax(struct usched_config_core *core) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGMAX, &core->ipc_msgmax);
 }
 
-static int _config_validate_core_pmq_msgmax(const struct usched_config_core *core) {
-	return core->pmq_msgmax > 0;
+static int _config_validate_core_ipc_msgmax(const struct usched_config_core *core) {
+	return core->ipc_msgmax > 0;
 }
 
-static int _config_init_core_pmq_msgsize(struct usched_config_core *core) {
-	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE, &core->pmq_msgsize);
+static int _config_init_core_ipc_msgsize(struct usched_config_core *core) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE, &core->ipc_msgsize);
 }
 
-static int _config_validate_core_pmq_msgsize(const struct usched_config_core *core) {
-	return core->pmq_msgsize > 0;
+static int _config_validate_core_ipc_msgsize(const struct usched_config_core *core) {
+	return core->ipc_msgsize > 0;
 }
 
-static int _config_init_core_pmq_name(struct usched_config_core *core) {
-	if (!(core->pmq_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_PMQ_NAME)))
+static int _config_init_core_ipc_name(struct usched_config_core *core) {
+	if (!(core->ipc_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_CORE "/" CONFIG_USCHED_FILE_CORE_IPC_NAME)))
 		return -1;
 
 	return 0;
 }
 
-static int _config_validate_core_pmq_name(const struct usched_config_core *core) {
+static int _config_validate_core_ipc_name(const struct usched_config_core *core) {
 	/* TODO */
 	return 1;
 }
@@ -678,47 +678,47 @@ int config_init_core(struct usched_config_core *core) {
 		return -1;
 	}
 
-	/* Read pmq msg max */
-	if (_config_init_core_pmq_msgmax(core) < 0) {
+	/* Read ipc msg max */
+	if (_config_init_core_ipc_msgmax(core) < 0) {
 		errsv = errno;
-		log_warn("_config_init_core(): _config_init_core_pmq_msgmax(): %s\n", strerror(errno));
+		log_warn("_config_init_core(): _config_init_core_ipc_msgmax(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Validate pmq msgmax */
-	if (!_config_validate_core_pmq_msgmax(core)) {
-		log_warn("_config_init_core(): _config_validate_core_pmq_msgmax(): Invalid core.pmq.msgmax value.\n");
+	/* Validate ipc msgmax */
+	if (!_config_validate_core_ipc_msgmax(core)) {
+		log_warn("_config_init_core(): _config_validate_core_ipc_msgmax(): Invalid core.ipc.msgmax value.\n");
 		errno = EINVAL;
 		return -1;
 	}
 
-	/* Read pmq msg size */
-	if (_config_init_core_pmq_msgsize(core) < 0) {
+	/* Read ipc msg size */
+	if (_config_init_core_ipc_msgsize(core) < 0) {
 		errsv = errno;
-		log_warn("_config_init_core(): _config_init_core_pmq_msgsize(): %s\n", strerror(errno));
+		log_warn("_config_init_core(): _config_init_core_ipc_msgsize(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Validate pmq msgsize */
-	if (!_config_validate_core_pmq_msgsize(core)) {
-		log_warn("_config_init_core(): _config_validate_core_pmq_msgsize(): Invalid core.pmq.msgsize value.\n");
+	/* Validate ipc msgsize */
+	if (!_config_validate_core_ipc_msgsize(core)) {
+		log_warn("_config_init_core(): _config_validate_core_ipc_msgsize(): Invalid core.ipc.msgsize value.\n");
 		errno = EINVAL;
 		return -1;
 	}
 
-	/* Read pmq name */
-	if (_config_init_core_pmq_name(core) < 0) {
+	/* Read ipc name */
+	if (_config_init_core_ipc_name(core) < 0) {
 		errsv = errno;
-		log_warn("_config_init_core(): _config_init_core_pmq_name(): %s\n", strerror(errno));
+		log_warn("_config_init_core(): _config_init_core_ipc_name(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	/* Validate pmq name */
-	if (!_config_validate_core_pmq_name(core)) {
-		log_warn("_config_init_core(): _config_validate_core_pmq_name(): Invalid core.pmq.name value.\n");
+	/* Validate ipc name */
+	if (!_config_validate_core_ipc_name(core)) {
+		log_warn("_config_init_core(): _config_validate_core_ipc_name(): Invalid core.ipc.name value.\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -1217,8 +1217,8 @@ void config_destroy_auth(struct usched_config_auth *auth) {
 void config_destroy_core(struct usched_config_core *core) {
 	memset(core->serialize_file, 0, strlen(core->serialize_file));
 	mm_free(core->serialize_file);
-	memset(core->pmq_name, 0, strlen(core->pmq_name));
-	mm_free(core->pmq_name);
+	memset(core->ipc_name, 0, strlen(core->ipc_name));
+	mm_free(core->ipc_name);
 	memset(core->jail_dir, 0, strlen(core->jail_dir));
 	mm_free(core->jail_dir);
 	memset(core->privdrop_user, 0, strlen(core->privdrop_user));

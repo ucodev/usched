@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface
  *
- * Date: 27-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,6 +38,7 @@
 #include "pmq.h"
 
 mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgsize) {
+#if CONFIG_USE_IPC_PMQ == 1
 	int errsv = 0;
 	mqd_t ret = (mqd_t) -1;
 	struct mq_attr mqattr;
@@ -64,11 +65,11 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgs
 	}
 
 	if (oflags & O_CREAT) {
-#if !defined(CONFIG_SYS_BSD) || CONFIG_SYS_BSD == 0
+ #if !defined(CONFIG_SYS_BSD) || CONFIG_SYS_BSD == 0
 		if ((ret = mq_open(name, oflags, mode, &mqattr)) == (mqd_t) -1) {
-#else
+ #else
 		if ((ret = mq_open(name, oflags, mode, NULL)) == (mqd_t) -1) {
-#endif
+ #endif
 			errsv = errno;
 			log_crit("pmq_init(): mq_open(): %s\n", strerror(errno));
 			errno = errsv;
@@ -81,23 +82,36 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgs
 		return (mqd_t) -1;
 	}
 
-#if CONFIG_SYS_BSD == 1
+ #if CONFIG_SYS_BSD == 1
 	if ((oflags & O_CREAT) && mq_setattr(ret, &mqattr, NULL) < 0) {
 		errsv = errno;
 		log_crit("pmq_init(): mq_setattr(): %s\n", strerror(errno));
 		errno = errsv;
 		return (mqd_t) -1;
 	}
-#endif
+ #endif
 
 	return ret;
+#else /* CONFIG_USE_IPC_PMQ */
+	errno = ENOSYS;
+	return -1;
+#endif
 }
 
 void pmq_destroy(mqd_t pmqd) {
+#if CONFIG_USE_IPC_PMQ == 1
 	mq_close(pmqd);
+#else
+	return ;
+#endif
 }
 
 int pmq_unlink(const char *pmqname) {
+#if CONFIG_USE_IPC_PMQ == 1
 	return mq_unlink(pmqname);
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
 }
 

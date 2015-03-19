@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 05-03-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,7 +39,7 @@
 #define USCHED_COMPONENT_DELTA_STR	"delta"
 #define USCHED_COMPONENT_JAIL_STR	"jail"
 #define USCHED_COMPONENT_LOCAL_STR	"local"
-#define USCHED_COMPONENT_PMQ_STR	"pmq"
+#define USCHED_COMPONENT_IPC_STR	"ipc"
 #define USCHED_COMPONENT_PRIVDROP_STR	"privdrop"
 #define USCHED_COMPONENT_REMOTE_STR	"remote"
 #define USCHED_COMPONENT_SERIALIZE_STR	"serialize"

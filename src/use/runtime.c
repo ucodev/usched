@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 16-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,10 +35,12 @@
 #include "log.h"
 #include "thread.h"
 #include "schedule.h"
-#include "pmq.h"
 #include "sig.h"
 #include "bitops.h"
-
+#include "ipc.h"
+#if CONFIG_USE_IPC_PMQ == 1
+ #include "pmq.h"
+#endif
 
 #if CONFIG_USCHED_MULTIUSER == 0
 static int _runtime_exec_drop_privs(void) {
@@ -119,12 +121,14 @@ int runtime_exec_init(int argc, char **argv) {
 	/* Initialize IPC */
 	log_info("Initializing IPC interface...\n");
 
-	if (pmq_exec_init() < 0) {
+	if (ipc_exec_init() < 0) {
 		errsv = errno;
-		log_crit("runtime_exec_init(): pmq_exec_init(): %s\n", strerror(errno));
+		log_crit("runtime_exec_init(): ipc_exec_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	log_info("IPC interface initialized.\n");
 
 #if CONFIG_USCHED_MULTIUSER == 0
 	/* If no multiuser support, drop privileges to the configured nopriv user and group */
@@ -139,8 +143,6 @@ int runtime_exec_init(int argc, char **argv) {
 
 	log_info("Privileges successfully dropped.\n");
 #endif
-
-	log_info("IPC interface initialized.\n");
 
 	/* All good */
 	log_info("All systems go. Ignition!\n");
@@ -158,7 +160,7 @@ int runtime_exec_interrupted(void) {
 void runtime_exec_destroy(void) {
 	/* Destroy IPC interface */
 	log_info("Destroying IPC interface...\n");
-	pmq_exec_destroy();
+	ipc_exec_destroy();
 	log_info("IPC interface destroyed.\n");
 
 	/* Destroy thread behaviour interface */
@@ -184,7 +186,8 @@ void runtime_exec_destroy(void) {
 }
 
 void runtime_exec_quiet_destroy(void) {
-	pmq_exec_destroy();
+	/* NOTE: this destructor is _ONLY_ used by child processes invoked by uSched Executer */
+	ipc_exec_destroy();
 	thread_exec_behaviour_destroy();
 	sig_exec_destroy();
 	config_exec_destroy();

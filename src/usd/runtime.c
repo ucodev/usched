@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 08-03-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,7 +41,7 @@
 #include "thread.h"
 #include "pool.h"
 #include "schedule.h"
-#include "pmq.h"
+#include "ipc.h"
 #include "sig.h"
 #include "bitops.h"
 #include "marshal.h"
@@ -152,9 +152,9 @@ int runtime_daemon_init(int argc, char **argv) {
 	/* Initialize IPC */
 	log_info("Initializing IPC interface...\n");
 
-	if (pmq_daemon_init() < 0) {
+	if (ipc_daemon_init() < 0) {
 		errsv = errno;
-		log_crit("runtime_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
+		log_crit("runtime_daemon_init(): ipc_daemon_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -423,7 +423,7 @@ void runtime_daemon_destroy(void) {
 
 	/* Destroy IPC interface */
 	log_info("Destroying IPC interface...\n");
-	pmq_daemon_destroy();
+	ipc_daemon_destroy();
 	log_info("IPC interface destroyed.\n");
 
 	/* Destroy signals interface */

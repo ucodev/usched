@@ -5,7 +5,7 @@ SPLINT_OPTS="-posix-lib -weak -redef -fcnuse -unrecog"
 SPLINT_OPTS_EXTRA="+ignorequals -duplicatequals"
 SPLINT_OUT=".splint_out"
 
-DEFINES="-D_POSIX_C_SOURCE=199309L -D_REENTRANT -Dtimer_t=unsigned"
+DEFINES="-D_POSIX_C_SOURCE=199309L -D_REENTRANT -Dtimer_t=unsigned -Dclockid_t=unsigned -DCONFIG_USE_IPC_PMQ=1"
 INCLUDES="-I../../include"
 
 printf "Analyzing uSched source code with splint...\n\n"

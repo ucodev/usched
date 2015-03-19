@@ -1,7 +1,7 @@
 /**
- * @file pmq.c
+ * @file ipc.h
  * @brief uSched
- *        POSIX Message Queueing interface - Daemon
+ *        Inter-Process Communication interface header
  *
  * Date: 19-03-2015
  * 
@@ -24,42 +24,17 @@
  *
  */
 
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
 
-#include <sys/stat.h>
-#include <mqueue.h>
+#ifndef USCHED_IPC_H
+#define USCHED_IPC_H
 
-#include "config.h"
-#include "runtime.h"
-#include "log.h"
-#include "pmq.h"
+/* Prototypes */
+int ipc_daemon_init(void);
+int ipc_exec_init(void);
+void ipc_daemon_destroy(void);
+void ipc_exec_destroy(void);
+int ipc_admin_create(void);
+int ipc_admin_delete(void);
 
-int pmq_daemon_init(void) {
-#if CONFIG_USE_IPC_PMQ == 1
-	int errsv = 0;
-	int oflags = O_WRONLY;
-
-	if ((rund.ipcd = pmq_init(rund.config.core.ipc_name, oflags, 0, 0, 0)) == (mqd_t) -1) {
-		errsv = errno;
-		log_crit("pmq_daemon_init(): pmq_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-#else
-	errno = ENOSYS;
-	return -1;
 #endif
-}
-
-void pmq_daemon_destroy(void) {
-#if CONFIG_USE_IPC_PMQ == 1
-	pmq_destroy(rund.ipcd);
-#else
-	return;
-#endif
-}
 

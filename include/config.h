@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 17-03-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -50,9 +50,9 @@
 #define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
 #define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
 #define CONFIG_USCHED_FILE_CORE_JAIL_DIR	"jail.dir"
-#define CONFIG_USCHED_FILE_CORE_PMQ_MSGMAX	"pmq.msgmax"
-#define CONFIG_USCHED_FILE_CORE_PMQ_MSGSIZE	"pmq.msgsize"
-#define CONFIG_USCHED_FILE_CORE_PMQ_NAME	"pmq.name"
+#define CONFIG_USCHED_FILE_CORE_IPC_MSGMAX	"ipc.msgmax"
+#define CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE	"ipc.msgsize"
+#define CONFIG_USCHED_FILE_CORE_IPC_NAME	"ipc.name"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_USER	"privdrop.user"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
@@ -113,11 +113,24 @@
 
 
 
-#define CONFIG_USE_LIBFSMA			0
-#define CONFIG_USE_SYNCFS			0
+#ifndef CONFIG_USE_LIBFSMA
+ #define CONFIG_USE_LIBFSMA			0
+#endif
+#ifndef CONFIG_USE_SYNCFS
+ #define CONFIG_USE_SYNCFS			0
+#endif
+#ifndef CONFIG_USE_IPC_PMQ
+ #define CONFIG_USE_IPC_PMQ			0
+#endif
+#ifndef CONFIG_USE_IPC_SOCK
+ #define CONFIG_USE_IPC_SOCK			0
+#endif
 
 
 /* Configuration compliance checks */
+#if CONFIG_USE_IPC_PMQ == 0 && CONFIG_USE_IPC_SOCK == 0
+ #error "No communication interface is set for uSched Execution module (CONFIG_USE_IPC_PMQ == 0 and CONFIG_USE_IPC_SOCK == 0)."
+#endif
 #if CONFIG_POSIX_STRICT == 1 && (CONFIG_USCHED_JAIL == 1 || CONFIG_USE_SYNCFS == 1)
  #error "CONFIG_POSIX_STRICT is incompatible with the following options: CONFIG_USCHED_JAIL, CONFIG_USE_SYNCFS"
 #endif
@@ -252,9 +265,9 @@ struct usched_config_core {
 	unsigned int delta_reload;
 	char *serialize_file;
 	char *jail_dir;
-	long pmq_msgmax;
-	long pmq_msgsize;
-	char *pmq_name;
+	long ipc_msgmax;
+	long ipc_msgsize;
+	char *ipc_name;
 	char *privdrop_user;
 	char *privdrop_group;
 	uid_t privdrop_uid;

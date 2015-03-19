@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 09-03-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -134,7 +134,12 @@ struct usched_runtime_daemon {
 
 	psched_t *psched;
 
-	mqd_t pmqd;
+#if CONFIG_USE_IPC_PMQ == 1
+	mqd_t ipcd;
+#endif
+#if CONFIG_USE_IPC_SOCK == 1
+	int ipcd;
+#endif
 
 	pall_fd_t ser_fd;
 
@@ -159,7 +164,12 @@ struct usched_runtime_exec {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-	mqd_t pmqd;
+#if CONFIG_USE_IPC_PMQ == 1
+	mqd_t ipcd;
+#endif
+#if CONFIG_USE_IPC_SOCK == 1
+	int ipcd;
+#endif
 
 	struct usched_config config;
 };

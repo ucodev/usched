@@ -3,9 +3,9 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Exec
  *
- * Date: 31-07-2014
+ * Date: 19-03-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -38,9 +38,10 @@
 #include "pmq.h"
 
 int pmq_exec_init(void) {
+#if CONFIG_USE_IPC_PMQ == 1
 	int errsv = 0;
 
-	if ((rune.pmqd = pmq_init(rune.config.core.pmq_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
+	if ((rune.ipcd = pmq_init(rune.config.core.ipc_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_exec_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
@@ -48,9 +49,17 @@ int pmq_exec_init(void) {
 	}
 
 	return 0;
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
 }
 
 void pmq_exec_destroy(void) {
-	pmq_destroy(rune.pmqd);
+#if CONFIG_USE_IPC_PMQ == 1
+	pmq_destroy(rune.ipcd);
+#else
+	return;
+#endif
 }
 

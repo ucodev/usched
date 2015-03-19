@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 13-03-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -72,7 +72,7 @@ static void *_exec_cmd(void *arg) {
 		/* Child */
 
 		/* Close message queue descriptor */
-		mq_close(rune.pmqd);
+		mq_close(rune.ipcd);
 
 		/* Get child pid */
 		pid = getpid();
@@ -217,7 +217,7 @@ static void _exec_process(void) {
 		/* Check for rutime interruptions */
 		if (runtime_exec_interrupted()) {
 			/* Get posix queue attributes */
-			if (mq_getattr(rune.pmqd, &mqattr) < 0) {
+			if (mq_getattr(rune.ipcd, &mqattr) < 0) {
 				log_warn("_exec_process(): mq_getattr(): %s\n", strerror(errno));
 				break;
 			}
@@ -230,7 +230,7 @@ static void _exec_process(void) {
 		/* Allocate temporary buffer size, plus one byte that won't be written to safe guard
 		 * the subject NULL termination
 		 */
-		if (!(tbuf = mm_alloc((size_t) rune.config.core.pmq_msgsize + 1))) {
+		if (!(tbuf = mm_alloc((size_t) rune.config.core.ipc_msgsize + 1))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));
 			continue;
 		}
@@ -238,14 +238,21 @@ static void _exec_process(void) {
 		/* Reset all the memory to 0, granting the extra byte to be 0, so subject will
 		 * will always be NULL terminated regardless of the data received from the queue
 		 */
-		memset(tbuf, 0, (size_t) rune.config.core.pmq_msgsize + 1);
+		memset(tbuf, 0, (size_t) rune.config.core.ipc_msgsize + 1);
 
+#if CONFIG_USE_IPC_PMQ == 1
 		/* Read message from queue */
-		if (mq_receive(rune.pmqd, tbuf, (size_t) rune.config.core.pmq_msgsize, 0) < 0) {
+		if (mq_receive(rune.ipcd, tbuf, (size_t) rune.config.core.ipc_msgsize, 0) < 0) {
 			log_warn("_exec_process(): mq_receive(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;
 		}
+#elif CONFIG_USE_IPC_SOCK == 1
+		/* TODO */
+ #error "IPC mechanism for this platform isn't yet implemented."
+#else
+ #error "No IPC mechanism defined."
+#endif
 
 		/* Create a new thread for command execution */
 		if (pthread_create(&ptid, NULL, _exec_cmd, tbuf)) {

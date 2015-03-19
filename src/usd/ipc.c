@@ -27,11 +27,14 @@
 #include <string.h>
 #include <errno.h>
 
+
 #include "config.h"
 #include "log.h"
 #include "ipc.h"
 #if CONFIG_USE_IPC_PMQ == 1
  #include "pmq.h"
+#elif CONFIG_USE_IPC_SOCK == 1
+ #include <panet/panet.h>
 #endif
 
 int ipc_daemon_init(void) {
@@ -46,6 +49,17 @@ int ipc_daemon_init(void) {
 	}
 
 	return 0;
+#elif CONFIG_USE_IPC_SOCK == 1
+	int errsv = 0;
+
+	if ((rund.ipcd = panet_client_unix(rund.config.core.ipc_name, PANET_PROTO_UNIX_STREAM)) < 0) {
+		errsv = errno;
+		log_warn("ipc_daemon_init(): panet_client_unix(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 #else
 	errno = ENOSYS;
 	return -1;
@@ -55,6 +69,8 @@ int ipc_daemon_init(void) {
 void ipc_daemon_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	pmq_daemon_destroy();
+#elif CONFIG_USE_IPC_SOCK == 1
+	panet_safe_close(rund.core.ipc_name);
 #else
 	return;
 #endif

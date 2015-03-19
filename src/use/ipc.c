@@ -28,11 +28,14 @@
 #include <string.h>
 #include <errno.h>
 
+
 #include "config.h"
 #include "log.h"
 #include "ipc.h"
 #if CONFIG_USE_IPC_PMQ == 1
  #include "pmq.h"
+#elif CONFIG_USE_IPC_SOCK == 1
+ #include <panet/panet.h>
 #endif
 
 int ipc_exec_init(void) {
@@ -47,6 +50,17 @@ int ipc_exec_init(void) {
 	}
 
 	return 0;
+#elif CONFIG_USE_IPC_SOCK == 1
+	int errsv = 0;
+
+	if ((rune.ipcd = panet_server_unix(rune.config.core.ipc_name, PANET_PROTO_UNIX_STREAM, rune.config.core.ipc_msgmax)) < 0) {
+		errsv = errno;
+		log_warn("ipc_exec_init(): panet_server_unix(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 #else
 	errno = ENOSYS;
 	return -1;
@@ -56,6 +70,8 @@ int ipc_exec_init(void) {
 void ipc_exec_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	pmq_exec_destroy();
+#elif CONFIG_USE_IPC_SOCK == 1
+	panet_safe_close(rune.ipcd);
 #else
 	return;
 #endif

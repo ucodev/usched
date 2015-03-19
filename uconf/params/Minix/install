@@ -1,3 +1,2 @@
-ldconfig
 usa change core ipc name /var/cache/usched/ipc.sock
 usa commit core

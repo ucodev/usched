@@ -30,7 +30,6 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <mqueue.h>
 #include <time.h>
 
 #include <sys/types.h>
@@ -42,6 +41,12 @@
 #include "runtime.h"
 #include "log.h"
 #include "bitops.h"
+
+#if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
+#elif CONFIG_USE_IPC_SOCK == 1
+ #include <panet/panet.h>
+#endif
 
 extern char **environ;
 
@@ -248,8 +253,12 @@ static void _exec_process(void) {
 			continue;
 		}
 #elif CONFIG_USE_IPC_SOCK == 1
-		/* TODO */
- #error "IPC mechanism for this platform isn't yet implemented."
+		/* Read message from unix socket */
+		if (panet_read(rune.ipcd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
+			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
+			mm_free(tbuf);
+			continue;
+		}
 #else
  #error "No IPC mechanism defined."
 #endif

@@ -30,7 +30,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <pthread.h>
-#include <mqueue.h>
 #include <unistd.h>
 
 #include <sys/types.h>
@@ -50,6 +49,12 @@
 #include "conn.h"
 #include "schedule.h"
 #include "vars.h"
+
+#if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
+#elif CONFIG_USE_IPC_SOCK == 1
+ #include <panet/panet.h>
+#endif
 
 static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 	int errsv = 0;
@@ -284,8 +289,8 @@ void entry_daemon_exec_dispatch(void *arg) {
 	if (mq_send(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
 #elif CONFIG_USE_IPC_SOCK == 1
-	/* TODO */
- #error "IPC mechanism for this platform isn't yet implemented."
+	if (panet_write(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
+		log_warn("entry_daemon_exec_dispatch(): panet_write(): %s\n", strerror(errno));
 #else
  #error "No IPC mechanism defined."
 #endif

@@ -119,6 +119,9 @@
 #ifndef CONFIG_USE_SYNCFS
  #define CONFIG_USE_SYNCFS			0
 #endif
+#ifndef CONFIG_USE_SELECT
+ #define CONFIG_USE_SELECT			0
+#endif
 #ifndef CONFIG_USE_IPC_PMQ
  #define CONFIG_USE_IPC_PMQ			0
 #endif

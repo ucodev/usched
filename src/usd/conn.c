@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 27-02-2015
+ * Date: 19-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -229,6 +229,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 		FD_ZERO(&fd_rset);
 		FD_SET(rund.fd_unix, &fd_rset);
 
+#if CONFIG_USE_SELECT == 0
 		/* Wait for activity on the file descriptor, but resume execution when a signal is
 		 * caught.
 		 */
@@ -237,9 +238,23 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			continue;
 		}
+#endif
 
 		/* Signals can now be caught */
 		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+
+#if CONFIG_USE_SELECT == 1
+		/* NOTE: Systems not supporting pselect() will have a possible race here */
+
+		/* Wait for activity on the file descriptor, but resume execution when a signal is
+		 * caught.
+		 */
+		if (select(rund.fd_unix + 1, &fd_rset, NULL, NULL, NULL) < 0) {
+			log_warn("conn_daemon_process_accept_unix(): select(): %s\n", strerror(errno));
+			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+			continue;
+		}
+#endif
 
 		/* Validate if we've actually received data for processing, or if the interruption
 		 * was caused by a signal.
@@ -298,6 +313,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 		FD_ZERO(&fd_rset);
 		FD_SET(rund.fd_remote, &fd_rset);
 
+#if CONFIG_USE_SELECT == 0
 		/* Wait for activity on the file descriptor, but resume execution when a signal is
 		 * caught.
 		 */
@@ -306,9 +322,23 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
 			continue;
 		}
+#endif
 
 		/* Signals can now be caught */
 		pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+
+#if CONFIG_USE_SELECT == 1
+		/* NOTE: Systems not supporting pselect() will have a possible race here */
+
+		/* Wait for activity on the file descriptor, but resume execution when a signal is
+		 * caught.
+		 */
+		if (select(rund.fd_remote + 1, &fd_rset, NULL, NULL, NULL) < 0) {
+			log_warn("conn_daemon_process_accept_remote(): select(): %s\n", strerror(errno));
+			pthread_sigmask(SIG_SETMASK, &si_prev, NULL);
+			continue;
+		}
+#endif
 
 		/* Validate if we've actually received data for processing, or if the interruption
 		 * was caused by a signal.

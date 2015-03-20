@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 01-03-2015
+# Date: 20-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -127,14 +127,30 @@ def usched_start():
 		print_info("Failed: Unable to commit uSched configuration.\n")
 		return False
 
-	# Start uSched daemon
+	# Start uSched Executer
+	try:
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_EXEC_PID_FILE, "-r", "-S", CONFIG_USCHED_EXEC_BIN])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to start uSched Executer\n")
+		return False
+
+	time.sleep(1)
+
+	# Wait for 'use' to start
+	while not os.path.isfile(CONFIG_USCHED_EXEC_PID_FILE):
+		time.sleep(1)
+
+	# Start uSched Daemon
 	try:
 		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_DAEMON_PID_FILE, "-r", "-S", CONFIG_USCHED_DAEMON_BIN])
 	except OSError:
 		status = 127
 
 	if status != EXIT_SUCCESS:
-		print_info("Failed: Unable to start uSched Daemon\n")
+		print_info("Failed: Unable to start uSched Daemon Module\n")
 		return False
 
 	time.sleep(1)
@@ -142,16 +158,6 @@ def usched_start():
 	# Wait for 'usd' to start
 	while not os.path.isfile(CONFIG_USCHED_DAEMON_PID_FILE):
 		time.sleep(1)
-
-	# Start uSched executer
-	try:
-		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_EXEC_PID_FILE, "-r", "-S", CONFIG_USCHED_EXEC_BIN])
-	except OSError:
-		status = 127
-
-	if status != EXIT_SUCCESS:
-		print_info("Failed: Unable to start uSched Exec Module\n")
-		return False
 
 	return True
 

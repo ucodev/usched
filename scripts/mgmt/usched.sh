@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 25-02-2015
+# Date: 20-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -109,7 +109,7 @@ op_start() {
 		return ${ret}
 	fi
 
-	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_DAEMON_PID_FILE} -r -S ${CONFIG_USCHED_DAEMON_BIN}
+	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_EXEC_PID_FILE} -r -S ${CONFIG_USCHED_EXEC_BIN}
 
 	if [ ${?} -ne 0 ]; then
 		return ${?}
@@ -117,9 +117,13 @@ op_start() {
 
 	sleep 1
 
-	while ! [ -f ${CONFIG_USCHED_DAEMON_PID_FILE} ]; do sleep 1; done
+	while ! [ -f ${CONFIG_USCHED_EXEC_PID_FILE} ]; do sleep 1; done
 
-	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_EXEC_PID_FILE} -r -S ${CONFIG_USCHED_EXEC_BIN}
+	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_DAEMON_PID_FILE} -r -S ${CONFIG_USCHED_DAEMON_BIN}
+
+	sleep 1
+
+	while ! [ -f ${CONFIG_USCHED_DAEMON_PID_FILE} ]; do sleep 1; done
 
 	return ${?}
 }

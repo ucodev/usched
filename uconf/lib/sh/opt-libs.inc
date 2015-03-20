@@ -3,7 +3,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 16/03/2015
+# Date: 20/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -66,4 +66,6 @@ if [ -e ./uconf/params/`cat .osname`/optlibs ]; then
 	echo "Done."
 	echo ""
 fi
+
+touch .libs
 

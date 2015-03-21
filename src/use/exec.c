@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,11 +45,9 @@
 
 #if CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
  #include <sys/socket.h>
  #include <panet/panet.h>
-
- static sock_t usd_fd = (sock_t) -1;
 #endif
 
 extern char **environ;
@@ -83,12 +81,9 @@ static void *_exec_cmd(void *arg) {
 #if CONFIG_USE_IPC_PMQ == 1
 		/* Close message queue descriptor */
 		mq_close(rune.ipcd);
-#elif CONFIG_USE_IPC_SOCK == 1
-		/* Close unix socket descriptor */
-		panet_safe_close(rune.ipcd);
-
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 		/* Close current uSched daemon descriptor */
-		panet_safe_close(usd_fd);
+		panet_safe_close(rune.ipcd);
 #endif
 
 		/* Get child pid */
@@ -230,17 +225,9 @@ static void _exec_process(void) {
 	char *tbuf = NULL;
 #if CONFIG_USE_IPC_PMQ == 1
 	struct mq_attr mqattr;
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1
 	uid_t fd_uid = (uid_t) -1;
 	gid_t fd_gid = (gid_t) -1;
-
-	/* Wait for the first event */
-	if ((usd_fd = (sock_t) accept(rune.ipcd, NULL, NULL)) < 0) {
-		log_warn("_exec_process(): accept(): %s\n", strerror(errno));
-
-		/* If the accept() fails, reload the daemon */
-		bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
-	}
 #endif
 
 	for (;;) {
@@ -279,9 +266,10 @@ static void _exec_process(void) {
 			mm_free(tbuf);
 			continue;
 		}
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+ #if CONFIG_USE_IPC_UNIX == 1
 		/* Get peer credentials */
-		if (local_fd_peer_cred(usd_fd, &fd_uid, &fd_gid) < 0) {
+		if (local_fd_peer_cred(rune.ipcd, &fd_uid, &fd_gid) < 0) {
 			log_warn("_exec_process(): local_fd_peer_cred(): %s\n", strerror(errno));
 			continue;
 		}
@@ -297,9 +285,9 @@ static void _exec_process(void) {
 			log_warn("_exec_process(): fd_gid[%u] != getgid[%u]\n", (unsigned) fd_gid, (unsigned) getgid());
 			continue;
 		}
-
+ #endif /* CONFIG_USE_IPC_UNIX */
 		/* Read message from unix socket */
-		if (panet_read(usd_fd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
+		if (panet_read(rune.ipcd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
 			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
 			mm_free(tbuf);
 

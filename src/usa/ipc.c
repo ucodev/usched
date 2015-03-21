@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Admin
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,7 +34,7 @@
 #include "ipc.h"
 #if CONFIG_USE_IPC_PMQ == 1
  #include "pmq.h"
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1
  #include <fsop/path.h>
  #include <panet/panet.h>
 #endif
@@ -51,7 +51,7 @@ int ipc_admin_create(void) {
 	}
 
 	return 0;
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1
 	int errsv = 0;
 	int ipcd = -1;
 
@@ -79,6 +79,8 @@ int ipc_admin_create(void) {
 	}
 
 	return 0;
+#elif CONFIG_USE_IPC_INET == 1
+	return 0;
 #else
 	errno = ENOSYS;
 	return -1;
@@ -97,7 +99,7 @@ int ipc_admin_delete(void) {
 	}
 
 	return 0;
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1
 	int errsv = 0;
 
 	if (fsop_path_exists(runa.config.core.ipc_name)) {
@@ -109,6 +111,8 @@ int ipc_admin_delete(void) {
 		}
 	}
 
+	return 0;
+#elif CONFIG_USE_IPC_INET == 1
 	return 0;
 #else
 	errno = ENOSYS;

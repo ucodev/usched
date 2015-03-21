@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -77,6 +77,7 @@
 #define CONFIG_USCHED_AUTH_PASSWORD_MAX		256
 #define CONFIG_USCHED_AUTH_PASSWORD_MIN		8
 #define CONFIG_USCHED_AUTH_SESSION_MAX		272 /* Current mac: 257 */
+#define CONFIG_USCHED_AUTH_IPC_SIZE		128 /* Size of IPC authentication string */
 #define CONFIG_USCHED_HASH_FNV1A		1
 #define CONFIG_USCHED_HASH_DJB2			0
 
@@ -126,14 +127,18 @@
 #ifndef CONFIG_USE_IPC_PMQ
  #define CONFIG_USE_IPC_PMQ			0
 #endif
-#ifndef CONFIG_USE_IPC_SOCK
- #define CONFIG_USE_IPC_SOCK			0
+#ifndef CONFIG_USE_IPC_UNIX
+ #define CONFIG_USE_IPC_UNIX			0
+#endif
+#ifndef CONFIG_USE_IPC_INET
+ #define CONFIG_USE_IPC_INET			0
 #endif
 
 
+
 /* Configuration compliance checks */
-#if CONFIG_USE_IPC_PMQ == 0 && CONFIG_USE_IPC_SOCK == 0
- #error "No communication interface is set for uSched Execution module (CONFIG_USE_IPC_PMQ == 0 and CONFIG_USE_IPC_SOCK == 0)."
+#if CONFIG_USE_IPC_PMQ == 0 && CONFIG_USE_IPC_UNIX == 0 && CONFIG_USE_IPC_INET == 0
+ #error "No communication interface is set for uSched Execution module (CONFIG_USE_IPC_PMQ == 0 and CONFIG_USE_IPC_UNIX == 0 and CONFIG_USE_IPC_INET == 0)."
 #endif
 #if CONFIG_POSIX_STRICT == 1 && (CONFIG_USCHED_JAIL == 1 || CONFIG_USE_SYNCFS == 1)
  #error "CONFIG_POSIX_STRICT is incompatible with the following options: CONFIG_USCHED_JAIL, CONFIG_USE_SYNCFS"

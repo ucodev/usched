@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,7 +44,10 @@
 #include <pall/fifo.h>
 #include <panet/panet.h>
 #if CONFIG_CLIENT_ONLY == 0
-#include <psched/psched.h>
+ #include <psched/psched.h>
+#endif
+#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+ #include <panet/panet.h>
 #endif
 
 #include <sys/types.h>
@@ -140,8 +143,8 @@ struct usched_runtime_daemon {
 #if CONFIG_USE_IPC_PMQ == 1
 	mqd_t ipcd;
 #endif
-#if CONFIG_USE_IPC_SOCK == 1
-	int ipcd;
+#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	sock_t ipcd;
 #endif
 
 	pall_fd_t ser_fd;
@@ -170,8 +173,9 @@ struct usched_runtime_exec {
 #if CONFIG_USE_IPC_PMQ == 1
 	mqd_t ipcd;
 #endif
-#if CONFIG_USE_IPC_SOCK == 1
-	int ipcd;
+#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	sock_t ipc_bind_fd;
+	sock_t ipcd;
 #endif
 
 	struct usched_config config;

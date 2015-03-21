@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -52,7 +52,7 @@
 
 #if CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
  #include <panet/panet.h>
 #endif
 
@@ -288,7 +288,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	/* Deliver message to uSched executer (use) */
 	if (mq_send(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	if (panet_write(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
 		log_warn("entry_daemon_exec_dispatch(): panet_write(): %s\n", strerror(errno));
 #else

@@ -579,7 +579,10 @@ static int _config_init_core_ipc_key(struct usched_config_core *core) {
 }
 
 static int _config_validate_core_ipc_key(const struct usched_config_core *core) {
-	if (strlen(core->ipc_key) < 24)
+	if (strlen(core->ipc_key) < 32)
+		return 0;
+
+	if (strlen(core->ipc_key) > CONFIG_USCHED_AUTH_IPC_SIZE)
 		return 0;
 
 	return 1;

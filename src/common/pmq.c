@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,8 +40,8 @@
  #include <mqueue.h>
 #endif
 
-mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgsize) {
 #if CONFIG_USE_IPC_PMQ == 1
+mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgsize) {
 	int errsv = 0;
 	mqd_t ret = (mqd_t) -1;
 	struct mq_attr mqattr;
@@ -95,26 +95,18 @@ mqd_t pmq_init(const char *name, int oflags, mode_t mode, long maxmsg, long msgs
  #endif
 
 	return ret;
-#else /* CONFIG_USE_IPC_PMQ */
-	errno = ENOSYS;
-	return -1;
-#endif
 }
+#endif
 
+#if CONFIG_USE_IPC_PMQ == 1
 void pmq_destroy(mqd_t pmqd) {
-#if CONFIG_USE_IPC_PMQ == 1
 	mq_close(pmqd);
-#else
-	return ;
-#endif
 }
+#endif
 
-int pmq_unlink(const char *pmqname) {
 #if CONFIG_USE_IPC_PMQ == 1
+int pmq_unlink(const char *pmqname) {
 	return mq_unlink(pmqname);
-#else
-	errno = ENOSYS;
-	return -1;
-#endif
 }
+#endif
 

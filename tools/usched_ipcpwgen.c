@@ -1,9 +1,9 @@
 /**
- * @file ipc_pwgen.c
+ * @file usched_ipcpwgen.c
  * @brief uSched tools
  *        IPC password generator
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -25,15 +25,30 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <psec/generate.h>
 
-int main(void) {
-	unsigned char result[33];
+int main(int argc, char *argv[]) {
+	size_t keylen = 128;
+	unsigned char result[128 + 1];
 	unsigned char dict[] = "ABCDEFGHIJKLMNOPQRTSUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_~/,.";
 
-	generate_dict_random(result, 32, dict, sizeof(dict) - 1);
-	result[32] = 0;
+	if (argc > 2) {
+		fprintf(stderr, "Usage: %s [ keylen ]\n", argv[0]);
+		exit(EXIT_FAILURE);
+	} else if (argc == 2) {
+		if ((keylen = atoi(argv[1])) > (sizeof(result) - 1)) {
+			fprintf(stderr, "Fatal: Key length too long (Maximum allowed size is %u).\n", (unsigned) sizeof(result) - 1);
+			exit(EXIT_FAILURE);
+		} else if (keylen < 32) {
+			fprintf(stderr, "Fatal: Key length too short (Minimum allowed size is 32).\n");
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	generate_dict_random(result, sizeof(result) - 1, dict, sizeof(dict) - 1);
+	result[keylen] = 0;
 
 	puts((char *) result);
 

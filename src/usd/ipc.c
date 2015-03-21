@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Daemon
  *
- * Date: 19-03-2015
+ * Date: 21-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,39 +27,95 @@
 #include <string.h>
 #include <errno.h>
 
-
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
 #include "ipc.h"
 #if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
  #include "pmq.h"
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
  #include <panet/panet.h>
 #endif
 
 int ipc_daemon_init(void) {
 #if CONFIG_USE_IPC_PMQ == 1
+	char *ipc_auth = NULL;
 	int errsv = 0;
 
-	if (pmq_daemon_init() < 0) {
+	if (!(ipc_auth = mm_alloc(rund.config.core.ipc_msgsize + 1))) {
 		errsv = errno;
-		log_warn("ipc_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
+		log_warn("ipc_daemon_init(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* Reset IPC authentication buffer */
+	memset(ipc_auth, 0, rund.config.core.ipc_msgsize + 1);
+
+	/* Initialize IPC PMQ interface */
+	if (pmq_daemon_init() < 0) {
+		errsv = errno;
+		log_warn("ipc_daemon_init(): pmq_daemon_init(): %s\n", strerror(errno));
+		mm_free(ipc_auth);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Craft IPC authentication string */
+	strncpy(ipc_auth, rund.config.core.ipc_key, rund.config.core.ipc_msgsize);
+
+	/* Send IPC authentication string */
+	if (mq_send(rund.ipcd, ipc_auth, (size_t) rund.config.core.ipc_msgsize, 0) < 0) {
+		errsv = errno;
+		log_crit("ipc_daemon_init(): mq_send(): %s\n", strerror(errno));
+		mm_free(ipc_auth);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset IPC authentication buffer (again) */
+	memset(ipc_auth, 0, rund.config.core.ipc_msgsize + 1);
+
+	/* Free IPC authentication buffer */
+	mm_free(ipc_auth);
+
+	/* All good */
 	return 0;
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	char ipc_auth[CONFIG_USCHED_AUTH_IPC_SIZE + 1];
 	int errsv = 0;
 
+	/* Reset IPC authentication buffer */
+	memset(ipc_auth, 0, sizeof(ipc_auth));
+
+ #if CONFIG_USE_IPC_UNIX == 1
 	if ((rund.ipcd = panet_client_unix(rund.config.core.ipc_name, PANET_PROTO_UNIX_STREAM)) < 0) {
 		errsv = errno;
 		log_warn("ipc_daemon_init(): panet_client_unix(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+ #elif CONFIG_USE_IPC_INET == 1
+	if ((rund.ipcd = panet_client_ipv4("127.0.0.1", rund.config.core.ipc_name, PANET_PROTO_TCP, 5)) < 0) {
+		errsv = errno;
+		log_warn("ipc_daemon_init(): panet_client_unix(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+ #endif
 
+	/* Craft IPC authentication string */
+	strncpy(ipc_auth, rund.config.core.ipc_key, CONFIG_USCHED_AUTH_IPC_SIZE);
+
+	if (panet_write(rund.ipcd, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
+		errsv = errno;
+		log_crit("ipc_daemon_init(): panet_write(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
 	return 0;
 #else
 	errno = ENOSYS;
@@ -70,7 +126,7 @@ int ipc_daemon_init(void) {
 void ipc_daemon_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	pmq_daemon_destroy();
-#elif CONFIG_USE_IPC_SOCK == 1
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	panet_safe_close(rund.ipcd);
 #else
 	return;

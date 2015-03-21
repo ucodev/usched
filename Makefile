@@ -6,6 +6,7 @@ all:
 install_all:
 	cd src && make install && cd ..
 	cd scripts && make install && cd ..
+	cd tools && make install && cd ..
 	mkdir -p /etc/usched
 	cp -r config/* /etc/usched/
 	chown -R root /etc/usched

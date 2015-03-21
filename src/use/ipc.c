@@ -144,6 +144,10 @@ int ipc_exec_init(void) {
 		return -1;
 	}
 
+	/* TODO: For INET connections, a privileged port (either source and dest ports) must be used.
+	 *       Any connection using unprivileged ports (>= 1024) shall be discarded.
+	 */
+
 	/* Close bound fd */
 	panet_safe_close(rune.ipc_bind_fd);
 	rune.ipc_bind_fd = (sock_t) -1;

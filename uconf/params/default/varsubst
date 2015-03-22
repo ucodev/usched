@@ -1,0 +1,10 @@
+include/config.h
+scripts/init/centos/usched
+scripts/init/debian/usched
+scripts/init/deepin/usched
+scripts/init/fedora/usched
+scripts/init/freebsd/usched
+scripts/init/redhat/usched
+scripts/init/ubuntu/usched
+scripts/mgmt/usched.py
+scripts/mgmt/usched.sh

@@ -3,9 +3,9 @@
 # uSched init script
 
 #
-# Date: 28-07-2014
+# Date: 22-03-2015
 # 
-# Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
 # This file is part of usched.
 #
@@ -35,13 +35,13 @@
 # Short-Description: uSched Service
 ### END INIT INFO
 
-. /lib/lsb/init-functions
+. @_SYSLIBDIR_@/lsb/init-functions
 
 flush()
 {
 	log_begin_msg "Flushing uSched services"
 
-	/usr/sbin/usched flush quiet
+	@_SYSSBINDIR_@/usched flush quiet
 
 	if [ $? -ne 0 ]; then
 		log_failure_msg "Unable to flush services"
@@ -56,7 +56,7 @@ reload()
 {
 	log_begin_msg "Reloading uSched services"
 
-	/usr/sbin/usched reload quiet
+	@_SYSSBINDIR_@/usched reload quiet
 
 	if [ $? -ne 0 ]; then
 		log_failure_msg "Unable to reload services"
@@ -71,7 +71,7 @@ start()
 {
 	log_begin_msg "Starting uSched services"
 
-	/usr/sbin/usched start quiet
+	@_SYSSBINDIR_@/usched start quiet
 
 	if [ $? -ne 0 ]; then
 		log_failure_msg "Unable to start services"
@@ -87,7 +87,7 @@ stop()
 {
 	log_begin_msg "Stopping uSched services"
 	
-	/usr/sbin/usched stop quiet
+	@_SYSSBINDIR_@/usched stop quiet
 
 	if [ $? -ne 0 ]; then
 		log_failure_msg "Unable to stop services"
@@ -102,13 +102,13 @@ status()
 {
 	log_begin_msg "Checking uSched services status"
 
-	if [ ! -f /var/run/usched_usd.pid ]; then
+	if [ ! -f @_SYSRUNDIR_@/usched_usd.pid ]; then
 		log_failure_msg "uSched Daemon Service isn't running"
 		log_end_msg 1
 		return 1
 	fi
 
-	if [ ! -f /var/run/usched_use.pid ]; then
+	if [ ! -f @_SYSRUNDIR_@/usched_use.pid ]; then
 		log_failure_msg "uSched Exec Service isn't running"
 		log_end_msg 1
 		return 1

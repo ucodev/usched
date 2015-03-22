@@ -3,7 +3,7 @@
 # uSched init script
 
 #
-# Date: 18-02-2015
+# Date: 22-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -26,11 +26,11 @@
 # PROVIDE: usched
 # KEYWORD: nojail
 
-. /etc/rc.subr
+. @_SYSCONFDIR_@/rc.subr
                 
 name="usched"
 rcvar="usched_enable"
-command="/usr/sbin/${name}"
+command="@_SYSSBINDIR_@/${name}"
 start_cmd="start"
 stop_cmd="stop"
 
@@ -39,7 +39,7 @@ flush()
 {
 	echo -n "Flushing uSched services... "
 
-	/usr/sbin/usched flush quiet
+	@_SYSSBINDIR_@/usched flush quiet
 
 	if [ $? -ne 0 ]; then
 		echo -n "Unable to flush services. "
@@ -54,7 +54,7 @@ reload()
 {
 	echo -n "Reloading uSched services... "
 
-	/usr/sbin/usched reload quiet
+	@_SYSSBINDIR_@/usched reload quiet
 
 	if [ $? -ne 0 ]; then
 		echo -n "Unable to reload services. "
@@ -69,7 +69,7 @@ start()
 {
 	echo -n "Starting uSched services... "
 
-	/usr/sbin/usched start quiet
+	@_SYSSBINDIR_@/usched start quiet
 
 	if [ $? -ne 0 ]; then
 		echo -n "Unable to start services. "
@@ -85,7 +85,7 @@ stop()
 {
 	echo -n "Stopping uSched services... "
 	
-	/usr/sbin/usched stop quiet
+	@_SYSSBINDIR_@/usched stop quiet
 
 	if [ $? -ne 0 ]; then
 		echo -n "Unable to stop services. "
@@ -100,13 +100,13 @@ status()
 {
 	echo -n "Checking uSched services status... "
 
-	if [ ! -f /var/run/usched_usd.pid ]; then
+	if [ ! -f @_SYSRUNDIR_@/usched_usd.pid ]; then
 		echo -n "uSched Daemon Service isn't running. "
 		echo "Failed"
 		return 1
 	fi
 
-	if [ ! -f /var/run/usched_use.pid ]; then
+	if [ ! -f @_SYSRUNDIR_@/usched_use.pid ]; then
 		echo -n "uSched Exec Service isn't running. "
 		echo "Failed"
 		return 1

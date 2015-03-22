@@ -1,6 +1,5 @@
-#!/bin/sh
 #
-# uConf: Project Cleanup script
+# uConf: Undo variable substitution shell scripting library
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -24,47 +23,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+if [ -e uconf/params/default/varsubst ]; then
+	for varsubst in `cat uconf/params/default/varsubst`; do
+		mv ${varsubst}.orig ${varsubst}
+	done
 
-if [ `id -u` -ne 0 ]; then
-	echo "Current user is not root"
-	exit 1
 fi
 
-. ./uconf/lib/sh/varundo.inc
-
-if [ -e ./uconf/params/default/undo ]; then
-	while read cmd; do
-		/bin/sh -c "${cmd}"
-
-		if [ $? -ne 0 ]; then
-			echo "Failed to execute: ${cmd}"
-			exit 1
-		fi
-	done < ./uconf/params/default/undo
+if [ -e uconf/params/`cat .osname`/varsubst ]; then
+	for varsubst in `cat uconf/params/$(cat .osname)/varsubst`; do
+		mv ${varsubst}.orig ${varsubst}
+	done
 fi
-
-if [ -e ./uconf/params/`cat .osname 2> /dev/null`/undo ]; then
-	while read cmd; do
-		/bin/sh -c "${cmd}"
-
-		if [ $? -ne 0 ]; then
-			echo "Failed to execute: ${cmd}"
-			exit 1
-		fi
-	done < ./uconf/params/`cat .osname`/undo
-fi
-
-rm -rf build
-rm -f .target
-rm -f .osname
-rm -f .extlib
-rm -f .compiler
-rm -f .olinker
-rm -f .ecflags
-rm -f .elflags
-rm -f .archflags
-rm -f .addons
-rm -f .done
-rm -f .l*
-rm -f .dir*
 

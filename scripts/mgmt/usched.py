@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 20-03-2015
+# Date: 22-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -31,12 +31,12 @@ import subprocess
 import time
 
 # Config
-CONFIG_USCHED_ADMIN_BIN = "/usr/sbin/usa"
-CONFIG_USCHED_DAEMON_BIN = "/usr/sbin/usd"
-CONFIG_USCHED_EXEC_BIN = "/usr/sbin/use"
-CONFIG_USCHED_MONITOR_BIN = "/usr/sbin/usm"
-CONFIG_USCHED_DAEMON_PID_FILE = "/var/run/usched_usd.pid"
-CONFIG_USCHED_EXEC_PID_FILE = "/var/run/usched_use.pid"
+CONFIG_USCHED_ADMIN_BIN = "@_SYSSBINDIR_@/usa"
+CONFIG_USCHED_DAEMON_BIN = "@_SYSSBINDIR_@/usd"
+CONFIG_USCHED_EXEC_BIN = "@_SYSSBINDIR_@/use"
+CONFIG_USCHED_MONITOR_BIN = "@_SYSSBINDIR_@/usm"
+CONFIG_USCHED_DAEMON_PID_FILE = "@_SYSRUNDIR_@/usched_usd.pid"
+CONFIG_USCHED_EXEC_PID_FILE = "@_SYSRUNDIR_@/usched_use.pid"
 
 # Operations
 USCHED_OP_FLUSH = "flush"

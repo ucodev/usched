@@ -35,7 +35,7 @@
 #define CONFIG_USCHED_SERIALIZE_ON_REQ		1
 #define CONFIG_USCHED_DELTA_CHECK_INTERVAL	1
 #define CONFIG_USCHED_SHELL_BIN_PATH		"/bin/sh"
-#define CONFIG_USCHED_DIR_BASE			"/etc/usched"
+#define CONFIG_USCHED_DIR_BASE			"@_SYSCONFDIR_@/usched"
 #define CONFIG_USCHED_NET_DEFAULT_PORT		"7600"
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"
@@ -64,8 +64,8 @@
 #define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT	"conn.timeout"
 #define CONFIG_USCHED_FILE_NETWORK_SOCK_NAME	"sock.name"
-#define CONFIG_USCHED_DAEMON_PID_FILE		"/var/run/usched_usd.pid"
-#define CONFIG_USCHED_EXEC_PID_FILE		"/var/run/usched_use.pid"
+#define CONFIG_USCHED_DAEMON_PID_FILE		"@_SYSRUNDIR_@/usched_usd.pid"
+#define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_use.pid"
 #define CONFIG_USCHED_ADMIN_PROC_NAME		"usa"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"

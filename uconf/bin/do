@@ -45,6 +45,9 @@
 ## Configure system directories
 . ./uconf/lib/sh/dirconf.inc
 
+## Replace configuration variables
+. ./uconf/lib/sh/varsubst.inc
+
 ## Build ##
 if [ -e ./uconf/params/default/do ]; then
 	while read cmd; do

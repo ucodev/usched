@@ -1,4 +1,7 @@
+SYSCONFDIR=`cat ../../../.dirconf`
+
 install:
-	cp usched /etc/rc.d/usched
-	chmod 755 /etc/rc.d/usched
+	mkdir -p ${SYSCONFDIR}/rc.d
+	cp usched ${SYSCONFDIR}/rc.d/usched
+	chmod 755 ${SYSCONFDIR}/rc.d/usched
 

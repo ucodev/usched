@@ -10,6 +10,8 @@ OBJS_LIB=auth.o config.o conn.o entry.o lib.o logic.o op.o opt.o parse.o pool.o 
 OBJS_CLIENT=auth.o config.o client.o conn.o entry.o logic.o op.o opt.o parse.o pool.o print.o process.o runtime.o sig.o usage.o
 TARGET_LIB=libusc.`cat ../../.extlib`
 TARGET_CLIENT=usc
+SYSBINDIR=`cat ../../.dirbin`
+SYSLIBDIR=`cat ../../.dirlib`
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c auth.c
@@ -32,8 +34,8 @@ all:
 	${CC} -shared -o ${TARGET_LIB} ${OBJS_LIB} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
 
 install:
-	cp ${TARGET_CLIENT} /usr/bin/
-	cp ${TARGET_LIB} /usr/lib/
+	cp ${TARGET_CLIENT} ${SYSBINDIR}/
+	cp ${TARGET_LIB} ${SYSLIBDIR}/
 
 clean:
 	rm -f ${OBJS_CLIENT}

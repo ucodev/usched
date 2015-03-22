@@ -8,6 +8,7 @@ INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/config.o ../common/debug.o ../common/input.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/term.o
 OBJS=admin.o all.o auth.o category.o config.o core.o file.o ipc.o logic.o network.o op.o parse.o pmq.o print.o runtime.o usage.o users.o
 TARGET=usa
+SYSSBINDIR=`cat ../../.dirsbin`
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c admin.c
@@ -30,7 +31,7 @@ all:
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
 
 install:
-	cp ${TARGET} /usr/sbin/
+	cp ${TARGET} ${SYSSBINDIR}/
 
 clean:
 	rm -f ${OBJS}

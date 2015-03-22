@@ -1,3 +1,15 @@
+SYSBINDIR=`cat .dirbin`
+SYSCACHEDIR=`cat .dircache`
+SYSCONFDIR=`cat .dirconf`
+SYSDOCDIR=`cat .dirdoc`
+SYSINCLUDEDIR=`cat .dirinclude`
+SYSLIBDIR=`cat .dirlib`
+SYSMANDIR=`cat .dirman`
+SYSRUNDIR=`cat .dirrun`
+SYSSBINDIR=`cat .dirsbin`
+SYSSHAREDIR=`cat .dirshare`
+SYSTMPDIR=`cat .systmp`
+
 all:
 	cd src && make && cd ..
 	cd scripts && make && cd ..
@@ -7,19 +19,19 @@ install_all:
 	cd src && make install && cd ..
 	cd scripts && make install && cd ..
 	cd tools && make install && cd ..
-	mkdir -p /etc/usched
-	cp -r config/* /etc/usched/
-	chown -R root /etc/usched
-	chmod 700 /etc/usched/auth
-	chmod 700 /etc/usched/core
-	chmod 755 /etc/usched/network
-	chmod 700 /etc/usched/users
-	mkdir -p /usr/include/usched
-	cp include/*.h /usr/include/usched/
-	mkdir -p /var/cache/usched
-	chmod 700 /var/cache/usched
-	mkdir -p /var/cache/usched/jail
-	chmod 700 /var/cache/usched/jail
+	mkdir -p ${SYSCONFDIR}/usched
+	cp -r config/* ${SYSCONFDIR}/usched/
+	chown -R root ${SYSCONFDIR}/usched
+	chmod 700 ${SYSCONFDIR}/usched/auth
+	chmod 700 ${SYSCONFDIR}/usched/core
+	chmod 755 ${SYSCONFDIR}/usched/network
+	chmod 700 ${SYSCONFDIR}/usched/users
+	mkdir -p ${SYSINCLUDEDIR}/usched
+	cp include/*.h ${SYSINCLUDEDIR}/usched/
+	mkdir -p ${SYSCACHEDIR}/usched
+	chmod 700 ${SYSCACHEDIR}/usched
+	mkdir -p ${SYSCACHEDIR}/usched/jail
+	chmod 700 ${SYSCACHEDIR}/usched/jail
 	usa commit all
 
 install_bindings_all:
@@ -65,8 +77,8 @@ install_systemd:
 	cd scripts && make install_systemd && cd ..
 
 install_doc:
-	mkdir -p /usr/share/doc/usched/
-	cp README /usr/share/doc/usched/
+	mkdir -p ${SYSDOCDIR}/usched/
+	cp README ${SYSDOCDIR}/usched/
 	cd doc && make text_install && cd ..
 	cd doc && make manpages && make manpages_install && cd ..
 

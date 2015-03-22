@@ -8,6 +8,7 @@ INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
 OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o ipc.o marshal.o notify.o pmq.o pool.o process.o runtime.o schedule.o sig.o thread.o vars.o
 TARGET=usd
+SYSSBINDIR=`cat ../../.dirsbin`
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c auth.c
@@ -31,7 +32,7 @@ all:
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
 
 install:
-	cp ${TARGET} /usr/sbin/
+	cp ${TARGET} ${SYSSBINDIR}/
 
 clean:
 	rm -f ${OBJS}

@@ -8,6 +8,7 @@ INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/debug.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
 OBJS=config.o exec.o ipc.o pmq.o runtime.o sig.o thread.o
 TARGET=use
+SYSSBINDIR=`cat ../../.dirsbin`
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c config.c
@@ -20,7 +21,7 @@ all:
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}
 
 install:
-	cp ${TARGET} /usr/sbin/
+	cp ${TARGET} ${SYSSBINDIR}/
 
 clean:
 	rm -f ${OBJS}

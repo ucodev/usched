@@ -1,4 +1,6 @@
+SYSDOCDIR=`cat ../../.dirdoc`
+
 install:
-	cp *.txt /usr/share/doc/usched/
+	cp *.txt ${SYSDOCDIR}/usched/
 
 

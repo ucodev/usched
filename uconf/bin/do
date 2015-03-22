@@ -4,7 +4,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 16/03/2015
+# Date: 22/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -41,6 +41,9 @@
 
 ## Test optional libraries ##
 . ./uconf/lib/sh/opt-libs.inc
+
+## Configure system directories
+. ./uconf/lib/sh/dirconf.inc
 
 ## Build ##
 if [ -e ./uconf/params/default/do ]; then

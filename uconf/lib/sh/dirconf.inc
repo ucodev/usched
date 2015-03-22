@@ -1,6 +1,5 @@
-#!/bin/sh
 #
-# uConf: Project Cleanup script
+# uConf: System directories configuration shell scripting library
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -24,45 +23,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+## Copy directory configuration files from default parameters
+cd uconf/params/default/dir
 
-if [ `id -u` -ne 0 ]; then
-	echo "Current user is not root"
-	exit 1
+for dirfile in *; do
+	cp ${dirfile} ../../../../.dir${dirfile}
+done
+
+cd ../../../../
+
+## If there are any non-default directory configurations, copy them (and replace the default ones)
+if [ -e uconf/params/`cat .osname`/dir ]; then
+	cd uconf/params/`cat .osname`/dir
+
+	for dirfile in *; do
+		cp ${dirfile} ../../../../.dir${dirfile}
+	done
+
+	cd ../../../../
 fi
-
-if [ -e ./uconf/params/default/undo ]; then
-	while read cmd; do
-		/bin/sh -c "${cmd}"
-
-		if [ $? -ne 0 ]; then
-			echo "Failed to execute: ${cmd}"
-			exit 1
-		fi
-	done < ./uconf/params/default/undo
-fi
-
-if [ -e ./uconf/params/`cat .osname 2> /dev/null`/undo ]; then
-	while read cmd; do
-		/bin/sh -c "${cmd}"
-
-		if [ $? -ne 0 ]; then
-			echo "Failed to execute: ${cmd}"
-			exit 1
-		fi
-	done < ./uconf/params/`cat .osname`/undo
-fi
-
-rm -rf build
-rm -f .target
-rm -f .osname
-rm -f .extlib
-rm -f .compiler
-rm -f .olinker
-rm -f .ecflags
-rm -f .elflags
-rm -f .archflags
-rm -f .addons
-rm -f .done
-rm -f .l*
-rm -f .dir*
 

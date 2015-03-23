@@ -88,7 +88,7 @@ Reference Manual - Rev.
 \end_layout
 
 \begin_layout Date
-19th March 2015
+23rd March 2015
 \end_layout
 
 \begin_layout Standard
@@ -465,7 +465,7 @@ Usage examples:
 \end_layout
 
 \begin_layout Quotation
-~# usc run 'tcpdump -i eth0 > /tmp/tcpdump.log' now && usc run 'kill -TERM
+~# usc run 'tcpdump -i eth0 -w /tmp/tcpdump.log' now && usc run 'kill -TERM
  `pidof tcpdump`' in 1 hour
 \end_layout
 
@@ -2066,7 +2066,7 @@ IPC
 
 \begin_layout Standard
 Available on CORE Category.
- Contains the Properties MSGMAX, MSGSIZE and NAME.
+ Contains the Properties MSGMAX, MSGSIZE, NAME and KEY.
  Used to configure the properties of the IPC interface that allows the communica
 tion between the uSched Daemon and uSched Executer.
  Usage examples:
@@ -2085,7 +2085,24 @@ tion between the uSched Daemon and uSched Executer.
 \end_layout
 
 \begin_layout Quotation
+~# usa change core ipc key SomeStrongKeyHereGreaterThan31BytesAndLesserThan129By
+tes
+\end_layout
+
+\begin_layout Quotation
 ~# usa commit core
+\end_layout
+
+\begin_layout Standard
+The NAME Property have different meanings depending on the IPC mechanism
+ used by uSched.
+ On systems using POSIX Message Queues, the NAME Property is the Message
+ Queue name.
+ On systems using UNIX sockets, the NAME Property is the full file system
+ path for the named socket.
+ On systems using INET sockets, the NAME Property is the TCP port that the
+ uSched Execution module will listen and wait for the uSched Daemon connection
+ on service startup.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2281,6 +2298,17 @@ A system group name.
 \end_layout
 
 \begin_layout Subsubsection
+KEY
+\end_layout
+
+\begin_layout Standard
+Currently only used by the IPC Component.
+ This is an authentication key verified at service startup.
+ Must be a string greater than 31 bytes and lesser than 129 bytes.
+ For greater security, it shall be changed each time the service is restarted.
+\end_layout
+
+\begin_layout Subsubsection
 LIMIT
 \end_layout
 
@@ -2434,6 +2462,14 @@ The following command will start all the required uSched Services:
 \end_layout
 
 \begin_layout Quotation
+~# usa change core ipc key $(usched_ipcpwgen 128)
+\end_layout
+
+\begin_layout Quotation
+~# usa commit core
+\end_layout
+
+\begin_layout Quotation
 ~# usched start
 \end_layout
 
@@ -2486,6 +2522,14 @@ If for some reason the uSched Services weren't stopped gracefully (caused
 
 \begin_layout Quotation
 ~# usched force_stop
+\end_layout
+
+\begin_layout Quotation
+~# usa change core ipc key $(usched_ipcpwgen 128)
+\end_layout
+
+\begin_layout Quotation
+~# usa commit core
 \end_layout
 
 \begin_layout Quotation

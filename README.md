@@ -183,5 +183,5 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
 
 ## Notes
 
-The current project revision is on an **alpha stage** and shall not be used beyond testing purposes.
+The current project revision is on an **beta stage** and shall not be used beyond testing purposes.
 

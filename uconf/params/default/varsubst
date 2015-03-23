@@ -8,3 +8,5 @@ scripts/init/redhat/usched
 scripts/init/ubuntu/usched
 scripts/mgmt/usched.py
 scripts/mgmt/usched.sh
+tests/security/check_cache
+tests/security/check_config

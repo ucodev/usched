@@ -24,6 +24,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+if [ -e .done ]; then
+	echo "Already done. Run 'undo' first."
+	exit 1
+fi
+
 ## Detect compiler ##
 . ./uconf/lib/sh/compiler.inc
 

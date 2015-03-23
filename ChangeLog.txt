@@ -1,3 +1,10 @@
+v0.1-beta-03 (2015-03-23):
+ - Fixed main Makefile uConf systmp configuration
+ - Included uConf configuration paths into scripts under tests/ directory
+ - Improved uConf scripts
+ - Added support for curl in 'deps' script
+ - Updated INSTALL.txt
+
 v0.1-beta-02 (2015-03-23):
  - Updated README.md
  - Added ChangeLog.txt

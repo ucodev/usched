@@ -4,7 +4,16 @@ install_lib()
 {
 	lib=${1}
 	cd ${lib}
-	wget https://github.com/ucodev/${lib}/archive/master.tar.gz
+
+	if [ -e `which wget` ]; then
+		wget https://github.com/ucodev/${lib}/archive/master.tar.gz
+	elif [ -e `which curl` ]; then
+		curl -O https://github.com/ucodev/${lib}/archive/master.tar.gz
+	else
+		echo "Can't find 'wget' nor 'curl'."
+		exit 1
+	fi
+
 	tar zxvf master.tar.gz
 	cd ${lib}-master
 

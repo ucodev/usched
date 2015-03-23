@@ -25,7 +25,9 @@
 
 if [ -e uconf/params/default/varsubst ]; then
 	for varsubst in `cat uconf/params/default/varsubst`; do
-		cp ${varsubst} ${varsubst}.orig
+		if [ ! -e ${varsubst}.orig ]; then
+			cp ${varsubst} ${varsubst}.orig
+		fi
 
 		sed -i.bak 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
 		sed -i.bak 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
@@ -46,7 +48,9 @@ fi
 
 if [ -e uconf/params/`cat .osname`/varsubst ]; then
 	for varsubst in `cat uconf/params/$(cat .osname)/varsubst`; do
-		cp ${varsubst} ${varsubst}.orig
+		if [ ! -e ${varsubst}.orig ]; then
+			cp ${varsubst} ${varsubst}.orig
+		fi
 
 		sed -i.bak 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
 		sed -i.bak 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
@@ -66,7 +70,9 @@ fi
 
 if [ -e uconf/params/user/varsubst ]; then
 	for varsubst in `cat uconf/params/user/varsubst`; do
-		cp ${varsubst} ${varsubst}.orig
+		if [ ! -e ${varsubst}.orig ]; then
+			cp ${varsubst} ${varsubst}.orig
+		fi
 
 		sed -i.bak 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
 		sed -i.bak 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}

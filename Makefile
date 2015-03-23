@@ -8,7 +8,7 @@ SYSMANDIR=`cat .dirman`
 SYSRUNDIR=`cat .dirrun`
 SYSSBINDIR=`cat .dirsbin`
 SYSSHAREDIR=`cat .dirshare`
-SYSTMPDIR=`cat .systmp`
+SYSTMPDIR=`cat .dirtmp`
 
 all:
 	cd src && make && cd ..

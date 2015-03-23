@@ -25,20 +25,26 @@
 
 if [ -e uconf/params/default/varsubst ]; then
 	for varsubst in `cat uconf/params/default/varsubst`; do
-		mv ${varsubst}.orig ${varsubst}
+		if [ -e ${varsubst}.orig ]; then
+			mv ${varsubst}.orig ${varsubst}
+		fi
 	done
 
 fi
 
 if [ -e uconf/params/`cat .osname`/varsubst ]; then
 	for varsubst in `cat uconf/params/$(cat .osname)/varsubst`; do
-		mv ${varsubst}.orig ${varsubst}
+		if [ -e ${varsubst}.orig ]; then
+			mv ${varsubst}.orig ${varsubst}
+		fi
 	done
 fi
 
 if [ -e uconf/params/user/varsubst ]; then
 	for varsubst in `cat uconf/params/user/varsubst`; do
-		mv ${varsubst}.orig ${varsubst}
+		if [ -e ${varsubst}.orig ]; then
+			mv ${varsubst}.orig ${varsubst}
+		fi
 	done
 fi
 

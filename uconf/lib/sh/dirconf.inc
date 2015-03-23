@@ -3,7 +3,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 22/03/2015
+# Date: 23/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -35,6 +35,17 @@ cd ../../../../
 ## If there are any non-default directory configurations, copy them (and replace the default ones)
 if [ -e uconf/params/`cat .osname`/dir ]; then
 	cd uconf/params/`cat .osname`/dir
+
+	for dirfile in *; do
+		cp ${dirfile} ../../../../.dir${dirfile}
+	done
+
+	cd ../../../../
+fi
+
+## If there are any user-defined directory configurations, copy them (and replace all the others)
+if [ -e uconf/params/user/dir ]; then
+	cd uconf/params/user/dir
 
 	for dirfile in *; do
 		cp ${dirfile} ../../../../.dir${dirfile}

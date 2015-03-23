@@ -3,7 +3,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 20/03/2015
+# Date: 23/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -66,6 +66,18 @@ if [ -e ./uconf/params/`cat .osname`/optlibs ]; then
 	echo "Done."
 	echo ""
 fi
+
+if [ -e ./uconf/params/user/optlibs ]; then
+	echo "Testing user-defined optional libraries..."
+
+	for lib in $(cat ./uconf/params/user/optlibs); do
+		test_opt_lib ${lib}
+	done
+
+	echo "Done."
+	echo ""
+fi
+
 
 touch .libs
 

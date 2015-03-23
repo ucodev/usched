@@ -3,7 +3,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 22/03/2015
+# Date: 23/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -32,6 +32,12 @@ fi
 
 if [ -e uconf/params/`cat .osname`/varsubst ]; then
 	for varsubst in `cat uconf/params/$(cat .osname)/varsubst`; do
+		mv ${varsubst}.orig ${varsubst}
+	done
+fi
+
+if [ -e uconf/params/user/varsubst ]; then
+	for varsubst in `cat uconf/params/user/varsubst`; do
 		mv ${varsubst}.orig ${varsubst}
 	done
 fi

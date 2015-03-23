@@ -3,7 +3,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 22/03/2015
+# Date: 23/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -46,6 +46,26 @@ fi
 
 if [ -e uconf/params/`cat .osname`/varsubst ]; then
 	for varsubst in `cat uconf/params/$(cat .osname)/varsubst`; do
+		cp ${varsubst} ${varsubst}.orig
+
+		sed -i.bak 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSCONFDIR_@/'$(cat .dirconf | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSDOCDIR_@/'$(cat .dirdoc | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSINCLUDEDIR_@/'$(cat .dirinclude | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSLIBDIR_@/'$(cat .dirlib | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSMANDIR_@/'$(cat .dirman | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSRUNDIR_@/'$(cat .dirrun | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSSBINDIR_@/'$(cat .dirsbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSSHAREDIR_@/'$(cat .dirshare | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+		sed -i.bak 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}
+
+		rm -f ${varsubst}.bak
+	done
+fi
+
+if [ -e uconf/params/user/varsubst ]; then
+	for varsubst in `cat uconf/params/user/varsubst`; do
 		cp ${varsubst} ${varsubst}.orig
 
 		sed -i.bak 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst}

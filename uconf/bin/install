@@ -4,7 +4,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 16/03/2015
+# Date: 23/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -55,6 +55,17 @@ if [ -e ./uconf/params/`cat .osname 2> /dev/null`/install ]; then
 			exit 1
 		fi
 	done < ./uconf/params/`cat .osname`/install
+fi
+
+if [ -e ./uconf/params/user/install ]; then
+	while read cmd; do
+		/bin/sh -c "${cmd}"
+
+		if [ $? -ne 0 ]; then
+			echo "Failed to execute: ${cmd}"
+			exit 1
+		fi
+	done < ./uconf/params/user/install
 fi
 
 echo "Installation complete."

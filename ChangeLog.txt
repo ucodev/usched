@@ -1,3 +1,7 @@
+v0.1-beta-04 (2015-03-24):
+ - Updated README.me (Added Contributions section)
+ - Updated manpages
+
 v0.1-beta-03 (2015-03-23):
  - Fixed main Makefile uConf systmp configuration
  - Included uConf configuration paths into scripts under tests/ directory

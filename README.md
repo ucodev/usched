@@ -9,9 +9,9 @@ It also delivers a powerful programming interface for multiple programming langu
 
 uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time.
 
-It provides a simple and intuitive structured language that is intepreted via a command line client, but can also be integrated into any programming language through its client libraries and bindings.
+It provides a simple and intuitive natural language that is intepreted via a command line client, but can also be integrated into any programming language through its client libraries and bindings.
 
-It also operates as a client/server, where requests performed by clients can affect local or remote machines where uSched services are running.
+It also operates as a **client/server**, where requests performed by clients can affect local or remote machines where uSched services are running.
 
 
 
@@ -64,6 +64,13 @@ Capture network traffic on interface eth0 between 8:00 and 18:00, every day:
 
       ~# usc run 'tcpdump -i eth0 -w /tmp/traffic_`date +%Y%m%d`.dump' on hour 8 every 1 day
       ~# usc run 'killall tcpdump' on hour 18 every 1 day
+
+
+Perform a request on a remote machine running uSched:
+
+      ~$ usc -H remote.example.com -U username run '/usr/local/bin/do_something.sh' on time 11:00:00
+      Password:
+      ~$
 
 
 Show all scheduled entries for the user by running the following command:
@@ -178,6 +185,14 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       usc = Usched()
       
       usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds")
+
+
+
+## Contributing
+
+Every open source project lives from people that gives some of their precious time to contribute with ideas, designs, solutions, fresh code, documentation, bug fixes, bug reports or any other form of contribution you can imagine. If you think this project is a good candidate for you to contribute to in any form, we'll be very thankful to hear from you.
+
+The best way to do it is through GitHub. Clone it, fork it, change it and improved it. Then send us a pull request with your work.
 
 
 

@@ -1,3 +1,6 @@
+v0.2-dev-02 (2015-03-25):
+ - Updated README.md
+
 v0.2-dev-01 (2015-03-25):
  - Updated README.md
 

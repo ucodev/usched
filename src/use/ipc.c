@@ -137,7 +137,7 @@ int ipc_exec_init(void) {
  #endif /* CONFIG_USE_IPC_INET */
 
 	/* Wait for the client connection */
-	if ((rune.ipcd = (sock_t) accept(rune.ipc_bind_fd, NULL, NULL)) == (sock_t) -1) {
+	if ((rune.ipcd = (sock_t) accept(rune.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("ipc_exec_init(): accept(): %s\n", strerror(errno));
 		errno = errsv;

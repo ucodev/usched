@@ -1,3 +1,6 @@
+v0.2-dev-05 (2015-03-25):
+ - Enhanced support for Minix connection handling
+
 v0.2-dev-04 (2015-03-25):
  - Changed uConf parameters
  - Fixed ucred code for SunOS

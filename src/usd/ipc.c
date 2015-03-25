@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Daemon
  *
- * Date: 21-03-2015
+ * Date: 25-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *

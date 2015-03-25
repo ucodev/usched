@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 19-03-2015
+ * Date: 25-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -263,7 +263,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 			continue;
 
 		/* Accept client connection */
-		if ((fd = accept(rund.fd_unix, NULL, NULL)) < 0) {
+		if ((fd = (sock_t) accept(rund.fd_unix, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) < 0) {
 			log_warn("conn_daemon_process_accept_unix(): accept(): %s\n", strerror(errno));
 			continue;
 		}
@@ -347,7 +347,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 			continue;
 
 		/* Accept client connection */
-		if ((fd = accept(rund.fd_remote, NULL, NULL)) < 0) {
+		if ((fd = (sock_t) accept(rund.fd_remote, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) < 0) {
 			log_warn("conn_daemon_process_accept_remote(): accept(): %s\n", strerror(errno));
 			continue;
 		}

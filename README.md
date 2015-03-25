@@ -1,7 +1,7 @@
 ## Summary 
 
-A command-line scheduler with an almost-natural language interpreter.
-It also delivers a powerful programming interface for multiple programming languages.
+A free and open source command-line scheduler with an almost-natural language interpreter.
+It also delivers a programming interface for multiple programming languages.
 
 
 
@@ -188,6 +188,12 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
 
 
 
+## License
+
+uSched is licensed under the [GNU General Public License version 3](https://www.gnu.org/copyleft/gpl.html).
+
+
+
 ## Contributing
 
 Every open source project lives from people that gives some of their precious time to contribute with ideas, designs, solutions, fresh code, documentation, bug fixes, bug reports or any other form of contribution you can imagine. If you think this project is a good candidate for you to contribute to in any form, we'll be very thankful to hear from you.
@@ -198,5 +204,6 @@ The best way to do it is through GitHub. Clone it, fork it, change it and improv
 
 ## Notes
 
-The current project revision is on an **beta stage** and shall not be used beyond testing purposes.
+* Tree version v0.1 of the project is on an **beta stage** and shall not be used beyond testing purposes.
+* Tree version v0.2 is **under development** and may not be fully functional.
 

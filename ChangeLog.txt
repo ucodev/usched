@@ -1,3 +1,6 @@
+v0.2-dev-01 (2015-03-25):
+ - Updated README.md
+
 v0.1-beta-05 (2015-03-25):
  - Forced IPC to be automatically changed on init scripts at service startup
  - Added support for optional non-root installations to uConf (required for Cygwin installation)

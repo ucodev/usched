@@ -1,25 +1,9 @@
+v0.2-dev-03 (2015-03-25):
+ - Changed uConf parameters
+
 v0.2-dev-02 (2015-03-25):
  - Updated README.md
 
 v0.2-dev-01 (2015-03-25):
  - Updated README.md
 
-v0.1-beta-05 (2015-03-25):
- - Forced IPC to be automatically changed on init scripts at service startup
- - Added support for optional non-root installations to uConf (required for Cygwin installation)
- - Fixed a typo on ChangeLog.txt
-
-v0.1-beta-04 (2015-03-24):
- - Updated README.md (Added Contributions section)
- - Updated manpages
-
-v0.1-beta-03 (2015-03-23):
- - Fixed main Makefile uConf systmp configuration
- - Included uConf configuration paths into scripts under tests/ directory
- - Improved uConf scripts
- - Added support for curl in 'deps' script
- - Updated INSTALL.txt
-
-v0.1-beta-02 (2015-03-23):
- - Updated README.md
- - Added ChangeLog.txt

@@ -1,1 +1,1 @@
--pthread -lrt -lgcc_s
+-lpthread -lrt -lgcc_s

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 21-03-2015
+ * Date: 25-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -285,6 +285,10 @@ void entry_daemon_exec_dispatch(void *arg) {
 	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
 
 #if CONFIG_USE_IPC_PMQ == 1
+	/* TODO: mq_timedsend() is a better approach here, as it's preferable to discard the
+	 * execution of the entry than risk starvation if sufficient threads become stalled, waiting
+	 * for mq_send() to return.
+	 */
 	/* Deliver message to uSched executer (use) */
 	if (mq_send(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));

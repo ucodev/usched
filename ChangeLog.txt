@@ -1,3 +1,7 @@
+v0.2-dev-04 (2015-03-25):
+ - Changed uConf parameters
+ - Fixed ucred code for SunOS
+
 v0.2-dev-03 (2015-03-25):
  - Changed uConf parameters
 

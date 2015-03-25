@@ -1,6 +1,7 @@
 SYSSBINDIR=`cat ../../.dirsbin`
 
 install:
+	cp usched_preinit.sh ${SYSSBINDIR}/usched_preinit
 	if [ -f "`which python`" ]; then make install_python; else make install_sh; fi
 
 install_python:

@@ -1,5 +1,10 @@
+v0.1-beta-05 (2015-03-25):
+ - Forced IPC to be automatically changed on init scripts at service startup
+ - Added support for optional non-root installations to uConf (required for Cygwin installation)
+ - Fixed a typo on ChangeLog.txt
+
 v0.1-beta-04 (2015-03-24):
- - Updated README.me (Added Contributions section)
+ - Updated README.md (Added Contributions section)
  - Updated manpages
 
 v0.1-beta-03 (2015-03-23):

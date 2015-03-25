@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 22-03-2015
+# Date: 25-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -35,6 +35,7 @@ CONFIG_USCHED_ADMIN_BIN = "@_SYSSBINDIR_@/usa"
 CONFIG_USCHED_DAEMON_BIN = "@_SYSSBINDIR_@/usd"
 CONFIG_USCHED_EXEC_BIN = "@_SYSSBINDIR_@/use"
 CONFIG_USCHED_MONITOR_BIN = "@_SYSSBINDIR_@/usm"
+CONFIG_USCHED_PREINIT_BIN = "@_SYSSBINDIR_@/usched_preinit"
 CONFIG_USCHED_DAEMON_PID_FILE = "@_SYSRUNDIR_@/usched_usd.pid"
 CONFIG_USCHED_EXEC_PID_FILE = "@_SYSRUNDIR_@/usched_use.pid"
 
@@ -116,6 +117,16 @@ def usched_reload():
 
 def usched_start():
 	print_info("Start operation status: ")
+
+	# Run pre initialization routines
+	try:
+		status = subprocess.call([CONFIG_USCHED_PREINIT_BIN])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Pre initialization routines failed.\n")
+		return False
 
 	# Commit uSched Core configuration changes
 	try:

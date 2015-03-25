@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 22-03-2015
+# Date: 25-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -34,6 +34,7 @@ CONFIG_USCHED_ADMIN_BIN="@_SYSSBINDIR_@/usa"
 CONFIG_USCHED_DAEMON_BIN="@_SYSSBINDIR_@/usd"
 CONFIG_USCHED_EXEC_BIN="@_SYSSBINDIR_@/use"
 CONFIG_USCHED_MONITOR_BIN="@_SYSSBINDIR_@/usm"
+CONFIG_USCHED_PREINIT_BIN="@_SYSSBINDIR_@/usched_preinit"
 CONFIG_USCHED_DAEMON_PID_FILE="@_SYSRUNDIR_@/usched_usd.pid"
 CONFIG_USCHED_EXEC_PID_FILE="@_SYSRUNDIR_@/usched_use.pid"
 
@@ -100,6 +101,14 @@ op_reload() {
 
 op_start() {
 	print_info "Start operation status: "
+
+	${CONFIG_USCHED_PREINIT_BIN}
+
+	if [ ${?} -ne 0 ]; then
+		ret=${?}
+		print_info "Failed to run pre initialization routines."
+		return ${ret}
+	fi
 
 	${CONFIG_USCHED_ADMIN_BIN} commit core
 

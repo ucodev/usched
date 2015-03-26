@@ -1,3 +1,8 @@
+v0.2-dev-11 (2015-03-26):
+ - Added timeout for IPC send calls.
+ - uConf parameters updated.
+ - Updated documentation.
+
 v0.2-dev-10 (2015-03-26):
  - Fixed minor issues.
  - Updated README.md

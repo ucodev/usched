@@ -230,7 +230,7 @@ uSched is licensed under the [GNU General Public License version 3](https://www.
 
 ## Contributing
 
-The best way to do it is through GitHub. Clone it, fork it, change it and improved it. Then check the [project wiki](https://github.com/ucodev/usched/wiki) for details regarding submitting contributions.
+The best way to do it is through GitHub. Clone it, fork it, change it and improved it. Then check the [project wiki](https://github.com/ucodev/usched/wiki) for details regarding the submission of contributions.
 
 
 

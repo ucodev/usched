@@ -178,6 +178,13 @@ It also delivers a programming interface for multiple programming languages.</p>
   int main(void) {
       usched_init();
 
+      /* Optional remote parameters. Not required for localhost requests */
+      usched_opt_set_remote_hostname("remote.usched.example.com");
+      usched_opt_set_remote_port("7600");
+      usched_opt_set_remote_username("username");
+      usched_opt_set_remote_password("password");
+
+      /* Perform the request */
       usched_request("run \'df -h &gt;&gt; /tmp/disk.txt\' now then every 30 seconds");
 
       usched_result_free_run();
@@ -198,6 +205,13 @@ It also delivers a programming interface for multiple programming languages.</p>
           public static void Main(string[] args) {
               Usched usc = new Usched();
 
+              /* Optional remote parameters. Not required for localhost requests */
+              usc.SetHostname("remote.usched.example.com");
+              usc.SetPort("7600");
+              usc.SetUsername("username");
+              usc.SetPassword("password");
+
+              /* Perform the request */
               usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
           }
       }
@@ -211,6 +225,13 @@ It also delivers a programming interface for multiple programming languages.</p>
       public static void main(String[] args) {
           Usched usc = new Usched();
 
+          /* Optional remote parameters. Not required for localhost requests */
+          usc.SetHostname("remote.usched.example.com");
+          usc.SetPort("7600");
+          usc.SetUsername("username");
+          usc.SetPassword("password");
+
+          /* Perform the request */
           usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
       }
   }
@@ -223,6 +244,13 @@ It also delivers a programming interface for multiple programming languages.</p>
 
   $usc = new Usched();
 
+  /* Optional remote parameters. Not required for localhost requests */
+  $usc-&gt;SetHostname("remote.usched.example.com");
+  $usc-&gt;SetPort("7600");
+  $usc-&gt;SetUsername("username");
+  $usc-&gt;SetPassword("password");
+
+  /* Perform the request */
   $usc-&gt;Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds");
 </code></pre>
 
@@ -233,6 +261,13 @@ It also delivers a programming interface for multiple programming languages.</p>
 
   usc = Usched()
 
+  /* Optional remote parameters. Not required for localhost requests */
+  usc.SetHostname("remote.usched.example.com");
+  usc.SetPort("7600");
+  usc.SetUsername("username");
+  usc.SetPassword("password");
+
+  /* Perform the request */
   usc.Request("run 'df -h &gt;&gt; /tmp/disk.txt' now then every 30 seconds")
 </code></pre>
 

@@ -1,3 +1,7 @@
+v0.2-dev-09 (2015-03-26):
+ - Optional __attribute__ ((packed, aligned(x))) instead of #pragma pack to support older compilers
+ - Updated uConf parameters for SunOS
+
 v0.2-dev-08 (2015-03-26):
  - New uConf parameters for SunOS support
  - New examples on README.md

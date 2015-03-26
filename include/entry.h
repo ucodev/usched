@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 13-03-2015
+ * Date: 26-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -72,23 +72,39 @@ typedef enum USCHED_ENTRY_FLAGS {
 } usched_entry_flag_t;
 
 /* uSched Entry Structure */
-#pragma pack(push)
-#pragma pack(4)
-union usched_entry_reserved {
+#ifndef USCHED_NO_PRAGMA_PACK
+ #pragma pack(push)
+ #pragma pack(4)
+#endif
+union
+#ifdef USCHED_NO_PRAGMA_PACK
+__attribute__ ((packed, aligned(4)))
+#endif
+usched_entry_reserved {
 #if CONFIG_CLIENT_ONLY == 0
 	pschedid_t psched_id;		/* The libpsched entry identifier */
 #endif
 	unsigned char _reserved[32];
 };
-#pragma pack(pop)
-#pragma pack(push)
-#pragma pack(4)
-struct usched_entry_crypto {
+#ifndef USCHED_NO_PRAGMA_PACK
+ #pragma pack(pop)
+#endif
+#ifndef USCHED_NO_PRAGMA_PACK
+ #pragma pack(push)
+ #pragma pack(4)
+#endif
+struct
+#ifdef USCHED_NO_PRAGMA_PACK
+__attribute__ ((packed, aligned(4)))
+#endif
+usched_entry_crypto {
 	unsigned char context[KE_CONTEXT_SIZE_CHREKE];
 	unsigned char agreed_key[KE_KEY_SIZE_CHREKE];
 	uint64_t nonce;
 };
-#pragma pack(pop)
+#ifndef USCHED_NO_PRAGMA_PACK
+ #pragma pack(pop)
+#endif
 #define usched_entry_id(id) 	((struct usched_entry [1]) { { id, } })
 #define usched_entry_hdr_size()	(offsetof(struct usched_entry, payload))
 
@@ -127,9 +143,15 @@ struct usched_entry_crypto {
  *   next trigger value.
  *
  */
-#pragma pack(push)
-#pragma pack(4)
-struct usched_entry {
+#ifndef USCHED_NO_PRAGMA_PACK
+ #pragma pack(push)
+ #pragma pack(4)
+#endif
+struct
+#ifdef USCHED_NO_PRAGMA_PACK
+__attribute__ ((packed, aligned(4)))
+#endif
+usched_entry {
 	/* Entry request header */
 	uint64_t id;
 	uint32_t flags;
@@ -184,7 +206,9 @@ struct usched_entry {
 	 */
 	unsigned char signature[HASH_DIGEST_SIZE_BLAKE2S];
 };
-#pragma pack(pop)
+#ifndef USCHED_NO_PRAGMA_PACK
+ #pragma pack(pop)
+#endif
 
 /* Prototypes */
 struct usched_entry *entry_client_init(uid_t uid, gid_t gid, time_t trigger, void *payload, size_t psize);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Exec
  *
- * Date: 21-03-2015
+ * Date: 26-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -126,15 +126,22 @@ int ipc_exec_init(void) {
 		errno = errsv;
 		return -1;
 	}
- #endif /* CONFIG_USE_IPC_UNIX */
- #if CONFIG_USE_IPC_INET == 1
+
+	/* Wait for the client connection */
+	if ((rune.ipcd = (sock_t) accept(rune.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
+		errsv = errno;
+		log_warn("ipc_exec_init(): accept(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+ #elif CONFIG_USE_IPC_INET == 1
 	if ((rune.ipc_bind_fd = panet_server_ipv4("127.0.0.1", rune.config.core.ipc_name, PANET_PROTO_TCP, rune.config.core.ipc_msgmax)) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("ipc_exec_init(): panet_server_ipv4(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
- #endif /* CONFIG_USE_IPC_INET */
 
 	/* Wait for the client connection */
 	if ((rune.ipcd = (sock_t) accept(rune.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) == (sock_t) -1) {
@@ -143,6 +150,9 @@ int ipc_exec_init(void) {
 		errno = errsv;
 		return -1;
 	}
+ #else
+  #error "No IPC mechanism defined."
+ #endif
 
 	/* TODO: For INET connections, a privileged port (either source and dest ports) must be used.
 	 *       Any connection using unprivileged ports (>= 1024) shall be discarded.

@@ -137,6 +137,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       int main(void) {
           usched_init();
           
+          /* Optional remote parameters. Not required for localhost requests */
+          usched_opt_set_remote_hostname("remote.usched.example.com");
+          usched_opt_set_remote_port("7600");
+          usched_opt_set_remote_username("username");
+          usched_opt_set_remote_password("password");
+          
+          /* Perform the request */
           usched_request("run \'df -h >> /tmp/disk.txt\' now then every 30 seconds");
           
           usched_result_free_run();
@@ -155,6 +162,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
               public static void Main(string[] args) {
                   Usched usc = new Usched();
                   
+                  /* Optional remote parameters. Not required for localhost requests */
+                  usc.SetHostname("remote.usched.example.com");
+                  usc.SetPort("7600");
+                  usc.SetUsername("username");
+                  usc.SetPassword("password");
+                  
+                  /* Perform the request */
                   usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
               }
           }
@@ -166,6 +180,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
           public static void main(String[] args) {
               Usched usc = new Usched();
               
+              /* Optional remote parameters. Not required for localhost requests */
+              usc.SetHostname("remote.usched.example.com");
+              usc.SetPort("7600");
+              usc.SetUsername("username");
+              usc.SetPassword("password");
+              
+              /* Perform the request */
               usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
           }
       }
@@ -176,6 +197,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       
       $usc = new Usched();
       
+      /* Optional remote parameters. Not required for localhost requests */
+      $usc->SetHostname("remote.usched.example.com");
+      $usc->SetPort("7600");
+      $usc->SetUsername("username");
+      $usc->SetPassword("password");
+      
+      /* Perform the request */
       $usc->Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
 
 ### Python
@@ -184,6 +212,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       
       usc = Usched()
       
+      /* Optional remote parameters. Not required for localhost requests */
+      usc.SetHostname("remote.usched.example.com");
+      usc.SetPort("7600");
+      usc.SetUsername("username");
+      usc.SetPassword("password");
+      
+      /* Perform the request */
       usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds")
 
 

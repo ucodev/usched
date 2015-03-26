@@ -1,3 +1,7 @@
+v0.2-dev-08 (2015-03-26):
+ - New uConf parameters for SunOS support
+ - New examples on README.md
+
 v0.2-dev-07 (2015-03-26):
  - Improved IPC code (Minix support)
 

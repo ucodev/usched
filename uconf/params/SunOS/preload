@@ -1,0 +1,2 @@
+# Anything to be preloaded before calling any of the uConf scripts should be set here
+alias id=/usr/xpg4/bin/id

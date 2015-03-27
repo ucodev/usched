@@ -4,7 +4,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 24/03/2015
+# Date: 27/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -25,7 +25,17 @@
 #
 
 
-if ! [ -e ".done" ]; then
+## Preload ##
+if [ -e ./uconf/params/default/preload ]; then
+	. ./uconf/params/default/preload
+fi
+
+if [ -e ./uconf/params/`uname`/preload ]; then
+	. ./uconf/params/`uname`/preload
+fi
+
+# Check if 'do' is done
+if [ ! -e ".done" ]; then
 	echo "Run 'do' first"
 	exit 1
 fi

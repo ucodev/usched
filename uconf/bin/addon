@@ -4,7 +4,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 16/03/2015
+# Date: 27/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -24,7 +24,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+## Preload ##
+if [ -e ./uconf/params/default/preload ]; then
+	. ./uconf/params/default/preload
+fi
 
+if [ -e ./uconf/params/`uname`/preload ]; then
+	. ./uconf/params/`uname`/preload
+fi
+
+# Check usage
 if [ ${#} -ne 1 ]; then
 	echo "Usage: ${0} <addon>"
 	exit 1

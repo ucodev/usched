@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # uConf: Addons management script
 #
@@ -25,11 +24,11 @@
 #
 
 ## Preload ##
-if [ -e ./uconf/params/default/preload ]; then
+if [ -e "./uconf/params/default/preload" ]; then
 	. ./uconf/params/default/preload
 fi
 
-if [ -e ./uconf/params/`uname`/preload ]; then
+if [ -e "./uconf/params/`uname`/preload" ]; then
 	. ./uconf/params/`uname`/preload
 fi
 
@@ -39,8 +38,8 @@ if [ ${#} -ne 1 ]; then
 	exit 1
 fi
 
-if [ -e ./uconf/addons/${1} ]; then
-	if [ ! -e .addons ]; then
+if [ -e "./uconf/addons/${1}" ]; then
+	if [ ! -e ".addons" ]; then
 		echo ${1} >> .addons
 	else
 		while read addon; do

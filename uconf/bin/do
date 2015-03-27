@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # uConf: Project Builder script
 #
@@ -25,16 +25,16 @@
 #
 
 ## Preload ##
-if [ -e ./uconf/params/default/preload ]; then
+if [ -e "./uconf/params/default/preload" ]; then
 	. ./uconf/params/default/preload
 fi
 
-if [ -e ./uconf/params/`uname`/preload ]; then
+if [ -e "./uconf/params/`uname`/preload" ]; then
 	. ./uconf/params/`uname`/preload
 fi
 
 # Check if 'do' is done
-if [ -e .done ]; then
+if [ -e ".done" ]; then
 	echo "Already done. Run 'undo' first."
 	exit 1
 fi
@@ -64,7 +64,7 @@ fi
 . ./uconf/lib/sh/varsubst.inc
 
 ## Build ##
-if [ -e ./uconf/params/default/do ]; then
+if [ -e "./uconf/params/default/do" ]; then
 	while read cmd; do
 		/bin/sh -c "${cmd}"
 
@@ -75,7 +75,7 @@ if [ -e ./uconf/params/default/do ]; then
 	done < ./uconf/params/default/do
 fi
 
-if [ -e ./uconf/params/`cat .osname 2> /dev/null`/do ]; then
+if [ -e "./uconf/params/`cat .osname 2> /dev/null`/do" ]; then
 	while read cmd; do
 		/bin/sh -c "${cmd}"
 
@@ -86,7 +86,7 @@ if [ -e ./uconf/params/`cat .osname 2> /dev/null`/do ]; then
 	done < ./uconf/params/`cat .osname`/do
 fi
 
-if [ -e ./uconf/params/user/do ]; then
+if [ -e "./uconf/params/user/do" ]; then
 	while read cmd; do
 		/bin/sh -c "${cmd}"
 

@@ -1,3 +1,7 @@
+v0.2-dev-13 (2015-03-27):
+ - More improvements to uConf to better support SunOS (and others)
+ - More improvements to 'deploy' and 'deps' scripts
+
 v0.2-dev-12 (2015-03-27):
  - Upgraded uConf to better support older versions of SunOS
  - Improved 'deploy' and 'deps' scripts

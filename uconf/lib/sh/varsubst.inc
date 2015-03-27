@@ -3,7 +3,7 @@
 #
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
-# Date: 26/03/2015
+# Date: 27/03/2015
 #
 # URL: http://www.ucodev.org
 #
@@ -30,37 +30,37 @@ if [ -e uconf/params/default/varsubst ]; then
 		fi
 
 		sed 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSCONFDIR_@/'$(cat .dirconf | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSDOCDIR_@/'$(cat .dirdoc | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSINCLUDEDIR_@/'$(cat .dirinclude | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSLIBDIR_@/'$(cat .dirlib | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSMANDIR_@/'$(cat .dirman | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSRUNDIR_@/'$(cat .dirrun | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSSBINDIR_@/'$(cat .dirsbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSSHAREDIR_@/'$(cat .dirshare | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		rm -f ${varsubst}.bak
 	done
@@ -74,37 +74,37 @@ if [ -e uconf/params/`cat .osname`/varsubst ]; then
 		fi
 
 		sed 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSCONFDIR_@/'$(cat .dirconf | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSDOCDIR_@/'$(cat .dirdoc | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSINCLUDEDIR_@/'$(cat .dirinclude | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSLIBDIR_@/'$(cat .dirlib | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSMANDIR_@/'$(cat .dirman | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSRUNDIR_@/'$(cat .dirrun | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSSBINDIR_@/'$(cat .dirsbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSSHAREDIR_@/'$(cat .dirshare | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		rm -f ${varsubst}.bak
 	done
@@ -117,37 +117,37 @@ if [ -e uconf/params/user/varsubst ]; then
 		fi
 
 		sed 's/@_SYSBINDIR_@/'$(cat .dirbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSCACHEDIR_@/'$(cat .dircache | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSCONFDIR_@/'$(cat .dirconf | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSDOCDIR_@/'$(cat .dirdoc | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSINCLUDEDIR_@/'$(cat .dirinclude | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSLIBDIR_@/'$(cat .dirlib | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSMANDIR_@/'$(cat .dirman | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSRUNDIR_@/'$(cat .dirrun | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSSBINDIR_@/'$(cat .dirsbin | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSSHAREDIR_@/'$(cat .dirshare | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak
-		mv ${varsubst}.bak ${varsubst}
+		mv -f ${varsubst}.bak ${varsubst}
 
 		rm -f ${varsubst}.bak
 	done

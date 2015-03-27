@@ -1,3 +1,7 @@
+v0.2-dev-15 (2015-03-27):
+ - Included the missing netinet/in.h header on usd/conn.c
+ - Minor fixes on uConf
+
 v0.2-dev-14 (2015-03-27):
  - Fixed minor issues on uConf
  - Added more required paths for SunOS params

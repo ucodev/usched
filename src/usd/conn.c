@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 25-03-2015
+ * Date: 27-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -38,6 +38,8 @@
 
 #include <rtsaio/rtsaio.h>
 #include <panet/panet.h>
+
+#include <netinet/in.h>
 
 #include <unistd.h>
 

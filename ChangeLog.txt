@@ -1,3 +1,7 @@
+v0.2-dev-14 (2015-03-27):
+ - Fixed minor issues on uConf
+ - Added more required paths for SunOS params
+
 v0.2-dev-13 (2015-03-27):
  - More improvements to uConf to better support SunOS (and others)
  - More improvements to 'deploy' and 'deps' scripts

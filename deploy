@@ -1,3 +1,5 @@
+#!/bin/sh
+
 ## Preload ##
 if [ -e "./uconf/params/default/preload" ]; then
 	. ./uconf/params/default/preload

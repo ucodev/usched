@@ -1,3 +1,4 @@
 # Anything to be preloaded before calling any of the uConf scripts should be set here
 PATH=$PATH:/usr/sfw/bin:/usr/xpg4/bin
 alias id=/usr/xpg4/bin/id
+alias sed=/usr/xpg4/bin/sed

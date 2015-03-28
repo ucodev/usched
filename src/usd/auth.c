@@ -3,7 +3,7 @@
  * @brief uSched
  *        Authentication and Authorization interface - Daemon
  *
- * Date: 25-02-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,13 +36,15 @@
 #include <psec/hash.h>
 #include <psec/kdf.h>
 
+#include <panet/panet.h>
+
 #include "debug.h"
 #include "config.h"
 #include "runtime.h"
 #include "log.h"
 #include "local.h"
 
-int auth_daemon_local(int fd, uid_t *uid, gid_t *gid) {
+int auth_daemon_local(sock_t fd, uid_t *uid, gid_t *gid) {
 	int errsv = 0;
 	uid_t local_uid = 0;
 	gid_t local_gid = 0;

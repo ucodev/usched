@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 26-03-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,8 @@
 #include <psec/crypt.h>
 #include <psec/ke.h>
 #include <psec/hash.h>
+
+#include <panet/panet.h>
 
 #include "usched.h"
 
@@ -239,7 +241,7 @@ int entry_set_subj(struct usched_entry *entry, const char *subj, size_t len);
 void entry_unset_subj(struct usched_entry *entry);
 int entry_copy(struct usched_entry *dest, struct usched_entry *src);
 int entry_compare(const void *e1, const void *e2);
-int entry_daemon_authorize(struct usched_entry *entry, int fd);
+int entry_daemon_authorize(struct usched_entry *entry, sock_t fd);
 int entry_daemon_remote_session_create(struct usched_entry *entry);
 int entry_daemon_remote_session_process(struct usched_entry *entry);
 void entry_daemon_exec_dispatch(void *arg);

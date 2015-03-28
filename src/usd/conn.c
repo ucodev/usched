@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 27-03-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -62,7 +62,7 @@ static int _conn_daemon_unix_init(void) {
 	}
 
 	/* Initialize local connections manager */
-	if ((rund.fd_unix = panet_server_unix(rund.config.network.sock_name, PANET_PROTO_UNIX_STREAM, 10)) < 0) {
+	if ((rund.fd_unix = panet_server_unix(rund.config.network.sock_name, PANET_PROTO_UNIX_STREAM, 10)) == (sock_t) -1) {
 		errsv = errno;
 		log_crit("_conn_daemon_unix_init(): panet_server_unix(\"%s\", ...): %s\n", rund.config.network.sock_name, strerror(errno));
 		errno = errsv;
@@ -99,7 +99,7 @@ static int _conn_daemon_remote_init(void) {
 	}
 
 	/* Initialize remote connections manager */
-	if ((rund.fd_remote = panet_server_ipv4(rund.config.network.bind_addr, rund.config.network.bind_port, PANET_PROTO_TCP, (int) rund.config.network.conn_limit)) < 0) {
+	if ((rund.fd_remote = panet_server_ipv4(rund.config.network.bind_addr, rund.config.network.bind_port, PANET_PROTO_TCP, (int) rund.config.network.conn_limit)) == (sock_t) -1) {
 		errsv = errno;
 		log_crit("conn_daemon_remote_init(): panet_server_ipv4(\"%s\", \"%s\", ...): %s\n", rund.config.network.bind_addr, rund.config.network.bind_port, strerror(errno));
 		errno = errsv;
@@ -149,7 +149,7 @@ int conn_daemon_init(void) {
 	return 0;
 }
 
-static int _conn_daemon_process_fd(int fd) {
+static int _conn_daemon_process_fd(sock_t fd) {
 	int errsv = 0;
 	struct async_op *aop = NULL;
 
@@ -265,7 +265,7 @@ static void *_conn_daemon_process_accept_unix(void *arg) {
 			continue;
 
 		/* Accept client connection */
-		if ((fd = (sock_t) accept(rund.fd_unix, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) < 0) {
+		if ((fd = (sock_t) accept(rund.fd_unix, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
 			log_warn("conn_daemon_process_accept_unix(): accept(): %s\n", strerror(errno));
 			continue;
 		}
@@ -349,7 +349,7 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 			continue;
 
 		/* Accept client connection */
-		if ((fd = (sock_t) accept(rund.fd_remote, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) < 0) {
+		if ((fd = (sock_t) accept(rund.fd_remote, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) == (sock_t) -1) {
 			log_warn("conn_daemon_process_accept_remote(): accept(): %s\n", strerror(errno));
 			continue;
 		}
@@ -401,7 +401,7 @@ int conn_daemon_process_all(void) {
 	return 0;
 }
 
-void conn_daemon_client_close(int fd) {
+void conn_daemon_client_close(sock_t fd) {
 	if (conn_is_remote(fd))
 		rund.conn_cur --;
 

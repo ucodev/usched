@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Common
  *
- * Date: 29-01-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,7 +45,7 @@
 #include "conn.h"
 #include "log.h"
 
-int conn_is_local(int fd) {
+int conn_is_local(sock_t fd) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else
@@ -63,7 +63,7 @@ int conn_is_local(int fd) {
 #endif
 }
 
-int conn_is_remote(int fd) {
+int conn_is_remote(sock_t fd) {
 #ifdef COMPILE_WIN32
 	return 1;
 #else
@@ -81,7 +81,7 @@ int conn_is_remote(int fd) {
 #endif
 }
 
-int conn_set_nonblock(int fd) {
+int conn_set_nonblock(sock_t fd) {
 #ifdef COMPILE_WIN32
 	return 0;
 #else

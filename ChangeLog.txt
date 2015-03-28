@@ -1,3 +1,6 @@
+v0.2-dev-17 (2015-03-28):
+ - Fixed lots of minor issues
+
 v0.2-dev-16 (2015-03-28):
  - Added execution permissions to pre-initialization scripts during installation
  - Updated uConf flags for SunOS

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 26-03-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -57,7 +57,7 @@
  #include <panet/panet.h>
 #endif
 
-static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
+static int _entry_daemon_authorize_local(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
 
 	if (auth_daemon_local(fd, &entry->uid, &entry->gid) < 0) {
@@ -70,7 +70,7 @@ static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 	return 1;
 }
 
-static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
+static int _entry_daemon_authorize_remote(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
 
 	/* Validate session data and compare user password */
@@ -84,7 +84,7 @@ static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
 	return 1;
 }
 
-int entry_daemon_authorize(struct usched_entry *entry, int fd) {
+int entry_daemon_authorize(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
 	int ret = -1;
 	struct cll_handler *bl = NULL, *wl = NULL;

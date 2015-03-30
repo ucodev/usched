@@ -3,12 +3,12 @@
 ./uconf/bin/setup
 
 if [ ${?} -ne 0 ]; then
-	exit ${?}
+	exit 1
 fi
 
 ./uconf/bin/undo_main
 
 if [ ${?} -ne 0 ]; then
-	exit ${?}
+	exit 1
 fi
 

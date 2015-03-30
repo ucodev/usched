@@ -3,12 +3,12 @@
 ./uconf/usched/setup
 
 if [ ${?} -ne 0 ]; then
-	exit ${?}
+	exit 1
 fi
 
 ./uconf/usched/deploy_main.setup
 
 if [ ${?} -ne 0 ]; then
-	exit ${?}
+	exit 1
 fi
 

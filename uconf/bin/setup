@@ -35,4 +35,5 @@ fi
 
 rm -f /tmp/uconfsh
 ln -s ${SETUP_SHELL} /tmp/uconfsh
+cp ./uconf/params/${SETUP_OS}/shell .shell
 

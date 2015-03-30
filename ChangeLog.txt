@@ -1,3 +1,6 @@
+v0.2-dev-24 (2015-03-30):
+ - Updated uConf parameters for SunOS and improved system shell configuration
+
 v0.2-dev-23 (2015-03-30):
  - Improved uConf
 

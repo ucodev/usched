@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./uconf/usched/setup
+./uconf/bin/setup
 
 if [ ${?} -ne 0 ]; then
 	exit 1

@@ -1,2 +1,2 @@
 # Anything to be preloaded before calling any of the uConf scripts should be set here
-PATH=/usr/xpg4/bin:$PATH:/usr/sfw/bin
+PATH=/usr/xpg4/bin:$PATH:/usr/sfw/bin:/usr/sbin

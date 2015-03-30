@@ -62,6 +62,9 @@ if [ -e uconf/params/default/varsubst ]; then
 		sed 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak 2> /dev/null
 		mv -f ${varsubst}.bak ${varsubst}
 
+		sed 's/@_SYSSHELL_@/'$(cat .shell | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak 2> /dev/null
+		mv -f ${varsubst}.bak ${varsubst}
+
 		rm -f ${varsubst}.bak
 	done
 
@@ -106,6 +109,9 @@ if [ -e uconf/params/`cat .osname`/varsubst ]; then
 		sed 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak 2> /dev/null
 		mv -f ${varsubst}.bak ${varsubst}
 
+		sed 's/@_SYSSHELL_@/'$(cat .shell | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak 2> /dev/null
+		mv -f ${varsubst}.bak ${varsubst}
+
 		rm -f ${varsubst}.bak
 	done
 fi
@@ -147,6 +153,9 @@ if [ -e uconf/params/user/varsubst ]; then
 		mv -f ${varsubst}.bak ${varsubst}
 
 		sed 's/@_SYSTMPDIR_@/'$(cat .dirtmp | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak 2> /dev/null
+		mv -f ${varsubst}.bak ${varsubst}
+
+		sed 's/@_SYSSHELL_@/'$(cat .shell | tr -d '\n' | sed 's/\//\\\//g')'/g' ${varsubst} > ${varsubst}.bak 2> /dev/null
 		mv -f ${varsubst}.bak ${varsubst}
 
 		rm -f ${varsubst}.bak

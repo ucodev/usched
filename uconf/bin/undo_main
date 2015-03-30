@@ -90,5 +90,6 @@ rm -f .addons
 rm -f .done
 rm -f .l*
 rm -f .dir*
+rm -f .shell
 rm -f /tmp/uconfsh
 

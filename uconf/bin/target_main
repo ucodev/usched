@@ -1,0 +1,57 @@
+#!@_SYSSHELL_@
+#
+# uConf: Target configuration script
+#
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
+#
+# Date: 30/03/2015
+#
+# URL: http://www.ucodev.org
+#
+# This file is part of uConf.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+## Preload ##
+if [ -e "./uconf/params/default/preload" ]; then
+	. ./uconf/params/default/preload
+fi
+
+if [ -e "./uconf/params/`uname`/preload" ]; then
+	. ./uconf/params/`uname`/preload
+fi
+
+if [ $# -ne 1 ]; then
+	echo "Usage: ${0} <special target>"
+	echo ""
+	echo "Special targets: rpi, bbb"
+	echo ""
+	echo "\trpi - Raspberry PI"
+	echo "\tbbb - Beaglebone Black"
+	echo ""
+	exit 1
+fi
+
+if [ ${1} = "rpi" ]; then
+	echo "Selected target is: Raspberry PI"
+elif [ ${1} = "bbb" ]; then
+	echo "Selected target is: Beaglebone Black"
+else
+	echo "Unknown target."
+	exit 1
+fi
+
+printf -- ${1} > .target
+

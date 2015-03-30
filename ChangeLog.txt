@@ -1,3 +1,7 @@
+v0.2-dev-18 (2015-03-30):
+ - Updated README.md
+ - New uConf revision
+
 v0.2-dev-17 (2015-03-28):
  - Fixed lots of minor issues
 

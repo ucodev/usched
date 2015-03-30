@@ -1,63 +1,14 @@
 #!/bin/sh
-#
-# uConf: Addons management script
-#
-# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
-#
-# Date: 27/03/2015
-#
-# URL: http://www.ucodev.org
-#
-# This file is part of uConf.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
-## Preload ##
-if [ -e "./uconf/params/default/preload" ]; then
-	. ./uconf/params/default/preload
+./uconf/bin/setup
+
+if [ ${?} -ne 0 ]; then
+	exit ${?}
 fi
 
-if [ -e "./uconf/params/`uname`/preload" ]; then
-	. ./uconf/params/`uname`/preload
+./uconf/bin/addon_main
+
+if [ ${?} -ne 0 ]; then
+	exit ${?}
 fi
-
-# Check usage
-if [ ${#} -ne 1 ]; then
-	echo "Usage: ${0} <addon>"
-	exit 1
-fi
-
-if [ -e "./uconf/addons/${1}" ]; then
-	if [ ! -e ".addons" ]; then
-		echo ${1} >> .addons
-	else
-		while read addon; do
-			if [ "${addon}" = "${1}" ]; then
-				echo "Addon already enabled."
-				exit 1
-			fi
-		done < .addons
-
-		echo ${1} > .addons
-	fi
-else
-	echo "No such addon: ${1}"
-	exit 1
-fi
-
-echo "Addon enabled: ${1}"
-
-exit 0
 

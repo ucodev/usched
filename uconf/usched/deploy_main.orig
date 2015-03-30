@@ -1,0 +1,50 @@
+#!@_SYSSHELL_@
+
+## Preload ##
+if [ -e "./uconf/params/default/preload" ]; then
+	. ./uconf/params/default/preload
+fi
+
+if [ -e "./uconf/params/`uname`/preload" ]; then
+	. ./uconf/params/`uname`/preload
+fi
+
+if [ ! -e ".nopriv" ]; then
+	if [ `id -u` -ne 0 ]; then
+		echo "Current user is not root."
+		exit 1
+	fi
+fi
+
+./deps
+
+if [ $? -ne 0 ]; then
+	echo "Failed to build dependencies."
+	exit 1
+fi
+
+./do
+
+if [ $? -ne 0 ]; then
+	echo "Failed to build uSched."
+	exit 1
+fi
+
+./install
+
+if [ $? -ne 0 ]; then
+	echo "Failed to install uSched."
+	exit 1
+fi
+
+./undo
+
+if [ $? -ne 0 ]; then
+	echo "uSched was deployed but it failed to cleanup."
+	exit 1
+fi
+
+echo "uSched was successfully deployed."
+
+exit 0
+

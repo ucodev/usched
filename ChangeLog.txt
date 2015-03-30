@@ -1,3 +1,6 @@
+v0.2-dev-19 (2015-03-30):
+ - Ported 'deploy' and 'deps' scripts to uConf specific folder
+
 v0.2-dev-18 (2015-03-30):
  - Updated README.md
  - New uConf revision

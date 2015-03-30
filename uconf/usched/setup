@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# uConf: uSched specific setup configuration script
+#
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
+#
+# Date: 30/03/2015
+#
+# URL: http://www.ucodev.org
+#
+# This file is part of uConf.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+SETUP_OS=`uname 2> /dev/null`
+SETUP_SHELL=`cat ./uconf/params/${SETUP_OS}/shell 2> /dev/null`
+
+if [ ${?} -ne 0 ]; then
+	echo "Your system is not supported."
+	exit 1
+fi
+
+echo ${SETUP_SHELL}
+
+# Setup 'deploy' script
+SETUP_SCRIPT="deploy_main"
+sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/usched/${SETUP_SCRIPT}.orig > ./uconf/usched/${SETUP_SCRIPT}.setup 2> /dev/null
+chmod 755 ./uconf/usched/${SETUP_SCRIPT}.setup
+
+# Setup 'deps' script
+SETUP_SCRIPT="deps_main"
+sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/usched/${SETUP_SCRIPT}.orig > ./uconf/usched/${SETUP_SCRIPT}.setup 2> /dev/null
+chmod 755 ./uconf/usched/${SETUP_SCRIPT}.setup
+

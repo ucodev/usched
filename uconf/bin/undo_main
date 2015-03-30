@@ -1,4 +1,4 @@
-#!@_SYSSHELL_@
+#!/tmp/uconfsh
 #
 # uConf: Project Cleanup script
 #
@@ -90,8 +90,5 @@ rm -f .addons
 rm -f .done
 rm -f .l*
 rm -f .dir*
-
-for script in ./uconf/bin/*.orig; do
-	mv ${script} `echo ${script} | sed 's/\.orig$//g'`
-done
+rm -f /tmp/uconfsh
 

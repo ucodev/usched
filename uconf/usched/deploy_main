@@ -1,4 +1,4 @@
-#!@_SYSSHELL_@
+#!/tmp/uconfsh
 
 ## Preload ##
 if [ -e "./uconf/params/default/preload" ]; then

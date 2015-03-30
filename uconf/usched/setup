@@ -33,15 +33,6 @@ if [ ${?} -ne 0 ]; then
 	exit 1
 fi
 
-echo ${SETUP_SHELL}
-
-# Setup 'deploy' script
-SETUP_SCRIPT="deploy_main"
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/usched/${SETUP_SCRIPT}.orig > ./uconf/usched/${SETUP_SCRIPT}.setup 2> /dev/null
-chmod 755 ./uconf/usched/${SETUP_SCRIPT}.setup
-
-# Setup 'deps' script
-SETUP_SCRIPT="deps_main"
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/usched/${SETUP_SCRIPT}.orig > ./uconf/usched/${SETUP_SCRIPT}.setup 2> /dev/null
-chmod 755 ./uconf/usched/${SETUP_SCRIPT}.setup
+rm -f /tmp/uconfsh
+ln -s ${SETUP_SHELL} /tmp/uconfsh
 

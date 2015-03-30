@@ -6,7 +6,7 @@ if [ ${?} -ne 0 ]; then
 	exit 1
 fi
 
-./uconf/usched/deps_main.setup
+./uconf/usched/deps_main
 
 if [ ${?} -ne 0 ]; then
 	exit 1

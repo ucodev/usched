@@ -33,66 +33,6 @@ if [ ${?} -ne 0 ]; then
 	exit 1
 fi
 
-echo ${SETUP_SHELL}
-
-# Setup 'addon' script
-SETUP_SCRIPT="addon_main"
-ls ./uconf/bin/${SETUP_SCRIPT}.orig 2> /dev/null > /dev/null
-if [ ${?} -ne 0 ]; then
-	cp ./uconf/bin/${SETUP_SCRIPT} ./uconf/bin/${SETUP_SCRIPT}.orig
-fi
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/bin/${SETUP_SCRIPT} > ./uconf/bin/${SETUP_SCRIPT}.bak 2> /dev/null
-mv ./uconf/bin/${SETUP_SCRIPT}.bak ./uconf/bin/${SETUP_SCRIPT}
-chmod 755 ./uconf/bin/${SETUP_SCRIPT}
-
-# Setup 'confdir' script
-SETUP_SCRIPT="confdir_main"
-ls ./uconf/bin/${SETUP_SCRIPT}.orig 2> /dev/null > /dev/null
-if [ ${?} -ne 0 ]; then
-	cp ./uconf/bin/${SETUP_SCRIPT} ./uconf/bin/${SETUP_SCRIPT}.orig
-fi
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/bin/${SETUP_SCRIPT} > ./uconf/bin/${SETUP_SCRIPT}.bak 2> /dev/null
-mv ./uconf/bin/${SETUP_SCRIPT}.bak ./uconf/bin/${SETUP_SCRIPT}
-chmod 755 ./uconf/bin/${SETUP_SCRIPT}
-
-# Setup 'do' script
-SETUP_SCRIPT="do_main"
-ls ./uconf/bin/${SETUP_SCRIPT}.orig 2> /dev/null > /dev/null
-if [ ${?} -ne 0 ]; then
-	cp ./uconf/bin/${SETUP_SCRIPT} ./uconf/bin/${SETUP_SCRIPT}.orig
-fi
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/bin/${SETUP_SCRIPT} > ./uconf/bin/${SETUP_SCRIPT}.bak 2> /dev/null
-mv ./uconf/bin/${SETUP_SCRIPT}.bak ./uconf/bin/${SETUP_SCRIPT}
-chmod 755 ./uconf/bin/${SETUP_SCRIPT}
-
-# Setup 'install' script
-SETUP_SCRIPT="install_main"
-ls ./uconf/bin/${SETUP_SCRIPT}.orig 2> /dev/null > /dev/null
-if [ ${?} -ne 0 ]; then
-	cp ./uconf/bin/${SETUP_SCRIPT} ./uconf/bin/${SETUP_SCRIPT}.orig
-fi
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/bin/${SETUP_SCRIPT} > ./uconf/bin/${SETUP_SCRIPT}.bak 2> /dev/null
-mv ./uconf/bin/${SETUP_SCRIPT}.bak ./uconf/bin/${SETUP_SCRIPT}
-chmod 755 ./uconf/bin/${SETUP_SCRIPT}
-
-# Setup 'target' script
-SETUP_SCRIPT="target_main"
-ls ./uconf/bin/${SETUP_SCRIPT}.orig 2> /dev/null > /dev/null
-if [ ${?} -ne 0 ]; then
-	cp ./uconf/bin/${SETUP_SCRIPT} ./uconf/bin/${SETUP_SCRIPT}.orig
-fi
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/bin/${SETUP_SCRIPT} > ./uconf/bin/${SETUP_SCRIPT}.bak 2> /dev/null
-mv ./uconf/bin/${SETUP_SCRIPT}.bak ./uconf/bin/${SETUP_SCRIPT}
-chmod 755 ./uconf/bin/${SETUP_SCRIPT}
-
-# Setup 'undo' script
-SETUP_SCRIPT="undo_main"
-ls ./uconf/bin/${SETUP_SCRIPT}.orig 2> /dev/null > /dev/null
-if [ ${?} -ne 0 ]; then
-	cp ./uconf/bin/${SETUP_SCRIPT} ./uconf/bin/${SETUP_SCRIPT}.orig
-fi
-sed 's/@_SYSSHELL_@/'$(echo ${SETUP_SHELL} | tr -d '\n' | sed 's/\//\\\//g')'/g' ./uconf/bin/${SETUP_SCRIPT} > ./uconf/bin/${SETUP_SCRIPT}.bak 2> /dev/null
-mv ./uconf/bin/${SETUP_SCRIPT}.bak ./uconf/bin/${SETUP_SCRIPT}
-chmod 755 ./uconf/bin/${SETUP_SCRIPT}
-
+rm -f /tmp/uconfsh
+ln -s ${SETUP_SHELL} /tmp/uconfsh
 

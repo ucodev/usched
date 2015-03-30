@@ -54,6 +54,11 @@
  Where language may be any of the supported languages (or the keyword 'all' to install everything). The available languages keywords are: all, csharp, java, php and python.
 
 
+ If there's issues regarding certificate verification for 'wget', install the corresponding certificates package on the system, or execute the following command before deployment to enable the '--no-check-certificate' flag:
+
+   # touch .no_certs
+
+
 
 3. Specific Add-ons
 

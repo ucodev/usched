@@ -1,3 +1,6 @@
+v0.2-dev-20 (2015-03-30):
+ - Fixed minor issues on uConf
+
 v0.2-dev-19 (2015-03-30):
  - Ported 'deploy' and 'deps' scripts to uConf specific folder
 

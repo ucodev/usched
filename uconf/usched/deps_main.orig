@@ -15,7 +15,11 @@ install_lib()
 	cd ${lib}
 
 	if [ -e "`which wget`" ]; then
-		wget https://github.com/ucodev/${lib}/archive/master.tar.gz
+		WGET_OPTS=""
+		if [ -e "../../.no_certs" ]; then
+			WGET_OPTS="--no-check-certificate"
+		fi
+		wget ${WGET_OPTS} https://github.com/ucodev/${lib}/archive/master.tar.gz
 	elif [ -e "`which curl`" ]; then
 		curl -O https://github.com/ucodev/${lib}/archive/master.tar.gz
 	else
@@ -24,6 +28,12 @@ install_lib()
 	fi
 
 	gunzip master.tar.gz
+
+	if [ ${?} -ne 0 ]; then
+		echo "Unable to extract dependency."
+		exit 1
+	fi
+
 	tar xvf master.tar
 	cd ${lib}-master
 
@@ -41,7 +51,7 @@ install_lib()
 
 	if [ ${?} -ne 0 ]; then
 		echo "Unable to install ${lib}"
-		exit 1;
+		exit 1
 	fi
 
 	cd ../../

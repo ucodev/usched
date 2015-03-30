@@ -18,28 +18,28 @@ fi
 
 ./deps
 
-if [ $? -ne 0 ]; then
+if [ ${?} -ne 0 ]; then
 	echo "Failed to build dependencies."
 	exit 1
 fi
 
 ./do
 
-if [ $? -ne 0 ]; then
+if [ ${?} -ne 0 ]; then
 	echo "Failed to build uSched."
 	exit 1
 fi
 
 ./install
 
-if [ $? -ne 0 ]; then
+if [ ${?} -ne 0 ]; then
 	echo "Failed to install uSched."
 	exit 1
 fi
 
 ./undo
 
-if [ $? -ne 0 ]; then
+if [ ${?} -ne 0 ]; then
 	echo "uSched was deployed but it failed to cleanup."
 	exit 1
 fi

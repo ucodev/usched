@@ -48,7 +48,9 @@
 <h2>
 <a id="portability" class="anchor" href="#portability" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portability</h2>
 
-<p>uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the <a href="https://github.com/ucodev/usched/blob/master/include/config.h">include/config.h</a> file.</p>
+<p>uSched is designed to be compliant with any POSIX operating system. It was successfully tested under <strong>Linux</strong>, <strong>FreeBSD</strong>, <strong>OpenBSD</strong>, <strong>SunOS</strong>, <strong>Minix</strong> and others, in different architectures (<strong>x86/64</strong>, <strong>ARM</strong> and <strong>SPARC</strong>).</p>
+
+<p>There are some features that may not be enabled by default in the case that some non-portable calls being unavailable on the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the <a href="https://github.com/ucodev/usched/blob/master/include/config.h">include/config.h</a> file.</p>
 
 <p>uSched client will compile on most Windows versions and the API bindings are available for C#.</p>
 

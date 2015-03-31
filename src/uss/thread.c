@@ -1,7 +1,7 @@
 /**
- * @file log.h
+ * @file thread.c
  * @brief uSched
- *        Logging interface header
+ *        Thread handlers interface - Stat
  *
  * Date: 31-03-2015
  * 
@@ -25,20 +25,31 @@
  */
 
 
-#ifndef USCHED_LOG_H
-#define USCHED_LOG_H
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <pthread.h>
 
-/* Prototypes */
-int log_admin_init(void);
-int log_client_init(void);
-int log_daemon_init(void);
-int log_exec_init(void);
-int log_monitor_init(void);
-int log_stat_init(void);
-void log_info(const char *fmt, ...);
-void log_warn(const char *fmt, ...);
-void log_crit(const char *fmt, ...);
-void log_destroy(void);
+#include "config.h"
+#include "log.h"
+#include "runtime.h"
+#include "thread.h"
 
-#endif
+int thread_stat_behaviour_init(void) {
+	int errsv = 0;
+
+	if ((errno = pthread_atfork(&thread_atfork_prepare, &thread_atfork_parent, &thread_atfork_child))) {
+		errsv = errno;
+		log_crit("thread_stat_behaviour_init(): pthread_atfork(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+void thread_stat_behaviour_destroy(void) {
+	if ((errno = pthread_atfork(&thread_atfork_noop, &thread_atfork_noop, &thread_atfork_noop)))
+		log_crit("thread_stat_behaviour_destroy(): pthread_atfork(): %s\n", strerror(errno));
+}
 

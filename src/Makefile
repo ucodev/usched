@@ -5,6 +5,7 @@ all:
 	cd usd && make && cd ..
 	cd use && make && cd ..
 	cd usm && make && cd ..
+	cd uss && make && cd ..
 
 install:
 	cd usa && make install && cd ..
@@ -12,6 +13,7 @@ install:
 	cd usd && make install && cd ..
 	cd use && make install && cd ..
 	cd usm && make install && cd ..
+	cd uss && make install && cd ..
 
 clean:
 	cd common && make clean && cd ..
@@ -20,4 +22,5 @@ clean:
 	cd usd && make clean && cd ..
 	cd use && make clean && cd ..
 	cd usm && make clean && cd ..
+	cd uss && make clean && cd ..
 

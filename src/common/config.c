@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 19-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -982,6 +982,12 @@ int config_init_network(struct usched_config_network *network) {
 	return 0;
 }
 
+int config_init_stat(struct usched_config_stat *stat) {
+	/* TODO */
+	errno = ENOSYS;
+	return -1;
+}
+
 static int _config_init_users_list_add_from_file(
 		struct usched_config_users *users,
 		const char *file,
@@ -1270,6 +1276,11 @@ void config_destroy_network(struct usched_config_network *network) {
 	mm_free(network->sock_name);
 
 	memset(network, 0, sizeof(struct usched_config_network));
+}
+
+void config_destroy_stat(struct usched_config_stat *stat) {
+	/* TODO */
+	return ;
 }
 
 void config_destroy_users(struct usched_config_users *users) {

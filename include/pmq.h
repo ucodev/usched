@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface header
  *
- * Date: 21-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,8 +45,10 @@ void pmq_destroy(mqd_t pmqd);
 int pmq_unlink(const char *pmqname);
 int pmq_daemon_init(void);
 int pmq_exec_init(void);
+int pmq_stat_init(void);
 void pmq_daemon_destroy(void);
 void pmq_exec_destroy(void);
+void pmq_stat_destroy(void);
 int pmq_admin_create(void);
 int pmq_admin_delete(void);
 #endif

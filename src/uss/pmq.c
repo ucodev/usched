@@ -1,7 +1,7 @@
 /**
- * @file log.h
+ * @file pmq.c
  * @brief uSched
- *        Logging interface header
+ *        POSIX Message Queueing interface - Stat
  *
  * Date: 31-03-2015
  * 
@@ -25,20 +25,44 @@
  */
 
 
-#ifndef USCHED_LOG_H
-#define USCHED_LOG_H
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 
-/* Prototypes */
-int log_admin_init(void);
-int log_client_init(void);
-int log_daemon_init(void);
-int log_exec_init(void);
-int log_monitor_init(void);
-int log_stat_init(void);
-void log_info(const char *fmt, ...);
-void log_warn(const char *fmt, ...);
-void log_crit(const char *fmt, ...);
-void log_destroy(void);
+#include <sys/stat.h>
 
+#if CONFIG_USE_IPC_PMQ == 1
+ #include <mqueue.h>
 #endif
+
+#include "config.h"
+#include "runtime.h"
+#include "log.h"
+#include "pmq.h"
+
+int pmq_stat_init(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	int errsv = 0;
+
+	if ((runs.ipcd = pmq_init(runs.config.stat.ipc_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
+		errsv = errno;
+		log_crit("pmq_stat_init(): pmq_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
+}
+
+void pmq_stat_destroy(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	pmq_destroy(runs.ipcd);
+#else
+	return;
+#endif
+}
 

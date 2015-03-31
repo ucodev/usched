@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface header
  *
- * Date: 19-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,8 +31,10 @@
 /* Prototypes */
 int ipc_daemon_init(void);
 int ipc_exec_init(void);
+int ipc_stat_init(void);
 void ipc_daemon_destroy(void);
 void ipc_exec_destroy(void);
+void ipc_stat_destroy(void);
 int ipc_admin_create(void);
 int ipc_admin_delete(void);
 

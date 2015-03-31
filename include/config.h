@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 26-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -71,6 +71,7 @@
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"
 #define CONFIG_USCHED_EXEC_PROC_NAME		"use"
 #define CONFIG_USCHED_MONITOR_PROC_NAME		"usm"
+#define CONFIG_USCHED_STAT_PROC_NAME		"uss"
 #define CONFIG_USCHED_LOG_MSG_MAX_SIZE		1024
 #define CONFIG_USCHED_SEC_KDF_ROUNDS		5000
 #define CONFIG_USCHED_AUTH_USERNAME_MAX		32
@@ -295,11 +296,23 @@ struct usched_config_network {
 	char *sock_name;
 };
 
+struct usched_config_stat {
+	long ipc_msgmax;
+	long ipc_msgsize;
+	char *ipc_name;
+	char *ipc_key;
+	char *privdrop_user;
+	char *privdrop_group;
+	uid_t privdrop_uid;
+	gid_t privdrop_gid;
+};
+
 struct usched_config {
 	struct usched_config_auth auth;
 	struct usched_config_core core;
 	struct usched_config_network network;
 	struct usched_config_users users;
+	struct usched_config_stat stat;
 };
 
 
@@ -307,10 +320,12 @@ struct usched_config {
 int config_init_auth(struct usched_config_auth *auth);
 int config_init_core(struct usched_config_core *core);
 int config_init_network(struct usched_config_network *network);
+int config_init_stat(struct usched_config_stat *stat);
 int config_init_users(struct usched_config_users *users);
 void config_destroy_auth(struct usched_config_auth *auth);
 void config_destroy_core(struct usched_config_core *core);
 void config_destroy_network(struct usched_config_network *network);
+void config_destroy_stat(struct usched_config_stat *stat);
 void config_destroy_users(struct usched_config_users *users);
 int config_admin_init(void);
 void config_admin_destroy(void);
@@ -320,6 +335,8 @@ int config_daemon_init(void);
 void config_daemon_destroy(void);
 int config_exec_init(void);
 void config_exec_destroy(void);
+int config_stat_init(void);
+void config_stat_destroy(void);
 
 #endif
 

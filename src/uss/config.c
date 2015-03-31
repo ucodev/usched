@@ -1,7 +1,7 @@
 /**
- * @file log.h
+ * @file config.c
  * @brief uSched
- *        Logging interface header
+ *        Configuration interface - Stat
  *
  * Date: 31-03-2015
  * 
@@ -24,21 +24,35 @@
  *
  */
 
+#include <string.h>
+#include <errno.h>
 
-#ifndef USCHED_LOG_H
-#define USCHED_LOG_H
+#include "config.h"
+#include "runtime.h"
+#include "log.h"
 
-/* Prototypes */
-int log_admin_init(void);
-int log_client_init(void);
-int log_daemon_init(void);
-int log_exec_init(void);
-int log_monitor_init(void);
-int log_stat_init(void);
-void log_info(const char *fmt, ...);
-void log_warn(const char *fmt, ...);
-void log_crit(const char *fmt, ...);
-void log_destroy(void);
 
-#endif
+int config_stat_init(void) {
+	int errsv = 0;
+	struct usched_config *config = &runs.config;
+
+	memset(config, 0, sizeof(struct usched_config));
+
+	if (config_init_stat(&config->stat) < 0) {
+		errsv = errno;
+		log_warn("config_stat_init(): config_init_stat(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+void config_stat_destroy(void) {
+	struct usched_config *config = &runs.config;
+
+	config_destroy_stat(&config->stat);
+
+	memset(config, 0, sizeof(struct usched_config));
+}
 

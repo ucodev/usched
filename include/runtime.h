@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 21-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -181,6 +181,27 @@ struct usched_runtime_exec {
 	struct usched_config config;
 };
 #endif /* CONFIG_EXEC_SPECIFIC */
+
+#if CONFIG_STAT_SPECIFIC == 1 || CONFIG_COMMON == 1
+struct usched_runtime_stat {
+	int argc;
+	char **argv;
+
+	volatile usched_runtime_flag_t flags;
+	struct sigaction sa_save;
+
+#if CONFIG_USE_IPC_PMQ == 1
+	mqd_t ipcd;
+#endif
+#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	sock_t ipc_bind_fd;
+	sock_t ipcd;
+#endif
+
+	struct usched_config config;
+};
+#endif /* CONFIG_STAT_SPECIFIC */
+
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* External */
@@ -197,6 +218,9 @@ extern struct usched_runtime_client runc;
  #if CONFIG_EXEC_SPECIFIC == 1 || CONFIG_COMMON == 1
  extern struct usched_runtime_exec rune;
  #endif /* CONFIG_EXEC_SPECIFIC */
+ #if CONFIG_STAT_SPECIFIC == 1 || CONFIG_COMMON == 1
+ extern struct usched_runtime_stat runs;
+ #endif /* CONFIG_STAT_SPECIFIC */
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* Prototypes */
@@ -208,12 +232,14 @@ int runtime_client_interrupted(void);
 int runtime_admin_init(int argc, char **argv);
 int runtime_daemon_init(int argc, char **argv);
 int runtime_exec_init(int argc, char **argv);
+int runtime_stat_init(int argc, char **argv);
 int runtime_admin_interrupted(void);
 void runtime_daemon_fatal(void);
 void runtime_daemon_interrupt(void);
 int runtime_daemon_terminated(void);
 int runtime_daemon_interrupted(void);
 int runtime_exec_interrupted(void);
+int runtime_stat_interrupted(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 void runtime_client_destroy(void);
 void runtime_client_lib_destroy(void);
@@ -222,6 +248,7 @@ void runtime_admin_destroy(void);
 void runtime_daemon_destroy(void);
 void runtime_exec_destroy(void);
 void runtime_exec_quiet_destroy(void);
+void runtime_stat_destroy(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 #endif

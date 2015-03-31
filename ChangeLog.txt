@@ -1,3 +1,7 @@
+v0.2-dev-25 (2015-03-31):
+ - Correctly set errno for error reporting of threads
+ - Added the THANKS.txt file
+
 v0.2-dev-24 (2015-03-30):
  - Updated uConf parameters for SunOS and improved system shell configuration
 

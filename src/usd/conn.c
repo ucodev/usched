@@ -3,7 +3,7 @@
  * @@brief uSched
  *        Connections interface - Daemon
  *
- * Date: 28-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@@ucodev.org)
  *
@@ -381,14 +381,14 @@ static void *_conn_daemon_process_accept_remote(void *arg) {
 int conn_daemon_process_all(void) {
 	int errsv = 0;
 
-	if (pthread_create(&rund.t_unix, NULL, _conn_daemon_process_accept_unix, NULL)) {
+	if ((errno = pthread_create(&rund.t_unix, NULL, _conn_daemon_process_accept_unix, NULL))) {
 		errsv = errno;
 		log_crit("conn_daemon_process_all(): pthread_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	if (pthread_create(&rund.t_remote, NULL, _conn_daemon_process_accept_remote, NULL)) {
+	if ((errno = pthread_create(&rund.t_remote, NULL, _conn_daemon_process_accept_remote, NULL))) {
 		errsv = errno;
 		log_crit("conn_daemon_process_all(): pthread_create(): %s\n", strerror(errno));
 		errno = errsv;

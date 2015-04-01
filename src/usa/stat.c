@@ -93,7 +93,7 @@ int stat_admin_commit(void) {
 	}
 
 	/* ipc.name */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_STAT, 128) < 0) {
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME, 128) < 0) {
 		errsv = errno;
 		log_crit("stat_admin_commit(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
@@ -144,7 +144,7 @@ int stat_admin_commit(void) {
 	return 0;
 }
 
-int auth_admin_rollback(void) {
+int stat_admin_rollback(void) {
 	int errsv = 0;
 
 	/* jail.dir */

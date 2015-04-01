@@ -37,6 +37,7 @@
 #include "auth.h"
 #include "core.h"
 #include "network.h"
+#include "stat.h"
 #include "log.h"
 #include "users.h"
 #include "usage.h"
@@ -1287,26 +1288,300 @@ int category_network_show(size_t argc, char **args) {
 }
 
 int category_stat_commit(size_t argc, char **args) {
-	/* TODO */
-	errno = EINVAL;
-	return -1;
+	int errsv = 0;
+
+	/* Usage: commit stat */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "commit stat");
+		log_warn("category_stat_commit(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (stat_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("category_stat_commit(): stat_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_stat_rollback(size_t argc, char **args) {
-	/* TODO**/
-	errno = EINVAL;
-	return -1;
+	int errsv = 0;
+
+	/* Usage: rollback stat */
+	if (argc) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "rollback stat");
+		log_warn("category_stat_rollback(): Too many arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (stat_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_stat_rollback(): stat_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 
 int category_stat_change(size_t argc, char **args) {
-	/* TODO */
+	int errsv = 0;
+
+	/* Usage: change stat <component> <property> <value> */
+	if (argc < 3) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "change stat");
+		log_warn("category_stat_change(): Insufficient arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (!strcasecmp(args[0], USCHED_COMPONENT_JAIL_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_DIR_STR)) {
+			/* set jail.dir */
+			if (stat_admin_jail_dir_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_jail_dir_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change stat jail");
+		log_warn("category_stat_change(): Invalid 'jail' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
+			/* set ipc.msgmax */
+			if (stat_admin_ipc_msgmax_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_ipc_msgmax_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
+			/* set ipc.msgsize */
+			if (stat_admin_ipc_msgsize_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_ipc_msgsize_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
+			/* set ipc.name */
+			if (stat_admin_ipc_name_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_ipc_name_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
+			/* set ipc.key */
+			if (stat_admin_ipc_key_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_ipc_key_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change stat ipc");
+		log_warn("category_stat_change(): Invalid 'ipc' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
+			/* set privdrop.group */
+			if (stat_admin_privdrop_group_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_privdrop_group_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_USER_STR)) {
+			/* set privdrop.user */
+			if (stat_admin_privdrop_user_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_privdrop_user_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change stat privdrop");
+		log_warn("category_stat_change(): Invalid 'privdrop' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} 
+
+	/* Unknown component */
+	usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT, "change stat");
+	log_warn("category_stat_change(): Invalid 'change stat' component: %s\n", args[0]);
 	errno = EINVAL;
+
 	return -1;
 }
 
 int category_stat_show(size_t argc, char **args) {
-	/* TODO */
+	int errsv = 0;
+
+	/* Usage: show stat <component> <property> */
+	if (!argc) {
+		stat_admin_show();
+		return 0;
+	}
+
+	if (argc < 2) {
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INSUFF_ARGS, "show stat");
+		log_warn("category_stat_change(): Insufficient arguments.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (!strcasecmp(args[0], USCHED_COMPONENT_JAIL_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_DIR_STR)) {
+			/* show jail.dir */
+			if (stat_admin_jail_dir_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_jail_dir_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat jail");
+		log_warn("category_stat_show(): Invalid 'jail' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
+			/* show ipc.msgmax */
+			if (stat_admin_ipc_msgmax_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_ipc_msgmax_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
+			/* show ipc.msgsize */
+			if (stat_admin_ipc_msgsize_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_ipc_msgsize_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
+			/* show ipc.name */
+			if (stat_admin_ipc_name_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_ipc_name_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
+			/* show ipc.name */
+			if (stat_admin_ipc_key_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_ipc_key_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+ 
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat ipc");
+		log_warn("category_stat_show(): Invalid 'ipc' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
+			/* show privdrop.group */
+			if (stat_admin_privdrop_group_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_privdrop_group_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_USER_STR)) {
+			/* show privdrop.user */
+			if (stat_admin_privdrop_user_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_privdrop_user_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat privdrop");
+		log_warn("category_stat_show(): Invalid 'privdrop' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	}
+
+	/* Unknown component */
+	usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT, "show stat");
+	log_warn("category_stat_show(): Invalid 'show stat' component: %s\n", args[0]);
 	errno = EINVAL;
+
 	return -1;
 }
 

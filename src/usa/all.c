@@ -33,6 +33,7 @@
 #include "auth.h"
 #include "core.h"
 #include "network.h"
+#include "stat.h"
 #include "users.h"
 
 int all_admin_show(void) {

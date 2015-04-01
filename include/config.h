@@ -74,7 +74,7 @@
 #define CONFIG_USCHED_FILE_STAT_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_DAEMON_PID_FILE		"@_SYSRUNDIR_@/usched_usd.pid"
 #define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_use.pid"
-#define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_uss.pid"
+#define CONFIG_USCHED_STAT_PID_FILE		"@_SYSRUNDIR_@/usched_uss.pid"
 #define CONFIG_USCHED_ADMIN_PROC_NAME		"usa"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"

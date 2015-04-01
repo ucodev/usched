@@ -310,8 +310,8 @@ struct usched_config_stat {
 	long ipc_msgmax;
 	long ipc_msgsize;
 	char *ipc_prefix;
-	char *ipc_name_read;
-	char *ipc_name_write;
+	char *ipc_name_uss_ro;
+	char *ipc_name_usd_wo;
 	char *ipc_key;
 	char *privdrop_user;
 	char *privdrop_group;

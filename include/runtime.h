@@ -191,13 +191,13 @@ struct usched_runtime_stat {
 	struct sigaction sa_save;
 
 #if CONFIG_USE_IPC_PMQ == 1
-	mqd_t ipcd_read;
-	mqd_t ipcd_write;
+	mqd_t ipcd_uss_ro; /* Read-only */
+	mqd_t ipcd_usd_wo; /* Write-only */
 #endif
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
-	sock_t ipcd_read;
-	sock_t ipcd_write;
+	sock_t ipcd_uss_ro; /* Read-only */
+	sock_t ipcd_usd_wo; /* Write-only */
 #endif
 
 	struct usched_config config;

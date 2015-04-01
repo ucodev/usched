@@ -1160,43 +1160,43 @@ int config_init_stat(struct usched_config_stat *stat) {
 		return -1;
 	}
 
-	/* Setup the ipc name for reading (will be written by usd and use) */
-	if (!(stat->ipc_name_read = mm_alloc(strlen(stat->ipc_prefix) + sizeof("_read")))) {
-		errsv = errno;
-		log_warn("_config_init_stat(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-#if CONFIG_USE_IPC_PMQ == 1 || CONFIG_USE_IPC_UNIX == 1
-	strcpy(stat->ipc_name_read, stat->ipc_prefix);
-	strcat(stat->ipc_name_read, "_read");
-#elif CONFIG_USE_IPC_INET == 1
-	sprintf(stat->ipc_name_read, "%d", atoi(stat->ipc_prefix));
-#endif
-
-	/* Setup the ipc name for writing (will be read by usd) */
-	if (!(stat->ipc_name_write = mm_alloc(strlen(stat->ipc_prefix) + sizeof("_write")))) {
-		errsv = errno;
-		log_warn("_config_init_stat(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-#if CONFIG_USE_IPC_PMQ == 1 || CONFIG_USE_IPC_UNIX == 1
-	strcpy(stat->ipc_name_write, stat->ipc_prefix);
-	strcat(stat->ipc_name_write, "_write");
-#elif CONFIG_USE_IPC_INET == 1
-	/* Add 1 to the port assigned to the read end */
-	sprintf(stat->ipc_name_write, "%d", atoi(stat->ipc_prefix) + 1);
-#endif
-
 	/* Validate ipc name */
 	if (!_config_validate_stat_ipc_name(stat)) {
 		log_warn("_config_init_stat(): _config_validate_stat_ipc_name(): Invalid stat.ipc.name value.\n");
 		errno = EINVAL;
 		return -1;
 	}
+
+	/* Setup the ipc name for reading (will be written by usd and use) */
+	if (!(stat->ipc_name_uss_ro = mm_alloc(strlen(stat->ipc_prefix) + sizeof("_read")))) {
+		errsv = errno;
+		log_warn("_config_init_stat(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+#if CONFIG_USE_IPC_PMQ == 1 || CONFIG_USE_IPC_UNIX == 1
+	strcpy(stat->ipc_name_uss_ro, stat->ipc_prefix);
+	strcat(stat->ipc_name_uss_ro, "_read");
+#elif CONFIG_USE_IPC_INET == 1
+	sprintf(stat->ipc_name_uss, "%d", atoi(stat->ipc_prefix));
+#endif
+
+	/* Setup the ipc name for writing (will be read by usd) */
+	if (!(stat->ipc_name_usd_wo = mm_alloc(strlen(stat->ipc_prefix) + sizeof("_write")))) {
+		errsv = errno;
+		log_warn("_config_init_stat(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+#if CONFIG_USE_IPC_PMQ == 1 || CONFIG_USE_IPC_UNIX == 1
+	strcpy(stat->ipc_name_usd_wo, stat->ipc_prefix);
+	strcat(stat->ipc_name_usd_wo, "_write");
+#elif CONFIG_USE_IPC_INET == 1
+	/* Add 1 to the port assigned to the read end */
+	sprintf(stat->ipc_name_usd_wo, "%d", atoi(stat->ipc_prefix) + 1);
+#endif
 
 	/* Read ipc key */
 	if (_config_init_stat_ipc_key(stat) < 0) {

@@ -44,7 +44,7 @@ int pmq_stat_init(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	int errsv = 0;
 
-	if ((runs.ipcd_read = pmq_init(runs.config.stat.ipc_name_read, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
+	if ((runs.ipcd_uss_ro = pmq_init(runs.config.stat.ipc_name_uss_ro, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_stat_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
@@ -60,8 +60,8 @@ int pmq_stat_init(void) {
 
 void pmq_stat_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
-	pmq_destroy(runs.ipcd_read);
-	pmq_destroy(runs.ipcd_write);
+	pmq_destroy(runs.ipcd_uss_ro);
+	pmq_destroy(runs.ipcd_usd_wo);
 #else
 	return;
 #endif

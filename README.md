@@ -87,13 +87,16 @@ Stop all scheduled entries for the user by running the following command:
 
 ## Documentation
 
-Reference Manual in HTML format:
+Useful documentation links:
 
-  * [http://doc.usched.org/uSched_Reference_Manual.html](http://doc.usched.org/uSched_Reference_Manual.html)
+  * [GitHub uSched Wiki](https://github.com/ucodev/usched/wiki) - The official uSched project wiki.
+  * [uSched FAQ](https://github.com/ucodev/usched/wiki/FAQ) - Frequently Asked Questions.
+  * [Getting Help](https://github.com/ucodev/usched/wiki#getting-help) - How to get help installing, configuring and using the project.
 
-Reference Manual in PDF format:
+Reference Manual:
 
-  * [http://doc.usched.org/uSched_Reference_Manual.pdf](http://doc.usched.org/uSched_Reference_Manual.pdf)
+  * [HTML](http://doc.usched.org/uSched_Reference_Manual.html) format.
+  * [PDF](http://doc.usched.org/uSched_Reference_Manual.pdf) format.
 
 Overview manual page:
 

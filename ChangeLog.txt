@@ -1,3 +1,6 @@
+v0.2-dev-26 (2015-04-01):
+ - Updated README.md with useful documentation links
+
 v0.2-dev-25 (2015-03-31):
  - Correctly set errno for error reporting of threads
  - Added the THANKS.txt file

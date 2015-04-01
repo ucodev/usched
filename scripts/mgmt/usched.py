@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 25-03-2015
+# Date: 01-04-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -34,10 +34,12 @@ import time
 CONFIG_USCHED_ADMIN_BIN = "@_SYSSBINDIR_@/usa"
 CONFIG_USCHED_DAEMON_BIN = "@_SYSSBINDIR_@/usd"
 CONFIG_USCHED_EXEC_BIN = "@_SYSSBINDIR_@/use"
+CONFIG_USCHED_STAT_BIN = "@_SYSSBINDIR_@/uss"
 CONFIG_USCHED_MONITOR_BIN = "@_SYSSBINDIR_@/usm"
 CONFIG_USCHED_PREINIT_BIN = "@_SYSSBINDIR_@/usched_preinit"
 CONFIG_USCHED_DAEMON_PID_FILE = "@_SYSRUNDIR_@/usched_usd.pid"
 CONFIG_USCHED_EXEC_PID_FILE = "@_SYSRUNDIR_@/usched_use.pid"
+CONFIG_USCHED_STAT_PID_FILE = "@_SYSRUNDIR_@/usched_uss.pid"
 
 # Operations
 USCHED_OP_FLUSH = "flush"
@@ -135,8 +137,30 @@ def usched_start():
 		status = 127
 
 	if status != EXIT_SUCCESS:
-		print_info("Failed: Unable to commit uSched configuration.\n")
+		print_info("Failed: Unable to commit uSched Core configuration.\n")
 		return False
+
+	# Commit uSched Stat configuration changes
+	try:
+		status = subprocess.call([CONFIG_USCHED_ADMIN_BIN, "commit", "stat"])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to commit uSched Stat configuration.\n")
+		return False
+
+	# Start uSched Status and Statistics module
+	try:
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_STAT_PID_FILE, "-r", "-S", CONFIG_USCHED_STAT_BIN])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to start uSched Status and Statistics Module\n")
+		return False
+
+	time.sleep(1)
 
 	# Start uSched Executer
 	try:
@@ -145,7 +169,7 @@ def usched_start():
 		status = 127
 
 	if status != EXIT_SUCCESS:
-		print_info("Failed: Unable to start uSched Executer\n")
+		print_info("Failed: Unable to start uSched Executer Module\n")
 		return False
 
 	time.sleep(1)
@@ -179,16 +203,24 @@ def usched_stop():
 	if signal_pid_file(CONFIG_USCHED_DAEMON_PID_FILE, signal.SIGTERM) == False:
 		return False
 
-	# Terminate use
-	if signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGTERM) == False:
-		return False
-
 	# Wait for 'usd' to terminate
 	while os.path.isfile(CONFIG_USCHED_DAEMON_PID_FILE):
 		time.sleep(1)
 
+	# Terminate use
+	if signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGTERM) == False:
+		return False
+
 	# Wait for 'use' to terminate
 	while os.path.isfile(CONFIG_USCHED_EXEC_PID_FILE):
+		time.sleep(1)
+
+	# Terminate uss
+	if signal_pid_file(CONFIG_USCHED_STAT_PID_FILE, signal.SIGTERM) == False:
+		return False
+
+	# Wait for 'use' to terminate
+	while os.path.isfile(CONFIG_USCHED_STAT_PID_FILE):
 		time.sleep(1)
 
 	return True
@@ -203,11 +235,17 @@ def usched_force_stop():
 		# Terminate use
 		signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGKILL, True)
 
+		# Terminate use
+		signal_pid_file(CONFIG_USCHED_STAT_PID_FILE, signal.SIGKILL, True)
+
 		# Remote the daemon pid file
 		os.unlink(CONFIG_USCHED_DAEMON_PID_FILE)
 
 		# Remote the exec pid file
 		os.unlink(CONFIG_USCHED_EXEC_PID_FILE)
+
+		# Remote the stat pid file
+		os.unlink(CONFIG_USCHED_STAT_PID_FILE)
 	except:
 		pass
 

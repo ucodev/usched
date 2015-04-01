@@ -60,6 +60,10 @@
 #define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
 #define CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY	"thread.priority"
 #define CONFIG_USCHED_FILE_CORE_THREAD_WORKERS	"thread.workers"
+#define CONFIG_USCHED_FILE_EXEC_IPC_MSGMAX	"ipc.msgmax"
+#define CONFIG_USCHED_FILE_EXEC_IPC_MSGSIZE	"ipc.msgsize"
+#define CONFIG_USCHED_FILE_EXEC_IPC_NAME	"ipc.name"
+#define CONFIG_USCHED_FILE_EXEC_IPC_KEY		"ipc.key"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_ADDR	"bind.addr"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_PORT	"bind.port"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"
@@ -297,6 +301,13 @@ struct usched_config_core {
 	unsigned int thread_workers;
 };
 
+struct usched_config_exec {
+	long ipc_msgmax;
+	long ipc_msgsize;
+	char *ipc_name;
+	char *ipc_key;
+};
+
 struct usched_config_network {
 	char *bind_addr;
 	char *bind_port;
@@ -309,9 +320,7 @@ struct usched_config_stat {
 	char *jail_dir;
 	long ipc_msgmax;
 	long ipc_msgsize;
-	char *ipc_prefix;
-	char *ipc_name_uss_ro;
-	char *ipc_name_usd_wo;
+	char *ipc_name;
 	char *ipc_key;
 	char *privdrop_user;
 	char *privdrop_group;
@@ -322,20 +331,23 @@ struct usched_config_stat {
 struct usched_config {
 	struct usched_config_auth auth;
 	struct usched_config_core core;
+	struct usched_config_exec exec;
 	struct usched_config_network network;
-	struct usched_config_users users;
 	struct usched_config_stat stat;
+	struct usched_config_users users;
 };
 
 
 /* Prototypes */
 int config_init_auth(struct usched_config_auth *auth);
 int config_init_core(struct usched_config_core *core);
+int config_init_exec(struct usched_config_exec *exec);
 int config_init_network(struct usched_config_network *network);
 int config_init_stat(struct usched_config_stat *stat);
 int config_init_users(struct usched_config_users *users);
 void config_destroy_auth(struct usched_config_auth *auth);
 void config_destroy_core(struct usched_config_core *core);
+void config_destroy_exec(struct usched_config_exec *exec);
 void config_destroy_network(struct usched_config_network *network);
 void config_destroy_stat(struct usched_config_stat *stat);
 void config_destroy_users(struct usched_config_users *users);

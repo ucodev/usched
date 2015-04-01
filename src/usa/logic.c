@@ -104,6 +104,13 @@ int logic_admin_process_change(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_change(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_change(): category_exec_change(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
 		if (category_network_change(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
@@ -155,6 +162,13 @@ int logic_admin_process_show(void) {
 		if (category_core_show(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_show(): category_core_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_exec_show(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -212,6 +226,13 @@ int logic_admin_process_commit(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_exec_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
 		if (category_network_commit(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
@@ -263,6 +284,13 @@ int logic_admin_process_rollback(void) {
 		if (category_core_rollback(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_rollback(): category_core_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_exec_rollback(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}

@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Stat
  *
- * Date: 31-03-2015
+ * Date: 01-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,7 +44,7 @@ int pmq_stat_init(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	int errsv = 0;
 
-	if ((runs.ipcd = pmq_init(runs.config.stat.ipc_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
+	if ((runs.ipcd_read = pmq_init(runs.config.stat.ipc_name_read, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
 		errsv = errno;
 		log_crit("pmq_stat_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
@@ -60,7 +60,8 @@ int pmq_stat_init(void) {
 
 void pmq_stat_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
-	pmq_destroy(runs.ipcd);
+	pmq_destroy(runs.ipcd_read);
+	pmq_destroy(runs.ipcd_write);
 #else
 	return;
 #endif

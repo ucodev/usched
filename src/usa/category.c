@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 19-03-2015
+ * Date: 01-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -1283,6 +1283,30 @@ int category_network_show(size_t argc, char **args) {
 	log_warn("category_network_show(): Invalid 'show network' component: %s\n", args[0]);
 	errno = EINVAL;
 
+	return -1;
+}
+
+int category_stat_commit(size_t argc, char **args) {
+	/* TODO */
+	errno = EINVAL;
+	return -1;
+}
+
+int category_stat_rollback(size_t argc, char **args) {
+	/* TODO**/
+	errno = EINVAL;
+	return -1;
+}
+
+int category_stat_change(size_t argc, char **args) {
+	/* TODO */
+	errno = EINVAL;
+	return -1;
+}
+
+int category_stat_show(size_t argc, char **args) {
+	/* TODO */
+	errno = EINVAL;
 	return -1;
 }
 

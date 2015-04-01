@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 31-03-2015
+ * Date: 01-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,7 @@
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"
 #define CONFIG_USCHED_DIR_NETWORK		"network"
+#define CONFIG_USCHED_DIR_STAT			"stat"
 #define CONFIG_USCHED_DIR_USERS			"users"
 #define CONFIG_USCHED_FILE_AUTH_BL_GID		"blacklist.gid"
 #define CONFIG_USCHED_FILE_AUTH_BL_UID		"blacklist.uid"
@@ -64,8 +65,16 @@
 #define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT	"conn.timeout"
 #define CONFIG_USCHED_FILE_NETWORK_SOCK_NAME	"sock.name"
+#define CONFIG_USCHED_FILE_STAT_JAIL_DIR	"jail.dir"
+#define CONFIG_USCHED_FILE_STAT_IPC_MSGMAX	"ipc.msgmax"
+#define CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE	"ipc.msgsize"
+#define CONFIG_USCHED_FILE_STAT_IPC_NAME	"ipc.name"
+#define CONFIG_USCHED_FILE_STAT_IPC_KEY		"ipc.key"
+#define CONFIG_USCHED_FILE_STAT_PRIVDROP_USER	"privdrop.user"
+#define CONFIG_USCHED_FILE_STAT_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_DAEMON_PID_FILE		"@_SYSRUNDIR_@/usched_usd.pid"
 #define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_use.pid"
+#define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_uss.pid"
 #define CONFIG_USCHED_ADMIN_PROC_NAME		"usa"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"
@@ -297,9 +306,12 @@ struct usched_config_network {
 };
 
 struct usched_config_stat {
+	char *jail_dir;
 	long ipc_msgmax;
 	long ipc_msgsize;
-	char *ipc_name;
+	char *ipc_prefix;
+	char *ipc_name_read;
+	char *ipc_name_write;
 	char *ipc_key;
 	char *privdrop_user;
 	char *privdrop_group;

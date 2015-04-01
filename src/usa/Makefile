@@ -6,7 +6,7 @@ ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/config.o ../common/debug.o ../common/input.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/term.o
-OBJS=admin.o all.o auth.o category.o config.o core.o file.o ipc.o logic.o network.o op.o parse.o pmq.o print.o runtime.o usage.o users.o
+OBJS=admin.o all.o auth.o category.o config.o core.o file.o ipc.o logic.o network.o op.o parse.o pmq.o print.o runtime.o stat.o usage.o users.o
 TARGET=usa
 SYSSBINDIR=`cat ../../.dirsbin`
 
@@ -26,6 +26,7 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c pmq.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c print.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c stat.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c usage.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c users.c
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Stat
  *
- * Date: 31-03-2015
+ * Date: 01-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -71,7 +71,7 @@ int ipc_stat_init(void) {
 	}
 
 	/* Wait for IPC authentication string */
-	if (mq_receive(runs.ipcd, ipc_auth, (size_t) runs.config.stat.ipc_msgsize, 0) < 0) {
+	if (mq_receive(runs.ipcd_read, ipc_auth, (size_t) runs.config.stat.ipc_msgsize, 0) < 0) {
 		errsv = errno;
 		log_crit("ipc_stat_init(): mq_receive(): %s\n", strerror(errno));
 		mm_free(ipc_auth);
@@ -104,7 +104,7 @@ int ipc_stat_init(void) {
 
  #if CONFIG_USE_IPC_UNIX == 1
 	/* Create the UNIX socket */
-	if ((runs.ipc_bind_fd = panet_server_unix(runs.config.stat.ipc_name, PANET_PROTO_UNIX_STREAM, runs.config.stat.ipc_msgmax)) == (sock_t) -1) {
+	if ((runs.ipc_bind_fd = panet_server_unix(runs.config.stat.ipc_name_read, PANET_PROTO_UNIX_STREAM, runs.config.stat.ipc_msgmax)) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): panet_server_unix(): %s\n", strerror(errno));
 		errno = errsv;
@@ -112,7 +112,7 @@ int ipc_stat_init(void) {
 	}
 
 	/* Grant that it's owned by UID 0 and GID 0 */
-	if (chown(runs.config.stat.ipc_name, 0, 0) < 0) {
+	if (chown(runs.config.stat.ipc_name_read, 0, 0) < 0) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): chown(): %s\n", strerror(errno));
 		errno = errsv;
@@ -120,7 +120,7 @@ int ipc_stat_init(void) {
 	}
 
 	/* Grant that it's only accessible by UID 0 */
-	if (chmod(runs.config.stat.ipc_name, 0600) < 0) {
+	if (chmod(runs.config.stat.ipc_name_read, 0600) < 0) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): chmod(): %s\n", strerror(errno));
 		errno = errsv;
@@ -128,7 +128,7 @@ int ipc_stat_init(void) {
 	}
 
 	/* Wait for the client connection */
-	if ((runs.ipcd = (sock_t) accept(runs.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
+	if ((runs.ipcd_read = (sock_t) accept(runs.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): accept(): %s\n", strerror(errno));
 		errno = errsv;
@@ -136,7 +136,7 @@ int ipc_stat_init(void) {
 	}
 
  #elif CONFIG_USE_IPC_INET == 1
-	if ((runs.ipc_bind_fd = panet_server_ipv4("127.0.0.1", runs.config.stat.ipc_name, PANET_PROTO_TCP, runs.config.stat.ipc_msgmax)) == (sock_t) -1) {
+	if ((runs.ipc_bind_fd = panet_server_ipv4("127.0.0.1", runs.config.stat.ipc_name_read, PANET_PROTO_TCP, runs.config.stat.ipc_msgmax)) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): panet_server_ipv4(): %s\n", strerror(errno));
 		errno = errsv;
@@ -144,7 +144,7 @@ int ipc_stat_init(void) {
 	}
 
 	/* Wait for the client connection */
-	if ((runs.ipcd = (sock_t) accept(runs.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) == (sock_t) -1) {
+	if ((runs.ipcd_read = (sock_t) accept(runs.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): accept(): %s\n", strerror(errno));
 		errno = errsv;
@@ -163,7 +163,7 @@ int ipc_stat_init(void) {
 	runs.ipc_bind_fd = (sock_t) -1;
 
 	/* Wait for authentication string */
-	if (panet_read(runs.ipcd, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
+	if (panet_read(runs.ipcd_read, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
 		errsv = errno;
 		log_warn("panet_read(): Unable to read IPC authentication string: (%s)\n", strerror(errno));
 		errno = errsv;
@@ -189,7 +189,8 @@ void ipc_stat_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	pmq_stat_destroy();
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	panet_safe_close(runs.ipcd);
+	panet_safe_close(runs.ipcd_read);
+	panet_safe_close(runs.ipcd_write);
 	panet_safe_close(runs.ipc_bind_fd);
 #else
 	return;

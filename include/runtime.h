@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 31-03-2015
+ * Date: 01-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -195,7 +195,8 @@ struct usched_runtime_stat {
 #endif
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
-	sock_t ipcd;
+	sock_t ipcd_read;
+	sock_t ipcd_write;
 #endif
 
 	struct usched_config config;

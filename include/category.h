@@ -3,7 +3,7 @@
  * @brief uSched
  *       Category processing interface header
  *
- * Date: 01-04-2015
+ * Date: 02-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,6 +43,10 @@ int category_core_commit(size_t argc, char **args);
 int category_core_rollback(size_t argc, char **args);
 int category_core_change(size_t argc, char **args);
 int category_core_show(size_t argc, char **args);
+int category_exec_commit(size_t argc, char **args);
+int category_exec_rollback(size_t argc, char **args);
+int category_exec_change(size_t argc, char **args);
+int category_exec_show(size_t argc, char **args);
 int category_network_commit(size_t argc, char **args);
 int category_network_rollback(size_t argc, char **args);
 int category_network_change(size_t argc, char **args);

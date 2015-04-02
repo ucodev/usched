@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 01-04-2015
+ * Date: 02-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -864,6 +864,137 @@ int config_init_core(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_init_exec_ipc_msgmax(struct usched_config_exec *exec) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_MSGMAX, &exec->ipc_msgmax);
+}
+
+static int _config_validate_exec_ipc_msgmax(const struct usched_config_exec *exec) {
+	return exec->ipc_msgmax > 0;
+}
+
+static int _config_init_exec_ipc_msgsize(struct usched_config_exec *exec) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_MSGSIZE, &exec->ipc_msgsize);
+}
+
+static int _config_validate_exec_ipc_msgsize(const struct usched_config_exec *exec) {
+	return exec->ipc_msgsize > 0;
+}
+
+static int _config_init_exec_ipc_name(struct usched_config_exec *exec) {
+	if (!(exec->ipc_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_NAME)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_exec_ipc_name(const struct usched_config_exec *exec) {
+#if CONFIG_USE_IPC_PMQ == 1
+	if (exec->ipc_name[0] != '/') {
+		errno = EINVAL;
+		return -1;
+	}
+#elif CONFIG_USE_IPC_UNIX == 1
+	/* TODO */
+#elif CONFIG_USE_IPC_INET == 1
+	int port = 0;
+
+	if (!strisnum(exec->ipc_name)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if ((port < 1) || (port > 65535)) {
+		errno = EINVAL;
+		return -1;
+	}
+#endif
+	return 1;
+}
+
+static int _config_init_exec_ipc_key(struct usched_config_exec *exec) {
+	if (!(exec->ipc_key = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_KEY)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_exec_ipc_key(const struct usched_config_exec *exec) {
+	if (strlen(exec->ipc_key) < 32)
+		return 0;
+
+	if (strlen(exec->ipc_key) > CONFIG_USCHED_AUTH_IPC_SIZE)
+		return 0;
+
+	return 1;
+}
+
+int config_init_exec(struct usched_config_exec *exec) {
+	int errsv = 0;
+
+	/* Read ipc msg max */
+	if (_config_init_exec_ipc_msgmax(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_msgmax(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc msgmax */
+	if (!_config_validate_exec_ipc_msgmax(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_msgmax(): Invalid exec.ipc.msgmax value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc msg size */
+	if (_config_init_exec_ipc_msgsize(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_msgsize(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc msgsize */
+	if (!_config_validate_exec_ipc_msgsize(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_msgsize(): Invalid exec.ipc.msgsize value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc name */
+	if (_config_init_exec_ipc_name(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_name(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc name */
+	if (!_config_validate_exec_ipc_name(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_name(): Invalid exec.ipc.name value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc key */
+	if (_config_init_exec_ipc_key(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc key */
+	if (!_config_validate_exec_ipc_key(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_key(): Invalid exec.ipc.key value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Success */
+	return 0;
+}
+
 static int _config_init_network_bind_addr(struct usched_config_network *network) {
 	if (!(network->bind_addr = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR)))
 		return -1;
@@ -1029,7 +1160,7 @@ static int _config_validate_stat_ipc_msgsize(const struct usched_config_stat *st
 }
 
 static int _config_init_stat_ipc_name(struct usched_config_stat *stat) {
-	if (!(stat->ipc_prefix = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME)))
+	if (!(stat->ipc_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME)))
 		return -1;
 
 	return 0;
@@ -1037,22 +1168,21 @@ static int _config_init_stat_ipc_name(struct usched_config_stat *stat) {
 
 static int _config_validate_stat_ipc_name(const struct usched_config_stat *stat) {
 #if CONFIG_USE_IPC_PMQ == 1
-	if (stat->ipc_prefix[0] != '/') {
+	if (stat->ipc_name[0] != '/') {
 		errno = EINVAL;
 		return -1;
 	}
 #elif CONFIG_USE_IPC_UNIX == 1
 	/* TODO */
 #elif CONFIG_USE_IPC_INET == 1
-	int port = atoi(stat->ipc_prefix);
+	int port = atoi(stat->ipc_name);
 
-	if (!strisnum(stat->ipc_prefix)) {
+	if (!strisnum(stat->ipc_name)) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	/* Note that the max value here _IS_ (and must be) 65534, because two ports will be used */
-	if ((port < 1) || (port > 65534)) {
+	if ((port < 1) || (port > 0xffff)) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -1166,37 +1296,6 @@ int config_init_stat(struct usched_config_stat *stat) {
 		errno = EINVAL;
 		return -1;
 	}
-
-	/* Setup the ipc name for reading (will be written by usd and use) */
-	if (!(stat->ipc_name_uss_ro = mm_alloc(strlen(stat->ipc_prefix) + sizeof("_read")))) {
-		errsv = errno;
-		log_warn("_config_init_stat(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-#if CONFIG_USE_IPC_PMQ == 1 || CONFIG_USE_IPC_UNIX == 1
-	strcpy(stat->ipc_name_uss_ro, stat->ipc_prefix);
-	strcat(stat->ipc_name_uss_ro, "_read");
-#elif CONFIG_USE_IPC_INET == 1
-	sprintf(stat->ipc_name_uss, "%d", atoi(stat->ipc_prefix));
-#endif
-
-	/* Setup the ipc name for writing (will be read by usd) */
-	if (!(stat->ipc_name_usd_wo = mm_alloc(strlen(stat->ipc_prefix) + sizeof("_write")))) {
-		errsv = errno;
-		log_warn("_config_init_stat(): mm_alloc(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-#if CONFIG_USE_IPC_PMQ == 1 || CONFIG_USE_IPC_UNIX == 1
-	strcpy(stat->ipc_name_usd_wo, stat->ipc_prefix);
-	strcat(stat->ipc_name_usd_wo, "_write");
-#elif CONFIG_USE_IPC_INET == 1
-	/* Add 1 to the port assigned to the read end */
-	sprintf(stat->ipc_name_usd_wo, "%d", atoi(stat->ipc_prefix) + 1);
-#endif
 
 	/* Read ipc key */
 	if (_config_init_stat_ipc_key(stat) < 0) {
@@ -1552,6 +1651,13 @@ void config_destroy_core(struct usched_config_core *core) {
 	memset(core, 0, sizeof(struct usched_config_core));
 }
 
+void config_destroy_exec(struct usched_config_exec *exec) {
+	memset(exec->ipc_name, 0, strlen(exec->ipc_name));
+	mm_free(exec->ipc_name);
+
+	memset(exec, 0, sizeof(struct usched_config_exec));
+}
+
 void config_destroy_network(struct usched_config_network *network) {
 	memset(network->bind_addr, 0, strlen(network->bind_addr));
 	mm_free(network->bind_addr);
@@ -1564,8 +1670,16 @@ void config_destroy_network(struct usched_config_network *network) {
 }
 
 void config_destroy_stat(struct usched_config_stat *stat) {
-	/* TODO */
-	return ;
+	memset(stat->ipc_name, 0, strlen(stat->ipc_name));
+	mm_free(stat->ipc_name);
+	memset(stat->jail_dir, 0, strlen(stat->jail_dir));
+	mm_free(stat->jail_dir);
+	memset(stat->privdrop_user, 0, strlen(stat->privdrop_user));
+	mm_free(stat->privdrop_user);
+	memset(stat->privdrop_group, 0, strlen(stat->privdrop_group));
+	mm_free(stat->privdrop_group);
+
+	memset(stat, 0, sizeof(struct usched_config_stat));
 }
 
 void config_destroy_users(struct usched_config_users *users) {

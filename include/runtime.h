@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 02-04-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -141,10 +141,13 @@ struct usched_runtime_daemon {
 	psched_t *psched;
 
 #if CONFIG_USE_IPC_PMQ == 1
-	mqd_t ipcd;
+	mqd_t ipcd_use_wo;
+	mqd_t ipcd_uss_ro;
 #endif
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	sock_t ipcd;
+	sock_t ipc_bind_fd;
+	sock_t ipcd_use_wo;
+	sock_t ipcd_uss_ro;
 #endif
 
 	pall_fd_t ser_fd;
@@ -171,11 +174,13 @@ struct usched_runtime_exec {
 	struct sigaction sa_save;
 
 #if CONFIG_USE_IPC_PMQ == 1
-	mqd_t ipcd;
+	mqd_t ipcd_usd_ro;
+	mqd_t ipcd_uss_wo;
 #endif
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
-	sock_t ipcd;
+	sock_t ipcd_usd_ro;
+	sock_t ipcd_uss_wo;
 #endif
 
 	struct usched_config config;
@@ -192,12 +197,12 @@ struct usched_runtime_stat {
 
 #if CONFIG_USE_IPC_PMQ == 1
 	mqd_t ipcd_use_ro; /* Read-only */
-	mqd_t ipcd_uss_wo; /* Write-only */
+	mqd_t ipcd_usd_wo; /* Write-only */
 #endif
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
 	sock_t ipcd_use_ro; /* Read-only */
-	sock_t ipcd_uss_wo; /* Write-only */
+	sock_t ipcd_usd_wo; /* Write-only */
 #endif
 
 	struct usched_config config;

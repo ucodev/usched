@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 28-03-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -292,7 +292,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	/* Deliver message to uSched executer (use). Give up on timeout to avoid this notifier to
 	 * stall in the case of a full message queue or unresponsive executer.
 	 */
-	if (mq_timedsend(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
+	if (mq_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	if (panet_write(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {

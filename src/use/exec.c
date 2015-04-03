@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 31-03-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -80,10 +80,10 @@ static void *_exec_cmd(void *arg) {
 
 #if CONFIG_USE_IPC_PMQ == 1
 		/* Close message queue descriptor */
-		mq_close(rune.ipcd);
+		mq_close(rune.ipcd_usd_ro);
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 		/* Close current uSched daemon descriptor */
-		panet_safe_close(rune.ipcd);
+		panet_safe_close(rune.ipcd_usd_ro);
 #endif
 
 		/* Get child pid */
@@ -235,7 +235,7 @@ static void _exec_process(void) {
 		if (runtime_exec_interrupted()) {
 #if CONFIG_USE_IPC_PMQ == 1
 			/* Get posix queue attributes */
-			if (mq_getattr(rune.ipcd, &mqattr) < 0) {
+			if (mq_getattr(rune.ipcd_usd_ro, &mqattr) < 0) {
 				log_warn("_exec_process(): mq_getattr(): %s\n", strerror(errno));
 				break;
 			}
@@ -261,7 +261,7 @@ static void _exec_process(void) {
 
 #if CONFIG_USE_IPC_PMQ == 1
 		/* Read message from queue */
-		if (mq_receive(rune.ipcd, tbuf, (size_t) rune.config.core.ipc_msgsize, 0) < 0) {
+		if (mq_receive(rune.ipcd_usd_ro, tbuf, (size_t) rune.config.core.ipc_msgsize, 0) < 0) {
 			log_warn("_exec_process(): mq_receive(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;
@@ -269,7 +269,7 @@ static void _exec_process(void) {
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
  #if CONFIG_USE_IPC_UNIX == 1
 		/* Get peer credentials */
-		if (local_fd_peer_cred(rune.ipcd, &fd_uid, &fd_gid) < 0) {
+		if (local_fd_peer_cred(rune.ipcd_usd_ro, &fd_uid, &fd_gid) < 0) {
 			log_warn("_exec_process(): local_fd_peer_cred(): %s\n", strerror(errno));
 			continue;
 		}
@@ -287,7 +287,7 @@ static void _exec_process(void) {
 		}
  #endif /* CONFIG_USE_IPC_UNIX */
 		/* Read message from unix socket */
-		if (panet_read(rune.ipcd, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
+		if (panet_read(rune.ipcd_usd_ro, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
 			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
 			mm_free(tbuf);
 

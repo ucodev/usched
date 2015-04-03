@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Stat
  *
- * Date: 01-04-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,7 +45,7 @@
  #include <panet/panet.h>
 #endif
 
-int ipc_stat_init(void) {
+static int _ipc_init_use_ro(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	char *ipc_auth = NULL;
 	int errsv = 0;
@@ -53,7 +53,7 @@ int ipc_stat_init(void) {
 	/* Allocate IPC authentication buffer */
 	if (!(ipc_auth = mm_alloc(runs.config.exec.ipc_msgsize + 1))) {
 		errsv = errno;
-		log_crit("ipc_stat_init(): mm_alloc(): %s\n", strerror(errno));
+		log_crit("_ipc_init_use_ro(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -62,9 +62,9 @@ int ipc_stat_init(void) {
 	memset(ipc_auth, 0, runs.config.exec.ipc_msgsize + 1);
 
 	/* Initialize IPC PMQ interface */
-	if (pmq_stat_init() < 0) {
+	if (pmq_stat_use_init() < 0) {
 		errsv = errno;
-		log_crit("ipc_stat_init(): pmq_stat_init(): %s\n", strerror(errno));
+		log_crit("_ipc_init_use_ro(): pmq_stat_use_init(): %s\n", strerror(errno));
 		mm_free(ipc_auth);
 		errno = errsv;
 		return -1;
@@ -73,7 +73,7 @@ int ipc_stat_init(void) {
 	/* Wait for IPC authentication string from uSched Exec (use) */
 	if (mq_receive(runs.ipcd_use_ro, ipc_auth, (size_t) runs.config.exec.ipc_msgsize, 0) < 0) {
 		errsv = errno;
-		log_crit("ipc_stat_init(): mq_receive(): %s\n", strerror(errno));
+		log_crit("_ipc_init_use_ro(): mq_receive(): %s\n", strerror(errno));
 		mm_free(ipc_auth);
 		errno = errsv;
 		return -1;
@@ -106,7 +106,7 @@ int ipc_stat_init(void) {
 	/* Create the UNIX socket */
 	if ((runs.ipc_bind_fd = panet_server_unix(runs.config.exec.ipc_name, PANET_PROTO_UNIX_STREAM, runs.config.exec.ipc_msgmax)) == (sock_t) -1) {
 		errsv = errno;
-		log_warn("ipc_stat_init(): panet_server_unix(): %s\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): panet_server_unix(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -114,7 +114,7 @@ int ipc_stat_init(void) {
 	/* Grant that it's owned by UID 0 and GID 0 */
 	if (chown(runs.config.exec.ipc_name, 0, 0) < 0) {
 		errsv = errno;
-		log_warn("ipc_stat_init(): chown(): %s\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): chown(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -122,7 +122,7 @@ int ipc_stat_init(void) {
 	/* Grant that it's only accessible by UID 0 */
 	if (chmod(runs.config.exec.ipc_name, 0600) < 0) {
 		errsv = errno;
-		log_warn("ipc_stat_init(): chmod(): %s\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): chmod(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -130,15 +130,15 @@ int ipc_stat_init(void) {
 	/* Wait for the client connection */
 	if ((runs.ipcd_use_ro = (sock_t) accept(runs.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
 		errsv = errno;
-		log_warn("ipc_stat_init(): accept(): %s\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): accept(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
  #elif CONFIG_USE_IPC_INET == 1
-	if ((runs.ipc_bind_fd = panet_server_ipv4("127.0.0.1", runs.config.exec.ipc_name, PANET_PROTO_TCP, runs.config.exec.ipc_msgmax)) == (sock_t) -1) {
+	if ((runs.ipc_bind_fd = panet_server_ipv4(CONFIG_USE_IPC_INET_BINDADDR, runs.config.exec.ipc_name, PANET_PROTO_TCP, runs.config.exec.ipc_msgmax)) == (sock_t) -1) {
 		errsv = errno;
-		log_warn("ipc_stat_init(): panet_server_ipv4(): %s\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): panet_server_ipv4(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -146,7 +146,7 @@ int ipc_stat_init(void) {
 	/* Wait for the client connection */
 	if ((runs.ipcd_use_ro = (sock_t) accept(runs.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_in [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_in) })) == (sock_t) -1) {
 		errsv = errno;
-		log_warn("ipc_stat_init(): accept(): %s\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): accept(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -165,7 +165,7 @@ int ipc_stat_init(void) {
 	/* Wait for authentication string */
 	if (panet_read(runs.ipcd_use_ro, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
 		errsv = errno;
-		log_warn("panet_read(): Unable to read IPC authentication string: (%s)\n", strerror(errno));
+		log_warn("_ipc_init_use_ro(): panet_read(): Unable to read IPC authentication string: (%s)\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -185,12 +185,122 @@ int ipc_stat_init(void) {
 #endif
 }
 
+static int _ipc_init_usd_wo(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	char *ipc_auth = NULL;
+	int errsv = 0;
+
+	if (!(ipc_auth = mm_alloc(runs.config.stat.ipc_msgsize + 1))) {
+		errsv = errno;
+		log_warn("_ipc_init_usd_wo(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset IPC authentication buffer */
+	memset(ipc_auth, 0, runs.config.stat.ipc_msgsize + 1);
+
+	/* Initialize IPC PMQ interface */
+	if (pmq_stat_usd_init() < 0) {
+		errsv = errno;
+		log_warn("_ipc_init_usd_wo(): pmq_stat_usd_init(): %s\n", strerror(errno));
+		mm_free(ipc_auth);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Craft IPC authentication string */
+	strncpy(ipc_auth, runs.config.stat.ipc_key, runs.config.stat.ipc_msgsize);
+
+	/* Send IPC authentication string */
+	if (mq_send(runs.ipcd_usd_wo, ipc_auth, (size_t) runs.config.stat.ipc_msgsize, 0) < 0) {
+		errsv = errno;
+		log_crit("_ipc_init_usd_wo(): mq_send(): %s\n", strerror(errno));
+		mm_free(ipc_auth);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset IPC authentication buffer (again) */
+	memset(ipc_auth, 0, runs.config.stat.ipc_msgsize + 1);
+
+	/* Free IPC authentication buffer */
+	mm_free(ipc_auth);
+
+	/* All good */
+	return 0;
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	char ipc_auth[CONFIG_USCHED_AUTH_IPC_SIZE + 1];
+	int errsv = 0;
+
+	/* Reset IPC authentication buffer */
+	memset(ipc_auth, 0, sizeof(ipc_auth));
+
+ #if CONFIG_USE_IPC_UNIX == 1
+	if ((runs.ipcd_usd_wo = panet_client_unix(runs.config.stat.ipc_name, PANET_PROTO_UNIX_STREAM)) < 0) {
+		errsv = errno;
+		log_warn("_ipc_init_usd_wo(): panet_client_unix(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+ #elif CONFIG_USE_IPC_INET == 1
+	if ((runs.ipcd_usd_wo = panet_client_ipv4(CONFIG_USE_IPC_INET_BINDADDR, runs.config.stat.ipc_name, PANET_PROTO_TCP, 5)) < 0) {
+		errsv = errno;
+		log_warn("_ipc_init_usd_wo(): panet_client_ipv4(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+ #endif
+
+	/* Craft IPC authentication string */
+	strncpy(ipc_auth, runs.config.stat.ipc_key, CONFIG_USCHED_AUTH_IPC_SIZE);
+
+	if (panet_write(runs.ipcd_usd_wo, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
+		errsv = errno;
+		log_crit("_ipc_init_usd_wo(): panet_write(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
+
+}
+
+int ipc_stat_init(void) {
+	int errsv = 0;
+
+	/* Initialize IPC interface with uSched Executer (use) */
+	if (_ipc_init_use_ro() < 0) {
+		errsv = errno;
+		log_warn("ipc_stat_init(): _ipc_init_use_ro(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Initialize IPC interface with uSched Daemon (usd) */
+	if (_ipc_init_usd_wo() < 0) {
+		errsv = errno;
+		log_warn("ipc_stat_init(): _ipc_init_usd_wo(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
 void ipc_stat_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
-	pmq_stat_destroy();
+	pmq_stat_usd_destroy();
+	pmq_stat_use_destroy();
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	panet_safe_close(runs.ipcd_usd_wo);
 	panet_safe_close(runs.ipcd_use_ro);
-	panet_safe_close(runs.ipcd_uss_wo);
 	panet_safe_close(runs.ipc_bind_fd);
 #else
 	return;

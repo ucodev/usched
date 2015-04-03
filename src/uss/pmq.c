@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Stat
  *
- * Date: 01-04-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,20 +40,14 @@
 #include "log.h"
 #include "pmq.h"
 
-int pmq_stat_init(void) {
+int pmq_stat_usd_init(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	int errsv = 0;
+	int oflags = O_WRONLY;
 
-	if ((runs.ipcd_use_ro = pmq_init(runs.config.exec.ipc_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
+	if ((runs.ipcd_usd_wo = pmq_init(runs.config.stat.ipc_name, oflags, 0, 0, 0)) == (mqd_t) -1) {
 		errsv = errno;
-		log_crit("pmq_stat_init(): pmq_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if ((runs.ipcd_uss_wo = pmq_init(runs.config.stat.ipc_name, O_WRONLY | O_CREAT, 0600, runs.config.stat.ipc_msgmax, runs.config.stat.ipc_msgsize)) == (mqd_t) -1) {
-		errsv = errno;
-		log_crit("pmq_stat_init(): pmq_init(): %s\n", strerror(errno));
+		log_crit("pmq_stat_usd_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -65,10 +59,36 @@ int pmq_stat_init(void) {
 #endif
 }
 
-void pmq_stat_destroy(void) {
+int pmq_stat_use_init(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	int errsv = 0;
+	int oflags = O_RDONLY | O_CREAT;
+
+	if ((runs.ipcd_use_ro = pmq_init(runs.config.exec.ipc_name, oflags, 0600, runs.config.exec.ipc_msgmax, runs.config.exec.ipc_msgsize)) == (mqd_t) -1) {
+		errsv = errno;
+		log_crit("pmq_stat_use_init(): pmq_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
+}
+
+void pmq_stat_usd_destroy(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	pmq_destroy(runs.ipcd_usd_wo);
+#else
+	return;
+#endif
+}
+
+void pmq_stat_use_destroy(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	pmq_destroy(runs.ipcd_use_ro);
-	pmq_destroy(runs.ipcd_uss_wo);
 #else
 	return;
 #endif

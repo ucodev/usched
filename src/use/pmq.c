@@ -3,7 +3,7 @@
  * @brief uSched
  *        POSIX Message Queueing interface - Exec
  *
- * Date: 19-03-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,13 +40,14 @@
 #include "log.h"
 #include "pmq.h"
 
-int pmq_exec_init(void) {
+int pmq_exec_usd_init(void) {
 #if CONFIG_USE_IPC_PMQ == 1
 	int errsv = 0;
+	int oflags = O_RDONLY | O_CREAT;
 
-	if ((rune.ipcd = pmq_init(rune.config.core.ipc_name, O_RDONLY, 0, 0, 0)) == (mqd_t) -1) {
+	if ((rune.ipcd_usd_ro = pmq_init(rune.config.core.ipc_name, oflags, 0600, rune.config.core.ipc_msgmax, rune.config.core.ipc_msgsize)) == (mqd_t) -1) {
 		errsv = errno;
-		log_crit("pmq_exec_init(): pmq_init(): %s\n", strerror(errno));
+		log_crit("pmq_exec_usd_init(): pmq_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -58,9 +59,36 @@ int pmq_exec_init(void) {
 #endif
 }
 
-void pmq_exec_destroy(void) {
+int pmq_exec_uss_init(void) {
 #if CONFIG_USE_IPC_PMQ == 1
-	pmq_destroy(rune.ipcd);
+	int errsv = 0;
+	int oflags = O_WRONLY;
+
+	if ((rune.ipcd_uss_wo = pmq_init(rune.config.exec.ipc_name, oflags, 0, 0, 0)) == (mqd_t) -1) {
+		errsv = errno;
+		log_crit("pmq_exec_uss_init(): pmq_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+#else
+	errno = ENOSYS;
+	return -1;
+#endif
+}
+
+void pmq_exec_usd_destroy(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	pmq_destroy(rune.ipcd_usd_ro);
+#else
+	return;
+#endif
+}
+
+void pmq_exec_uss_destroy(void) {
+#if CONFIG_USE_IPC_PMQ == 1
+	pmq_destroy(rune.ipcd_uss_wo);
 #else
 	return;
 #endif

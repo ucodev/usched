@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 01-04-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,6 +39,7 @@
 #define CONFIG_USCHED_NET_DEFAULT_PORT		"7600"
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"
+#define CONFIG_USCHED_DIR_EXEC			"exec"
 #define CONFIG_USCHED_DIR_NETWORK		"network"
 #define CONFIG_USCHED_DIR_STAT			"stat"
 #define CONFIG_USCHED_DIR_USERS			"users"
@@ -148,7 +149,9 @@
 #ifndef CONFIG_USE_IPC_INET
  #define CONFIG_USE_IPC_INET			0
 #endif
-
+#ifndef CONFIG_USE_IPC_INET_BINDADDR
+ #define CONFIG_USE_IPC_INET_BINDADDR		"127.0.0.1"
+#endif
 
 
 /* Configuration compliance checks */

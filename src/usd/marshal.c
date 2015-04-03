@@ -3,7 +3,7 @@
  * @brief uSched
  *        Serialization / Unserialization interface
  *
- * Date: 13-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -123,7 +123,7 @@ int marshal_daemon_monitor_init(void) {
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 1
 	int errsv = 0;
 
-	if (pthread_create(&rund.t_marshal, NULL, &_marshal_monitor, NULL)) {
+	if ((errno = pthread_create(&rund.t_marshal, NULL, &_marshal_monitor, NULL))) {
 		errsv = errno;
 		log_warn("marshal_daemon_init(): pthread_create(): %s\n", strerror(errno));
 		close(rund.ser_fd);

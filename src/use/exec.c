@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 21-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -301,7 +301,7 @@ static void _exec_process(void) {
 #endif
 
 		/* Create a new thread for command execution */
-		if (pthread_create(&ptid, NULL, _exec_cmd, tbuf)) {
+		if ((errno = pthread_create(&ptid, NULL, _exec_cmd, tbuf))) {
 			log_warn("_exec_process(): pthread_create(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;
@@ -310,7 +310,7 @@ static void _exec_process(void) {
 		/* Detach the newly created thread as the resources should be automatically free'd
 		 * upon thread termination.
 		 */
-		if (pthread_detach(ptid))
+		if ((errno = pthread_detach(ptid)))
 			log_crit("_exec_process(): pthread_detach(): %s. (Possible memory leak)\n", strerror(errno));
 	}
 }

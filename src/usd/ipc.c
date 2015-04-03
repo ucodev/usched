@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Daemon
  *
- * Date: 21-03-2015
+ * Date: 26-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -99,7 +99,7 @@ int ipc_daemon_init(void) {
  #elif CONFIG_USE_IPC_INET == 1
 	if ((rund.ipcd = panet_client_ipv4("127.0.0.1", rund.config.core.ipc_name, PANET_PROTO_TCP, 5)) < 0) {
 		errsv = errno;
-		log_warn("ipc_daemon_init(): panet_client_unix(): %s\n", strerror(errno));
+		log_warn("ipc_daemon_init(): panet_client_ipv4(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

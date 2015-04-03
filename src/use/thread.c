@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface - Exec
  *
- * Date: 08-02-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,7 @@
 int thread_exec_behaviour_init(void) {
 	int errsv = 0;
 
-	if (pthread_atfork(&thread_atfork_prepare, &thread_atfork_parent, &thread_atfork_child)) {
+	if ((errno = pthread_atfork(&thread_atfork_prepare, &thread_atfork_parent, &thread_atfork_child))) {
 		errsv = errno;
 		log_crit("thread_exec_behaviour_init(): pthread_atfork(): %s\n", strerror(errno));
 		errno = errsv;
@@ -49,7 +49,7 @@ int thread_exec_behaviour_init(void) {
 }
 
 void thread_exec_behaviour_destroy(void) {
-	if (pthread_atfork(&thread_atfork_noop, &thread_atfork_noop, &thread_atfork_noop))
+	if ((errno = pthread_atfork(&thread_atfork_noop, &thread_atfork_noop, &thread_atfork_noop)))
 		log_crit("thread_exec_behaviour_destroy(): pthread_atfork(): %s\n", strerror(errno));
 }
 

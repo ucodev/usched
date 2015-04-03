@@ -3,7 +3,7 @@
  * @brief uSched
  *        Delta T interface - Daemon
  *
- * Date: 04-03-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -94,7 +94,7 @@ int delta_daemon_time_init(void) {
 	rund.delta_last = 0;
 
 	/* Create a delta time monitor worker */
-	if (pthread_create(&rund.t_delta, NULL, &_delta_daemon_time_monitor, NULL)) {
+	if ((errno = pthread_create(&rund.t_delta, NULL, &_delta_daemon_time_monitor, NULL))) {
 		errsv = errno;
 		log_warn("delta_daemon_time_init(): pthread_create(): %s\n", strerror(errno));
 		errno = errsv;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 21-03-2015
+ * Date: 26-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -80,6 +80,7 @@
 #define CONFIG_USCHED_AUTH_IPC_SIZE		128 /* Size of IPC authentication string */
 #define CONFIG_USCHED_HASH_FNV1A		1
 #define CONFIG_USCHED_HASH_DJB2			0
+#define CONFIG_USCHED_IPC_TIMEOUT		3   /* Number of seconds before give up on sends */
 
 #define CONFIG_POSIX_STRICT			0
 

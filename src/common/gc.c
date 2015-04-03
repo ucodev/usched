@@ -3,7 +3,7 @@
  * @brief uSched
  *        Garbage Collector interface
  *
- * Date: 29-01-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -69,7 +69,7 @@ void gc_cleanup(void) {
 int gc_init(void) {
 	int errsv = 0;
 
-	if (pthread_mutex_init(&_gc_mutex, NULL)) {
+	if ((errno = pthread_mutex_init(&_gc_mutex, NULL))) {
 		errsv = errno;
 		log_warn("gc_init(): pthread_mutex_init(): %s\n", strerror(errno));
 		errno = errsv;

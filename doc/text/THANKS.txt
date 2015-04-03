@@ -1,0 +1,5 @@
+A special thanks to the following:
+
+ * Tiago Sousa (https://plus.google.com/u/0/+TiagoSousa/) - A special thanks for testing the uSched v0.2-dev on the Solaris 5.10 under an UltraSPARC IIe 500 MHz, which also led to improvements of the uConf (uSched configuration package).
+
+

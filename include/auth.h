@@ -4,7 +4,7 @@
  *        Authentication and Authorization interface header
  *        Authentication configuration and administration header
  *
- * Date: 20-02-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,11 +31,13 @@
 
 #include <unistd.h>
 
+#include <panet/panet.h>
+
 #include "config.h"
 
 /* Prototypes */
 #if CONFIG_CLIENT_ONLY == 0
-int auth_daemon_local(int fd, uid_t *uid, gid_t *gid);
+int auth_daemon_local(sock_t fd, uid_t *uid, gid_t *gid);
 int auth_daemon_remote_session_create(const char *username, unsigned char *session, unsigned char *context);
 int auth_daemon_remote_session_verify(const char *username, const unsigned char *session, unsigned char *context, unsigned char *agreed_key, uid_t *uid, gid_t *gid);
 #endif /* CONFIG_CLIENT_ONLY == 0 */

@@ -1,0 +1,88 @@
+#!/tmp/uconfsh
+#
+# uConf: System directory paths configuration script
+#
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
+#
+# Date: 30/03/2015
+#
+# URL: http://www.ucodev.org
+#
+# This file is part of uConf.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+## Preload ##
+if [ -e "./uconf/params/default/preload" ]; then
+	. ./uconf/params/default/preload
+fi
+
+if [ -e "./uconf/params/`uname`/preload" ]; then
+	. ./uconf/params/`uname`/preload
+fi
+
+## Check usage ##
+if [ ${#} -ne 2 ]; then
+	echo "Usage: ${0} <sysdirname> <sysdirpath>"
+	exit 1;
+fi
+
+if [ ! -e "./uconf/params/user/dir" ]; then
+	mkdir -p uconf/params/user/dir
+fi
+
+case "${1}" in
+bin)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+cache)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+conf)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+doc)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+include)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+lib)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+man)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+run)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+sbin)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+share)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+tmp)
+	printf -- ${2} > uconf/params/user/dir/${1}
+	;;
+*)
+	echo "Invalid sysdirname: ${1}."
+	exit 1
+esac
+
+echo "System '${1}' directory set to '${2}'"
+
+exit 0
+

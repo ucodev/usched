@@ -1,0 +1,105 @@
+#!/tmp/uconfsh
+#
+# uConf: Project Builder script
+#
+# Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
+#
+# Date: 30/03/2015
+#
+# URL: http://www.ucodev.org
+#
+# This file is part of uConf.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+## Preload ##
+if [ -e "./uconf/params/default/preload" ]; then
+	. ./uconf/params/default/preload
+fi
+
+if [ -e "./uconf/params/`uname`/preload" ]; then
+	. ./uconf/params/`uname`/preload
+fi
+
+# Check if 'do' is done
+if [ -e ".done" ]; then
+	echo "Already done. Run 'undo' first."
+	exit 1
+fi
+
+## Detect compiler ##
+. ./uconf/lib/sh/compiler.inc
+
+## Detect linker ##
+. ./uconf/lib/sh/linker.inc
+
+## Detect architecture ##
+. ./uconf/lib/sh/arch.inc
+
+## OS-Specific options ##
+. ./uconf/lib/sh/os-spec.inc
+
+## Addon options ##
+. ./uconf/lib/sh/addons.inc
+
+## Test optional libraries ##
+. ./uconf/lib/sh/opt-libs.inc
+
+## Configure system directories
+. ./uconf/lib/sh/dirconf.inc
+
+## Replace configuration variables
+. ./uconf/lib/sh/varsubst.inc
+
+## Build ##
+if [ -e "./uconf/params/default/do" ]; then
+	while read cmd; do
+		/bin/sh -c "${cmd}"
+
+		if [ $? -ne 0 ]; then
+			echo "Failed to execute: ${cmd}"
+			exit 1
+		fi
+	done < ./uconf/params/default/do
+fi
+
+if [ -e "./uconf/params/`cat .osname 2> /dev/null`/do" ]; then
+	while read cmd; do
+		/bin/sh -c "${cmd}"
+
+		if [ $? -ne 0 ]; then
+			echo "Failed to execute: ${cmd}"
+			exit 1
+		fi
+	done < ./uconf/params/`cat .osname`/do
+fi
+
+if [ -e "./uconf/params/user/do" ]; then
+	while read cmd; do
+		/bin/sh -c "${cmd}"
+
+		if [ $? -ne 0 ]; then
+			echo "Failed to execute: ${cmd}"
+			exit 1
+		fi
+	done < ./uconf/params/user/do
+fi
+
+touch .done
+
+echo "Build completed."
+
+exit 0
+

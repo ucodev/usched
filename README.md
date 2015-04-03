@@ -1,13 +1,12 @@
 ## Summary 
 
-A command-line scheduler with an almost-natural language interpreter.
-It also delivers a powerful programming interface for multiple programming languages.
+A free and open source command-line scheduler with an almost-natural language interpreter, delivering remote management and an intuitive programming interface for multiple programming languages.
 
 
 
 ## Description
 
-uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specificied interval, and optionally stopping them at any other particular time.
+uSched services provide an interface to schedule commands to be executed at a particular time, optionally repeating them over a specified interval, and optionally stopping them at any other particular time.
 
 It provides a simple and intuitive natural language that is intepreted via a command line client, but can also be integrated into any programming language through its client libraries and bindings.
 
@@ -17,7 +16,9 @@ It also operates as a **client/server**, where requests performed by clients can
 
 ## Portability
 
-uSched is designed to be compliant with any POSIX operating system. There are some features that may not be enabled by default in the case that some non-portable calls being unavailable for the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the [include/config.h](https://github.com/ucodev/usched/blob/master/include/config.h) file.
+uSched is designed to be compliant with any POSIX-oriented operating system. It was successfully tested under **Linux**, **FreeBSD**, **OpenBSD**, **SunOS**, **Minix**, **Darwin** and others, in different architectures (**x86/64**, **ARM** and **SPARC**).
+
+There are some features that may not be enabled by default in the case that some non-portable calls being unavailable on the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the [include/config.h](https://github.com/ucodev/usched/blob/master/include/config.h) file.
 
 uSched client will compile on most Windows versions and the API bindings are available for C#.
 
@@ -86,13 +87,16 @@ Stop all scheduled entries for the user by running the following command:
 
 ## Documentation
 
-Reference Manual in HTML format:
+Useful documentation links:
 
-  * [http://doc.usched.org/uSched_Reference_Manual.html](http://doc.usched.org/uSched_Reference_Manual.html)
+  * [GitHub uSched Wiki](https://github.com/ucodev/usched/wiki) - The official uSched project wiki.
+  * [uSched FAQ](https://github.com/ucodev/usched/wiki/FAQ) - Frequently Asked Questions.
+  * [Getting Help](https://github.com/ucodev/usched/wiki#getting-help) - How to get help installing, configuring and using the project.
 
-Reference Manual in PDF format:
+Reference Manual:
 
-  * [http://doc.usched.org/uSched_Reference_Manual.pdf](http://doc.usched.org/uSched_Reference_Manual.pdf)
+  * [HTML](http://doc.usched.org/uSched_Reference_Manual.html) format.
+  * [PDF](http://doc.usched.org/uSched_Reference_Manual.pdf) format.
 
 Overview manual page:
 
@@ -137,6 +141,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       int main(void) {
           usched_init();
           
+          /* Optional remote parameters. Not required for localhost requests */
+          usched_opt_set_remote_hostname("remote.usched.example.com");
+          usched_opt_set_remote_port("7600");
+          usched_opt_set_remote_username("username");
+          usched_opt_set_remote_password("password");
+          
+          /* Perform the request */
           usched_request("run \'df -h >> /tmp/disk.txt\' now then every 30 seconds");
           
           usched_result_free_run();
@@ -155,6 +166,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
               public static void Main(string[] args) {
                   Usched usc = new Usched();
                   
+                  /* Optional remote parameters. Not required for localhost requests */
+                  usc.SetHostname("remote.usched.example.com");
+                  usc.SetPort("7600");
+                  usc.SetUsername("username");
+                  usc.SetPassword("password");
+                  
+                  /* Perform the request */
                   usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
               }
           }
@@ -166,6 +184,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
           public static void main(String[] args) {
               Usched usc = new Usched();
               
+              /* Optional remote parameters. Not required for localhost requests */
+              usc.SetHostname("remote.usched.example.com");
+              usc.SetPort("7600");
+              usc.SetUsername("username");
+              usc.SetPassword("password");
+              
+              /* Perform the request */
               usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
           }
       }
@@ -176,6 +201,13 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       
       $usc = new Usched();
       
+      /* Optional remote parameters. Not required for localhost requests */
+      $usc->SetHostname("remote.usched.example.com");
+      $usc->SetPort("7600");
+      $usc->SetUsername("username");
+      $usc->SetPassword("password");
+      
+      /* Perform the request */
       $usc->Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds");
 
 ### Python
@@ -184,19 +216,31 @@ See [example/](https://github.com/ucodev/usched/tree/master/example) directory f
       
       usc = Usched()
       
+      /* Optional remote parameters. Not required for localhost requests */
+      usc.SetHostname("remote.usched.example.com");
+      usc.SetPort("7600");
+      usc.SetUsername("username");
+      usc.SetPassword("password");
+      
+      /* Perform the request */
       usc.Request("run 'df -h >> /tmp/disk.txt' now then every 30 seconds")
+
+
+
+## License
+
+uSched is licensed under the [GNU General Public License version 3](https://www.gnu.org/copyleft/gpl.html).
 
 
 
 ## Contributing
 
-Every open source project lives from people that gives some of their precious time to contribute with ideas, designs, solutions, fresh code, documentation, bug fixes, bug reports or any other form of contribution you can imagine. If you think this project is a good candidate for you to contribute to in any form, we'll be very thankful to hear from you.
-
-The best way to do it is through GitHub. Clone it, fork it, change it and improved it. Then send us a pull request with your work.
+The best way to do it is through GitHub. Clone it, fork it, change it and improved it. Then check the [project wiki](https://github.com/ucodev/usched/wiki) for details regarding the submission of contributions.
 
 
 
 ## Notes
 
-The current project revision is on an **beta stage** and shall not be used beyond testing purposes.
+* Tree version v0.1 of the project is on an **beta stage** and shall not be used beyond testing purposes.
+* Tree version v0.2 is **under development** and may not be fully functional.
 

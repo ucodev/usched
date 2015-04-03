@@ -3,7 +3,7 @@
  * @brief uSched
  *        Local utilities and handlers interface
  *
- * Date: 14-03-2015
+ * Date: 25-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -101,7 +101,7 @@ int local_fd_peer_cred(int fd, uid_t *uid, gid_t *gid) {
 #elif CONFIG_SYS_SOLARIS == 1
 	ucred_t *uc = NULL;
 
-	if (getpeerucred(fd, &ucred) < 0) {
+	if (getpeerucred(fd, &uc) < 0) {
 		errsv = errno;
 		log_warn("local_fd_peer_cred(): getpeerucred(): %s\n", strerror(errno));
 		errno = errsv;

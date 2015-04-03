@@ -1,10 +1,10 @@
-#!/bin/sh
+#!@_SYSSHELL_@
 #
-# @file usched-preinit.sh
+# @file usched_preinit.sh
 # @brief uSched
 #        uSched pre initialization script
 #
-# Date: 25-03-2015
+# Date: 30-03-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #

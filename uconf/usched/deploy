@@ -1,0 +1,14 @@
+#!/bin/sh
+
+./uconf/bin/setup
+
+if [ ${?} -ne 0 ]; then
+	exit 1
+fi
+
+./uconf/usched/deploy_main
+
+if [ ${?} -ne 0 ]; then
+	exit 1
+fi
+

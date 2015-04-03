@@ -3,7 +3,7 @@
  * @brief uSched
  *        String helper interface
  *
- * Date: 03-03-2015
+ * Date: 26-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -106,13 +106,13 @@ char *strreplall(const char *haystack, const char *needle, const char *rcontent)
 int strisascii(const char *s, size_t len) {
 	if (!len) len = strlen(s);
 
-	for ( ; *s && len; s ++, len --) if (*s > 127) return 0;
+	for ( ; *s && len; s ++, len --) if (((unsigned char) *s) > 127) return 0;
 
 	return 1;
 }
 
 int strisnum(const char *s) {
-	for ( ; *s; s ++) if ((*s < 48) || (*s > 57)) return 0;
+	for ( ; *s; s ++) if ((((unsigned char) *s) < 48) || (((unsigned char) *s) > 57)) return 0;
 
 	return 1;
 }

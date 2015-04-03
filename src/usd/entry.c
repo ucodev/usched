@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 21-03-2015
+ * Date: 28-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -51,12 +51,13 @@
 #include "vars.h"
 
 #if CONFIG_USE_IPC_PMQ == 1
+ #include <time.h>
  #include <mqueue.h>
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
  #include <panet/panet.h>
 #endif
 
-static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
+static int _entry_daemon_authorize_local(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
 
 	if (auth_daemon_local(fd, &entry->uid, &entry->gid) < 0) {
@@ -69,7 +70,7 @@ static int _entry_daemon_authorize_local(struct usched_entry *entry, int fd) {
 	return 1;
 }
 
-static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
+static int _entry_daemon_authorize_remote(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
 
 	/* Validate session data and compare user password */
@@ -83,7 +84,7 @@ static int _entry_daemon_authorize_remote(struct usched_entry *entry, int fd) {
 	return 1;
 }
 
-int entry_daemon_authorize(struct usched_entry *entry, int fd) {
+int entry_daemon_authorize(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
 	int ret = -1;
 	struct cll_handler *bl = NULL, *wl = NULL;
@@ -201,6 +202,9 @@ void entry_daemon_exec_dispatch(void *arg) {
 	int ret = 0, errsv = 0;
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
+#if CONFIG_USE_IPC_PMQ == 1
+	struct timespec pmq_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
+#endif
 
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
@@ -285,8 +289,10 @@ void entry_daemon_exec_dispatch(void *arg) {
 	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
 
 #if CONFIG_USE_IPC_PMQ == 1
-	/* Deliver message to uSched executer (use) */
-	if (mq_send(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0) < 0) {
+	/* Deliver message to uSched executer (use). Give up on timeout to avoid this notifier to
+	 * stall in the case of a full message queue or unresponsive executer.
+	 */
+	if (mq_timedsend(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	if (panet_write(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {

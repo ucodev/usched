@@ -88,7 +88,7 @@ Reference Manual - Rev.
 \end_layout
 
 \begin_layout Date
-23rd March 2015
+26th March 2015
 \end_layout
 
 \begin_layout Standard
@@ -119,9 +119,9 @@ Introduction
 \begin_layout Standard
 uSched Services and Tools (or simply uSched) provide an interface to schedule
  commands to be executed at a particular time, optionally repeating them
- over a specificied interval, and optionally stopping them at any other
- particular time.
- It provides a simple and intuitive structured language that is intepreted
+ over a specified interval, and optionally stopping them at any other particular
+ time.
+ It provides a simple and intuitive natural language that is intepreted
  via a command line client, but can also be integrated into any programming
  language through its client libraries and bindings.
  It also operates as a client/server, where requests performed by clients

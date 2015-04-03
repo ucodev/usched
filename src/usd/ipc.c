@@ -32,6 +32,7 @@
 #include <sys/stat.h>
 
 #include "config.h"
+#include "debug.h"
 #include "runtime.h"
 #include "log.h"
 #include "ipc.h"
@@ -163,11 +164,13 @@ static int _ipc_init_uss_ro(void) {
 
 	/* Safe to use strcmp(). ipc_auth will always be NULL terminated (granted by memset() + 1) */
 	if (strcmp(ipc_auth, rund.config.stat.ipc_key)) {
-		log_crit("IPC authentication failed.\n");
+		log_crit("_ipc_init_uss_ro(): IPC authentication failed.\n");
 		mm_free(ipc_auth);
 		errno = EINVAL;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "_ipc_init_uss_ro(): IPC authentication successful.\n");
 
 	/* Reset IPC authentication buffer (again) */
 	memset(ipc_auth, 0, rund.config.stat.ipc_msgsize + 1);
@@ -254,10 +257,12 @@ static int _ipc_init_uss_ro(void) {
 
 	/* Safe to use strcmp(). ipc_auth will always be NULL terminated (granted by memset() + 1) */
 	if (strcmp(ipc_auth, rund.config.stat.ipc_key)) {
-		log_crit("IPC authentication failed.\n");
+		log_crit("_ipc_init_uss_ro(): IPC authentication failed.\n");
 		errno = EINVAL;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "_ipc_init_uss_ro(): IPC authentication successful.\n");
 
 	/* All good */
 	return 0;

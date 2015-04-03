@@ -1,4 +1,8 @@
 make install_all
 make install_doc
 usa change core ipc key "`./tools/usched_ipcpwgen`"
+usa change exec ipc key "`./tools/usched_ipcpwgen`"
+usa change stat ipc key "`./tools/usched_ipcpwgen`"
 usa commit core
+usa commit exec
+usa commit stat

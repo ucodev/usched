@@ -1,3 +1,6 @@
+v0.2-dev-26 (2015-04-03):
+ - Fixed usc(1) manpage
+
 v0.2-dev-26 (2015-04-01):
  - Updated README.md with useful documentation links
 

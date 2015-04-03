@@ -295,7 +295,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	if (mq_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_write(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
+	if (panet_write(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
 		log_warn("entry_daemon_exec_dispatch(): panet_write(): %s\n", strerror(errno));
 #else
  #error "No IPC mechanism defined."

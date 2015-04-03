@@ -299,9 +299,9 @@ void ipc_exec_destroy(void) {
 	pmq_exec_usd_destroy();
 	pmq_exec_uss_destroy();
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	panet_safe_close(runs.ipcd_usd_ro);
-	panet_safe_close(runs.ipcd_uss_wo);
-	panet_safe_close(runs.ipc_bind_fd);
+	panet_safe_close(rune.ipcd_usd_ro);
+	panet_safe_close(rune.ipcd_uss_wo);
+	panet_safe_close(rune.ipc_bind_fd);
 #else
 	return;
 #endif

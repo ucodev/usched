@@ -24,8 +24,12 @@
  *
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
+
+#include <sys/stat.h>
 
 #include "config.h"
 #include "runtime.h"
@@ -206,7 +210,7 @@ static int _ipc_init_uss_ro(void) {
 	}
 
 	/* Wait for the client connection */
-	if ((runs.ipcd_uss_ro = (sock_t) accept(rund.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
+	if ((rund.ipcd_uss_ro = (sock_t) accept(rund.ipc_bind_fd, (struct sockaddr *) (struct sockaddr_un [1]) { { 0 } }, (socklen_t [1]) { sizeof(struct sockaddr_un) })) == (sock_t) -1) {
 		errsv = errno;
 		log_warn("_ipc_init_uss_ro(): accept(): %s\n", strerror(errno));
 		errno = errsv;

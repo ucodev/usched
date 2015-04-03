@@ -1,94 +1,31 @@
-v0.2-dev-26 (2015-04-03):
+v0.1-beta-06 (2015-04-03):
  - Fixed usc(1) manpage
-
-v0.2-dev-26 (2015-04-01):
- - Updated README.md with useful documentation links
-
-v0.2-dev-25 (2015-03-31):
+ - Updated INSTALL.txt and README.md
  - Correctly set errno for error reporting of threads
  - Added the THANKS.txt file
-
-v0.2-dev-24 (2015-03-30):
- - Updated uConf parameters for SunOS and improved system shell configuration
-
-v0.2-dev-23 (2015-03-30):
- - Improved uConf
-
-v0.2-dev-22 (2015-03-30):
- - Updated INSTALL.txt and README.md
-
-v0.2-dev-21 (2015-03-30):
- - More minor fixes on uConf
-
-v0.2-dev-20 (2015-03-30):
- - Fixed minor issues on uConf
-
-v0.2-dev-19 (2015-03-30):
+ - Improved uConf routines and parameters
  - Ported 'deploy' and 'deps' scripts to uConf specific folder
-
-v0.2-dev-18 (2015-03-30):
- - Updated README.md
- - New uConf revision
-
-v0.2-dev-17 (2015-03-28):
+ - Added support for SunOS
  - Fixed lots of minor issues
-
-v0.2-dev-16 (2015-03-28):
  - Added execution permissions to pre-initialization scripts during installation
- - Updated uConf flags for SunOS
-
-v0.2-dev-15 (2015-03-27):
  - Included the missing netinet/in.h header on usd/conn.c
- - Minor fixes on uConf
 
-v0.2-dev-14 (2015-03-27):
- - Fixed minor issues on uConf
- - Added more required paths for SunOS params
+v0.1-beta-05 (2015-03-25):
+ - Forced IPC to be automatically changed on init scripts at service startup
+ - Added support for optional non-root installations to uConf (required for Cygwin installation)
+ - Fixed a typo on ChangeLog.txt
 
-v0.2-dev-13 (2015-03-27):
- - More improvements to uConf to better support SunOS (and others)
- - More improvements to 'deploy' and 'deps' scripts
+v0.1-beta-04 (2015-03-24):
+ - Updated README.md (Added Contributions section)
+ - Updated manpages
 
-v0.2-dev-12 (2015-03-27):
- - Upgraded uConf to better support older versions of SunOS
- - Improved 'deploy' and 'deps' scripts
+v0.1-beta-03 (2015-03-23):
+ - Fixed main Makefile uConf systmp configuration
+ - Included uConf configuration paths into scripts under tests/ directory
+ - Improved uConf scripts
+ - Added support for curl in 'deps' script
+ - Updated INSTALL.txt
 
-v0.2-dev-11 (2015-03-26):
- - Added timeout for IPC send calls.
- - uConf parameters updated.
- - Updated documentation.
-
-v0.2-dev-10 (2015-03-26):
- - Fixed minor issues.
+v0.1-beta-02 (2015-03-23):
  - Updated README.md
-
-v0.2-dev-09 (2015-03-26):
- - Optional __attribute__ ((packed, aligned(x))) instead of #pragma pack to support older compilers
- - Updated uConf parameters for SunOS
-
-v0.2-dev-08 (2015-03-26):
- - New uConf parameters for SunOS support
- - New examples on README.md
-
-v0.2-dev-07 (2015-03-26):
- - Improved IPC code (Minix support)
-
-v0.2-dev-06 (2015-03-26):
- - Improved uConf portability on variables replacement script
-
-v0.2-dev-05 (2015-03-25):
- - Enhanced support for Minix connection handling
-
-v0.2-dev-04 (2015-03-25):
- - Changed uConf parameters
- - Fixed ucred code for SunOS
-
-v0.2-dev-03 (2015-03-25):
- - Changed uConf parameters
-
-v0.2-dev-02 (2015-03-25):
- - Updated README.md
-
-v0.2-dev-01 (2015-03-25):
- - Updated README.md
-
+ - Added ChangeLog.txt

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Admin
  *
- * Date: 27-02-2015
+ * Date: 03-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -69,8 +69,14 @@ static usched_category_t _parse_get_category(const char *category) {
 	if (!strcasecmp(category, USCHED_CATEGORY_CORE_STR))
 		return USCHED_CATEGORY_CORE;
 
+	if (!strcasecmp(category, USCHED_CATEGORY_EXEC_STR))
+		return USCHED_CATEGORY_EXEC;
+
 	if (!strcasecmp(category, USCHED_CATEGORY_NETWORK_STR))
 		return USCHED_CATEGORY_NETWORK;
+
+	if (!strcasecmp(category, USCHED_CATEGORY_STAT_STR))
+		return USCHED_CATEGORY_STAT;
 
 	if (!strcasecmp(category, USCHED_CATEGORY_USERS_STR))
 		return USCHED_CATEGORY_USERS;

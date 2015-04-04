@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Shell implementation
 #
-# Date: 30-03-2015
+# Date: 01-04-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -33,10 +33,12 @@ CONFIG_USCHED_QUIET=0
 CONFIG_USCHED_ADMIN_BIN="@_SYSSBINDIR_@/usa"
 CONFIG_USCHED_DAEMON_BIN="@_SYSSBINDIR_@/usd"
 CONFIG_USCHED_EXEC_BIN="@_SYSSBINDIR_@/use"
+CONFIG_USCHED_STAT_BIN="@_SYSSBINDIR_@/uss"
 CONFIG_USCHED_MONITOR_BIN="@_SYSSBINDIR_@/usm"
 CONFIG_USCHED_PREINIT_BIN="@_SYSSBINDIR_@/usched_preinit"
 CONFIG_USCHED_DAEMON_PID_FILE="@_SYSRUNDIR_@/usched_usd.pid"
 CONFIG_USCHED_EXEC_PID_FILE="@_SYSRUNDIR_@/usched_use.pid"
+CONFIG_USCHED_EXEC_PID_FILE="@_SYSRUNDIR_@/usched_uss.pid"
 
 ## Status ##
 EXIT_SUCCESS=0
@@ -111,12 +113,23 @@ op_start() {
 	fi
 
 	${CONFIG_USCHED_ADMIN_BIN} commit core
+	${CONFIG_USCHED_ADMIN_BIN} commit stat
 
 	if [ ${?} -ne 0 ]; then
 		ret=${?}
 		print_info "Failed to commit uSched Core configuration: "
 		return ${ret}
 	fi
+
+	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_STAT_PID_FILE} -r -S ${CONFIG_USCHED_STAT_BIN}
+
+	if [ ${?} -ne 0 ]; then
+		return ${?}
+	fi
+
+	sleep 1
+
+	while ! [ -f ${CONFIG_USCHED_STAT_PID_FILE} ]; do sleep 1; done
 
 	${CONFIG_USCHED_MONITOR_BIN} -p ${CONFIG_USCHED_EXEC_PID_FILE} -r -S ${CONFIG_USCHED_EXEC_BIN}
 
@@ -144,12 +157,19 @@ op_stop() {
 		kill -TERM `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`
 	fi
 
+	while [ -f ${CONFIG_USCHED_DAEMON_PID_FILE} ]; do sleep 1; done
+
 	if [ -f "${CONFIG_USCHED_EXEC_PID_FILE}" ]; then
 		kill -TERM `cat ${CONFIG_USCHED_EXEC_PID_FILE}`
 	fi
 
-	while [ -f ${CONFIG_USCHED_DAEMON_PID_FILE} ]; do sleep 1; done
 	while [ -f ${CONFIG_USCHED_EXEC_PID_FILE} ]; do sleep 1; done
+
+	if [ -f "${CONFIG_USCHED_STAT_PID_FILE}" ]; then
+		kill -TERM `cat ${CONFIG_USCHED_STAT_PID_FILE}`
+	fi
+
+	while [ -f ${CONFIG_USCHED_STAT_PID_FILE} ]; do sleep 1; done
 
 	return 0
 }
@@ -159,9 +179,11 @@ op_force_stop() {
 
 	(kill -KILL `cat ${CONFIG_USCHED_DAEMON_PID_FILE}`) >& /dev/null
 	(kill -KILL `cat ${CONFIG_USCHED_EXEC_PID_FILE}`) >& /dev/null
+	(kill -KILL `cat ${CONFIG_USCHED_STAT_PID_FILE}`) >& /dev/null
 
 	rm -f ${CONFIG_USCHED_DAEMON_PID_FILE} >& /dev/null
 	rm -f ${CONFIG_USCHED_EXEC_PID_FILE} >& /dev/null
+	rm -f ${CONFIG_USCHED_STAT_PID_FILE} >& /dev/null
 
 	return 0
 }

@@ -94,6 +94,21 @@ for file in ../../src/usm/*.c; do
 done
 echo "   OK"
 
+# Analyze src/uss
+printf " * Checking src/uss... "
+for file in ../../src/uss/*.c; do
+	splint ${INCLUDES} ${DEFINES} -DCONFIG_STAT_SPECIFIC=1 ${SPLINT_OPTS} ${SPLINT_OPTS_EXTRA} ${file} 2> ${SPLINT_OUT}
+
+	if [ ${?} -ne 0 ]; then
+		cat ${SPLINT_OUT}
+		echo "File ${file} failed splint check."
+		rm -f ${SPLINT_OUT}
+		exit 1
+	fi
+done
+echo "   OK"
+
+# We're done
 printf "\nDone.\n"
 
 # Unlink output file
@@ -101,3 +116,4 @@ rm -f ${SPLINT_OUT}
 
 # All good
 exit 0
+

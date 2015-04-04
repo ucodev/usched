@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface header
  *
- * Date: 04-02-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,9 +32,11 @@
 int sig_client_init(void);
 int sig_daemon_init(void);
 int sig_exec_init(void);
+int sig_stat_init(void);
 void sig_client_destroy(void);
 void sig_daemon_destroy(void);
 void sig_exec_destroy(void);
+void sig_stat_destroy(void);
 
 #endif
 

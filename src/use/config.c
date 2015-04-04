@@ -3,9 +3,9 @@
  * @brief uSched
  *        Configuration interface - Exec
  *
- * Date: 31-07-2014
+ * Date: 01-04-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -45,6 +45,13 @@ int config_exec_init(void) {
 		return -1;
 	}
 
+	if (config_init_exec(&config->exec) < 0) {
+		errsv = errno;
+		log_warn("config_exec_init(): config_init_exec(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -52,6 +59,7 @@ void config_exec_destroy(void) {
 	struct usched_config *config = &rune.config;
 
 	config_destroy_core(&config->core);
+	config_destroy_exec(&config->exec);
 
 	memset(config, 0, sizeof(struct usched_config));
 }

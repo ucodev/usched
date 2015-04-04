@@ -3,9 +3,9 @@
  * @brief uSched
  *        Logging interface header
  *
- * Date: 05-08-2014
+ * Date: 31-03-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -34,6 +34,7 @@ int log_client_init(void);
 int log_daemon_init(void);
 int log_exec_init(void);
 int log_monitor_init(void);
+int log_stat_init(void);
 void log_info(const char *fmt, ...);
 void log_warn(const char *fmt, ...);
 void log_crit(const char *fmt, ...);

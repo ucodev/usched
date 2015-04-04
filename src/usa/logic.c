@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Admin
  *
- * Date: 20-02-2015
+ * Date: 01-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -104,10 +104,24 @@ int logic_admin_process_change(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_change(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_change(): category_exec_change(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
 		if (category_network_change(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_change(): category_network_change(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_STAT) {
+		if (category_stat_change(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_change(): category_stat_change(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -151,10 +165,24 @@ int logic_admin_process_show(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_exec_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
 		if (category_network_show(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_show(): category_network_show(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_STAT) {
+		if (category_stat_show(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_show(): category_stat_show(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -198,10 +226,24 @@ int logic_admin_process_commit(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_exec_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
 		if (category_network_commit(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_commit(): category_network_commit(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_STAT) {
+		if (category_stat_commit(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_commit(): category_stat_commit(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}
@@ -245,10 +287,24 @@ int logic_admin_process_rollback(void) {
 			errno = errsv;
 			return -1;
 		}
+	} else if (runa.req->category == USCHED_CATEGORY_EXEC) {
+		if (category_exec_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_exec_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
 	} else if (runa.req->category == USCHED_CATEGORY_NETWORK) {
 		if (category_network_rollback(runa.req->argc, runa.req->args) < 0) {
 			errsv = errno;
 			log_warn("logic_admin_process_rollback(): category_network_rollback(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	} else if (runa.req->category == USCHED_CATEGORY_STAT) {
+		if (category_stat_rollback(runa.req->argc, runa.req->args) < 0) {
+			errsv = errno;
+			log_warn("logic_admin_process_rollback(): category_stat_rollback(): %s\n", strerror(errno));
 			errno = errsv;
 			return -1;
 		}

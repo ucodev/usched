@@ -71,6 +71,18 @@ if [ ${?} -ne 0 ]; then
 fi
 echo "   OK"
 
+# Analyze src/uss
+printf " * Checking src/uss... "
+pscan -p usched.pscan ../../src/uss/*.c 2> ${PSCAN_OUT}
+if [ ${?} -ne 0 ]; then
+	echo "Failed."
+	cat ${PSCAN_OUT}
+	rm -f ${PSCAN_OUT}
+	exit 1
+fi
+echo "   OK"
+
+# We're done
 printf "\nDone.\n"
 
 # Unlink output file

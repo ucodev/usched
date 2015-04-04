@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 28-03-2015
+ * Date: 04-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,7 @@
 #include "conn.h"
 #include "schedule.h"
 #include "vars.h"
+#include "ipc.h"
 
 #if CONFIG_USE_IPC_PMQ == 1
  #include <time.h>
@@ -202,6 +203,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	int ret = 0, errsv = 0;
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
+	struct ipc_use_hdr *hdr = NULL;
 #if CONFIG_USE_IPC_PMQ == 1
 	struct timespec pmq_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
 #endif
@@ -263,7 +265,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	 * Although this check was already performed when receiving the entry from the user,
 	 * this one is required since now the variables are expanded.
 	 */
-	if ((strlen(cmd) + 21) > (size_t) rund.config.core.ipc_msgsize) {
+	if ((strlen(cmd) + sizeof(struct ipc_use_hdr) + 1) > (size_t) rund.config.core.ipc_msgsize) {
 		log_warn("entry_daemon_exec_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
 
 		/* Mark this entry as invalid. */
@@ -276,11 +278,13 @@ void entry_daemon_exec_dispatch(void *arg) {
 	}
 
 	/* Craft message */
-	memcpy(buf, &entry->id, 8);
-	memcpy(buf + 8, &entry->uid, 4);
-	memcpy(buf + 12, &entry->gid, 4);
-	memcpy(buf + 16, &entry->trigger, 4);
-	memcpy(buf + 20, cmd, strlen(cmd));
+	hdr          = (struct ipc_use_hdr *) buf;
+	hdr->id      = entry->id;
+	hdr->uid     = entry->uid;
+	hdr->gid     = entry->gid;
+	hdr->trigger = entry->trigger;
+	hdr->cmd_len = strlen(cmd);
+	memcpy(buf + sizeof(struct ipc_use_hdr), cmd, hdr->cmd_len);
 
 	/* Free cmd memory if allocated by vars_replace_all() */
 	if (cmd != entry->subj)
@@ -292,10 +296,10 @@ void entry_daemon_exec_dispatch(void *arg) {
 	/* Deliver message to uSched executer (use). Give up on timeout to avoid this notifier to
 	 * stall in the case of a full message queue or unresponsive executer.
 	 */
-	if (mq_timedsend(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
+	if (mq_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_write(rund.ipcd, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
+	if (panet_write(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
 		log_warn("entry_daemon_exec_dispatch(): panet_write(): %s\n", strerror(errno));
 #else
  #error "No IPC mechanism defined."

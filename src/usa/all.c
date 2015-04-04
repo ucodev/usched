@@ -3,7 +3,7 @@
  * @brief uSched
  *       ALL Category administration interface
  *
- * Date: 20-02-2015
+ * Date: 02-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,7 +32,9 @@
 #include "all.h"
 #include "auth.h"
 #include "core.h"
+#include "exec.h"
 #include "network.h"
+#include "stat.h"
 #include "users.h"
 
 int all_admin_show(void) {
@@ -52,9 +54,23 @@ int all_admin_show(void) {
 		return -1;
 	}
 
+	if (exec_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): exec_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if (network_admin_show() < 0) {
 		errsv = errno;
 		log_warn("all_admin_show(): network_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (stat_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): stat_admin_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -88,10 +104,26 @@ int all_admin_commit(void) {
 		return -1;
 	}
 
+	/* Commit exec changes */
+	if (exec_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): exec_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Commit network changes */
 	if (network_admin_commit() < 0) {
 		errsv = errno;
 		log_warn("all_admin_commit(): network_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Commit stat changes */
+	if (stat_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): stat_admin_commit(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -126,10 +158,26 @@ int all_admin_rollback(void) {
 		return -1;
 	}
 
+	/* Rollback exec changes */
+	if (exec_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("all_admin_rollback(): exec_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	/* Rollback network changes */
 	if (network_admin_rollback() < 0) {
 		errsv = errno;
 		log_warn("category_all_commit(): network_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Rollback stat changes */
+	if (stat_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("category_all_commit(): stat_admin_rollback(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

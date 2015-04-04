@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Common
  *
- * Date: 17-01-2015
+ * Date: 31-03-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,5 +34,6 @@ struct usched_runtime_client runc;
 struct usched_runtime_admin runa;
 struct usched_runtime_daemon rund;
 struct usched_runtime_exec rune;
+struct usched_runtime_stat runs;
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 

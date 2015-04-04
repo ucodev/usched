@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 19-03-2015
+ * Date: 02-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -567,7 +567,26 @@ static int _config_init_core_ipc_name(struct usched_config_core *core) {
 }
 
 static int _config_validate_core_ipc_name(const struct usched_config_core *core) {
+#if CONFIG_USE_IPC_PMQ == 1
+	if (core->ipc_name[0] != '/') {
+		errno = EINVAL;
+		return -1;
+	}
+#elif CONFIG_USE_IPC_UNIX == 1
 	/* TODO */
+#elif CONFIG_USE_IPC_INET == 1
+	int port = 0;
+
+	if (!strisnum(core->ipc_name)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if ((port < 1) || (port > 65535)) {
+		errno = EINVAL;
+		return -1;
+	}
+#endif
 	return 1;
 }
 
@@ -845,6 +864,137 @@ int config_init_core(struct usched_config_core *core) {
 	return 0;
 }
 
+static int _config_init_exec_ipc_msgmax(struct usched_config_exec *exec) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_MSGMAX, &exec->ipc_msgmax);
+}
+
+static int _config_validate_exec_ipc_msgmax(const struct usched_config_exec *exec) {
+	return exec->ipc_msgmax > 0;
+}
+
+static int _config_init_exec_ipc_msgsize(struct usched_config_exec *exec) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_MSGSIZE, &exec->ipc_msgsize);
+}
+
+static int _config_validate_exec_ipc_msgsize(const struct usched_config_exec *exec) {
+	return exec->ipc_msgsize > 0;
+}
+
+static int _config_init_exec_ipc_name(struct usched_config_exec *exec) {
+	if (!(exec->ipc_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_NAME)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_exec_ipc_name(const struct usched_config_exec *exec) {
+#if CONFIG_USE_IPC_PMQ == 1
+	if (exec->ipc_name[0] != '/') {
+		errno = EINVAL;
+		return -1;
+	}
+#elif CONFIG_USE_IPC_UNIX == 1
+	/* TODO */
+#elif CONFIG_USE_IPC_INET == 1
+	int port = 0;
+
+	if (!strisnum(exec->ipc_name)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if ((port < 1) || (port > 65535)) {
+		errno = EINVAL;
+		return -1;
+	}
+#endif
+	return 1;
+}
+
+static int _config_init_exec_ipc_key(struct usched_config_exec *exec) {
+	if (!(exec->ipc_key = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_EXEC "/" CONFIG_USCHED_FILE_EXEC_IPC_KEY)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_exec_ipc_key(const struct usched_config_exec *exec) {
+	if (strlen(exec->ipc_key) < 32)
+		return 0;
+
+	if (strlen(exec->ipc_key) > CONFIG_USCHED_AUTH_IPC_SIZE)
+		return 0;
+
+	return 1;
+}
+
+int config_init_exec(struct usched_config_exec *exec) {
+	int errsv = 0;
+
+	/* Read ipc msg max */
+	if (_config_init_exec_ipc_msgmax(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_msgmax(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc msgmax */
+	if (!_config_validate_exec_ipc_msgmax(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_msgmax(): Invalid exec.ipc.msgmax value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc msg size */
+	if (_config_init_exec_ipc_msgsize(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_msgsize(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc msgsize */
+	if (!_config_validate_exec_ipc_msgsize(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_msgsize(): Invalid exec.ipc.msgsize value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc name */
+	if (_config_init_exec_ipc_name(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_name(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc name */
+	if (!_config_validate_exec_ipc_name(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_name(): Invalid exec.ipc.name value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc key */
+	if (_config_init_exec_ipc_key(exec) < 0) {
+		errsv = errno;
+		log_warn("_config_init_exec(): _config_init_exec_ipc_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc key */
+	if (!_config_validate_exec_ipc_key(exec)) {
+		log_warn("_config_init_exec(): _config_validate_exec_ipc_key(): Invalid exec.ipc.key value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Success */
+	return 0;
+}
+
 static int _config_init_network_bind_addr(struct usched_config_network *network) {
 	if (!(network->bind_addr = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_NETWORK "/" CONFIG_USCHED_FILE_NETWORK_BIND_ADDR)))
 		return -1;
@@ -974,6 +1124,246 @@ int config_init_network(struct usched_config_network *network) {
 	/* Validate sock name */
 	if (!_config_validate_network_sock_name(network)) {
 		log_warn("_config_init_network(): _config_validate_network_sock_name(): Invalid network.sock.name value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Success */
+	return 0;
+}
+
+static int _config_init_stat_jail_dir(struct usched_config_stat *stat) {
+	if (!(stat->jail_dir = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_JAIL_DIR)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_stat_jail_dir(const struct usched_config_stat *stat) {
+	return fsop_path_isdir(stat->jail_dir);
+}
+
+static int _config_init_stat_ipc_msgmax(struct usched_config_stat *stat) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, &stat->ipc_msgmax);
+}
+
+static int _config_validate_stat_ipc_msgmax(const struct usched_config_stat *stat) {
+	return stat->ipc_msgmax > 0;
+}
+
+static int _config_init_stat_ipc_msgsize(struct usched_config_stat *stat) {
+	return _value_init_long_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, &stat->ipc_msgsize);
+}
+
+static int _config_validate_stat_ipc_msgsize(const struct usched_config_stat *stat) {
+	return stat->ipc_msgsize > 0;
+}
+
+static int _config_init_stat_ipc_name(struct usched_config_stat *stat) {
+	if (!(stat->ipc_name = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_stat_ipc_name(const struct usched_config_stat *stat) {
+#if CONFIG_USE_IPC_PMQ == 1
+	if (stat->ipc_name[0] != '/') {
+		errno = EINVAL;
+		return -1;
+	}
+#elif CONFIG_USE_IPC_UNIX == 1
+	/* TODO */
+#elif CONFIG_USE_IPC_INET == 1
+	int port = atoi(stat->ipc_name);
+
+	if (!strisnum(stat->ipc_name)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if ((port < 1) || (port > 0xffff)) {
+		errno = EINVAL;
+		return -1;
+	}
+#endif
+	return 1;
+}
+
+static int _config_init_stat_ipc_key(struct usched_config_stat *stat) {
+	if (!(stat->ipc_key = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_KEY)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_stat_ipc_key(const struct usched_config_stat *stat) {
+	if (strlen(stat->ipc_key) < 32)
+		return 0;
+
+	if (strlen(stat->ipc_key) > CONFIG_USCHED_AUTH_IPC_SIZE)
+		return 0;
+
+	return 1;
+}
+
+static int _config_init_stat_privdrop_user(struct usched_config_stat *stat) {
+	if (!(stat->privdrop_user = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_PRIVDROP_USER)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_stat_privdrop_user(const struct usched_config_stat *stat) {
+	/* TODO */
+	return 1;
+}
+
+static int _config_init_stat_privdrop_group(struct usched_config_stat *stat) {
+	if (!(stat->privdrop_group = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_PRIVDROP_GROUP)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_stat_privdrop_group(const struct usched_config_stat *stat) {
+	/* TODO */
+	return 1;
+}
+
+int config_init_stat(struct usched_config_stat *stat) {
+	int errsv = 0;
+	struct passwd passwd_buf, *passwd = NULL;
+	struct group group_buf, *group = NULL;
+	char buf[8192];
+
+	/* Read the jail directory */
+	if (_config_init_stat_jail_dir(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_jail_dir(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate jail dir */
+	if (!_config_validate_stat_jail_dir(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_jail_dir(): Invalid stat.jail.dir value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc msg max */
+	if (_config_init_stat_ipc_msgmax(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_ipc_msgmax(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc msgmax */
+	if (!_config_validate_stat_ipc_msgmax(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_ipc_msgmax(): Invalid stat.ipc.msgmax value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc msg size */
+	if (_config_init_stat_ipc_msgsize(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_ipc_msgsize(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc msgsize */
+	if (!_config_validate_stat_ipc_msgsize(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_ipc_msgsize(): Invalid stat.ipc.msgsize value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc name (used as prefix, since two IPC queues will be created) */
+	if (_config_init_stat_ipc_name(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_ipc_name(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc name */
+	if (!_config_validate_stat_ipc_name(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_ipc_name(): Invalid stat.ipc.name value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read ipc key */
+	if (_config_init_stat_ipc_key(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_ipc_key(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate ipc key */
+	if (!_config_validate_stat_ipc_key(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_ipc_key(): Invalid stat.ipc.key value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read privilege drop user */
+	if (_config_init_stat_privdrop_user(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_privdrop_user(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Retrieve the UID associated to the user */
+	memset(buf, 0, sizeof(buf));
+	memset(&passwd_buf, 0, sizeof(passwd_buf));
+
+	if (getpwnam_r(stat->privdrop_user, &passwd_buf, buf, sizeof(buf), &passwd) || (passwd != &passwd_buf)) {
+		errsv = errno;
+		log_warn("_config_init_stat(): getpwnam_r(\"%s\", ...): %s\n.", stat->privdrop_user, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	stat->privdrop_uid = passwd->pw_uid;
+
+	/* Validate privilege drop user */
+	if (!_config_validate_stat_privdrop_user(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_privdrop_user(): Invalid stat.privdrop.user value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read privilege drop group */
+	if (_config_init_stat_privdrop_group(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_privdrop_group(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Retrieve the GID associated to the group */
+	memset(buf, 0, sizeof(buf));
+	memset(&group_buf, 0, sizeof(group_buf));
+
+	if (getgrnam_r(stat->privdrop_group, &group_buf, buf, sizeof(buf), &group) || (group != &group_buf)) {
+		errsv = errno;
+		log_warn("_config_init_stat(): getgrnam_r(\"%s\", ...): %s\n.", stat->privdrop_group, strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	stat->privdrop_gid = group->gr_gid;
+
+	/* Validate privilege drop group */
+	if (!_config_validate_stat_privdrop_group(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_privdrop_group(): Invalid stat.privdrop.group value.\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -1261,6 +1651,13 @@ void config_destroy_core(struct usched_config_core *core) {
 	memset(core, 0, sizeof(struct usched_config_core));
 }
 
+void config_destroy_exec(struct usched_config_exec *exec) {
+	memset(exec->ipc_name, 0, strlen(exec->ipc_name));
+	mm_free(exec->ipc_name);
+
+	memset(exec, 0, sizeof(struct usched_config_exec));
+}
+
 void config_destroy_network(struct usched_config_network *network) {
 	memset(network->bind_addr, 0, strlen(network->bind_addr));
 	mm_free(network->bind_addr);
@@ -1270,6 +1667,19 @@ void config_destroy_network(struct usched_config_network *network) {
 	mm_free(network->sock_name);
 
 	memset(network, 0, sizeof(struct usched_config_network));
+}
+
+void config_destroy_stat(struct usched_config_stat *stat) {
+	memset(stat->ipc_name, 0, strlen(stat->ipc_name));
+	mm_free(stat->ipc_name);
+	memset(stat->jail_dir, 0, strlen(stat->jail_dir));
+	mm_free(stat->jail_dir);
+	memset(stat->privdrop_user, 0, strlen(stat->privdrop_user));
+	mm_free(stat->privdrop_user);
+	memset(stat->privdrop_group, 0, strlen(stat->privdrop_group));
+	mm_free(stat->privdrop_group);
+
+	memset(stat, 0, sizeof(struct usched_config_stat));
 }
 
 void config_destroy_users(struct usched_config_users *users) {

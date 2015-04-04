@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 03-04-2015
+ * Date: 04-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,7 @@
 #include "log.h"
 #include "bitops.h"
 #include "local.h"
+#include "ipc.h"
 
 #if CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>
@@ -54,29 +55,41 @@ extern char **environ;
 
 static void *_exec_cmd(void *arg) {
 	char *buf = arg;	/* | id (64 bits) | uid (32 bits) | gid (32 bits) | trigger (32 bits) | cmd (...) ... | */
-	uint64_t id = 0;
-	uint32_t uid = 0, gid = 0, trigger = 0;
-	char *cmd = &buf[20];
+	char child_outdata[CONFIG_USCHED_EXEC_OUTPUT_MAX];
+	ssize_t child_outlen = 0;
 	pid_t pid = 0;
-	int status = 0;
+	int status = 0, opipe[2] = { 0, 0 };
+	char *cmd = buf + sizeof(struct ipc_use_hdr);
+	struct ipc_use_hdr *hdr = (struct ipc_use_hdr *) buf;
 
-	memcpy(&id, buf, 8);
-	memcpy(&uid, buf + 8, 4);
-	memcpy(&gid, buf + 12, 4);
-	memcpy(&trigger, buf + 16, 4);
+	/* Grant NULL termination */
+	cmd[hdr->cmd_len] = 0;
+
+	/* Create a pipe to read child output */
+	if (pipe(opipe) < 0)
+		log_warn("Entry[0x%016llX]: _exec_cmd(): pipe(): %s\n", hdr->id, strerror(errno));
 
 	/* Check delta time before executing event (Absolute value is a safe check. Negative values
 	 * won't occur here... hopefully).
 	 */
-	if ((unsigned int) labs((long) (time(NULL) - trigger)) >= rune.config.core.delta_noexec) {
-		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", id, time(NULL) - trigger, rune.config.core.delta_noexec);
+	if ((unsigned int) labs((long) (time(NULL) - hdr->trigger)) >= rune.config.core.delta_noexec) {
+		log_warn("Entry[0x%016llX]: _exec_cmd(): Entry delta T (%u seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", hdr->id, time(NULL) - hdr->trigger, rune.config.core.delta_noexec);
 	} else if ((pid = fork()) == (pid_t) -1) {	/* Create a new process, drop privileges to
 							 * UID and GID and execute CMD
 							 */
 		/* Failure */
-		log_warn("Entry[0x%016llX]: _exec_cmd(): fork(): %s\n", id, strerror(errno));
+		log_warn("Entry[0x%016llX]: _exec_cmd(): fork(): %s\n", hdr->id, strerror(errno));
+
+		/* Close pipe */
+		close(opipe[0]);
+		close(opipe[1]);
 	} else if (!pid) {
 		/* Child */
+
+		/* Get child pid */
+		pid = getpid();
+
+		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", hdr->id, pid, cmd, hdr->uid, hdr->gid);
 
 #if CONFIG_USE_IPC_PMQ == 1
 		/* Close message queue descriptor */
@@ -86,10 +99,16 @@ static void *_exec_cmd(void *arg) {
 		panet_safe_close(rune.ipcd_usd_ro);
 #endif
 
-		/* Get child pid */
-		pid = getpid();
+		/* Close the read end of the output pipe */
+		close(opipe[0]);
 
-		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", id, pid, cmd, uid, gid);
+		/* Duplicate standard output */
+		if (dup2(opipe[1], STDOUT_FILENO) < 0)
+			debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: dup2(opipe[1], STDOUT_FILENO): %s\n", hdr->id, pid, strerror(errno));
+
+		/* Duplicate standard error */
+		if (dup2(opipe[1], STDERR_FILENO) < 0)
+			debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: dup2(opipe[1], STDERR_FILENO): %s\n", hdr->id, pid, strerror(errno));
 
 		/* Create a new session */
 		if (setsid() == (pid_t) -1) {
@@ -107,30 +126,16 @@ static void *_exec_cmd(void *arg) {
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDIN);
 		}
 
-		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stdout)) {
-			/* Free argument resources */
-			mm_free(arg);
-
-			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDOUT);
-		}
-
-		if (!freopen(CONFIG_SYS_DEV_NULL, "a", stderr)) {
-			/* Free argument resources */
-			mm_free(arg);
-
-			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR);
-		}
-
 #if CONFIG_USCHED_MULTIUSER == 1
 		/* Drop privileges, if required */
-		if (setregid(gid, gid) < 0) {
+		if (setregid(hdr->gid, hdr->gid) < 0) {
 			/* Free argument resources */
 			mm_free(arg);
 
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREGID);
 		}
 
-		if (setreuid(uid, uid) < 0) {
+		if (setreuid(hdr->uid, hdr->uid) < 0) {
 			/* Free argument resources */
 			mm_free(arg);
 
@@ -139,14 +144,14 @@ static void *_exec_cmd(void *arg) {
 #endif
 
 		/* Paranoid mode */
-		if ((getuid() != (uid_t) uid) || (geteuid() != (uid_t) uid)) {
+		if ((getuid() != (uid_t) hdr->uid) || (geteuid() != (uid_t) hdr->uid)) {
 			/* Free argument resources */
 			mm_free(arg);
 
 			exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_UID);
 		}
 
-		if ((getgid() != (gid_t) gid) || (getegid() != (gid_t) gid)) {
+		if ((getgid() != (gid_t) hdr->gid) || (getegid() != (gid_t) hdr->gid)) {
 			/* Free argument resources */
 			mm_free(arg);
 
@@ -168,46 +173,61 @@ static void *_exec_cmd(void *arg) {
 		exit(CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_EXECLP);
 	} else {
 		/* Parent */
-		log_info("Entry[0x%016llX]: PID[%u]: Executing '%s' [uid: %u, gid: %u]. Waiting for child to exit...\n", id, pid, cmd, uid, gid);
+		log_info("Entry[0x%016llX]: PID[%u]: Executing '%s' [uid: %u, gid: %u]. Waiting for child to exit...\n", hdr->id, pid, cmd, hdr->uid, hdr->gid);
+
+		/* Close the write end of the output pipe */
+		close(opipe[1]);
 
 		/* Wait for child to return */
 		if (waitpid(pid, &status, 0) < 0)
-			log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", id, strerror(errno));
+			log_crit("Entry[0x%016llX]: _exec_cmd(): waitpid(): %s\n", hdr->id, strerror(errno));
+
+		/* Read the output from the child process */
+		memset(child_outdata, 0, sizeof(child_outdata));
+		child_outlen = read(opipe[0], child_outdata, sizeof(child_outdata) - 1);
+
+		/* Process the output buffer */
+		if (child_outlen < 0) {
+			/* Set the error as the output */
+			snprintf(child_outdata, sizeof(child_outdata) - 1, "Entry[0x%016llX]: read(): %s\n", (unsigned long long) hdr->id, strerror(errno));
+		} else {
+			/* Grant NULL terination on output data buffer */
+			child_outdata[child_outlen] = 0;
+		}
+
+		/* Close the read end of the pipe */
+		close(opipe[0]);
+
+		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: Output: %s\n", hdr->id, child_outdata);
 
 		/* Log errors (if any) based on exit status */
 		switch (WEXITSTATUS(status)) {
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETSID: {
-				log_warn("Entry[0x%016llX]: PID[%u]: setsid() failed.\n", id, pid);
+				log_warn("Entry[0x%016llX]: PID[%u]: setsid() failed.\n", hdr->id, pid);
 			} break;
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDIN: {
-				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"r\", stdout) failed.\n", id, pid, CONFIG_SYS_DEV_ZERO);
-			} break;
-			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDOUT: {
-				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"a\", stdout) failed.\n", id, pid, CONFIG_SYS_DEV_NULL);
-			} break;
-			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR: {
-				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"a\", stderr) failed.\n", id, pid, CONFIG_SYS_DEV_NULL);
+				log_warn("Entry[0x%016llX]: PID[%u]: freopen(%s, \"r\", stdout) failed.\n", hdr->id, pid, CONFIG_SYS_DEV_ZERO);
 			} break;
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREGID: {
-				log_warn("Entry[0x%016llX]: PID[%u]: setregid() failed.\n", id, pid);
+				log_warn("Entry[0x%016llX]: PID[%u]: setregid() failed.\n", hdr->id, pid);
 			} break;
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_SETREUID: {
-				log_warn("Entry[0x%016llX]: PID[%u]: setreuid() failed.\n", id, pid);
+				log_warn("Entry[0x%016llX]: PID[%u]: setreuid() failed.\n", hdr->id, pid);
 			} break;
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_UID: {
-				log_warn("Entry[0x%016llX]: PID[%u]: Failed to drop process privileges (UID).", id, pid);
+				log_warn("Entry[0x%016llX]: PID[%u]: Failed to drop process privileges (UID).", hdr->id, pid);
 			} break;
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_GID: {
-				log_warn("Entry[0x%016llX]: PID[%u]: Failed to drop process privileges (GID).", id, pid);
+				log_warn("Entry[0x%016llX]: PID[%u]: Failed to drop process privileges (GID).", hdr->id, pid);
 			} break;
 			case CONFIG_SYS_EXIT_CODE_CUSTOM_BASE + CHILD_EXIT_STATUS_FAILED_EXECLP: {
-				log_warn("Entry[0x%016llX]: PID[%u]: execlp() failed.", id, pid);
+				log_warn("Entry[0x%016llX]: PID[%u]: execlp() failed.", hdr->id, pid);
 			} break;
 			case EXIT_SUCCESS:
 			default: break;
 		}
 
-		log_info("Entry[0x%016llX]: PID[%u]: Child exited. Exit Status: %d\n", id, pid, WEXITSTATUS(status));
+		log_info("Entry[0x%016llX]: PID[%u]: Child exited. Exit Status: %d\n", hdr->id, pid, WEXITSTATUS(status));
 	}
 
 	/* Free argument resources */

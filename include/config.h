@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 03-04-2015
+ * Date: 04-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -93,6 +93,7 @@
 #define CONFIG_USCHED_AUTH_PASSWORD_MIN		8
 #define CONFIG_USCHED_AUTH_SESSION_MAX		272 /* Current mac: 257 */
 #define CONFIG_USCHED_AUTH_IPC_SIZE		128 /* Size of IPC authentication string */
+#define CONFIG_USCHED_EXEC_OUTPUT_MAX		512 /* Maximum number of bytes to store output data */
 #define CONFIG_USCHED_HASH_FNV1A		1
 #define CONFIG_USCHED_HASH_DJB2			0
 #define CONFIG_USCHED_IPC_TIMEOUT		3   /* Number of seconds before give up on sends */
@@ -197,8 +198,8 @@
 enum CHILD_EXIT_STATUS_CUSTOM_OFFSET {
 	CHILD_EXIT_STATUS_FAILED_SETSID = 1,
 	CHILD_EXIT_STATUS_FAILED_FREOPEN_STDIN,
-	CHILD_EXIT_STATUS_FAILED_FREOPEN_STDOUT,
-	CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR,
+	CHILD_EXIT_STATUS_FAILED_FREOPEN_STDOUT,	/* Obsolete. Can be replaced. */
+	CHILD_EXIT_STATUS_FAILED_FREOPEN_STDERR,	/* Obsolete. Can be replaced. */
 	CHILD_EXIT_STATUS_FAILED_SETREGID,
 	CHILD_EXIT_STATUS_FAILED_SETREUID,
 	CHILD_EXIT_STATUS_FAILED_UID,

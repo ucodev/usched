@@ -1,3 +1,7 @@
+v0.2-dev-28 (2015-04-04):
+ - Added uSched Status and Statistics module (skeleton)
+ - Significant changes on IPC communications.
+
 v0.2-dev-26 (2015-04-03):
  - Fixed usc(1) manpage
 

@@ -1,3 +1,6 @@
+v0.2-dev-29 (2015-04-05):
+ - Simplified IPC interface
+
 v0.2-dev-28 (2015-04-04):
  - Added uSched Status and Statistics module (skeleton)
  - Significant changes on IPC communications.

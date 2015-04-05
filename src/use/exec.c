@@ -41,15 +41,7 @@
 #include "runtime.h"
 #include "log.h"
 #include "bitops.h"
-#include "local.h"
 #include "ipc.h"
-
-#if CONFIG_USE_IPC_PMQ == 1
- #include <mqueue.h>
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
- #include <sys/socket.h>
- #include <panet/panet.h>
-#endif
 
 extern char **environ;
 
@@ -91,13 +83,8 @@ static void *_exec_cmd(void *arg) {
 
 		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", hdr->id, pid, cmd, hdr->uid, hdr->gid);
 
-#if CONFIG_USE_IPC_PMQ == 1
-		/* Close message queue descriptor */
-		mq_close(rune.ipcd_usd_ro);
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-		/* Close current uSched daemon descriptor */
-		panet_safe_close(rune.ipcd_usd_ro);
-#endif
+		/* Close IPC descriptor */
+		ipc_close(rune.ipcd_usd_ro);
 
 		/* Close the read end of the output pipe */
 		close(opipe[0]);
@@ -243,26 +230,12 @@ static void *_exec_cmd(void *arg) {
 static void _exec_process(void) {
 	pthread_t ptid;
 	char *tbuf = NULL;
-#if CONFIG_USE_IPC_PMQ == 1
-	struct mq_attr mqattr;
-#elif CONFIG_USE_IPC_UNIX == 1
-	uid_t fd_uid = (uid_t) -1;
-	gid_t fd_gid = (gid_t) -1;
-#endif
 
 	for (;;) {
 		/* Check for rutime interruptions */
 		if (runtime_exec_interrupted()) {
-#if CONFIG_USE_IPC_PMQ == 1
-			/* Get posix queue attributes */
-			if (mq_getattr(rune.ipcd_usd_ro, &mqattr) < 0) {
-				log_warn("_exec_process(): mq_getattr(): %s\n", strerror(errno));
-				break;
-			}
-
 			/* Interrupt execution only when there are no messages in the queue */
-			if (!mqattr.mq_curmsgs)
-#endif
+			if (!ipc_pending(rune.ipcd_usd_ro))
 				break;
 		}
 
@@ -279,46 +252,12 @@ static void _exec_process(void) {
 		 */
 		memset(tbuf, 0, (size_t) rune.config.core.ipc_msgsize + 1);
 
-#if CONFIG_USE_IPC_PMQ == 1
-		/* Read message from queue */
-		if (mq_receive(rune.ipcd_usd_ro, tbuf, (size_t) rune.config.core.ipc_msgsize, 0) < 0) {
-			log_warn("_exec_process(): mq_receive(): %s\n", strerror(errno));
+		/* Wait for IPC message */
+		if (ipc_recv(rune.ipcd_usd_ro, tbuf, (size_t) rune.config.core.ipc_msgsize) < 0) {
+			log_warn("_exec_process(): ipc_recv(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;
 		}
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
- #if CONFIG_USE_IPC_UNIX == 1
-		/* Get peer credentials */
-		if (local_fd_peer_cred(rune.ipcd_usd_ro, &fd_uid, &fd_gid) < 0) {
-			log_warn("_exec_process(): local_fd_peer_cred(): %s\n", strerror(errno));
-			continue;
-		}
-
-		/* Validate peer UID */
-		if (fd_uid != getuid()) {
-			log_warn("_exec_process(): fd_uid[%u] != getuid()[%u]\n", (unsigned) fd_uid, (unsigned) getuid());
-			continue;
-		}
-
-		/* Validate peer GID */
-		if (fd_gid != getgid()) {
-			log_warn("_exec_process(): fd_gid[%u] != getgid[%u]\n", (unsigned) fd_gid, (unsigned) getgid());
-			continue;
-		}
- #endif /* CONFIG_USE_IPC_UNIX */
-		/* Read message from unix socket */
-		if (panet_read(rune.ipcd_usd_ro, tbuf, (size_t) rune.config.core.ipc_msgsize) != (ssize_t) rune.config.core.ipc_msgsize) {
-			log_warn("_exec_process(): panet_read(): %s\n", strerror(errno));
-			mm_free(tbuf);
-
-			/* When a read fails, reload the uSched Executer to perform new accept() */
-			bit_set(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD);
-
-			continue;
-		}
-#else
- #error "No IPC mechanism defined."
-#endif
 
 		/* Create a new thread for command execution */
 		if ((errno = pthread_create(&ptid, NULL, _exec_cmd, tbuf))) {

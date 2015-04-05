@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <sys/types.h>
 
@@ -50,13 +51,6 @@
 #include "schedule.h"
 #include "vars.h"
 #include "ipc.h"
-
-#if CONFIG_USE_IPC_PMQ == 1
- #include <time.h>
- #include <mqueue.h>
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
- #include <panet/panet.h>
-#endif
 
 static int _entry_daemon_authorize_local(struct usched_entry *entry, sock_t fd) {
 	int errsv = 0;
@@ -204,9 +198,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
 	struct ipc_use_hdr *hdr = NULL;
-#if CONFIG_USE_IPC_PMQ == 1
 	struct timespec pmq_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
-#endif
 
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
@@ -290,20 +282,13 @@ void entry_daemon_exec_dispatch(void *arg) {
 	if (cmd != entry->subj)
 		mm_free(cmd);
 
-	debug_printf(DEBUG_INFO, "Executing entry->id: 0x%016llX\n", entry->id);
+	debug_printf(DEBUG_INFO, "Requesting execution of entry->id: 0x%016llX\n", entry->id);
 
-#if CONFIG_USE_IPC_PMQ == 1
 	/* Deliver message to uSched executer (use). Give up on timeout to avoid this notifier to
 	 * stall in the case of a full message queue or unresponsive executer.
 	 */
-	if (mq_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, 0, &pmq_timeout) < 0) {
-		log_warn("entry_daemon_exec_dispatch(): mq_send(): %s\n", strerror(errno));
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_write(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize) != (ssize_t) rund.config.core.ipc_msgsize) {
-		log_warn("entry_daemon_exec_dispatch(): panet_write(): %s\n", strerror(errno));
-#else
- #error "No IPC mechanism defined."
-#endif
+	if (ipc_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, &pmq_timeout) < 0) {
+		log_warn("entry_daemon_exec_dispatch(): ipc_send(): %s\n", strerror(errno));
 
 		/* NOTE:
 		 *

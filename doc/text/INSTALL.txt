@@ -78,15 +78,11 @@
 
 4. Starting uSched Services
 
-   # usa change core ipc key $(usched_ipcpwgen)
-   # usa commit core
    # usched start
 
  On FreeBSD operating systems, grant that the mqueuefs kernel module is loaded before starting the uSched Services:
 
    # kldload mqueuefs
-   # usa change core ipc key $(usched_ipcpwgen)
-   # usa commit core
    # usched start
 
 

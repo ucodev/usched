@@ -30,7 +30,7 @@ Perform the following commands:
 
       ~# cd /usr/src
       ~# mkdir usched
-      ~# wget https://github.com/ucodev/usched/archive/master.tar.gz
+      ~# wget https://github.com/ucodev/usched/archive/v0.1-beta-06.tar.gz
       ~# tar zxvf master.tar.gz -C usched
       ~# cd usched
       ~# ./deploy
@@ -89,14 +89,14 @@ Stop all scheduled entries for the user by running the following command:
 
 Useful documentation links:
 
-  * [GitHub uSched Wiki](https://github.com/ucodev/usched/wiki) - The official uSched project wiki.
-  * [uSched FAQ](https://github.com/ucodev/usched/wiki/FAQ) - Frequently Asked Questions.
-  * [Getting Help](https://github.com/ucodev/usched/wiki#getting-help) - How to get help installing, configuring and using the project.
+  * [GitHub uSched Wiki](https://github.com/ucodev/usched/wiki) - The official uSched project wiki
+  * [uSched FAQ](https://github.com/ucodev/usched/wiki/FAQ) - Frequently Asked Questions
+  * [Getting Help](https://github.com/ucodev/usched/wiki#getting-help) - How to get help installing, configuring and using the project
 
 Reference Manual:
 
-  * [HTML](http://doc.usched.org/uSched_Reference_Manual.html) format.
-  * [PDF](http://doc.usched.org/uSched_Reference_Manual.pdf) format.
+  * [HTML](http://doc.usched.org/uSched_Reference_Manual.html) format
+  * [PDF](http://doc.usched.org/uSched_Reference_Manual.pdf) format
 
 Overview manual page:
 

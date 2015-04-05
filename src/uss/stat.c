@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 31-03-2015
+ * Date: 05-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,15 +28,67 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "debug.h"
 #include "runtime.h"
 #include "log.h"
 #include "bitops.h"
+#include "ipc.h"
 
-static void _stat_process(void) {
-	/* TODO */
-	pause();
+static int _stat_process(void) {
+	int errsv = 0;
+	char *buf = NULL, *outdata = NULL;
+	struct ipc_uss_hdr *hdr = NULL;
 
-	return;
+	/* Allocate uss IPC message memory */
+	if (!(buf = mm_alloc(runs.config.exec.ipc_msgsize))) {
+		errsv = errno;
+		log_warn("_stat_process(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set header address */
+	hdr = (struct ipc_uss_hdr *) buf;
+
+	/* Set output data address */
+	outdata = buf + sizeof(struct ipc_uss_hdr);
+
+	/* Process IPC messages */
+	for (;;) {
+		/* Check if runtime was interrupted */
+		if (runtime_stat_interrupted())
+			break;
+
+		/* Reset message memory */
+		memset(buf, 0, runs.config.exec.ipc_msgsize);
+
+		/* Wait for IPC message */
+		if (ipc_recv(runs.ipcd_use_ro, buf, runs.config.exec.ipc_msgsize) < 0) {
+			log_warn("_stat_process(): ipc_recv(): %s\n", strerror(errno));
+
+			continue;
+		}
+
+		/* Validate output data size */
+		if (hdr->outdata_len >= (runs.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) {
+			log_crit("_stat_process(): IPC message too long (%u bytes). Entry ID: 0x%016llX\n", hdr->outdata_len, hdr->id);
+
+			continue;
+		}
+
+		/* Grant NULL termination on output data buffer */
+		outdata[hdr->outdata_len] = 0;
+
+		debug_printf(DEBUG_INFO, "_stat_process(): hdr->id: 0x%016llX, hdr->status: %lu, hdr->pid: %lu, hdr->outdata_len: %lu\n", hdr->id, hdr->status, hdr->pid, hdr->outdata_len);
+
+		/* TODO */
+	}
+
+	/* Release buffer memory */
+	mm_free(buf);
+
+	/* No errors... just an interrupt */
+	return 0;
 }
 
 static void _init(int argc, char **argv) {
@@ -55,7 +107,10 @@ static void _loop(int argc, char **argv) {
 
 	for (;;) {
 		/* Process status and statistics requests */
-		_stat_process();
+		if (_stat_process() < 0) {
+			log_crit("_loop(): _stat_process(): %s\n", strerror(errno));
+			break;
+		}
 
 		/* Check for runtime interruptions */
 		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE))

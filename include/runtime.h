@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 03-04-2015
+ * Date: 05-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,12 +31,10 @@
 #include <time.h>
 
 #include "config.h"
+#include "ipc.h"
 
 #ifndef COMPILE_WIN32
  #include <pthread.h>
- #if CONFIG_USE_IPC_PMQ == 1
-  #include <mqueue.h>
- #endif
 #endif
 
 #include <signal.h>
@@ -140,14 +138,11 @@ struct usched_runtime_daemon {
 
 	psched_t *psched;
 
-#if CONFIG_USE_IPC_PMQ == 1
-	mqd_t ipcd_use_wo;
-	mqd_t ipcd_uss_ro;
-#endif
+	ipcd_t ipcd_use_wo;
+	ipcd_t ipcd_uss_ro;
+
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
-	sock_t ipcd_use_wo;
-	sock_t ipcd_uss_ro;
 #endif
 
 	pall_fd_t ser_fd;
@@ -173,14 +168,10 @@ struct usched_runtime_exec {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-#if CONFIG_USE_IPC_PMQ == 1
-	mqd_t ipcd_usd_ro;
-	mqd_t ipcd_uss_wo;
-#endif
+	ipcd_t ipcd_usd_ro;
+	ipcd_t ipcd_uss_wo;
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
-	sock_t ipcd_usd_ro;
-	sock_t ipcd_uss_wo;
 #endif
 
 	struct usched_config config;
@@ -195,14 +186,11 @@ struct usched_runtime_stat {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-#if CONFIG_USE_IPC_PMQ == 1
-	mqd_t ipcd_use_ro; /* Read-only */
-	mqd_t ipcd_usd_wo; /* Write-only */
-#endif
+	ipcd_t ipcd_use_ro; /* Read-only */
+	ipcd_t ipcd_usd_wo; /* Write-only */
+
 #if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
 	sock_t ipc_bind_fd;
-	sock_t ipcd_use_ro; /* Read-only */
-	sock_t ipcd_usd_wo; /* Write-only */
 #endif
 
 	struct usched_config config;

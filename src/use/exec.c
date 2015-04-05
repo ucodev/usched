@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 04-04-2015
+ * Date: 05-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,6 +45,66 @@
 
 extern char **environ;
 
+static int _uss_dispatch(
+	uint64_t id,
+	uint32_t pid,
+	const struct timespec *t_start,
+	const struct timespec *t_end,
+	uint32_t status,
+	const char *outdata)
+{
+	int errsv = 0;
+	char *buf = NULL;
+	struct ipc_uss_hdr *hdr = NULL;
+	struct timespec ipc_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
+
+	/* Allocate IPC buffer */
+	if (!(buf = mm_alloc((size_t) rune.config.exec.ipc_msgsize))) {
+		errsv = errno;
+		log_warn("_uss_dispatch(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset IPC buffer */
+	memset(buf, 0, (size_t) rune.config.exec.ipc_msgsize);
+
+	/* Craft IPC message header */
+	hdr 		 = (struct ipc_uss_hdr *) buf;
+	hdr->id		 = id;
+	hdr->status 	 = status;
+	hdr->pid	 = pid;
+	hdr->outdata_len = strlen(outdata);
+	memcpy(&hdr->t_start, t_start, sizeof(struct timespec));
+	memcpy(&hdr->t_end, t_end, sizeof(struct timespec));
+
+	/* Validate message size */
+	if ((hdr->outdata_len + sizeof(struct timespec) + 1) > (size_t) rune.config.exec.ipc_msgsize) {
+		log_warn("_uss_dispatch(): IPC message size too long (Entry ID: 0x%016llX)\n", id);
+		mm_free(buf);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Append output data to IPC message */
+	memcpy(buf + sizeof(struct ipc_uss_hdr), outdata, hdr->outdata_len);
+
+	/* Dispatch IPC message to uss module */
+	if (ipc_timedsend(rune.ipcd_uss_wo, buf, (size_t) rune.config.exec.ipc_msgsize, &ipc_timeout) < 0) {
+		errsv = errno;
+		log_warn("_uss_dispatch(): ipc_timedsend(): %s\n", strerror(errno));
+		mm_free(buf);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Free IPC message memory */
+	mm_free(buf);
+
+	/* All good */
+	return 0;
+}
+
 static void *_exec_cmd(void *arg) {
 	char *buf = arg;	/* | id (64 bits) | uid (32 bits) | gid (32 bits) | trigger (32 bits) | cmd (...) ... | */
 	char child_outdata[CONFIG_USCHED_EXEC_OUTPUT_MAX];
@@ -53,9 +113,19 @@ static void *_exec_cmd(void *arg) {
 	int status = 0, opipe[2] = { 0, 0 };
 	char *cmd = buf + sizeof(struct ipc_use_hdr);
 	struct ipc_use_hdr *hdr = (struct ipc_use_hdr *) buf;
+	struct timespec t_start, t_end;
+
+	/* Validate cmd length */
+	if (hdr->cmd_len >= (rune.config.core.ipc_msgsize - sizeof(struct ipc_use_hdr))) {
+		log_crit("_exec_cmd(): hdr->cmd_len is too long (%u bytes). Entry ID: 0x%016llX\n", hdr->cmd_len, hdr->id);
+		goto _exec_finish;
+	}
 
 	/* Grant NULL termination */
 	cmd[hdr->cmd_len] = 0;
+
+	/* Get the start time of execution */
+	clock_gettime(CLOCK_REALTIME, &t_start);
 
 	/* Create a pipe to read child output */
 	if (pipe(opipe) < 0)
@@ -217,6 +287,14 @@ static void *_exec_cmd(void *arg) {
 		log_info("Entry[0x%016llX]: PID[%u]: Child exited. Exit Status: %d\n", hdr->id, pid, WEXITSTATUS(status));
 	}
 
+	/* Get the end time of the execution */
+	clock_gettime(CLOCK_REALTIME, &t_end);
+
+	/* Send status and statistical data to uSched Status and Statistics */
+	if (_uss_dispatch(hdr->id, pid, &t_start, &t_end, status, child_outdata) < 0)
+		log_warn("_exec_cmd(): _uss_dispatch(): %s\n", strerror(errno));
+
+_exec_finish:
 	/* Free argument resources */
 	mm_free(arg);
 

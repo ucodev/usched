@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 04-04-2015
+ * Date: 05-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -198,7 +198,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
 	struct ipc_use_hdr *hdr = NULL;
-	struct timespec pmq_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
+	struct timespec ipc_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
 
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
@@ -253,12 +253,20 @@ void entry_daemon_exec_dispatch(void *arg) {
 	if (!(cmd = vars_replace_all(entry->subj, (struct usched_vars [1]) { { entry->id, entry->username, entry->uid, entry->gid, entry->trigger, entry->step, entry->expire } })))
 		cmd = entry->subj;
 
+	/* Craft IPC message header */
+	hdr          = (struct ipc_use_hdr *) buf;
+	hdr->id      = entry->id;
+	hdr->uid     = entry->uid;
+	hdr->gid     = entry->gid;
+	hdr->trigger = entry->trigger;
+	hdr->cmd_len = strlen(cmd);
+
 	/* Check if the message fits in the configured message size.
 	 * Although this check was already performed when receiving the entry from the user,
 	 * this one is required since now the variables are expanded.
 	 */
-	if ((strlen(cmd) + sizeof(struct ipc_use_hdr) + 1) > (size_t) rund.config.core.ipc_msgsize) {
-		log_warn("entry_daemon_exec_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX\n", entry->id);
+	if ((hdr->cmd_len + sizeof(struct ipc_use_hdr) + 1) > (size_t) rund.config.core.ipc_msgsize) {
+		log_warn("entry_daemon_exec_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX)\n", entry->id);
 
 		/* Mark this entry as invalid. */
 		entry_set_flag(entry, USCHED_ENTRY_FLAG_INVALID);
@@ -269,13 +277,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 		goto _finish;
 	}
 
-	/* Craft message */
-	hdr          = (struct ipc_use_hdr *) buf;
-	hdr->id      = entry->id;
-	hdr->uid     = entry->uid;
-	hdr->gid     = entry->gid;
-	hdr->trigger = entry->trigger;
-	hdr->cmd_len = strlen(cmd);
+	/* Append command to IPC message */
 	memcpy(buf + sizeof(struct ipc_use_hdr), cmd, hdr->cmd_len);
 
 	/* Free cmd memory if allocated by vars_replace_all() */
@@ -287,7 +289,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	/* Deliver message to uSched executer (use). Give up on timeout to avoid this notifier to
 	 * stall in the case of a full message queue or unresponsive executer.
 	 */
-	if (ipc_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, &pmq_timeout) < 0) {
+	if (ipc_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, &ipc_timeout) < 0) {
 		log_warn("entry_daemon_exec_dispatch(): ipc_send(): %s\n", strerror(errno));
 
 		/* NOTE:

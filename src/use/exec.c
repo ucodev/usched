@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 05-04-2015
+ * Date: 06-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -75,6 +75,7 @@ static int _uss_dispatch(
 	hdr->status 	 = status;
 	hdr->pid	 = pid;
 	hdr->outdata_len = strlen(outdata);
+	hdr->outdata_len = (hdr->outdata_len >= (rune.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) ? (rune.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr) - 1) : hdr->outdata_len;
 	memcpy(&hdr->t_start, t_start, sizeof(struct timespec));
 	memcpy(&hdr->t_end, t_end, sizeof(struct timespec));
 

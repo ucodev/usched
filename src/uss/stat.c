@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 05-04-2015
+ * Date: 06-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,48 @@
 #include "bitops.h"
 #include "ipc.h"
 
+static int _use_process(char *msg) {
+	int errsv = 0;
+	struct ipc_uss_hdr *hdr = (struct ipc_uss_hdr *) msg;
+	char *outdata = msg + sizeof(struct ipc_uss_hdr);
+
+	/* Sanity checks */
+	if (!msg) {
+		log_crit("_use_process(): Message buffer is NULL.\n");
+		/* TODO: Set runtime fatal flag here as this is really critical */
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Wait for IPC message */
+	if (ipc_recv(runs.ipcd_use_ro, msg, runs.config.exec.ipc_msgsize) < 0) {
+		errsv = errno;
+		log_warn("_use_process(): ipc_recv(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate output data size */
+	if (hdr->outdata_len >= (runs.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) {
+		errsv = errno;
+		log_crit("_use_process(): IPC message too long (%u bytes). Entry ID: 0x%016llX\n", hdr->outdata_len, hdr->id);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Grant NULL termination on output data buffer */
+	outdata[hdr->outdata_len] = 0;
+
+	debug_printf(DEBUG_INFO, "_use_process(): hdr->id: 0x%016llX, hdr->status: %lu, hdr->pid: %lu, hdr->outdata_len: %lu, outdata: %s\n", hdr->id, hdr->status, hdr->pid, hdr->outdata_len, outdata);
+
+	/* TODO */
+	return 0;
+}
+
+static int _usd_dispatch(void) {
+	return -1;
+}
+
 static int _stat_process(void) {
 	int errsv = 0;
 	char *buf = NULL, *outdata = NULL;
@@ -62,26 +104,15 @@ static int _stat_process(void) {
 		/* Reset message memory */
 		memset(buf, 0, runs.config.exec.ipc_msgsize);
 
-		/* Wait for IPC message */
-		if (ipc_recv(runs.ipcd_use_ro, buf, runs.config.exec.ipc_msgsize) < 0) {
-			log_warn("_stat_process(): ipc_recv(): %s\n", strerror(errno));
+		/* Process data incoming from use */
+		if (_use_process(buf) < 0) {
+			log_warn("_stat_process(): _use_process(): %s\n", strerror(errno));
 
 			continue;
 		}
-
-		/* Validate output data size */
-		if (hdr->outdata_len >= (runs.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) {
-			log_crit("_stat_process(): IPC message too long (%u bytes). Entry ID: 0x%016llX\n", hdr->outdata_len, hdr->id);
-
-			continue;
-		}
-
-		/* Grant NULL termination on output data buffer */
-		outdata[hdr->outdata_len] = 0;
-
-		debug_printf(DEBUG_INFO, "_stat_process(): hdr->id: 0x%016llX, hdr->status: %lu, hdr->pid: %lu, hdr->outdata_len: %lu\n", hdr->id, hdr->status, hdr->pid, hdr->outdata_len);
 
 		/* TODO */
+		_usd_dispatch();
 	}
 
 	/* Release buffer memory */

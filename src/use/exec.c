@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 06-04-2015
+ * Date: 08-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,10 +47,13 @@ extern char **environ;
 
 static int _uss_dispatch(
 	uint64_t id,
+	uint32_t uid,
+	uint32_t gid,
 	uint32_t pid,
+	uint32_t status,
+	const struct timespec *t_trigger,
 	const struct timespec *t_start,
 	const struct timespec *t_end,
-	uint32_t status,
 	const char *outdata)
 {
 	int errsv = 0;
@@ -72,10 +75,13 @@ static int _uss_dispatch(
 	/* Craft IPC message header */
 	hdr 		 = (struct ipc_uss_hdr *) buf;
 	hdr->id		 = id;
-	hdr->status 	 = status;
+	hdr->uid	 = uid;
+	hdr->gid	 = gid;
 	hdr->pid	 = pid;
+	hdr->status 	 = status;
 	hdr->outdata_len = strlen(outdata);
 	hdr->outdata_len = (hdr->outdata_len >= (rune.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) ? (rune.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr) - 1) : hdr->outdata_len;
+	memcpy(&hdr->t_trigger, t_trigger, sizeof(struct timespec));
 	memcpy(&hdr->t_start, t_start, sizeof(struct timespec));
 	memcpy(&hdr->t_end, t_end, sizeof(struct timespec));
 
@@ -114,7 +120,7 @@ static void *_exec_cmd(void *arg) {
 	int status = 0, opipe[2] = { 0, 0 };
 	char *cmd = buf + sizeof(struct ipc_use_hdr);
 	struct ipc_use_hdr *hdr = (struct ipc_use_hdr *) buf;
-	struct timespec t_start, t_end;
+	struct timespec t_start, t_end, t_trigger;
 
 	/* Validate cmd length */
 	if (hdr->cmd_len >= (rune.config.core.ipc_msgsize - sizeof(struct ipc_use_hdr))) {
@@ -291,8 +297,12 @@ static void *_exec_cmd(void *arg) {
 	/* Get the end time of the execution */
 	clock_gettime(CLOCK_REALTIME, &t_end);
 
+	/* Convert trigger format */
+	t_trigger.tv_sec  = hdr->trigger;
+	t_trigger.tv_nsec = 0;
+
 	/* Send status and statistical data to uSched Status and Statistics */
-	if (_uss_dispatch(hdr->id, pid, &t_start, &t_end, status, child_outdata) < 0)
+	if (_uss_dispatch(hdr->id, hdr->uid, hdr->gid, pid, status, &t_trigger, &t_start, &t_end, child_outdata) < 0)
 		log_warn("_exec_cmd(): _uss_dispatch(): %s\n", strerror(errno));
 
 _exec_finish:

@@ -3,9 +3,9 @@
  * @brief uSched
  *        Pool handlers interface header
  *
- * Date: 24-06-2014
+ * Date: 08-04-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -31,8 +31,10 @@
 /* Prototypes */
 int pool_client_init(void);
 int pool_daemon_init(void);
+int pool_stat_init(void);
 void pool_client_destroy(void);
 void pool_daemon_destroy(void);
+void pool_stat_destroy(void);
 
 #endif
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 05-04-2015
+ * Date: 08-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -185,6 +185,10 @@ struct usched_runtime_stat {
 
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
+
+	struct cll_handler *spool;	/* Stats pool */
+
+	pthread_mutex_t mutex_spool;
 
 	ipcd_t ipcd_use_ro; /* Read-only */
 	ipcd_t ipcd_usd_wo; /* Write-only */

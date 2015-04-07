@@ -3,7 +3,7 @@
  * @brief uSched
  *        Stat configuration and administration interface header
  *
- * Date: 01-04-2015
+ * Date: 08-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,6 +27,28 @@
 #ifndef USCHED_STAT_H
 #define USCHED_STAT_H
 
+/* Structures */
+struct usched_stat_exec {
+	uid_t uid;
+	gid_t gid;
+	pid_t pid;
+	int status;
+	struct timespec trigger;
+	struct timespec start;
+	struct timespec end;
+	size_t outdata_len;
+	char outdata[CONFIG_USCHED_EXEC_OUTPUT_MAX + 1];
+};
+
+struct usched_stat_entry {
+	uint64_t id;			/* Entry ID */
+	struct usched_stat_exec current;/* Stats of the last execution */
+	struct usched_stat_exec error;	/* Stats of the last error */
+	unsigned int nr_exec;		/* Number of times executed */
+	unsigned int nr_ok;		/* Number of executions with zero status */
+	unsigned int nr_fail;		/* Number of executions with non-zero status */
+};
+
 /* Prototypes */
 int stat_admin_commit(void);
 int stat_admin_rollback(void);
@@ -45,6 +67,8 @@ int stat_admin_privdrop_group_show(void);
 int stat_admin_privdrop_group_change(const char *privdrop_group);
 int stat_admin_privdrop_user_show(void);
 int stat_admin_privdrop_user_change(const char *privdrop_user);
-
+int stat_compare(const void *s1, const void *s2);
+void stat_zero(struct usched_stat_entry *s);
+void stat_destroy(void *elem);
 #endif
 

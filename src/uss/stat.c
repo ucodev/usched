@@ -74,6 +74,7 @@ static int _stat_entry_update(
 		if (!(s = mm_alloc(sizeof(struct usched_stat_entry)))) {
 			errsv = errno;
 			log_warn("_stat_entry_update(): mm_alloc(): %s\n", strerror(errno));
+			pthread_mutex_unlock(&runs.mutex_spool);
 			errno = errsv;
 			return -1;
 		}
@@ -88,6 +89,7 @@ static int _stat_entry_update(
 		if (runs.spool->insert(runs.spool, s) < 0) {
 			errsv = errno;
 			log_warn("_stat_entry_update(): runs.spool->insert(): %s\n", strerror(errno));
+			pthread_mutex_unlock(&runs.mutex_spool);
 			errno = errsv;
 			return -1;
 		}

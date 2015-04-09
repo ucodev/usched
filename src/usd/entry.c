@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 28-03-2015
+ * Date: 09-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -240,6 +240,13 @@ void entry_daemon_exec_dispatch(void *arg) {
 
 		/* Remove this entry as it is invalid */
 		goto _remove;
+	}
+
+	/* Check if the entry is valid */
+	if (entry_has_flag(entry, USCHED_ENTRY_FLAG_INVALID)) {
+		log_warn("entry_daemon_exec_dispatch(): Entry ID 0x%016llX is marked as invalid.\n", entry->id);
+
+		goto _finish;
 	}
 
 	/* Check entry signature */

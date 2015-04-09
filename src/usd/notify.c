@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 05-03-2015
+ * Date: 09-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -104,9 +104,6 @@ void notify_read(struct async_op *aop) {
 
 			/* Set the entry creation time */
 			entry->create_time = time(NULL);
-
-			/* Update entry signature */
-			entry_update_signature(entry);
 
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);

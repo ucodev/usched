@@ -1,3 +1,6 @@
+v0.1-beta-07 (2015-04-09):
+ - Entries are now always signed before being armed.
+
 v0.1-beta-06 (2015-04-03):
  - Fixed usc(1) manpage
  - Updated INSTALL.txt and README.md

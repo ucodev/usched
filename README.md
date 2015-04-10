@@ -16,7 +16,7 @@ It also operates as a **client/server**, where requests performed by clients can
 
 ## Portability
 
-uSched is designed to be compliant with any POSIX-oriented operating system. It was successfully tested under **Linux**, **FreeBSD**, **OpenBSD**, **SunOS**, **Minix**, **Darwin** and others, in different architectures (**x86/64**, **ARM** and **SPARC**).
+uSched is designed to be compliant with any POSIX-oriented operating system. It was successfully tested under **Linux**, **FreeBSD**, **OpenBSD**, **SunOS**, **Minix**, **Darwin** and [others](https://github.com/ucodev/usched/wiki#supported-operating-systems-tested), and multiple architectures (**x86/64**, **ARM**, **MIPS**, **SPARC** and [more](https://github.com/ucodev/usched/wiki#supported-architectures-tested)).
 
 There are some features that may not be enabled by default in the case that some non-portable calls being unavailable on the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the [include/config.h](https://github.com/ucodev/usched/blob/master/include/config.h) file.
 
@@ -91,6 +91,7 @@ Useful documentation links:
 
   * [GitHub uSched Wiki](https://github.com/ucodev/usched/wiki) - The official uSched project wiki
   * [uSched FAQ](https://github.com/ucodev/usched/wiki/FAQ) - Frequently Asked Questions
+  * [Getting Started](https://github.com/ucodev/usched/wiki/Getting-Started) - A starters guide to uSched
   * [Getting Help](https://github.com/ucodev/usched/wiki#getting-help) - How to get help installing, configuring and using the project
 
 Reference Manual:

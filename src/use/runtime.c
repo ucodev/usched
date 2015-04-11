@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 19-03-2015
+ * Date: 11-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -111,7 +111,7 @@ int runtime_exec_init(int argc, char **argv) {
 
 	if (thread_exec_behaviour_init() < 0) {
 		errsv = errno;
-		log_crit("runtmie_exec_init(): thread_exec_behaviour_init(): %s\n", strerror(errno));
+		log_crit("runtime_exec_init(): thread_exec_behaviour_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

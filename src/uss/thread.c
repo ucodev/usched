@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface - Stat
  *
- * Date: 31-03-2015
+ * Date: 11-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -35,12 +35,12 @@
 #include "runtime.h"
 #include "thread.h"
 
-int thread_stat_behaviour_init(void) {
+int thread_stat_components_init(void) {
 	int errsv = 0;
 
-	if ((errno = pthread_atfork(&thread_atfork_prepare, &thread_atfork_parent, &thread_atfork_child))) {
+	if ((errno = pthread_mutex_init(&runs.mutex_spool, NULL))) {
 		errsv = errno;
-		log_crit("thread_stat_behaviour_init(): pthread_atfork(): %s\n", strerror(errno));
+		log_crit("thread_stat_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -48,8 +48,7 @@ int thread_stat_behaviour_init(void) {
 	return 0;
 }
 
-void thread_stat_behaviour_destroy(void) {
-	if ((errno = pthread_atfork(&thread_atfork_noop, &thread_atfork_noop, &thread_atfork_noop)))
-		log_crit("thread_stat_behaviour_destroy(): pthread_atfork(): %s\n", strerror(errno));
+void thread_stat_components_destroy(void) {
+	pthread_mutex_destroy(&runs.mutex_spool);
 }
 

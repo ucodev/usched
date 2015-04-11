@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Stat
  *
- * Date: 31-03-2015
+ * Date: 11-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,6 +38,7 @@
 #include "sig.h"
 #include "bitops.h"
 #include "ipc.h"
+#include "pool.h"
 
 static int _runtime_stat_drop_privs(void) {
 	int errsv = 0;
@@ -102,16 +103,28 @@ int runtime_stat_init(int argc, char **argv) {
 	log_info("Signals interface initialized.\n");
 
 	/* Initialize threads behaviour */
-	log_info("Initializing thread behaviour interface...\n");
+	log_info("Initializing thread components interface...\n");
 
-	if (thread_stat_behaviour_init() < 0) {
+	if (thread_stat_components_init() < 0) {
 		errsv = errno;
-		log_crit("runtmie_stat_init(): thread_stat_behaviour_init(): %s\n", strerror(errno));
+		log_crit("runtime_stat_init(): thread_stat_components_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	log_info("Thread behaviour interface initialized.\n");
+	log_info("Thread components interface initialized.\n");
+
+	/* Initialize pools */
+	log_info("Initializing pools...\n");
+
+	if (pool_stat_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_stat_init(): pool_stat_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Pools initialized.\n");
 
 	/* Initialize IPC */
 	log_info("Initializing IPC interface...\n");
@@ -156,10 +169,15 @@ void runtime_stat_destroy(void) {
 	ipc_stat_destroy();
 	log_info("IPC interface destroyed.\n");
 
+	/* Destroy pools */
+	log_info("Destroying pools...\n");
+	pool_stat_destroy();
+	log_info("Pools destroyed.\n");
+
 	/* Destroy thread behaviour interface */
-	log_info("Destroying thread behaviour interface...\n");
-	thread_stat_behaviour_destroy();
-	log_info("Thread behaviour interface destroyed.\n");
+	log_info("Destroying thread components interface...\n");
+	thread_stat_components_destroy();
+	log_info("Thread components interface destroyed.\n");
 
 	/* Destroy signals interface */
 	log_info("Destroying signals interface...\n");

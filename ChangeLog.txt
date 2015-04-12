@@ -1,3 +1,6 @@
+v0.1-beta-08 (2015-04-13):
+ - Minor fixes on uSched Client
+
 v0.1-beta-07 (2015-04-09):
  - Entries are now always signed before being armed.
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 08-04-2015
+ * Date: 12-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,17 @@
 int pool_stat_init(void) {
 	int errsv = 0;
 
+	/* Initialize dispatch pool */
+	if (!(runs.dpool = pall_cll_init(&stat_compare, &stat_destroy, NULL, NULL))) {
+		errsv = errno;
+		log_crit("pool_stat_init(): runs.dpool = pall_cll_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Setup CLL: No auto search, head insert, search forward */
+	(void) runs.dpool->set_config(runs.dpool, (ui32_t) (CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD));
+
 	/* Initialize stat entries pool */
 	if (!(runs.spool = pall_cll_init(&stat_compare, &stat_destroy, NULL, NULL))) {
 		errsv = errno;
@@ -51,10 +62,21 @@ int pool_stat_init(void) {
 	/* Setup CLL: No auto search, head insert, search forward */
 	(void) runs.spool->set_config(runs.spool, (ui32_t) (CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD));
 
+	/* All good */
 	return 0;
 }
 
 void pool_stat_destroy(void) {
+	/* Destroy dispatch pool */
+	pthread_mutex_lock(&runs.mutex_dpool);
+
+	if (runs.dpool) {
+		pall_cll_destroy(runs.dpool);
+		runs.dpool = NULL;
+	}
+	pthread_mutex_unlock(&runs.mutex_dpool);
+
+	/* Destory stat entries pool */
 	pthread_mutex_lock(&runs.mutex_spool);
 
 	if (runs.spool) {

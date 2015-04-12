@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 08-04-2015
+ * Date: 12-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -120,11 +120,13 @@ static int _stat_entry_update(
 	/* Release spool lock */
 	pthread_mutex_unlock(&runs.mutex_spool);
 
+	/* TODO: Insert stat entry into dpool and signal dpool cond */
+
 	/* All good */
 	return 0;
 }
 
-static int _use_process(void) {
+static int _use_receive(void) {
 	int errsv = 0;
 	struct ipc_uss_hdr *hdr = NULL;
 	char *outdata = NULL, *buf = NULL;
@@ -188,29 +190,100 @@ static int _usd_dispatch(void) {
 	return -1;
 }
 
-static int _stat_process(void) {
-	/* Process IPC messages */
+static void *_worker_receive(void *arg) {
+	/* Process incoming IPC messages */
 	for (;;) {
 		/* Check if runtime was interrupted */
 		if (runtime_stat_interrupted())
 			break;
 
-		/* Process data incoming from use */
-		if (_use_process() < 0) {
-			log_warn("_stat_process(): _use_process(): %s\n", strerror(errno));
+		/* Process messages from uSched Executer */
+		if (_use_receive() < 0)
+			log_warn("_worker_receive(): _use_process(): %s\n", strerror(errno));
+	}
 
-			continue;
-		}
+	/* Runtime was interrupted */
+	pthread_exit(NULL);
 
-		/* TODO */
-		if (_usd_dispatch() < 0) {
-			log_warn("_stat_process(): _usd_dispatch(): %s\n", strerror(errno));
+	return NULL;
+}
 
-			continue;
+static void *_worker_dispatch(void *arg) {
+	pthread_mutex_lock(&runs.mutex_dpool);
+
+	/* Monitor and dispatch rpool entries */
+	for (;;) {
+		/* Check if runtime was interupted */
+		if (runtime_stat_interrupted())
+			break;
+
+		/* Wait for something to be dispatched */
+		while (!runs.dpool->count(runs.dpool))
+			pthread_cond_wait(&runs.cond_dpool, &runs.mutex_dpool);
+
+		/* Process dpool */
+		if (_usd_dispatch() < 0)
+			log_warn("_worker_dispatch(): _usd_dispatch(): %s\n", strerror(errno));
+	}
+
+	pthread_mutex_unlock(&runs.mutex_dpool);
+
+	/* Runtime was interrupted */
+	pthread_exit(NULL);
+
+	return NULL;
+}
+
+static void _init(int argc, char **argv) {
+	if (runtime_stat_init(argc, argv) < 0) {
+		log_crit("_init(): runtime_stat_init(): %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	/* Create workers */
+	if ((errno = pthread_create(&runs.tid_receive, NULL, &_worker_receive, NULL))) {
+		log_crit("_init(): pthread_create(): %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	if ((errno = pthread_create(&runs.tid_dispatch, NULL, &_worker_dispatch, NULL))) {
+		log_crit("_init(): pthread_create(): %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
+
+static void _destroy(void) {
+	/* Wait for workers to terminate */
+	pthread_join(runs.tid_receive, NULL);
+	pthread_join(runs.tid_dispatch, NULL);
+
+	/* Destroy runtime environment */
+	runtime_stat_destroy();
+}
+
+static void _loop(int argc, char **argv) {
+	_init(argc, argv);
+
+	for (;;) {
+		/* Wait for runtime interruption */
+		pause();
+
+		/* Check for runtime interruptions */
+		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE))
+			break;
+
+		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
+			_destroy();
+			_init(argc, argv);
 		}
 	}
 
-	/* No errors... just an interrupt */
+	_destroy();
+}
+
+int main(int argc, char **argv) {
+	_loop(argc, argv);
+
 	return 0;
 }
 
@@ -236,45 +309,5 @@ void stat_destroy(void *elem) {
 	stat_zero(s);
 
 	mm_free(s);
-}
-
-static void _init(int argc, char **argv) {
-	if (runtime_stat_init(argc, argv) < 0) {
-		log_crit("_init(): runtime_stat_init(): %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-}
-
-static void _destroy(void) {
-	runtime_stat_destroy();
-}
-
-static void _loop(int argc, char **argv) {
-	_init(argc, argv);
-
-	for (;;) {
-		/* Process status and statistics requests */
-		if (_stat_process() < 0) {
-			log_crit("_loop(): _stat_process(): %s\n", strerror(errno));
-			break;
-		}
-
-		/* Check for runtime interruptions */
-		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE))
-			break;
-
-		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
-			_destroy();
-			_init(argc, argv);
-		}
-	}
-
-	_destroy();
-}
-
-int main(int argc, char **argv) {
-	_loop(argc, argv);
-
-	return 0;
 }
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 27-02-2015
+ * Date: 13-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -145,9 +145,9 @@ int process_client_recv_run(struct usched_entry *entry) {
 
 int process_client_recv_stop(struct usched_entry *entry) {
 	int errsv = 0;
-	uint32_t i = 0, entry_list_nmemb = 0;
+	uint32_t i = 0, entry_list_nmemb = 0, data_len = 0;
 	uint64_t *entry_list = NULL;
-	size_t data_len = 0, p_offset = 0;
+	size_t p_offset = 0;
 
 	/* Cleanup entry payload if required */
 	if (entry->payload) {
@@ -159,7 +159,7 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	/* Read data size */
 	if (panet_read(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): panet_read(, &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_stop(): panet_read(, &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -170,7 +170,7 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	/* Allocate enough memory to receive the payload */
 	if (!(entry->payload = mm_alloc(entry->psize))) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): mm_alloc(): %s\n", strerror(errno));
+		log_crit("process_client_recv_stop(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -178,7 +178,7 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	/* Receive the payload */
 	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_stop(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
@@ -187,7 +187,7 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	/* Decrypt the payload */
 	if (entry_payload_decrypt(entry) < 0) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): entry_payload_decrypt(): %s\n", strerror(errno));
+		log_crit("process_client_recv_stop(): entry_payload_decrypt(): %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;

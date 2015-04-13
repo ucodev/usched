@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 12-04-2015
+ * Date: 13-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -56,7 +56,7 @@ static int _stat_entry_update(
 	char *outdata)
 {
 	int errsv = 0;
-	struct usched_stat_entry *s = NULL;
+	struct usched_stat_entry *s = NULL, *dpool_s = NULL;
 
 	/* Sanity checks */
 	if (outdata_len > CONFIG_USCHED_EXEC_OUTPUT_MAX) {
@@ -117,16 +117,42 @@ static int _stat_entry_update(
 	/* Update the number of times the entry was executed */
 	s->nr_exec ++;
 
+	/* Acquire dpool mutex */
+	pthread_mutex_lock(&runs.mutex_dpool);
+
+	/* Check if this entry is already in in dpool */
+	if (!(dpool_s = runs.dpool->search(runs.dpool, (struct usched_stat_entry [1]) { { s->id, } }))) {
+		/* Duplicate stat entry */
+		if (!(dpool_s = stat_dup(s))) {
+			errsv = errno;
+			log_warn("_stat_entry_update(): stat_dup(): %s\n", strerror(errno));
+			pthread_mutex_unlock(&runs.mutex_spool);
+			errno = errsv;
+			return -1;
+		}
+
+		/* Insert stat entry into dpool */
+		if (runs.dpool->insert(runs.dpool, dpool_s) < 0)
+			log_warn("_stat_entry_update(): runs.dpool->insert(): %s\n", strerror(errno));
+	} else {
+		/* Update dpool entry contents */
+		memcpy(dpool_s, s, sizeof(struct usched_stat_entry));
+	}
+
+	/* Signal the dpool worker to start processing the queue */
+	pthread_cond_signal(&runs.cond_dpool);
+
+	/* Release the dpool mutex */
+	pthread_mutex_unlock(&runs.mutex_dpool);
+
 	/* Release spool lock */
 	pthread_mutex_unlock(&runs.mutex_spool);
-
-	/* TODO: Insert stat entry into dpool and signal dpool cond */
 
 	/* All good */
 	return 0;
 }
 
-static int _use_receive(void) {
+static int _use_incoming(void) {
 	int errsv = 0;
 	struct ipc_uss_hdr *hdr = NULL;
 	char *outdata = NULL, *buf = NULL;
@@ -187,10 +213,14 @@ static int _use_receive(void) {
 }
 
 static int _usd_dispatch(void) {
-	return -1;
+	runs.dpool->collapse(runs.dpool);
+	debug_printf(DEBUG_INFO, "_usd_dispatch(): Dispatching...\n");
+
+	/* TODO */
+	return 0;
 }
 
-static void *_worker_receive(void *arg) {
+static void *_worker_incoming(void *arg) {
 	/* Process incoming IPC messages */
 	for (;;) {
 		/* Check if runtime was interrupted */
@@ -198,9 +228,11 @@ static void *_worker_receive(void *arg) {
 			break;
 
 		/* Process messages from uSched Executer */
-		if (_use_receive() < 0)
-			log_warn("_worker_receive(): _use_process(): %s\n", strerror(errno));
+		if (_use_incoming() < 0)
+			log_warn("_worker_incoming(): _use_incoming(): %s\n", strerror(errno));
 	}
+
+	debug_printf(DEBUG_INFO, "_worker_incoming(): Terminating...\n");
 
 	/* Runtime was interrupted */
 	pthread_exit(NULL);
@@ -218,8 +250,10 @@ static void *_worker_dispatch(void *arg) {
 			break;
 
 		/* Wait for something to be dispatched */
-		while (!runs.dpool->count(runs.dpool))
+		if (!runs.dpool->count(runs.dpool)) {
 			pthread_cond_wait(&runs.cond_dpool, &runs.mutex_dpool);
+			continue;
+		}
 
 		/* Process dpool */
 		if (_usd_dispatch() < 0)
@@ -227,6 +261,8 @@ static void *_worker_dispatch(void *arg) {
 	}
 
 	pthread_mutex_unlock(&runs.mutex_dpool);
+
+	debug_printf(DEBUG_INFO, "_worker_dispatch(): Terminating...\n");
 
 	/* Runtime was interrupted */
 	pthread_exit(NULL);
@@ -241,7 +277,7 @@ static void _init(int argc, char **argv) {
 	}
 
 	/* Create workers */
-	if ((errno = pthread_create(&runs.tid_receive, NULL, &_worker_receive, NULL))) {
+	if ((errno = pthread_create(&runs.tid_incoming, NULL, &_worker_incoming, NULL))) {
 		log_crit("_init(): pthread_create(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -254,7 +290,11 @@ static void _init(int argc, char **argv) {
 
 static void _destroy(void) {
 	/* Wait for workers to terminate */
-	pthread_join(runs.tid_receive, NULL);
+	pthread_cancel(runs.tid_incoming);
+	pthread_join(runs.tid_incoming, NULL);
+	pthread_mutex_lock(&runs.mutex_dpool);
+	pthread_cond_signal(&runs.cond_dpool);
+	pthread_mutex_unlock(&runs.mutex_dpool);
 	pthread_join(runs.tid_dispatch, NULL);
 
 	/* Destroy runtime environment */
@@ -267,6 +307,8 @@ static void _loop(int argc, char **argv) {
 	for (;;) {
 		/* Wait for runtime interruption */
 		pause();
+
+		debug_printf(DEBUG_INFO, "_loop(): Interrupted...\n");
 
 		/* Check for runtime interruptions */
 		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE))
@@ -297,6 +339,25 @@ int stat_compare(const void *s1, const void *s2) {
 		return -1;
 
 	return 0;
+}
+
+struct usched_stat_entry *stat_dup(const struct usched_stat_entry *s) {
+	int errsv = 0;
+	struct usched_stat_entry *d = NULL;
+
+	/* Allocate the entry memory */
+	if (!(d = mm_alloc(sizeof(struct usched_stat_entry)))) {
+		errsv = errno;
+		log_warn("stat_dup(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return NULL;
+	}
+
+	/* Copy stat entry contents */
+	memcpy(d, s, sizeof(struct usched_stat_entry));
+
+	/* All good */
+	return d;
 }
 
 void stat_zero(struct usched_stat_entry *s) {

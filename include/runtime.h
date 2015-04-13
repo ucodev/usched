@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 12-04-2015
+ * Date: 13-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -189,7 +189,7 @@ struct usched_runtime_stat {
 	struct cll_handler *dpool;	/* Dispatch pool */
 	struct cll_handler *spool;	/* Stats pool */
 
-	pthread_t tid_receive;
+	pthread_t tid_incoming;
 	pthread_t tid_dispatch;
 
 	pthread_cond_t cond_dpool;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 28-03-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -207,6 +207,14 @@ usched_entry {
 	 *
 	 */
 	unsigned char signature[HASH_DIGEST_SIZE_BLAKE2S];
+
+	/* Status and statistics */
+	uint32_t pid;
+	uint32_t status;
+	uint64_t exec_time;	/* In nanoseconds */
+	uint64_t latency;	/* In nanoseconds */
+	uint32_t outdata_len;
+	char outdata[CONFIG_USCHED_EXEC_OUTPUT_MAX];
 };
 #ifndef USCHED_NO_PRAGMA_PACK
  #pragma pack(pop)

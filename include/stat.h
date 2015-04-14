@@ -3,7 +3,7 @@
  * @brief uSched
  *        Stat configuration and administration interface header
  *
- * Date: 13-04-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -67,9 +67,12 @@ int stat_admin_privdrop_group_show(void);
 int stat_admin_privdrop_group_change(const char *privdrop_group);
 int stat_admin_privdrop_user_show(void);
 int stat_admin_privdrop_user_change(const char *privdrop_user);
+int stat_daemon_init(void);
+void stat_daemon_destroy(void);
 int stat_compare(const void *s1, const void *s2);
 struct usched_stat_entry *stat_dup(const struct usched_stat_entry *s);
 void stat_zero(struct usched_stat_entry *s);
 void stat_destroy(void *elem);
+
 #endif
 

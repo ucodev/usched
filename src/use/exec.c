@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 08-04-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,6 +39,7 @@
 #include "config.h"
 #include "debug.h"
 #include "runtime.h"
+#include "mm.h"
 #include "log.h"
 #include "bitops.h"
 #include "ipc.h"

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface header
  *
- * Date: 08-04-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -47,6 +47,7 @@ struct ipc_usd_hdr {
 	uint64_t id;
 	uint64_t exec_time;	/* In nanoseconds */
 	uint64_t latency;	/* In nanoseconds */
+	uint32_t pid;
 	uint32_t status;
 	uint32_t outdata_len;
 };

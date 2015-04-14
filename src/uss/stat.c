@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 14-04-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -178,7 +178,7 @@ static int _use_incoming(void) {
 	}
 
 	/* Validate output data size */
-	if (hdr->outdata_len >= (runs.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) {
+	if ((hdr->outdata_len + sizeof(struct ipc_uss_hdr) + 1) > runs.config.exec.ipc_msgsize) {
 		errsv = errno;
 		log_crit("_use_process(): IPC message too long (%u bytes). Entry ID: 0x%016llX\n", hdr->outdata_len, hdr->id);
 		mm_free(buf);
@@ -211,6 +211,7 @@ static int _usd_dispatch(void) {
 	char *msg = NULL, *outdata = NULL;
 	struct usched_stat_entry *s = NULL;
 	struct ipc_usd_hdr *hdr = NULL;
+	struct timespec ipc_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
 
 	/* Allocate message size */
 	if (!(msg = mm_alloc(runs.config.stat.ipc_msgsize))) {
@@ -246,11 +247,12 @@ static int _usd_dispatch(void) {
 	hdr->id = s->id;
 	hdr->exec_time = ((s->current.end.tv_sec * 1000000000) + s->current.end.tv_nsec) - ((s->current.start.tv_sec * 1000000000) + s->current.start.tv_nsec);
 	hdr->latency = ((s->current.start.tv_sec * 1000000000) + s->current.start.tv_nsec) - ((s->current.trigger.tv_sec * 1000000000) + s->current.trigger.tv_nsec);
+	hdr->pid = s->current.pid;
 	hdr->status = WEXITSTATUS(s->current.status);
-	hdr->outdata_len = strlen(s->current.outdata) + 1;
+	hdr->outdata_len = strlen(s->current.outdata);
 
 	/* Assert outdata length */
-	if (hdr->outdata_len > (runs.config.stat.ipc_msgsize - sizeof(struct ipc_usd_hdr)))
+	if ((hdr->outdata_len + sizeof(struct ipc_usd_hdr) + 1) > runs.config.stat.ipc_msgsize)
 		hdr->outdata_len = (runs.config.stat.ipc_msgsize - sizeof(struct ipc_usd_hdr) - 1);
 
 	/* Set outdata */
@@ -259,11 +261,17 @@ static int _usd_dispatch(void) {
 	/* Destroy dpool stat entry */
 	stat_destroy(s);
 
-	debug_printf(DEBUG_INFO, "_usd_dispatch(): Dispatching...\n");
-	/* TODO: Print extended debug information */
+	/* Print extended debug information */
+	debug_printf(DEBUG_INFO, "[DISPATCH]: Entry ID: 0x%016llX, PID: %u, exec_time: %.3fus, latency: %.3fus, status: %u, outdata_len: %u\n", hdr->id, hdr->pid, (hdr->exec_time / 1000.0), (hdr->latency / 1000.0), hdr->status, hdr->outdata_len);
 
-	/* TODO: Dispatch message to uSched Daemon */
-
+	/* Dispatch message to uSched Daemon */
+	if (ipc_timedsend(runs.ipcd_usd_wo, msg, (size_t) runs.config.stat.ipc_msgsize, &ipc_timeout) < 0) {
+		errsv = errno;
+		log_warn("_usd_dispatch(): ipc_timedsend(): %s\n", strerror(errno));
+		mm_free(msg);
+		errno = errsv;
+		return -1;
+	}
 	/* Free message memory */
 	mm_free(msg);
 

@@ -6,7 +6,7 @@ ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
 OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/ipc.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
-OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o ipc.o marshal.o notify.o pmq.o pool.o process.o runtime.o schedule.o sig.o thread.o vars.o
+OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o ipc.o marshal.o notify.o pmq.o pool.o process.o runtime.o schedule.o sig.o stat.o thread.o vars.o
 TARGET=usd
 SYSSBINDIR=`cat ../../.dirsbin`
 
@@ -27,6 +27,7 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c schedule.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c sig.c
+	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c stat.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c thread.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c vars.c
 	${CC} -o ${TARGET} ${OBJS} ${OBJS_COMMON} ${LDFLAGS} ${ELFLAGS}

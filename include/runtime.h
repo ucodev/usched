@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 14-04-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -154,6 +154,7 @@ struct usched_runtime_daemon {
 	pthread_t t_runtime;		/* main thread */
 	pthread_t t_unix, t_remote;	/* connection management threads */
 	pthread_t t_delta, t_marshal;	/* monitoring threads */
+	pthread_t t_stat;		/* Status and Statistics worker */
 
 	time_t time_last;
 	int64_t delta_last;

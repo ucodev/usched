@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 19-03-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,7 @@
 #include "marshal.h"
 #include "gc.h"
 #include "delta.h"
+#include "stat.h"
 
 #if CONFIG_USCHED_JAIL == 1
 static int _runtime_daemon_jail(void) {
@@ -186,6 +187,18 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Pools initialized.\n");
+
+	/* Initialize status and statistics worker */
+	log_info("Initializing status and statistics worker...\n");
+
+	if (stat_daemon_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): stat_daemon_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Status and statistics worker initialized.\n");
 
 	/* Initialize scheduling interface */
 	log_info("Initializing scheduling interface...\n");
@@ -398,6 +411,11 @@ void runtime_daemon_destroy(void) {
 	schedule_daemon_destroy();
 	log_info("Scheduling interface destroyed.\n");
 
+	/* Destroy the status and statistics worker */
+	log_info("Destroying status and statistics worker...\n");
+	stat_daemon_destroy();
+	log_info("Status and statistics worker destroyed.\n");
+	
 #if CONFIG_USCHED_SERIALIZE_ON_REQ == 0
 	log_info("Serializing active pools...\n");
 

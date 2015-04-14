@@ -1,3 +1,6 @@
+v0.1-beta-09 (2015-04-14):
+ - Fixed curl flags on 'deps' script
+
 v0.1-beta-08 (2015-04-13):
  - Minor fixes on uSched Client
 

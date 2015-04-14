@@ -3,7 +3,7 @@
  * @brief uSched
  *        Pool handlers interface
  *
- * Date: 12-04-2015
+ * Date: 14-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,6 +31,7 @@
 #include <pthread.h>
 
 #include <pall/cll.h>
+#include <pall/fifo.h>
 
 #include "runtime.h"
 #include "pool.h"
@@ -40,16 +41,13 @@
 int pool_stat_init(void) {
 	int errsv = 0;
 
-	/* Initialize dispatch pool */
-	if (!(runs.dpool = pall_cll_init(&stat_compare, &stat_destroy, NULL, NULL))) {
+	/* Initialize dispatch queue */
+	if (!(runs.dpool = pall_fifo_init(&stat_destroy, NULL, NULL))) {
 		errsv = errno;
-		log_crit("pool_stat_init(): runs.dpool = pall_cll_init(): %s\n", strerror(errno));
+		log_crit("pool_stat_init(): runs.dpool = pall_fifo_init(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
-
-	/* Setup CLL: No auto search, head insert, search forward */
-	(void) runs.dpool->set_config(runs.dpool, (ui32_t) (CONFIG_SEARCH_FORWARD | CONFIG_INSERT_HEAD));
 
 	/* Initialize stat entries pool */
 	if (!(runs.spool = pall_cll_init(&stat_compare, &stat_destroy, NULL, NULL))) {
@@ -71,7 +69,7 @@ void pool_stat_destroy(void) {
 	pthread_mutex_lock(&runs.mutex_dpool);
 
 	if (runs.dpool) {
-		pall_cll_destroy(runs.dpool);
+		pall_fifo_destroy(runs.dpool);
 		runs.dpool = NULL;
 	}
 	pthread_mutex_unlock(&runs.mutex_dpool);

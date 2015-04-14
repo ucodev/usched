@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 13-04-2015
+ * Date: 14-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -120,24 +120,18 @@ static int _stat_entry_update(
 	/* Acquire dpool mutex */
 	pthread_mutex_lock(&runs.mutex_dpool);
 
-	/* Check if this entry is already in in dpool */
-	if (!(dpool_s = runs.dpool->search(runs.dpool, (struct usched_stat_entry [1]) { { s->id, } }))) {
-		/* Duplicate stat entry */
-		if (!(dpool_s = stat_dup(s))) {
-			errsv = errno;
-			log_warn("_stat_entry_update(): stat_dup(): %s\n", strerror(errno));
-			pthread_mutex_unlock(&runs.mutex_spool);
-			errno = errsv;
-			return -1;
-		}
-
-		/* Insert stat entry into dpool */
-		if (runs.dpool->insert(runs.dpool, dpool_s) < 0)
-			log_warn("_stat_entry_update(): runs.dpool->insert(): %s\n", strerror(errno));
-	} else {
-		/* Update dpool entry contents */
-		memcpy(dpool_s, s, sizeof(struct usched_stat_entry));
+	/* Duplicate stat entry */
+	if (!(dpool_s = stat_dup(s))) {
+		errsv = errno;
+		log_warn("_stat_entry_update(): stat_dup(): %s\n", strerror(errno));
+		pthread_mutex_unlock(&runs.mutex_spool);
+		errno = errsv;
+		return -1;
 	}
+
+	/* Insert stat entry into dpool */
+	if (runs.dpool->push(runs.dpool, dpool_s) < 0)
+		log_warn("_stat_entry_update(): runs.dpool->push(): %s\n", strerror(errno));
 
 	/* Signal the dpool worker to start processing the queue */
 	pthread_cond_signal(&runs.cond_dpool);
@@ -213,10 +207,67 @@ static int _use_incoming(void) {
 }
 
 static int _usd_dispatch(void) {
-	runs.dpool->collapse(runs.dpool);
-	debug_printf(DEBUG_INFO, "_usd_dispatch(): Dispatching...\n");
+	int errsv = 0;
+	char *msg = NULL, *outdata = NULL;
+	struct usched_stat_entry *s = NULL;
+	struct ipc_usd_hdr *hdr = NULL;
 
-	/* TODO */
+	/* Allocate message size */
+	if (!(msg = mm_alloc(runs.config.stat.ipc_msgsize))) {
+		errsv = errno;
+		log_warn("_usd_dispatch(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Reset message memory */
+	memset(msg, 0, runs.config.stat.ipc_msgsize);
+
+	/* Setup pointers */
+	hdr = (struct ipc_usd_hdr *) msg;
+	outdata = msg + sizeof(struct ipc_usd_hdr);
+
+	/* Acquire dispatch pool mutex */
+	pthread_mutex_lock(&runs.mutex_dpool);
+
+	/* Fetch a stat entry to be dispatched */
+	if (!(s = runs.dpool->pop(runs.dpool))) {
+		log_warn("_usd_dispatch(): Dispatch worker was signaled, but queue is empty.\n");
+		pthread_mutex_unlock(&runs.mutex_dpool);
+		mm_free(msg);
+		errno = ENODATA;
+		return -1;
+	}
+
+	/* Release dispatch pool mutex */
+	pthread_mutex_unlock(&runs.mutex_dpool);
+
+	/* Setup header */
+	hdr->id = s->id;
+	hdr->exec_time = ((s->current.end.tv_sec * 1000000000) + s->current.end.tv_nsec) - ((s->current.start.tv_sec * 1000000000) + s->current.start.tv_nsec);
+	hdr->latency = ((s->current.start.tv_sec * 1000000000) + s->current.start.tv_nsec) - ((s->current.trigger.tv_sec * 1000000000) + s->current.trigger.tv_nsec);
+	hdr->status = WEXITSTATUS(s->current.status);
+	hdr->outdata_len = strlen(s->current.outdata) + 1;
+
+	/* Assert outdata length */
+	if (hdr->outdata_len > (runs.config.stat.ipc_msgsize - sizeof(struct ipc_usd_hdr)))
+		hdr->outdata_len = (runs.config.stat.ipc_msgsize - sizeof(struct ipc_usd_hdr) - 1);
+
+	/* Set outdata */
+	memcpy(outdata, s->current.outdata, hdr->outdata_len);
+
+	/* Destroy dpool stat entry */
+	stat_destroy(s);
+
+	debug_printf(DEBUG_INFO, "_usd_dispatch(): Dispatching...\n");
+	/* TODO: Print extended debug information */
+
+	/* TODO: Dispatch message to uSched Daemon */
+
+	/* Free message memory */
+	mm_free(msg);
+
+	/* All good */
 	return 0;
 }
 
@@ -241,26 +292,27 @@ static void *_worker_incoming(void *arg) {
 }
 
 static void *_worker_dispatch(void *arg) {
-	pthread_mutex_lock(&runs.mutex_dpool);
-
 	/* Monitor and dispatch rpool entries */
 	for (;;) {
 		/* Check if runtime was interupted */
 		if (runtime_stat_interrupted())
 			break;
 
+		pthread_mutex_lock(&runs.mutex_dpool);
+
 		/* Wait for something to be dispatched */
 		if (!runs.dpool->count(runs.dpool)) {
 			pthread_cond_wait(&runs.cond_dpool, &runs.mutex_dpool);
+			pthread_mutex_unlock(&runs.mutex_dpool);
 			continue;
 		}
+
+		pthread_mutex_unlock(&runs.mutex_dpool);
 
 		/* Process dpool */
 		if (_usd_dispatch() < 0)
 			log_warn("_worker_dispatch(): _usd_dispatch(): %s\n", strerror(errno));
 	}
-
-	pthread_mutex_unlock(&runs.mutex_dpool);
 
 	debug_printf(DEBUG_INFO, "_worker_dispatch(): Terminating...\n");
 

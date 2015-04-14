@@ -21,7 +21,7 @@ install_lib()
 		fi
 		wget ${WGET_OPTS} https://github.com/ucodev/${lib}/archive/master.tar.gz
 	elif [ -e "`which curl`" ]; then
-		curl -O https://github.com/ucodev/${lib}/archive/master.tar.gz
+		curl -LO https://github.com/ucodev/${lib}/archive/master.tar.gz
 	else
 		echo "Can't find 'wget' nor 'curl'."
 		exit 1

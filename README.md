@@ -18,7 +18,7 @@ It also operates as a **client/server**, where requests performed by clients can
 
 uSched is designed to be compliant with any POSIX-oriented operating system. It was successfully tested under **Linux**, **FreeBSD**, **OpenBSD**, **SunOS**, **Minix**, **Darwin** and [others](https://github.com/ucodev/usched/wiki#supported-operating-systems-tested), and multiple architectures (**x86/64**, **ARM**, **MIPS**, **SPARC** and [more](https://github.com/ucodev/usched/wiki#supported-architectures-tested)).
 
-There are some features that may not be enabled by default in the case that some non-portable calls being unavailable on the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the [include/config.h](https://github.com/ucodev/usched/blob/master/include/config.h) file.
+There are some features that may not be enabled by default in the case of some non-portable calls being unavailable on the target operating system, such as chroot(). To disable such calls and features, set the CONFIG_POSIX_STRICT definition to 1 in the [include/config.h](https://github.com/ucodev/usched/blob/master/include/config.h) file.
 
 uSched client will compile on most Windows versions and the API bindings are available for C#.
 

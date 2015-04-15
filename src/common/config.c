@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 02-04-2015
+ * Date: 15-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -1641,6 +1641,8 @@ void config_destroy_core(struct usched_config_core *core) {
 	mm_free(core->serialize_file);
 	memset(core->ipc_name, 0, strlen(core->ipc_name));
 	mm_free(core->ipc_name);
+	memset(core->ipc_key, 0, strlen(core->ipc_key));
+	mm_free(core->ipc_key);
 	memset(core->jail_dir, 0, strlen(core->jail_dir));
 	mm_free(core->jail_dir);
 	memset(core->privdrop_user, 0, strlen(core->privdrop_user));
@@ -1654,6 +1656,8 @@ void config_destroy_core(struct usched_config_core *core) {
 void config_destroy_exec(struct usched_config_exec *exec) {
 	memset(exec->ipc_name, 0, strlen(exec->ipc_name));
 	mm_free(exec->ipc_name);
+	memset(exec->ipc_key, 0, strlen(exec->ipc_key));
+	mm_free(exec->ipc_key);
 
 	memset(exec, 0, sizeof(struct usched_config_exec));
 }
@@ -1672,6 +1676,8 @@ void config_destroy_network(struct usched_config_network *network) {
 void config_destroy_stat(struct usched_config_stat *stat) {
 	memset(stat->ipc_name, 0, strlen(stat->ipc_name));
 	mm_free(stat->ipc_name);
+	memset(stat->ipc_key, 0, strlen(stat->ipc_key));
+	mm_free(stat->ipc_key);
 	memset(stat->jail_dir, 0, strlen(stat->jail_dir));
 	mm_free(stat->jail_dir);
 	memset(stat->privdrop_user, 0, strlen(stat->privdrop_user));

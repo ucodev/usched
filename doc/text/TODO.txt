@@ -3,7 +3,7 @@ v0.2:
  - Communication Protocol revision
  - Improved serialization routines
  - New operations: hold, change
- - uSched Statistics (uss)
+ - [DONE] uSched Statistics (uss)
 
 v0.3:
  - Exceptions (new conjunctions: except, only)
@@ -11,7 +11,7 @@ v0.3:
 
 v0.4
  - Recursivity (full support)
- - Entry stats and status (including PIDs, exit status, ...)
+ - Support for loadable modules, allowing integration with any external program.
  - crontab importer
  - at importer
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Common
  *
- * Date: 04-04-2015
+ * Date: 16-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,6 +40,8 @@
 #else
  #error "No IPC mechanism defined."
 #endif
+
+/* TODO: Implement generic calls to create and authenticate the IPC interface */
 
 int ipc_timedsend(ipcd_t ipcd, const char *msg, size_t count, const struct timespec *timeout) {
 	int errsv = 0;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Stat
  *
- * Date: 03-04-2015
+ * Date: 16-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -71,6 +71,8 @@ static int _ipc_init_use_ro(void) {
 		return -1;
 	}
 
+	debug_printf(DEBUG_INFO, "[IPC]: Wait for uSched Exec (use) authentication...\n");
+
 	/* Wait for IPC authentication string from uSched Exec (use) */
 	if (mq_receive(runs.ipcd_use_ro, ipc_auth, (size_t) runs.config.exec.ipc_msgsize, 0) < 0) {
 		errsv = errno;
@@ -79,6 +81,8 @@ static int _ipc_init_use_ro(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication received.\n");
 
 	/* Safe to use strcmp(). ipc_auth will always be NULL terminated (granted by memset() + 1) */
 	if (strcmp(ipc_auth, runs.config.exec.ipc_key)) {
@@ -165,6 +169,8 @@ static int _ipc_init_use_ro(void) {
 	panet_safe_close(runs.ipc_bind_fd);
 	runs.ipc_bind_fd = (sock_t) -1;
 
+	debug_printf(DEBUG_INFO, "[IPC]: Wait for uSched Exec (use) authentication...\n");
+
 	/* Wait for authentication string */
 	if (panet_read(runs.ipcd_use_ro, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
 		errsv = errno;
@@ -172,6 +178,8 @@ static int _ipc_init_use_ro(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication received.\n");
 
 	/* Safe to use strcmp(). ipc_auth will always be NULL terminated (granted by memset() + 1) */
 	if (strcmp(ipc_auth, runs.config.exec.ipc_key)) {
@@ -217,6 +225,8 @@ static int _ipc_init_usd_wo(void) {
 	/* Craft IPC authentication string */
 	strncpy(ipc_auth, runs.config.stat.ipc_key, runs.config.stat.ipc_msgsize);
 
+	debug_printf(DEBUG_INFO, "[IPC]: Send authentication to uSched Daemon (usd)...\n");
+
 	/* Send IPC authentication string */
 	if (mq_send(runs.ipcd_usd_wo, ipc_auth, (size_t) runs.config.stat.ipc_msgsize, 0) < 0) {
 		errsv = errno;
@@ -225,6 +235,8 @@ static int _ipc_init_usd_wo(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication sent.\n");
 
 	/* Reset IPC authentication buffer (again) */
 	memset(ipc_auth, 0, runs.config.stat.ipc_msgsize + 1);
@@ -260,12 +272,16 @@ static int _ipc_init_usd_wo(void) {
 	/* Craft IPC authentication string */
 	strncpy(ipc_auth, runs.config.stat.ipc_key, CONFIG_USCHED_AUTH_IPC_SIZE);
 
+	debug_printf(DEBUG_INFO, "[IPC]: Send authentication to uSched Daemon (usd)...\n");
+
 	if (panet_write(runs.ipcd_usd_wo, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
 		errsv = errno;
 		log_crit("_ipc_init_usd_wo(): panet_write(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication sent.\n");
 
 	/* All good */
 	return 0;

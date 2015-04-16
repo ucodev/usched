@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Exec
  *
- * Date: 03-04-2015
+ * Date: 16-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -71,7 +71,9 @@ static int _ipc_init_usd_ro(void) {
 		return -1;
 	}
 
-	/* Wait for IPC authentication string from uSched Exec (use) */
+	debug_printf(DEBUG_INFO, "[IPC]: Wait for uSched Daemon authentication...\n");
+
+	/* Wait for IPC authentication string from uSched Daemon (usd) */
 	if (mq_receive(rune.ipcd_usd_ro, ipc_auth, (size_t) rune.config.core.ipc_msgsize, 0) < 0) {
 		errsv = errno;
 		log_crit("_ipc_init_usd_ro(): mq_receive(): %s\n", strerror(errno));
@@ -79,6 +81,8 @@ static int _ipc_init_usd_ro(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication received.\n");
 
 	/* Safe to use strcmp(). ipc_auth will always be NULL terminated (granted by memset() + 1) */
 	if (strcmp(ipc_auth, rune.config.core.ipc_key)) {
@@ -165,6 +169,8 @@ static int _ipc_init_usd_ro(void) {
 	panet_safe_close(rune.ipc_bind_fd);
 	rune.ipc_bind_fd = (sock_t) -1;
 
+	debug_printf(DEBUG_INFO, "[IPC]: Wait for uSched Daemon authentication...\n");
+
 	/* Wait for authentication string */
 	if (panet_read(rune.ipcd_usd_ro, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
 		errsv = errno;
@@ -172,6 +178,8 @@ static int _ipc_init_usd_ro(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication received.\n");
 
 	/* Safe to use strcmp(). ipc_auth will always be NULL terminated (granted by memset() + 1) */
 	if (strcmp(ipc_auth, rune.config.core.ipc_key)) {
@@ -217,6 +225,8 @@ static int _ipc_init_uss_wo(void) {
 	/* Craft IPC authentication string */
 	strncpy(ipc_auth, rune.config.exec.ipc_key, rune.config.exec.ipc_msgsize);
 
+	debug_printf(DEBUG_INFO, "[IPC]: Send authentication to uSched Status and Statistics (uss)...\n");
+
 	/* Send IPC authentication string */
 	if (mq_send(rune.ipcd_uss_wo, ipc_auth, (size_t) rune.config.exec.ipc_msgsize, 0) < 0) {
 		errsv = errno;
@@ -225,6 +235,8 @@ static int _ipc_init_uss_wo(void) {
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication sent.\n");
 
 	/* Reset IPC authentication buffer (again) */
 	memset(ipc_auth, 0, rune.config.exec.ipc_msgsize + 1);
@@ -260,12 +272,16 @@ static int _ipc_init_uss_wo(void) {
 	/* Craft IPC authentication string */
 	strncpy(ipc_auth, rune.config.exec.ipc_key, CONFIG_USCHED_AUTH_IPC_SIZE);
 
+	debug_printf(DEBUG_INFO, "[IPC]: Send authentication to uSched Status and Statistics (uss)...\n");
+
 	if (panet_write(rune.ipcd_uss_wo, ipc_auth, (size_t) sizeof(ipc_auth) - 1) != (ssize_t) sizeof(ipc_auth) - 1) {
 		errsv = errno;
 		log_crit("_ipc_init_uss_wo(): panet_write(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
+
+	debug_printf(DEBUG_INFO, "[IPC]: Authentication sent.\n");
 
 	/* All good */
 	return 0;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Common
  *
- * Date: 16-04-2015
+ * Date: 17-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,6 +45,7 @@
 
 int ipc_timedsend(ipcd_t ipcd, const char *msg, size_t count, const struct timespec *timeout) {
 	int errsv = 0;
+
 #if CONFIG_USE_IPC_PMQ == 1
 	if (mq_timedsend(ipcd, msg, count, 0, timeout) < 0) {
 		errsv = errno;
@@ -65,8 +66,55 @@ int ipc_timedsend(ipcd_t ipcd, const char *msg, size_t count, const struct times
 	return 0;
 }
 
+int ipc_send(ipcd_t ipcd, const char *msg, size_t count) {
+	int errsv = 0;
+
+#if CONFIG_USE_IPC_PMQ == 1
+	if (mq_send(ipcd, msg, count, 0) < 0) {
+		errsv = errno;
+		log_warn("ipc_send(): mq_timedsend(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	if (panet_write(ipcd, msg, count) != (ssize_t) count) {
+		errsv = errno;
+		log_warn("ipc_send(): panet_write(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#else
+ #error "No IPC mechanism defined."
+#endif
+	return 0;
+}
+
+int ipc_timedrecv(ipcd_t ipcd, char *msg, size_t count, const struct timespec *timeout) {
+	int errsv = 0;
+
+#if CONFIG_USE_IPC_PMQ == 1
+	if (mq_timedreceive(ipcd, msg, count, 0, timeout) < 0) {
+		errsv = errno;
+		log_warn("ipc_recv(): mq_receive(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
+	if (panet_read(ipcd, msg, count) != (ssize_t) count) {
+		errsv = errno;
+		log_warn("ipc_recv(): panet_read(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+#else
+ #error "No IPC mechanism defined."
+#endif
+	return 0;
+}
+
 int ipc_recv(ipcd_t ipcd, char *msg, size_t count) {
 	int errsv = 0;
+
 #if CONFIG_USE_IPC_PMQ == 1
 	if (mq_receive(ipcd, msg, count, 0) < 0) {
 		errsv = errno;

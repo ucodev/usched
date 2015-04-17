@@ -1,1 +1,1 @@
--std=c99 -I/usr/pkg/include -DCONFIG_SYS_MINIX=1 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -DPSCHED_INTERNAL_TIMER_UL=1 -DCONFIG_USE_IPC_UNIX=1 -DCONFIG_USE_SELECT=1 -DCONFIG_USE_SIGINFO=0 -Dsetreuid(ruid,euid)=setuid(ruid) -Dsetregid(rgid,egid)=setgid(rgid) -fstack-protector-all -Wstack-protector
+-std=c99 -I/usr/pkg/include -DCONFIG_SYS_MINIX=1 -D_POSIX_C_SOURCE=200112L -D_XOPEN_SOURCE=700 -DPSCHED_INTERNAL_TIMER_UL=1 -DCONFIG_USE_IPC_UNIX=1 -DCONFIG_USE_SELECT=1 -DCONFIG_USE_SIGINFO=0 -Dsetreuid(ruid,euid)=setuid(ruid) -Dsetregid(rgid,egid)=setgid(rgid)

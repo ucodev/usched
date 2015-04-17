@@ -1,7 +1,7 @@
 /**
- * @file thread.h
+ * @file thread.c
  * @brief uSched
- *        Thread handlers interface header
+ *        Thread handlers interface - IPC
  *
  * Date: 17-04-2015
  * 
@@ -25,23 +25,23 @@
  */
 
 
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <pthread.h>
 
-#ifndef USCHED_THREAD_H
-#define USCHED_THREAD_H
+#include "config.h"
+#include "log.h"
+#include "runtime.h"
+#include "thread.h"
 
-/* Prototypes */
-int thread_daemon_components_init(void);
-void thread_daemon_components_destroy(void);
-int thread_exec_behaviour_init(void);
-void thread_exec_behaviour_destroy(void);
-int thread_ipc_components_init(void);
-void thread_ipc_components_destroy(void);
-int thread_stat_components_init(void);
-void thread_stat_components_destroy(void);
-void thread_atfork_noop(void);
-void thread_atfork_prepare(void);
-void thread_atfork_parent(void);
-void thread_atfork_child(void);
+int thread_ipc_components_init(void) {
+	errno = ENOSYS;
 
-#endif
+	return -1;
+}
+
+void thread_stat_components_destroy(void) {
+	return ;
+}
 

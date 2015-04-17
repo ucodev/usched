@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 06-04-2015
+ * Date: 17-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -363,6 +363,8 @@ int config_daemon_init(void);
 void config_daemon_destroy(void);
 int config_exec_init(void);
 void config_exec_destroy(void);
+int config_ipc_init(void);
+void config_ipc_destroy(void);
 int config_stat_init(void);
 void config_stat_destroy(void);
 

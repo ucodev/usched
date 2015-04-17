@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface header
  *
- * Date: 15-04-2015
+ * Date: 17-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -74,6 +74,8 @@ struct ipc_uss_hdr {
 
 /* Prototypes */
 int ipc_timedsend(ipcd_t ipcd, const char *msg, size_t count, const struct timespec *timeout);
+int ipc_send(ipcd_t ipcd, const char *msg, size_t count);
+int ipc_timedrecv(ipcd_t ipcd, char *msg, size_t count, const struct timespec *timeout);
 int ipc_recv(ipcd_t ipcd, char *msg, size_t count);
 size_t ipc_pending(ipcd_t ipcd);
 void ipc_close(ipcd_t ipcd);

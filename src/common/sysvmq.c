@@ -1,7 +1,7 @@
 /**
- * @file runtime.c
+ * @file sysvmq.c
  * @brief uSched
- *        Runtime handlers interface - Common
+ *        System V Message Queueing interface
  *
  * Date: 24-04-2015
  * 
@@ -25,16 +25,38 @@
  */
 
 
+#include <string.h>
+#include <errno.h>
+
+#include <sys/types.h>
+
 #include "config.h"
 #include "runtime.h"
+#include "log.h"
+#include "sysvmq.h"
 
-/* Globals */
-struct usched_runtime_client runc;
-#if CONFIG_CLIENT_ONLY == 0
-struct usched_runtime_admin runa;
-struct usched_runtime_daemon rund;
-struct usched_runtime_exec rune;
-struct usched_runtime_stat runs;
-struct usched_runtime_ipc runi;
-#endif /* CONFIG_CLIENT_ONLY == 0 */
+#if CONFIG_USE_IPC_SYSVMQ == 1
+ #include <sys/ipc.h>
+ #include <sys/msg.h>
+#endif
+
+#if CONFIG_USE_IPC_SYSVMQ == 1
+int sysvmq_init(const char *key, int oflags, mode_t mode, long maxmsg, long msgsize) {
+	errno = ENOSYS;
+	return -1;
+}
+#endif
+
+#if CONFIG_USE_IPC_SYSVMQ == 1
+void sysvmq_destroy(int mqid) {
+	return ;
+}
+#endif
+
+#if CONFIG_USE_IPC_SYSVMQ == 1
+int sysvmq_unlink(int mqid) {
+	errno = ENOSYS;
+	return -1;
+}
+#endif
 

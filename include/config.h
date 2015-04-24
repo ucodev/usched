@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 17-04-2015
+ * Date: 24-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -27,6 +27,8 @@
 
 #ifndef USCHED_CONFIG_H
 #define USCHED_CONFIG_H
+
+#error "WARNING: This is the uSched tree v0.2-xx. This tree is under development and may not even be functional. Please fetch the latest release from the v0.1 tree if you want to test the project. If you really want to compile and develop the v0.2-xx tree, run ./undo and then remove this #error from the include/config.h file. Then, run ./do again."
 
 #define CONFIG_USCHED_DEBUG			1
 #define CONFIG_USCHED_MULTIUSER			1
@@ -140,6 +142,9 @@
 #endif
 #ifndef CONFIG_USE_SELECT
  #define CONFIG_USE_SELECT			0
+#endif
+#ifndef CONFIG_USE_IPC_SYSVMQ
+ #define CONFIG_USE_IPC_SYSVMQ			0
 #endif
 #ifndef CONFIG_USE_IPC_PMQ
  #define CONFIG_USE_IPC_PMQ			0

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface header
  *
- * Date: 17-04-2015
+ * Date: 24-04-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,7 +34,12 @@
 
 #include "config.h"
 
-#if CONFIG_USE_IPC_PMQ == 1
+#if CONFIG_USE_IPC_SYSVMQ == 1
+ #include <sys/types.h>
+ #include <sys/ipc.h>
+ #include <sys/msg.h>
+ typedef int ipcd_t;
+#elif CONFIG_USE_IPC_PMQ == 1
  #include <mqueue.h>
  typedef mqd_t ipcd_t;
 #elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1

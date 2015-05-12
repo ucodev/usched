@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 09-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -198,7 +198,6 @@ void entry_daemon_exec_dispatch(void *arg) {
 	char *buf = NULL, *cmd = NULL;
 	struct usched_entry *entry = arg;
 	struct ipc_use_hdr *hdr = NULL;
-	struct timespec ipc_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
 
 	/* Remove relative trigger flags, if any */
 	entry_unset_flag(entry, USCHED_ENTRY_FLAG_RELATIVE_TRIGGER);
@@ -272,7 +271,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 	 * Although this check was already performed when receiving the entry from the user,
 	 * this one is required since now the variables are expanded.
 	 */
-	if ((hdr->cmd_len + sizeof(struct ipc_use_hdr) + 1) > (size_t) rund.config.core.ipc_msgsize) {
+	if ((hdr->cmd_len + sizeof(struct ipc_use_hdr) + 1) > (size_t) rund.config.ipc.msg_size) {
 		log_warn("entry_daemon_exec_dispatch(): msg_size > sizeof(buf) (Entry ID: 0x%016llX)\n", entry->id);
 
 		/* Mark this entry as invalid. */
@@ -293,11 +292,11 @@ void entry_daemon_exec_dispatch(void *arg) {
 
 	debug_printf(DEBUG_INFO, "Requesting execution of entry->id: 0x%016llX\n", entry->id);
 
-	/* Deliver message to uSched executer (use). Give up on timeout to avoid this notifier to
+	/* Deliver message to uSched executer (use). Give up on block to avoid this notifier to
 	 * stall in the case of a full message queue or unresponsive executer.
 	 */
-	if (ipc_timedsend(rund.ipcd_use_wo, buf, (size_t) rund.config.core.ipc_msgsize, &ipc_timeout) < 0) {
-		log_warn("entry_daemon_exec_dispatch(): ipc_send(): %s\n", strerror(errno));
+	if (ipc_send_nowait(rund.pipcd, IPC_USD_ID, IPC_USE_ID, buf, (size_t) rund.config.ipc.msg_size) < 0) {
+		log_warn("entry_daemon_exec_dispatch(): ipc_send_nowait(): %s\n", strerror(errno));
 
 		/* NOTE:
 		 *

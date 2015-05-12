@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 15-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -152,7 +152,7 @@ static int _use_incoming(void) {
 	char *outdata = NULL, *buf = NULL;
 
 	/* Allocate uss IPC message memory */
-	if (!(buf = mm_alloc(runs.config.exec.ipc_msgsize))) {
+	if (!(buf = mm_alloc(runs.config.ipc.msg_size))) {
 		errsv = errno;
 		log_warn("_use_process(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
@@ -160,7 +160,7 @@ static int _use_incoming(void) {
 	}
 
 	/* Reset message memory */
-	memset(buf, 0, runs.config.exec.ipc_msgsize);
+	memset(buf, 0, runs.config.ipc.msg_size);
 
 	/* Set header address */
 	hdr = (struct ipc_uss_hdr *) buf;
@@ -169,7 +169,7 @@ static int _use_incoming(void) {
 	outdata = buf + sizeof(struct ipc_uss_hdr);
 
 	/* Wait for IPC message */
-	if (ipc_recv(runs.ipcd_use_ro, buf, runs.config.exec.ipc_msgsize) < 0) {
+	if (ipc_recv(runs.pipcd, (long [1]) { IPC_USE_ID }, (long [1]) { IPC_USS_ID }, buf, runs.config.ipc.msg_size) < 0) {
 		errsv = errno;
 		log_warn("_use_process(): ipc_recv(): %s\n", strerror(errno));
 		mm_free(buf);
@@ -178,7 +178,7 @@ static int _use_incoming(void) {
 	}
 
 	/* Validate output data size */
-	if ((hdr->outdata_len + sizeof(struct ipc_uss_hdr) + 1) > runs.config.exec.ipc_msgsize) {
+	if ((hdr->outdata_len + sizeof(struct ipc_uss_hdr) + 1) > runs.config.ipc.msg_size) {
 		errsv = errno;
 		log_crit("_use_process(): IPC message too long (%u bytes). Entry ID: 0x%016llX\n", hdr->outdata_len, hdr->id);
 		mm_free(buf);
@@ -211,10 +211,9 @@ static int _usd_dispatch(void) {
 	char *msg = NULL, *outdata = NULL;
 	struct usched_stat_entry *s = NULL;
 	struct ipc_usd_hdr *hdr = NULL;
-	struct timespec ipc_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
 
 	/* Allocate message size */
-	if (!(msg = mm_alloc(runs.config.stat.ipc_msgsize))) {
+	if (!(msg = mm_alloc(runs.config.ipc.msg_size))) {
 		errsv = errno;
 		log_warn("_usd_dispatch(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
@@ -222,7 +221,7 @@ static int _usd_dispatch(void) {
 	}
 
 	/* Reset message memory */
-	memset(msg, 0, runs.config.stat.ipc_msgsize);
+	memset(msg, 0, runs.config.ipc.msg_size);
 
 	/* Setup pointers */
 	hdr = (struct ipc_usd_hdr *) msg;
@@ -252,8 +251,8 @@ static int _usd_dispatch(void) {
 	hdr->outdata_len = strlen(s->current.outdata);
 
 	/* Assert outdata length */
-	if ((hdr->outdata_len + sizeof(struct ipc_usd_hdr) + 1) > runs.config.stat.ipc_msgsize)
-		hdr->outdata_len = (runs.config.stat.ipc_msgsize - sizeof(struct ipc_usd_hdr) - 1);
+	if ((hdr->outdata_len + sizeof(struct ipc_usd_hdr) + 1) > runs.config.ipc.msg_size)
+		hdr->outdata_len = (runs.config.ipc.msg_size - sizeof(struct ipc_usd_hdr) - 1);
 
 	/* Set outdata */
 	memcpy(outdata, s->current.outdata, hdr->outdata_len);
@@ -265,9 +264,9 @@ static int _usd_dispatch(void) {
 	debug_printf(DEBUG_INFO, "[DISPATCH]: Entry ID: 0x%016llX, PID: %u, exec_time: %.3fus, latency: %.3fus, status: %u, outdata_len: %u\n", hdr->id, hdr->pid, (hdr->exec_time / 1000.0), (hdr->latency / 1000.0), hdr->status, hdr->outdata_len);
 
 	/* Dispatch message to uSched Daemon */
-	if (ipc_timedsend(runs.ipcd_usd_wo, msg, (size_t) runs.config.stat.ipc_msgsize, &ipc_timeout) < 0) {
+	if (ipc_send_nowait(runs.pipcd, IPC_USS_ID, IPC_USD_ID, msg, (size_t) runs.config.ipc.msg_size) < 0) {
 		errsv = errno;
-		log_warn("_usd_dispatch(): ipc_timedsend(): %s\n", strerror(errno));
+		log_warn("_usd_dispatch(): ipc_send_nowait(): %s\n", strerror(errno));
 		mm_free(msg);
 		errno = errsv;
 		return -1;

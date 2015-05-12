@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics worker interface - Daemon
  *
- * Date: 15-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -46,7 +46,7 @@ static int _stat_daemon_process(char *msg) {
 	struct usched_entry *entry = NULL;
 
 	/* Validate outdata length */
-	if ((hdr->outdata_len + sizeof(struct ipc_usd_hdr)) >= rund.config.stat.ipc_msgsize) {
+	if ((hdr->outdata_len + sizeof(struct ipc_usd_hdr)) >= rund.config.ipc.msg_size) {
 		errsv = errno = EINVAL;
 		log_warn("_stat_daemon_process(): hdr->outdata_len is too long: %s\n", strerror(errno));
 		errno = errsv;
@@ -100,21 +100,21 @@ static void *_stat_daemon_worker(void *arg) {
 	for (;;) {
 		/* Check for runtime interruptions */
 		if (runtime_daemon_interrupted()) {
-			if (!ipc_pending(rund.ipcd_uss_ro))
+			if (!ipc_pending(rund.pipcd))
 				break;
 		}
 
 		/* Allocate message size */
-		if (!(msg = mm_alloc((size_t) rund.config.stat.ipc_msgsize + 1))) {
+		if (!(msg = mm_alloc((size_t) rund.config.ipc.msg_size + 1))) {
 			log_warn("_stat_daemon_worker(): msg = mm_alloc(): %s\n", strerror(errno));
 			continue;
 		}
 
 		/* Reset message memory */
-		memset(msg, 0, (size_t) rund.config.stat.ipc_msgsize + 1);
+		memset(msg, 0, (size_t) rund.config.ipc.msg_size + 1);
 
 		/* Wait for IPC message */
-		if (ipc_recv(rund.ipcd_uss_ro, msg, (size_t) rund.config.stat.ipc_msgsize) < 0) {
+		if (ipc_recv(rund.pipcd, (long [1]) { IPC_USS_ID }, (long [1]) { IPC_USD_ID }, msg, (size_t) rund.config.ipc.msg_size) < 0) {
 			log_warn("_stat_daemon_worker(): ipc_recv(): %s\n", strerror(errno));
 			mm_free(msg);
 			continue;

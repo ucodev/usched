@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface - IPC
  *
- * Date: 17-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -52,6 +52,13 @@ int config_ipc_init(void) {
 		return -1;
 	}
 
+	if (config_init_ipc(&config->ipc) < 0) {
+		errsv = errno;
+		log_warn("config_ipc_init(): config_init_ipc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if (config_init_stat(&config->stat) < 0) {
 		errsv = errno;
 		log_warn("config_ipc_init(): config_init_stat(): %s\n", strerror(errno));
@@ -67,6 +74,7 @@ void config_ipc_destroy(void) {
 
 	config_destroy_core(&config->core);
 	config_destroy_exec(&config->exec);
+	config_destroy_ipc(&config->ipc);
 	config_destroy_stat(&config->stat);
 
 	memset(config, 0, sizeof(struct usched_config));

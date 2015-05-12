@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 24-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -43,10 +43,9 @@
 #include <panet/panet.h>
 #if CONFIG_CLIENT_ONLY == 0
  #include <psched/psched.h>
+ #include <pipc/pipc.h>
 #endif
-#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
- #include <panet/panet.h>
-#endif
+
 
 #include <sys/types.h>
 
@@ -138,12 +137,7 @@ struct usched_runtime_daemon {
 
 	psched_t *psched;
 
-	ipcd_t ipcd_use_wo;
-	ipcd_t ipcd_uss_ro;
-
-#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	sock_t ipc_bind_fd;
-#endif
+	pipcd_t pipcd; /* IPC descriptor */
 
 	pall_fd_t ser_fd;
 
@@ -169,11 +163,7 @@ struct usched_runtime_exec {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-	ipcd_t ipcd_usd_ro;
-	ipcd_t ipcd_uss_wo;
-#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	sock_t ipc_bind_fd;
-#endif
+	pipcd_t pipcd; /* IPC descriptor */
 
 	struct usched_config config;
 };
@@ -198,12 +188,7 @@ struct usched_runtime_stat {
 	pthread_mutex_t mutex_dpool;
 	pthread_mutex_t mutex_spool;
 
-	ipcd_t ipcd_use_ro; /* Read-only */
-	ipcd_t ipcd_usd_wo; /* Write-only */
-
-#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	sock_t ipc_bind_fd;
-#endif
+	pipcd_t pipcd; /* IPC descriptor */
 
 	struct usched_config config;
 };
@@ -217,11 +202,7 @@ struct usched_runtime_ipc {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-	ipcd_t ipcd; /* IPC descriptor */
-
-#if CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	sock_t ipc_bind_fd;
-#endif
+	pipcd_t pipcd; /* IPC descriptor */
 
 	struct usched_config config;
 };
@@ -246,6 +227,9 @@ extern struct usched_runtime_client runc;
  #if CONFIG_STAT_SPECIFIC == 1 || CONFIG_COMMON == 1
  extern struct usched_runtime_stat runs;
  #endif /* CONFIG_STAT_SPECIFIC */
+ #if CONFIG_IPC_SPECIFIC == 1 || CONFIG_COMMON == 1
+ extern struct usched_runtime_ipc runi;
+ #endif /* CONFIG_IPC_SPECIFIC */
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 
 /* Prototypes */

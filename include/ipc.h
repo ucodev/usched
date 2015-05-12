@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface header
  *
- * Date: 24-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,20 +32,17 @@
 #include <stdint.h>
 #include <time.h>
 
+#include <pipc/pipc.h>
+
 #include "config.h"
 
-#if CONFIG_USE_IPC_SYSVMQ == 1
- #include <sys/types.h>
- #include <sys/ipc.h>
- #include <sys/msg.h>
- typedef int ipcd_t;
-#elif CONFIG_USE_IPC_PMQ == 1
- #include <mqueue.h>
- typedef mqd_t ipcd_t;
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
- #include <panet/panet.h>
- typedef sock_t ipcd_t;
-#endif
+/* IPC module IDs */
+enum IPC_MODULE_ID {
+	IPC_USI_ID = 1,
+	IPC_USD_ID,
+	IPC_USE_ID,
+	IPC_USS_ID
+};
 
 /* Structures */
 struct ipc_usd_hdr {
@@ -78,20 +75,35 @@ struct ipc_uss_hdr {
 };
 
 /* Prototypes */
-int ipc_timedsend(ipcd_t ipcd, const char *msg, size_t count, const struct timespec *timeout);
-int ipc_send(ipcd_t ipcd, const char *msg, size_t count);
-int ipc_timedrecv(ipcd_t ipcd, char *msg, size_t count, const struct timespec *timeout);
-int ipc_recv(ipcd_t ipcd, char *msg, size_t count);
-size_t ipc_pending(ipcd_t ipcd);
-void ipc_close(ipcd_t ipcd);
+ssize_t ipc_send(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count);
+ssize_t ipc_send_nowait(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count);
+ssize_t ipc_recv(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count);
+ssize_t ipc_recv_nowait(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count);
+int ipc_pending(pipcd_t pipcd);
+void ipc_close(pipcd_t pipcd);
 int ipc_daemon_init(void);
 int ipc_exec_init(void);
 int ipc_stat_init(void);
+int ipc_ipc_init(void);
 void ipc_daemon_destroy(void);
 void ipc_exec_destroy(void);
 void ipc_stat_destroy(void);
-int ipc_admin_create(void);
-int ipc_admin_delete(void);
+void ipc_ipc_destroy(void);
+int ipc_admin_commit(void);
+int ipc_admin_rollback(void);
+int ipc_admin_show(void);
+int ipc_admin_auth_key_show(void);
+int ipc_admin_auth_key_change(const char *auth_key);
+int ipc_admin_msg_max_show(void);
+int ipc_admin_msg_max_change(const char *msg_max);
+int ipc_admin_msg_size_show(void);
+int ipc_admin_msg_size_change(const char *msg_size);
+int ipc_admin_jail_dir_show(void);
+int ipc_admin_jail_dir_change(const char *jail_dir);
+int ipc_admin_privdrop_user_show(void);
+int ipc_admin_privdrop_user_change(const char *privdrop_user);
+int ipc_admin_privdrop_group_show(void);
+int ipc_admin_privdrop_group_change(const char *privdrop_group);
 
 #endif
 

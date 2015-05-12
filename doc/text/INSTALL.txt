@@ -23,6 +23,9 @@
   - fsma Library
     * https://github.com/ucodev/libfsma
 
+  - pipc Library
+    * https://github.com/ucodev/libpipc
+
  The 'deps' script depends on 'wget' or 'curl', 'tar' and 'gunzip'. Make sure they are installed on the system before executing the 'deps' or 'deploy' script.
 
 

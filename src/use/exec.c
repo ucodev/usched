@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 15-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -60,10 +60,9 @@ static int _uss_dispatch(
 	int errsv = 0;
 	char *buf = NULL;
 	struct ipc_uss_hdr *hdr = NULL;
-	struct timespec ipc_timeout = { CONFIG_USCHED_IPC_TIMEOUT, 0 };
 
 	/* Allocate IPC buffer */
-	if (!(buf = mm_alloc((size_t) rune.config.exec.ipc_msgsize))) {
+	if (!(buf = mm_alloc((size_t) rune.config.ipc.msg_size))) {
 		errsv = errno;
 		log_warn("_uss_dispatch(): mm_alloc(): %s\n", strerror(errno));
 		errno = errsv;
@@ -71,7 +70,7 @@ static int _uss_dispatch(
 	}
 
 	/* Reset IPC buffer */
-	memset(buf, 0, (size_t) rune.config.exec.ipc_msgsize);
+	memset(buf, 0, (size_t) rune.config.ipc.msg_size);
 
 	/* Craft IPC message header */
 	hdr 		 = (struct ipc_uss_hdr *) buf;
@@ -81,13 +80,13 @@ static int _uss_dispatch(
 	hdr->pid	 = pid;
 	hdr->status 	 = status;
 	hdr->outdata_len = strlen(outdata);
-	hdr->outdata_len = (hdr->outdata_len >= (rune.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr))) ? (rune.config.exec.ipc_msgsize - sizeof(struct ipc_uss_hdr) - 1) : hdr->outdata_len;
+	hdr->outdata_len = (hdr->outdata_len >= (rune.config.ipc.msg_size - sizeof(struct ipc_uss_hdr))) ? (rune.config.ipc.msg_size - sizeof(struct ipc_uss_hdr) - 1) : hdr->outdata_len;
 	memcpy(&hdr->t_trigger, t_trigger, sizeof(struct timespec));
 	memcpy(&hdr->t_start, t_start, sizeof(struct timespec));
 	memcpy(&hdr->t_end, t_end, sizeof(struct timespec));
 
 	/* Validate message size */
-	if ((hdr->outdata_len + sizeof(struct timespec) + 1) > (size_t) rune.config.exec.ipc_msgsize) {
+	if ((hdr->outdata_len + sizeof(struct timespec) + 1) > (size_t) rune.config.ipc.msg_size) {
 		log_warn("_uss_dispatch(): IPC message size too long (Entry ID: 0x%016llX)\n", id);
 		mm_free(buf);
 		errno = EINVAL;
@@ -98,9 +97,9 @@ static int _uss_dispatch(
 	memcpy(buf + sizeof(struct ipc_uss_hdr), outdata, hdr->outdata_len);
 
 	/* Dispatch IPC message to uss module */
-	if (ipc_timedsend(rune.ipcd_uss_wo, buf, (size_t) rune.config.exec.ipc_msgsize, &ipc_timeout) < 0) {
+	if (ipc_send_nowait(rune.pipcd, IPC_USE_ID, IPC_USS_ID, buf, (size_t) rune.config.ipc.msg_size) < 0) {
 		errsv = errno;
-		log_warn("_uss_dispatch(): ipc_timedsend(): %s\n", strerror(errno));
+		log_warn("_uss_dispatch(): ipc_send_nowait(): %s\n", strerror(errno));
 		mm_free(buf);
 		errno = errsv;
 		return -1;
@@ -124,7 +123,7 @@ static void *_exec_cmd(void *arg) {
 	struct timespec t_start, t_end, t_trigger;
 
 	/* Validate cmd length */
-	if (hdr->cmd_len >= (rune.config.core.ipc_msgsize - sizeof(struct ipc_use_hdr))) {
+	if (hdr->cmd_len >= (rune.config.ipc.msg_size - sizeof(struct ipc_use_hdr))) {
 		log_crit("_exec_cmd(): hdr->cmd_len is too long (%u bytes). Entry ID: 0x%016llX\n", hdr->cmd_len, hdr->id);
 		goto _exec_finish;
 	}
@@ -162,7 +161,7 @@ static void *_exec_cmd(void *arg) {
 		debug_printf(DEBUG_INFO, "Entry[0x%016llX]: PID[%u]: Executing: %s\nUID: %u\nGID: %u\n", hdr->id, pid, cmd, hdr->uid, hdr->gid);
 
 		/* Close IPC descriptor */
-		ipc_close(rune.ipcd_usd_ro);
+		ipc_close(rune.pipcd);
 
 		/* Close the read end of the output pipe */
 		close(opipe[0]);
@@ -325,14 +324,14 @@ static void _exec_process(void) {
 		/* Check for rutime interruptions */
 		if (runtime_exec_interrupted()) {
 			/* Interrupt execution only when there are no messages in the queue */
-			if (!ipc_pending(rune.ipcd_usd_ro))
+			if (!ipc_pending(rune.pipcd))
 				break;
 		}
 
 		/* Allocate temporary buffer size, plus one byte that won't be written to safe guard
 		 * the subject NULL termination
 		 */
-		if (!(tbuf = mm_alloc((size_t) rune.config.core.ipc_msgsize + 1))) {
+		if (!(tbuf = mm_alloc((size_t) rune.config.ipc.msg_size + 1))) {
 			log_warn("_exec_process(): tbuf = mm_alloc(): %s\n", strerror(errno));
 			continue;
 		}
@@ -340,10 +339,10 @@ static void _exec_process(void) {
 		/* Reset all the memory to 0, granting the extra byte to be 0, so subject will
 		 * will always be NULL terminated regardless of the data received from the queue
 		 */
-		memset(tbuf, 0, (size_t) rune.config.core.ipc_msgsize + 1);
+		memset(tbuf, 0, (size_t) rune.config.ipc.msg_size + 1);
 
 		/* Wait for IPC message */
-		if (ipc_recv(rune.ipcd_usd_ro, tbuf, (size_t) rune.config.core.ipc_msgsize) < 0) {
+		if (ipc_recv(rune.pipcd, (long [1]) { IPC_USD_ID }, (long [1]) { IPC_USE_ID }, tbuf, (size_t) rune.config.ipc.msg_size) < 0) {
 			log_warn("_exec_process(): ipc_recv(): %s\n", strerror(errno));
 			mm_free(tbuf);
 			continue;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Core configuration and administration interface header
  *
- * Date: 19-03-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,20 +31,10 @@
 int core_admin_commit(void);
 int core_admin_rollback(void);
 int core_admin_show(void);
-int core_admin_delta_noexec_show(void);
-int core_admin_delta_noexec_change(const char *delta_noexec);
 int core_admin_delta_reload_show(void);
 int core_admin_delta_reload_change(const char *delta_reload);
 int core_admin_jail_dir_show(void);
 int core_admin_jail_dir_change(const char *jail_dir);
-int core_admin_ipc_msgmax_show(void);
-int core_admin_ipc_msgmax_change(const char *ipc_msgmax);
-int core_admin_ipc_msgsize_show(void);
-int core_admin_ipc_msgsize_change(const char *ipc_msgsize);
-int core_admin_ipc_name_show(void);
-int core_admin_ipc_name_change(const char *ipc_name);
-int core_admin_ipc_key_show(void);
-int core_admin_ipc_key_change(const char *ipc_name);
 int core_admin_privdrop_group_show(void);
 int core_admin_privdrop_group_change(const char *privdrop_group);
 int core_admin_privdrop_user_show(void);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 24-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,7 @@
 #define CONFIG_USCHED_DIR_AUTH			"auth"
 #define CONFIG_USCHED_DIR_CORE			"core"
 #define CONFIG_USCHED_DIR_EXEC			"exec"
+#define CONFIG_USCHED_DIR_IPC			"ipc"
 #define CONFIG_USCHED_DIR_NETWORK		"network"
 #define CONFIG_USCHED_DIR_STAT			"stat"
 #define CONFIG_USCHED_DIR_USERS			"users"
@@ -51,41 +52,39 @@
 #define CONFIG_USCHED_FILE_AUTH_WL_UID		"whitelist.uid"
 #define CONFIG_USCHED_FILE_AUTH_LOCAL_USE	"local.use"
 #define CONFIG_USCHED_FILE_AUTH_REMOTE_USERS	"remote.users"
-#define CONFIG_USCHED_FILE_CORE_DELTA_NOEXEC	"delta.noexec"
 #define CONFIG_USCHED_FILE_CORE_DELTA_RELOAD	"delta.reload"
 #define CONFIG_USCHED_FILE_CORE_JAIL_DIR	"jail.dir"
-#define CONFIG_USCHED_FILE_CORE_IPC_MSGMAX	"ipc.msgmax"
-#define CONFIG_USCHED_FILE_CORE_IPC_MSGSIZE	"ipc.msgsize"
-#define CONFIG_USCHED_FILE_CORE_IPC_NAME	"ipc.name"
-#define CONFIG_USCHED_FILE_CORE_IPC_KEY		"ipc.key"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_USER	"privdrop.user"
 #define CONFIG_USCHED_FILE_CORE_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_FILE_CORE_SERIALIZE_FILE	"serialize.file"
 #define CONFIG_USCHED_FILE_CORE_THREAD_PRIORITY	"thread.priority"
 #define CONFIG_USCHED_FILE_CORE_THREAD_WORKERS	"thread.workers"
-#define CONFIG_USCHED_FILE_EXEC_IPC_MSGMAX	"ipc.msgmax"
-#define CONFIG_USCHED_FILE_EXEC_IPC_MSGSIZE	"ipc.msgsize"
-#define CONFIG_USCHED_FILE_EXEC_IPC_NAME	"ipc.name"
-#define CONFIG_USCHED_FILE_EXEC_IPC_KEY		"ipc.key"
+#define CONFIG_USCHED_FILE_EXEC_DELTA_NOEXEC	"delta.noexec"
+#define CONFIG_USCHED_FILE_IPC_AUTH_KEY		"auth.key"
+#define CONFIG_USCHED_FILE_IPC_ID_KEY		"id.key"
+#define CONFIG_USCHED_FILE_IPC_ID_NAME		"id.name"
+#define CONFIG_USCHED_FILE_IPC_MSG_MAX		"msg.max"
+#define CONFIG_USCHED_FILE_IPC_MSG_SIZE		"msg.size"
+#define CONFIG_USCHED_FILE_IPC_JAIL_DIR		"jail.dir"
+#define CONFIG_USCHED_FILE_IPC_PRIVDROP_USER	"privdrop.user"
+#define CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_ADDR	"bind.addr"
 #define CONFIG_USCHED_FILE_NETWORK_BIND_PORT	"bind.port"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_LIMIT	"conn.limit"
 #define CONFIG_USCHED_FILE_NETWORK_CONN_TIMEOUT	"conn.timeout"
 #define CONFIG_USCHED_FILE_NETWORK_SOCK_NAME	"sock.name"
 #define CONFIG_USCHED_FILE_STAT_JAIL_DIR	"jail.dir"
-#define CONFIG_USCHED_FILE_STAT_IPC_MSGMAX	"ipc.msgmax"
-#define CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE	"ipc.msgsize"
-#define CONFIG_USCHED_FILE_STAT_IPC_NAME	"ipc.name"
-#define CONFIG_USCHED_FILE_STAT_IPC_KEY		"ipc.key"
 #define CONFIG_USCHED_FILE_STAT_PRIVDROP_USER	"privdrop.user"
 #define CONFIG_USCHED_FILE_STAT_PRIVDROP_GROUP	"privdrop.group"
 #define CONFIG_USCHED_DAEMON_PID_FILE		"@_SYSRUNDIR_@/usched_usd.pid"
 #define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_use.pid"
+#define CONFIG_USCHED_IPC_PID_FILE		"@_SYSRUNDIR_@/usched_usi.pid"
 #define CONFIG_USCHED_STAT_PID_FILE		"@_SYSRUNDIR_@/usched_uss.pid"
 #define CONFIG_USCHED_ADMIN_PROC_NAME		"usa"
 #define CONFIG_USCHED_CLIENT_PROC_NAME		"usc"
 #define CONFIG_USCHED_DAEMON_PROC_NAME		"usd"
 #define CONFIG_USCHED_EXEC_PROC_NAME		"use"
+#define CONFIG_USCHED_IPC_PROC_NAME		"usi"
 #define CONFIG_USCHED_MONITOR_PROC_NAME		"usm"
 #define CONFIG_USCHED_STAT_PROC_NAME		"uss"
 #define CONFIG_USCHED_LOG_MSG_MAX_SIZE		1024
@@ -93,12 +92,12 @@
 #define CONFIG_USCHED_AUTH_USERNAME_MAX		32
 #define CONFIG_USCHED_AUTH_PASSWORD_MAX		256
 #define CONFIG_USCHED_AUTH_PASSWORD_MIN		8
-#define CONFIG_USCHED_AUTH_SESSION_MAX		272 /* Current mac: 257 */
-#define CONFIG_USCHED_AUTH_IPC_SIZE		128 /* Size of IPC authentication string */
+#define CONFIG_USCHED_AUTH_SESSION_MAX		272  /* Current mac: 257 */
+#define CONFIG_USCHED_AUTH_IPC_SIZE_MIN		32   /* Min. Size of IPC authentication string */
+#define CONFIG_USCHED_AUTH_IPC_SIZE_MAX		128  /* Max. Size of IPC authentication string */
 #define CONFIG_USCHED_EXEC_OUTPUT_MAX		4096 /* Max number of bytes to store output data */
 #define CONFIG_USCHED_HASH_FNV1A		1
 #define CONFIG_USCHED_HASH_DJB2			0
-#define CONFIG_USCHED_IPC_TIMEOUT		3   /* Number of seconds before give up on sends */
 
 #define CONFIG_POSIX_STRICT			0
 
@@ -128,6 +127,12 @@
 #ifndef CONFIG_EXEC_SPECIFIC
 #define CONFIG_EXEC_SPECIFIC			0
 #endif
+#ifndef CONFIG_IPC_SPECIFIC
+#define CONFIG_IPC_SPECIFIC			0
+#endif
+#ifndef CONFIG_STAT_SPECIFIC
+#define CONFIG_STAT_SPECIFIC			0
+#endif
 #ifndef CONFIG_ADMIN_SPECIFIC
 #define CONFIG_ADMIN_SPECIFIC			0
 #endif
@@ -143,27 +148,9 @@
 #ifndef CONFIG_USE_SELECT
  #define CONFIG_USE_SELECT			0
 #endif
-#ifndef CONFIG_USE_IPC_SYSVMQ
- #define CONFIG_USE_IPC_SYSVMQ			0
-#endif
-#ifndef CONFIG_USE_IPC_PMQ
- #define CONFIG_USE_IPC_PMQ			0
-#endif
-#ifndef CONFIG_USE_IPC_UNIX
- #define CONFIG_USE_IPC_UNIX			0
-#endif
-#ifndef CONFIG_USE_IPC_INET
- #define CONFIG_USE_IPC_INET			0
-#endif
-#ifndef CONFIG_USE_IPC_INET_BINDADDR
- #define CONFIG_USE_IPC_INET_BINDADDR		"127.0.0.1"
-#endif
 
 
 /* Configuration compliance checks */
-#if CONFIG_USE_IPC_PMQ == 0 && CONFIG_USE_IPC_UNIX == 0 && CONFIG_USE_IPC_INET == 0
- #error "No communication interface is set for uSched Execution module (CONFIG_USE_IPC_PMQ == 0 and CONFIG_USE_IPC_UNIX == 0 and CONFIG_USE_IPC_INET == 0)."
-#endif
 #if CONFIG_POSIX_STRICT == 1 && (CONFIG_USCHED_JAIL == 1 || CONFIG_USE_SYNCFS == 1)
  #error "CONFIG_POSIX_STRICT is incompatible with the following options: CONFIG_USCHED_JAIL, CONFIG_USE_SYNCFS"
 #endif
@@ -294,14 +281,9 @@ struct usched_config_auth {
 };
 
 struct usched_config_core {
-	unsigned int delta_noexec;
 	unsigned int delta_reload;
 	char *serialize_file;
 	char *jail_dir;
-	long ipc_msgmax;
-	long ipc_msgsize;
-	char *ipc_name;
-	char *ipc_key;
 	char *privdrop_user;
 	char *privdrop_group;
 	uid_t privdrop_uid;
@@ -311,10 +293,20 @@ struct usched_config_core {
 };
 
 struct usched_config_exec {
-	long ipc_msgmax;
-	long ipc_msgsize;
-	char *ipc_name;
-	char *ipc_key;
+	unsigned int delta_noexec;
+};
+
+struct usched_config_ipc {
+	char *auth_key;
+	long id_key;
+	char *id_name;
+	long msg_max;
+	long msg_size;
+	char *jail_dir;
+	char *privdrop_user;
+	char *privdrop_group;
+	uid_t privdrop_uid;
+	gid_t privdrop_gid;
 };
 
 struct usched_config_network {
@@ -327,10 +319,6 @@ struct usched_config_network {
 
 struct usched_config_stat {
 	char *jail_dir;
-	long ipc_msgmax;
-	long ipc_msgsize;
-	char *ipc_name;
-	char *ipc_key;
 	char *privdrop_user;
 	char *privdrop_group;
 	uid_t privdrop_uid;
@@ -341,6 +329,7 @@ struct usched_config {
 	struct usched_config_auth auth;
 	struct usched_config_core core;
 	struct usched_config_exec exec;
+	struct usched_config_ipc ipc;
 	struct usched_config_network network;
 	struct usched_config_stat stat;
 	struct usched_config_users users;
@@ -351,12 +340,14 @@ struct usched_config {
 int config_init_auth(struct usched_config_auth *auth);
 int config_init_core(struct usched_config_core *core);
 int config_init_exec(struct usched_config_exec *exec);
+int config_init_ipc(struct usched_config_ipc *ipc);
 int config_init_network(struct usched_config_network *network);
 int config_init_stat(struct usched_config_stat *stat);
 int config_init_users(struct usched_config_users *users);
 void config_destroy_auth(struct usched_config_auth *auth);
 void config_destroy_core(struct usched_config_core *core);
 void config_destroy_exec(struct usched_config_exec *exec);
+void config_destroy_ipc(struct usched_config_ipc *ipc);
 void config_destroy_network(struct usched_config_network *network);
 void config_destroy_stat(struct usched_config_stat *stat);
 void config_destroy_users(struct usched_config_users *users);

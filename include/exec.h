@@ -3,7 +3,7 @@
  * @brief uSched
  *        Exec configuration and administration interface header
  *
- * Date: 01-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -31,14 +31,8 @@
 int exec_admin_commit(void);
 int exec_admin_rollback(void);
 int exec_admin_show(void);
-int exec_admin_ipc_msgmax_show(void);
-int exec_admin_ipc_msgmax_change(const char *ipc_msgmax);
-int exec_admin_ipc_msgsize_show(void);
-int exec_admin_ipc_msgsize_change(const char *ipc_msgsize);
-int exec_admin_ipc_name_show(void);
-int exec_admin_ipc_name_change(const char *ipc_name);
-int exec_admin_ipc_key_show(void);
-int exec_admin_ipc_key_change(const char *ipc_name);
+int exec_admin_delta_noexec_show(void);
+int exec_admin_delta_noexec_change(const char *ipc_msgmax);
 
 #endif
 

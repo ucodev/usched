@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Common
  *
- * Date: 17-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,140 +28,34 @@
 #include <string.h>
 #include <errno.h>
 
+#include <pipc/pipc.h>
+
 #include "config.h"
 #include "ipc.h"
 #include "log.h"
 
-#if CONFIG_USE_IPC_PMQ == 1
- #include <time.h>
- #include <mqueue.h>
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
- #include <panet/panet.h>
-#else
- #error "No IPC mechanism defined."
-#endif
-
-/* TODO: Implement generic calls to create and authenticate the IPC interface */
-
-int ipc_timedsend(ipcd_t ipcd, const char *msg, size_t count, const struct timespec *timeout) {
-	int errsv = 0;
-
-#if CONFIG_USE_IPC_PMQ == 1
-	if (mq_timedsend(ipcd, msg, count, 0, timeout) < 0) {
-		errsv = errno;
-		log_warn("ipc_send(): mq_timedsend(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_write(ipcd, msg, count) != (ssize_t) count) {
-		errsv = errno;
-		log_warn("ipc_send(): panet_write(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#else
- #error "No IPC mechanism defined."
-#endif
-	return 0;
+ssize_t ipc_send(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count) {
+	return pipc_send(pipcd, src_id, dst_id, msg, count);
 }
 
-int ipc_send(ipcd_t ipcd, const char *msg, size_t count) {
-	int errsv = 0;
-
-#if CONFIG_USE_IPC_PMQ == 1
-	if (mq_send(ipcd, msg, count, 0) < 0) {
-		errsv = errno;
-		log_warn("ipc_send(): mq_timedsend(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_write(ipcd, msg, count) != (ssize_t) count) {
-		errsv = errno;
-		log_warn("ipc_send(): panet_write(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#else
- #error "No IPC mechanism defined."
-#endif
-	return 0;
+ssize_t ipc_send_nowait(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count) {
+	return pipc_send_nowait(pipcd, src_id, dst_id, msg, count);
 }
 
-int ipc_timedrecv(ipcd_t ipcd, char *msg, size_t count, const struct timespec *timeout) {
-	int errsv = 0;
-
-#if CONFIG_USE_IPC_PMQ == 1
-	if (mq_timedreceive(ipcd, msg, count, 0, timeout) < 0) {
-		errsv = errno;
-		log_warn("ipc_recv(): mq_receive(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_read(ipcd, msg, count) != (ssize_t) count) {
-		errsv = errno;
-		log_warn("ipc_recv(): panet_read(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#else
- #error "No IPC mechanism defined."
-#endif
-	return 0;
+ssize_t ipc_recv(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count) {
+	return pipc_recv(pipcd, src_id, dst_id, msg, count);
 }
 
-int ipc_recv(ipcd_t ipcd, char *msg, size_t count) {
-	int errsv = 0;
-
-#if CONFIG_USE_IPC_PMQ == 1
-	if (mq_receive(ipcd, msg, count, 0) < 0) {
-		errsv = errno;
-		log_warn("ipc_recv(): mq_receive(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	if (panet_read(ipcd, msg, count) != (ssize_t) count) {
-		errsv = errno;
-		log_warn("ipc_recv(): panet_read(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-#else
- #error "No IPC mechanism defined."
-#endif
-	return 0;
+ssize_t ipc_recv_nowait(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count) {
+	return pipc_recv_nowait(pipcd, src_id, dst_id, msg, count);
 }
 
-size_t ipc_pending(ipcd_t ipcd) {
-	size_t nmemb = 0;
-#if CONFIG_USE_IPC_PMQ == 1
-	int errsv = 0;
-	struct mq_attr mqattr;
-
-	memset(&mqattr, 0, sizeof(struct mq_attr));
-
-	if (mq_getattr(ipcd, &mqattr) < 0) {
-		errsv = errno;
-		log_warn("ipc_pending(): mq_getattr(): %s\n", strerror(errno));
-		errno = errsv;
-		nmemb = 0;
-	} else {
-		nmemb = mqattr.mq_curmsgs;
-	}
-#endif
-	return nmemb;
+int ipc_pending(pipcd_t pipcd) {
+	return pipc_pending(pipcd);
 }
 
-void ipc_close(ipcd_t ipcd) {
-#if CONFIG_USE_IPC_PMQ == 1
-	mq_close(ipcd);
-#elif CONFIG_USE_IPC_UNIX == 1 || CONFIG_USE_IPC_INET == 1
-	panet_safe_close(ipcd);
-#else
- #error "No IPC mechanism defined."
-#endif
+void ipc_close(pipcd_t pipcd) {
+	/* TODO */
+	return ;
 }
 

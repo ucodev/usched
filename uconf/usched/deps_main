@@ -96,6 +96,7 @@ mkdir build/libpanet
 mkdir build/libpsched
 mkdir build/libpsec
 mkdir build/librtsaio
+mkdir build/libpipc
 cd build
 
 # Install dependencies
@@ -106,6 +107,7 @@ install_lib "libpanet"
 install_lib "libpsched"
 install_lib "libpsec"
 install_lib "librtsaio"
+install_lib "libpipc"
 
 # Cleanup
 cd ../

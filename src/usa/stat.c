@@ -3,7 +3,7 @@
  * @brief uSched
  *        Stat configuration and administration interface
  *
- * Date: 01-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,7 +38,6 @@
 #include "mm.h"
 #include "usched.h"
 #include "print.h"
-#include "ipc.h"
 
 int stat_admin_commit(void) {
 	int errsv = 0;
@@ -62,46 +61,11 @@ int stat_admin_commit(void) {
 		return -1;
 	}
 
-	/* Destroy the current message queue */
-	ipc_admin_delete();
-
 	/* Destroy the current configuration */
 	config_admin_destroy();
 
 	/* jail.dir */
 	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_JAIL_DIR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_JAIL_DIR, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_commit(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.msgmax */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_commit(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.msgsize */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_commit(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.name */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_commit(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.key */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_KEY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_KEY, 128) < 0) {
 		errsv = errno;
 		log_crit("stat_admin_commit(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
@@ -132,14 +96,6 @@ int stat_admin_commit(void) {
 		return -1;
 	}
 
-	/* Create the message queue */
-	if (ipc_admin_create() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_commit(): ipc_admin_create(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
 	/* All good */
 	return 0;
 }
@@ -149,38 +105,6 @@ int stat_admin_rollback(void) {
 
 	/* jail.dir */
 	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_JAIL_DIR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_JAIL_DIR, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.msgmax */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.msgsize */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.name */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_NAME, 128) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* ipc.key */
-	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_KEY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_KEY, 128) < 0) {
 		errsv = errno;
 		log_crit("stat_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
@@ -213,34 +137,6 @@ int stat_admin_show(void) {
 	if (stat_admin_jail_dir_show() < 0) {
 		errsv = errno;
 		log_crit("stat_admin_show(): stat_admin_jail_dir_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_msgmax_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_show(): stat_admin_ipc_msgmax_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_msgsize_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_show(): stat_admin_ipc_msgsize_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_name_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_show(): stat_admin_ipc_name_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_key_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_show(): stat_admin_ipc_key_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -339,319 +235,6 @@ int stat_admin_jail_dir_change(const char *jail_dir) {
 
 	return 0;
 }
-
-int stat_admin_ipc_msgmax_show(void) {
-	int errsv = 0;
-	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
-
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGMAX))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGMAX))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgmax_show(): file_read_line_single(): %s\n", strerror(errno));
-		mm_free(value_tmp);
-		errno = errsv;
-		return -1;
-	}
-
-	/* Check which value to print */
-	if (!strcmp(value, value_tmp)) {
-		if (!(value_print = mm_alloc(strlen(value) + 1))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		strcpy(value_print, value);
-	} else {
-		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_msgmax_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		/* Show the temporary value with a trailing '*' */
-		strcpy(value_print, value_tmp);
-		strcat(value_print, "*");
-	}
-
-	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_STAT_STR, CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, value_print);
-
-	/* Free memory */
-	mm_free(value);
-	mm_free(value_tmp);
-	mm_free(value_print);
-
-	/* All good */
-	return 0;
-}
-
-int stat_admin_ipc_msgmax_change(const char *ipc_msgmax) {
-	int errsv = 0;
-
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGMAX, ipc_msgmax) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgmax_change(): file_write_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_msgmax_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgmax_change(): stat_admin_ipc_msgmax_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-int stat_admin_ipc_msgsize_show(void) {
-	int errsv = 0;
-	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
-
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgsize_show(): file_read_line_single(): %s\n", strerror(errno));
-		mm_free(value_tmp);
-		errno = errsv;
-		return -1;
-	}
-
-	/* Check which value to print */
-	if (!strcmp(value, value_tmp)) {
-		if (!(value_print = mm_alloc(strlen(value) + 1))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		strcpy(value_print, value);
-	} else {
-		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_msgsize_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		/* Show the temporary value with a trailing '*' */
-		strcpy(value_print, value_tmp);
-		strcat(value_print, "*");
-	}
-
-	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_STAT_STR, CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, value_print);
-
-	/* Free memory */
-	mm_free(value);
-	mm_free(value_tmp);
-	mm_free(value_print);
-
-	/* All good */
-	return 0;
-}
-
-int stat_admin_ipc_msgsize_change(const char *ipc_msgsize) {
-	int errsv = 0;
-
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_MSGSIZE, ipc_msgsize) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgsize_change(): file_write_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_msgsize_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_msgsize_change(): stat_admin_ipc_msgsize_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-int stat_admin_ipc_name_show(void) {
-	int errsv = 0;
-	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
-
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_NAME))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_name_show(): file_read_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_NAME))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_name_show(): file_read_line_single(): %s\n", strerror(errno));
-		mm_free(value_tmp);
-		errno = errsv;
-		return -1;
-	}
-
-	/* Check which value to print */
-	if (!strcmp(value, value_tmp)) {
-		if (!(value_print = mm_alloc(strlen(value) + 1))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_name_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		strcpy(value_print, value);
-	} else {
-		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_name_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		/* Show the temporary value with a trailing '*' */
-		strcpy(value_print, value_tmp);
-		strcat(value_print, "*");
-	}
-
-	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_STAT_STR, CONFIG_USCHED_FILE_STAT_IPC_NAME, value_print);
-
-	/* Free memory */
-	mm_free(value);
-	mm_free(value_tmp);
-	mm_free(value_print);
-
-	/* All good */
-	return 0;
-}
-
-int stat_admin_ipc_name_change(const char *ipc_name) {
-	int errsv = 0;
-
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_NAME, ipc_name) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_name_change(): file_write_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_name_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_name_change(): stat_admin_ipc_name_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
-int stat_admin_ipc_key_show(void) {
-	int errsv = 0;
-	char *value = NULL, *value_tmp = NULL, *value_print = NULL;
-
-	if (!(value_tmp = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_KEY))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_key_show(): file_read_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (!(value = file_read_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_IPC_KEY))) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_key_show(): file_read_line_single(): %s\n", strerror(errno));
-		mm_free(value_tmp);
-		errno = errsv;
-		return -1;
-	}
-
-	/* Check which value to print */
-	if (!strcmp(value, value_tmp)) {
-		if (!(value_print = mm_alloc(strlen(value) + 1))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_key_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		strcpy(value_print, value);
-	} else {
-		if (!(value_print = mm_alloc(strlen(value_tmp) + 2))) {
-			errsv = errno;
-			log_crit("stat_admin_ipc_key_show(): mm_alloc(): %s\n", strerror(errno));
-			mm_free(value);
-			mm_free(value_tmp);
-			errno = errsv;
-			return -1;
-		}
-
-		/* Show the temporary value with a trailing '*' */
-		strcpy(value_print, value_tmp);
-		strcat(value_print, "*");
-	}
-
-	/* Print the output */
-	print_admin_category_var_value(USCHED_CATEGORY_STAT_STR, CONFIG_USCHED_FILE_STAT_IPC_KEY, value_print);
-
-	/* Free memory */
-	mm_free(value);
-	mm_free(value_tmp);
-	mm_free(value_print);
-
-	/* All good */
-	return 0;
-}
-
-int stat_admin_ipc_key_change(const char *ipc_key) {
-	int errsv = 0;
-
-	if (file_write_line_single(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/." CONFIG_USCHED_FILE_STAT_IPC_KEY, ipc_key) < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_key_change(): file_write_line_single(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (stat_admin_ipc_key_show() < 0) {
-		errsv = errno;
-		log_crit("stat_admin_ipc_key_change(): stat_admin_ipc_key_show(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-}
-
 
 int stat_admin_privdrop_group_show(void) {
 	int errsv = 0;

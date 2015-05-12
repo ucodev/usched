@@ -3,7 +3,7 @@ ECFLAGS=`cat ../../.ecflags`
 CCFLAGS=-DCONFIG_COMMON=1
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS=bitops.o config.o conn.o debug.o entry.o gc.o hash.o input.o ipc.o local.o log.o mm.o pmq.o runtime.o str.o sysvmq.o term.o thread.o
+OBJS=bitops.o config.o conn.o debug.o entry.o gc.o hash.o input.o ipc.o local.o log.o mm.o runtime.o str.o term.o thread.o
 
 all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c bitops.c
@@ -18,10 +18,8 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c local.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c log.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c mm.c
-	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c pmq.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c str.c
-	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c sysvmq.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c term.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c thread.c
 

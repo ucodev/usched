@@ -1,9 +1,9 @@
 /**
  * @file ipc.c
  * @brief uSched
- *        Inter-Process Communication interface - Admin
+ *        IPC configuration and administration interface
  *
- * Date: 21-03-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,99 +24,472 @@
  *
  */
 
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <unistd.h>
+
+#include <fsop/path.h>
+#include <fsop/file.h>
 
 #include "config.h"
-#include "runtime.h"
+#include "admin.h"
 #include "log.h"
+#include "mm.h"
+#include "usched.h"
 #include "ipc.h"
-#if CONFIG_USE_IPC_PMQ == 1
- #include "pmq.h"
-#elif CONFIG_USE_IPC_UNIX == 1
- #include <fsop/path.h>
- #include <panet/panet.h>
-#endif
 
-int ipc_admin_create(void) {
-#if CONFIG_USE_IPC_PMQ == 1
+int ipc_admin_commit(void) {
 	int errsv = 0;
 
-	if (pmq_admin_create() < 0) {
+	/* Check if services are running and stop processing if they are */
+	if (fsop_path_exists(CONFIG_USCHED_DAEMON_PID_FILE)) {
+		log_crit("ipc_admin_commit(): uSched services are running (usd). You must stop all uSched services before you can commit exec configuration changes.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	if (fsop_path_exists(CONFIG_USCHED_EXEC_PID_FILE)) {
+		log_crit("ipc_admin_commit(): uSched services are running (use). You must stop all uSched services before you can commit exec configuration changes.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	if (fsop_path_exists(CONFIG_USCHED_STAT_PID_FILE)) {
+		log_crit("ipc_admin_commit(): uSched services are running (uss). You must stop all uSched services before you can commit exec configuration changes.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	if (fsop_path_exists(CONFIG_USCHED_IPC_PID_FILE)) {
+		log_crit("ipc_admin_commit(): uSched services are running (usi). You must stop all uSched services before you can commit exec configuration changes.\n");
+		errno = EBUSY;
+		return -1;
+	}
+
+	/* Destroy the current message queue */
+	ipc_admin_delete();
+
+	/* Destroy the current configuration */
+	config_admin_destroy();
+
+	/* auth.key */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_AUTH_KEY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_AUTH_KEY, 128) < 0) {
 		errsv = errno;
-		log_warn("ipc_admin_create(): pmq_admin_create(): %s\n", strerror(errno));
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	/* id.key */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_ID_KEY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_ID_KEY, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* id.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_ID_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_ID_NAME, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* msg.max */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_MSG_MAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_MSG_MAX, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* msg.size */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_MSG_SIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_MSG_SIZE, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* jail.dir */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_JAIL_DIR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_JAIL_DIR, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.user */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_PRIVDROP_USER, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_PRIVDROP_USER, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.group */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Re-initialize the configuration */
+	if (config_admin_init() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): config_admin_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Create the message queue */
+	if (ipc_admin_create() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_commit(): ipc_admin_create(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
 	return 0;
-#elif CONFIG_USE_IPC_UNIX == 1
-	int errsv = 0;
-	int ipcd = -1;
-
-	if ((ipcd = panet_server_unix(runa.config.core.ipc_name, PANET_PROTO_UNIX_STREAM, runa.config.core.ipc_msgmax)) < 0) {
-		errsv = errno;
-		log_warn("ipc_exec_init(): panet_server_unix(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	panet_safe_close(ipcd);
-
-	if (chown(runa.config.core.ipc_name, 0, 0) < 0) {
-		errsv = errno;
-		log_warn("ipc_exec_init(): chown(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (chmod(runa.config.core.ipc_name, 0700) < 0) {
-		errsv = errno;
-		log_warn("ipc_exec_init(): chmod(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	return 0;
-#elif CONFIG_USE_IPC_INET == 1
-	return 0;
-#else
-	errno = ENOSYS;
-	return -1;
-#endif
 }
 
-int ipc_admin_delete(void) {
-#if CONFIG_USE_IPC_PMQ == 1
+int ipc_admin_rollback(void) {
 	int errsv = 0;
 
-	if (pmq_admin_delete() < 0) {
+	/* auth.key */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_AUTH_KEY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_AUTH_KEY, 128) < 0) {
 		errsv = errno;
-		log_warn("ipc_admin_delete(): pmq_admin_delete(): %s\n", strerror(errno));
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* id.key */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_ID_KEY, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_ID_KEY, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* id.name */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_ID_NAME, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_ID_NAME, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* msg.max */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_MSG_MAX, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_MSG_MAX, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* msg.size */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_MSG_SIZE, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_MSG_SIZE, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* jail.dir */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_JAIL_DIR, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_JAIL_DIR, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.user */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_PRIVDROP_USER, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_PRIVDROP_USER, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* privdrop.group */
+	if (fsop_cp(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/" CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP, CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_IPC "/." CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP, 128) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_rollback(): fsop_cp(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_show(void) {
+	int errsv = 0;
+
+	if (ipc_admin_auth_key_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_auth_key_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_id_key_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_id_key_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_id_name_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_id_name_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_msg_max_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_msg_max_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_msg_size_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_msg_size_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_jail_dir_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_jail_dir_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_privdrop_user_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_privdrop_user_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_privdrop_group_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_show(): ipc_admin_privdrop_group_show(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	return 0;
-#elif CONFIG_USE_IPC_UNIX == 1
+}
+
+int ipc_admin_auth_key_show(void) {
 	int errsv = 0;
 
-	if (fsop_path_exists(runa.config.core.ipc_name)) {
-		if (unlink(runa.config.core.ipc_name) < 0) {
-			errsv = errno;
-			log_warn("ipc_admin_delete(): unlink(\"%s\"): %s\n", runa.config.core.ipc_name, strerror(errno));
-			errno = errsv;
-			return -1;
-		}
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_AUTH_KEY) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_auth_key_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_auth_key_change(const char *auth_key) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_AUTH_KEY, auth_key) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_auth_key_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_auth_key_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_auth_key_change(): ipc_admin_auth_key_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
 	}
 
 	return 0;
-#elif CONFIG_USE_IPC_INET == 1
+}
+
+int ipc_admin_msg_max_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_MSG_MAX) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_msg_max_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
 	return 0;
-#else
-	errno = ENOSYS;
-	return -1;
-#endif
+}
+
+int ipc_admin_msg_max_change(const char *msg_max) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_MSG_MAX, msg_max) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_msg_max_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_msg_max_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_msg_max_change(): ipc_admin_msg_max_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int ipc_admin_msg_size_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_MSG_SIZE) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_msg_size_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_msg_size_change(const char *msg_size) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_MSG_SIZE, msg_size) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_msg_size_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_msg_size_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_msg_size_change(): ipc_admin_msg_size_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int ipc_admin_jail_dir_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_JAIL_DIR) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_jail_dir_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_jail_dir_change(const char *jail_dir) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_JAIL_DIR, jail_dir) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_jail_dir_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_jail_dir_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_jail_dir_change(): ipc_admin_jail_dir_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int ipc_admin_privdrop_user_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_PRIVDROP_USER) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_privdrop_user_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_privdrop_user_change(const char *privdrop_user) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_PRIVDROP_USER, privdrop_user) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_privdrop_user_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_privdrop_user_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_privdrop_user_change(): ipc_admin_privdrop_user_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int ipc_admin_privdrop_group_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_privdrop_group_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_privdrop_group_change(const char *privdrop_group) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_PRIVDROP_GROUP, privdrop_group) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_privdrop_group_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_privdrop_group_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_privdrop_group_change(): ipc_admin_privdrop_group_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
 }
 

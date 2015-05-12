@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 01-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,13 +33,16 @@
 #include "entry.h"
 
 /* Components - Human */
+#define USCHED_COMPONENT_AUTH_STR	"auth"
 #define USCHED_COMPONENT_BIND_STR	"bind"
 #define USCHED_COMPONENT_BLACKLIST_STR	"blacklist"
 #define USCHED_COMPONENT_CONN_STR	"conn"
 #define USCHED_COMPONENT_DELTA_STR	"delta"
 #define USCHED_COMPONENT_JAIL_STR	"jail"
 #define USCHED_COMPONENT_LOCAL_STR	"local"
+#define USCHED_COMPONENT_ID_STR		"id"
 #define USCHED_COMPONENT_IPC_STR	"ipc"
+#define USCHED_COMPONENT_MSG_STR	"msg"
 #define USCHED_COMPONENT_PRIVDROP_STR	"privdrop"
 #define USCHED_COMPONENT_REMOTE_STR	"remote"
 #define USCHED_COMPONENT_SERIALIZE_STR	"serialize"
@@ -55,13 +58,13 @@
 #define USCHED_PROPERTY_GROUP_STR	"group"
 #define USCHED_PROPERTY_KEY_STR		"key"
 #define USCHED_PROPERTY_LIMIT_STR	"limit"
-#define USCHED_PROPERTY_MSGMAX_STR	"msgmax"
-#define USCHED_PROPERTY_MSGSIZE_STR	"msgsize"
+#define USCHED_PROPERTY_MAX_STR		"max"
 #define USCHED_PROPERTY_NAME_STR	"name"
 #define USCHED_PROPERTY_NOEXEC_STR	"noexec"
 #define USCHED_PROPERTY_PORT_STR	"port"
 #define USCHED_PROPERTY_PRIORITY_STR	"priority"
 #define USCHED_PROPERTY_RELOAD_STR	"reload"
+#define USCHED_PROPERTY_SIZE_STR	"size"
 #define USCHED_PROPERTY_TIMEOUT_STR	"timeout"
 #define USCHED_PROPERTY_UID_STR		"uid"
 #define USCHED_PROPERTY_USE_STR		"use"
@@ -74,6 +77,7 @@
 #define USCHED_CATEGORY_AUTH_STR	"auth"
 #define USCHED_CATEGORY_CORE_STR	"core"
 #define USCHED_CATEGORY_EXEC_STR	"exec"
+#define UCSHED_CATEGORY_IPC_STR		"ipc"
 #define USCHED_CATEGORY_NETWORK_STR	"network"
 #define USCHED_CATEGORY_STAT_STR	"stat"
 #define USCHED_CATEGORY_USERS_STR	"users"
@@ -141,6 +145,7 @@ typedef enum CATEGORY {
 	USCHED_CATEGORY_AUTH,
 	USCHED_CATEGORY_CORE,
 	USCHED_CATEGORY_EXEC,
+	USCHED_CATEGORY_IPC,
 	USCHED_CATEGORY_NETWORK,
 	USCHED_CATEGORY_STAT,
 	USCHED_CATEGORY_USERS

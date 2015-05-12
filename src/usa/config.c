@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface - Admin
  *
- * Date: 02-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,21 +39,28 @@ int config_admin_init(void) {
 
 	if (config_init_core(&config->core) < 0) {
 		errsv = errno;
-		log_warn("config_daemon_init(): config_init_core(): %s\n", strerror(errno));
+		log_warn("config_admin_init(): config_init_core(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	if (config_init_exec(&config->exec) < 0) {
 		errsv = errno;
-		log_warn("config_daemon_init(): config_init_exec(): %s\n", strerror(errno));
+		log_warn("config_admin_init(): config_init_exec(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (config_init_ipc(&config->ipc) < 0) {
+		errsv = errno;
+		log_warn("config_admin_init(): config_init_ipc(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	if (config_init_stat(&config->stat) < 0) {
 		errsv = errno;
-		log_warn("config_daemon_init(): config_init_stat(): %s\n", strerror(errno));
+		log_warn("config_admin_init(): config_init_stat(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -66,7 +73,9 @@ void config_admin_destroy(void) {
 
 	config_destroy_core(&config->core);
 	config_destroy_exec(&config->exec);
+	config_destroy_ipc(&config->ipc);
 	config_destroy_stat(&config->stat);
 
 	memset(config, 0, sizeof(struct usched_config));
 }
+

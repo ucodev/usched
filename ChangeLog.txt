@@ -1,3 +1,7 @@
+v0.2-dev-47 (2015-05-12):
+ - Major IPC structural changes
+ - New configuration tree
+
 v0.2-dev-46 (2015-04-24):
  - Skeleton for System V Message Queues (will replace the default POSIX Message Queues)
 

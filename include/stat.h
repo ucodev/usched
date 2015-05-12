@@ -3,7 +3,7 @@
  * @brief uSched
  *        Stat configuration and administration interface header
  *
- * Date: 15-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -55,14 +55,6 @@ int stat_admin_rollback(void);
 int stat_admin_show(void);
 int stat_admin_jail_dir_show(void);
 int stat_admin_jail_dir_change(const char *jail_dir);
-int stat_admin_ipc_msgmax_show(void);
-int stat_admin_ipc_msgmax_change(const char *ipc_msgmax);
-int stat_admin_ipc_msgsize_show(void);
-int stat_admin_ipc_msgsize_change(const char *ipc_msgsize);
-int stat_admin_ipc_name_show(void);
-int stat_admin_ipc_name_change(const char *ipc_name);
-int stat_admin_ipc_key_show(void);
-int stat_admin_ipc_key_change(const char *ipc_name);
 int stat_admin_privdrop_group_show(void);
 int stat_admin_privdrop_group_change(const char *privdrop_group);
 int stat_admin_privdrop_user_show(void);

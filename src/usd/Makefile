@@ -5,8 +5,8 @@ LDFLAGS=-lpsched -lpall -lrtsaio -lpanet -lfsop -lpsec `cat ../../.libs`
 ELFLAGS=`cat ../../.elflags`
 ARCHFLAGS=`cat ../../.archflags`
 INCLUDEDIRS=-I../../include
-OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/ipc.o ../common/local.o ../common/log.o ../common/mm.o ../common/pmq.o ../common/runtime.o ../common/str.o ../common/thread.o
-OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o ipc.o marshal.o notify.o pmq.o pool.o process.o runtime.o schedule.o sig.o stat.o thread.o vars.o
+OBJS_COMMON=../common/bitops.o ../common/config.o ../common/conn.o ../common/debug.o ../common/entry.o ../common/gc.o ../common/hash.o ../common/ipc.o ../common/local.o ../common/log.o ../common/mm.o ../common/runtime.o ../common/str.o ../common/thread.o
+OBJS=auth.o config.o conn.o daemon.o delta.o entry.o index.o ipc.o marshal.o notify.o pool.o process.o runtime.o schedule.o sig.o stat.o thread.o vars.o
 TARGET=usd
 SYSSBINDIR=`cat ../../.dirsbin`
 
@@ -21,7 +21,6 @@ all:
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c ipc.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c marshal.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c notify.c
-	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c pmq.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c pool.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c process.c
 	${CC} ${ECFLAGS} ${CCFLAGS} ${ARCHFLAGS} ${INCLUDEDIRS} -c runtime.c

@@ -3,7 +3,7 @@
  * @brief uSched
  *       ALL Category administration interface
  *
- * Date: 02-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -61,6 +61,13 @@ int all_admin_show(void) {
 		return -1;
 	}
 
+	if (ipc_admin_show() < 0) {
+		errsv = errno;
+		log_warn("all_admin_show(): ipc_admin_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if (network_admin_show() < 0) {
 		errsv = errno;
 		log_warn("all_admin_show(): network_admin_show(): %s\n", strerror(errno));
@@ -108,6 +115,14 @@ int all_admin_commit(void) {
 	if (exec_admin_commit() < 0) {
 		errsv = errno;
 		log_warn("all_admin_commit(): exec_admin_commit(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Commit ipc changes */
+	if (ipc_admin_commit() < 0) {
+		errsv = errno;
+		log_warn("all_admin_commit(): ipc_admin_commit(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -162,6 +177,14 @@ int all_admin_rollback(void) {
 	if (exec_admin_rollback() < 0) {
 		errsv = errno;
 		log_warn("all_admin_rollback(): exec_admin_rollback(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Rollback ipc changes */
+	if (ipc_admin_rollback() < 0) {
+		errsv = errno;
+		log_warn("all_admin_rollback(): ipc_admin_rollback(9: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

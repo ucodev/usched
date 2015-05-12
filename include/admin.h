@@ -1,9 +1,9 @@
 /**
- * @file sysvmq.h
+ * @file admin.h
  * @brief uSched
- *        System V Message Queueing interface header
+ *        uSched Admin interface header
  *
- * Date: 24-04-2015
+ * Date: 12-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -24,26 +24,12 @@
  *
  */
 
-
-#ifndef USCHED_SYSVMQ_H
-#define USCHED_SYSVMQ_H
-
-#include <sys/types.h>
-
-#include "config.h"
-
-#if CONFIG_USE_IPC_SYSVMQ == 1
- #include <sys/ipc.h>
- #include <sys/msg.h>
-#endif
-
+#ifndef USCHED_ADMIN_H
+#define USCHED_ADMIN_H
 
 /* Prototypes */
-#if CONFIG_USE_IPC_SYSVMQ == 1
-int sysvmq_init(const char *key, int oflags, mode_t mode, long maxmsg, long msgsize);
-void sysvmq_destroy(int mqid);
-int sysvmq_unlink(int mqid);
-#endif
+int admin_property_show(const char *category_dir, const char *category_str, const char *property_file);
+int admin_property_change(const char *category_dir, const char *property_file, const char *value);
 
 #endif
 

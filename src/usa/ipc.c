@@ -3,7 +3,7 @@
  * @brief uSched
  *        IPC configuration and administration interface
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,6 +32,7 @@
 #include <fsop/file.h>
 
 #include "config.h"
+#include "usched.h"
 #include "admin.h"
 #include "log.h"
 #include "mm.h"
@@ -65,9 +66,6 @@ int ipc_admin_commit(void) {
 		errno = EBUSY;
 		return -1;
 	}
-
-	/* Destroy the current message queue */
-	ipc_admin_delete();
 
 	/* Destroy the current configuration */
 	config_admin_destroy();
@@ -140,14 +138,6 @@ int ipc_admin_commit(void) {
 	if (config_admin_init() < 0) {
 		errsv = errno;
 		log_crit("ipc_admin_commit(): config_admin_init(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	/* Create the message queue */
-	if (ipc_admin_create() < 0) {
-		errsv = errno;
-		log_crit("ipc_admin_commit(): ipc_admin_create(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -323,6 +313,75 @@ int ipc_admin_auth_key_change(const char *auth_key) {
 	return 0;
 }
 
+int ipc_admin_id_key_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_ID_KEY) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_id_key_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_id_key_change(const char *id_key) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_ID_KEY, id_key) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_id_key_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_id_key_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_id_key_change(): ipc_admin_id_key_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+int ipc_admin_id_name_show(void) {
+	int errsv = 0;
+
+	if (admin_property_show(CONFIG_USCHED_DIR_IPC, USCHED_CATEGORY_IPC_STR, CONFIG_USCHED_FILE_IPC_ID_NAME) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_id_name_show(): admin_property_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* All good */
+	return 0;
+}
+
+int ipc_admin_id_name_change(const char *id_name) {
+	int errsv = 0;
+
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_ID_NAME, id_name) < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_id_name_change(): admin_property_change(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (ipc_admin_id_name_show() < 0) {
+		errsv = errno;
+		log_crit("ipc_admin_id_name_change(): ipc_admin_id_name_show(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+
 int ipc_admin_msg_max_show(void) {
 	int errsv = 0;
 
@@ -340,7 +399,7 @@ int ipc_admin_msg_max_show(void) {
 int ipc_admin_msg_max_change(const char *msg_max) {
 	int errsv = 0;
 
-	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_MSG_MAX, msg_max) < 0) {
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_MSG_MAX, msg_max) < 0) {
 		errsv = errno;
 		log_crit("ipc_admin_msg_max_change(): admin_property_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -374,7 +433,7 @@ int ipc_admin_msg_size_show(void) {
 int ipc_admin_msg_size_change(const char *msg_size) {
 	int errsv = 0;
 
-	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_MSG_SIZE, msg_size) < 0) {
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_MSG_SIZE, msg_size) < 0) {
 		errsv = errno;
 		log_crit("ipc_admin_msg_size_change(): admin_property_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -408,7 +467,7 @@ int ipc_admin_jail_dir_show(void) {
 int ipc_admin_jail_dir_change(const char *jail_dir) {
 	int errsv = 0;
 
-	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_JAIL_DIR, jail_dir) < 0) {
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_JAIL_DIR, jail_dir) < 0) {
 		errsv = errno;
 		log_crit("ipc_admin_jail_dir_change(): admin_property_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -442,7 +501,7 @@ int ipc_admin_privdrop_user_show(void) {
 int ipc_admin_privdrop_user_change(const char *privdrop_user) {
 	int errsv = 0;
 
-	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_PRIVDROP_USER, privdrop_user) < 0) {
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_PRIVDROP_USER, privdrop_user) < 0) {
 		errsv = errno;
 		log_crit("ipc_admin_privdrop_user_change(): admin_property_change(): %s\n", strerror(errno));
 		errno = errsv;
@@ -476,7 +535,7 @@ int ipc_admin_privdrop_group_show(void) {
 int ipc_admin_privdrop_group_change(const char *privdrop_group) {
 	int errsv = 0;
 
-	if (admin_property_change(CONFIG_USHCED_DIR_IPC, CONFIG_USCHED_FILE_PRIVDROP_GROUP, privdrop_group) < 0) {
+	if (admin_property_change(CONFIG_USCHED_DIR_IPC, CONFIG_USCHED_FILE_IPC_PRIVDROP_GROUP, privdrop_group) < 0) {
 		errsv = errno;
 		log_crit("ipc_admin_privdrop_group_change(): admin_property_change(): %s\n", strerror(errno));
 		errno = errsv;

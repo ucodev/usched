@@ -3,7 +3,7 @@
  * @brief uSched
  *       ALL Category administration interface
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -33,6 +33,7 @@
 #include "auth.h"
 #include "core.h"
 #include "exec.h"
+#include "ipc.h"
 #include "network.h"
 #include "stat.h"
 #include "users.h"

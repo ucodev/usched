@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,7 +41,6 @@
 #define USCHED_COMPONENT_JAIL_STR	"jail"
 #define USCHED_COMPONENT_LOCAL_STR	"local"
 #define USCHED_COMPONENT_ID_STR		"id"
-#define USCHED_COMPONENT_IPC_STR	"ipc"
 #define USCHED_COMPONENT_MSG_STR	"msg"
 #define USCHED_COMPONENT_PRIVDROP_STR	"privdrop"
 #define USCHED_COMPONENT_REMOTE_STR	"remote"
@@ -77,7 +76,7 @@
 #define USCHED_CATEGORY_AUTH_STR	"auth"
 #define USCHED_CATEGORY_CORE_STR	"core"
 #define USCHED_CATEGORY_EXEC_STR	"exec"
-#define UCSHED_CATEGORY_IPC_STR		"ipc"
+#define USCHED_CATEGORY_IPC_STR		"ipc"
 #define USCHED_CATEGORY_NETWORK_STR	"network"
 #define USCHED_CATEGORY_STAT_STR	"stat"
 #define USCHED_CATEGORY_USERS_STR	"users"

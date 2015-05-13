@@ -137,7 +137,8 @@ struct usched_runtime_daemon {
 
 	psched_t *psched;
 
-	pipcd_t pipcd; /* IPC descriptor */
+	pipck_t pipck;
+	pipcd_t *pipcd; /* IPC descriptor */
 
 	pall_fd_t ser_fd;
 
@@ -163,7 +164,8 @@ struct usched_runtime_exec {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-	pipcd_t pipcd; /* IPC descriptor */
+	pipck_t pipck;
+	pipcd_t *pipcd; /* IPC descriptor */
 
 	struct usched_config config;
 };
@@ -188,7 +190,8 @@ struct usched_runtime_stat {
 	pthread_mutex_t mutex_dpool;
 	pthread_mutex_t mutex_spool;
 
-	pipcd_t pipcd; /* IPC descriptor */
+	pipck_t pipck;
+	pipcd_t *pipcd; /* IPC descriptor */
 
 	struct usched_config config;
 };
@@ -202,7 +205,8 @@ struct usched_runtime_ipc {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
-	pipcd_t pipcd; /* IPC descriptor */
+	pipck_t pipck;
+	pipcd_t *pipcd; /* IPC descriptor */
 
 	struct usched_config config;
 };

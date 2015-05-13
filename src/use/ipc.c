@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Exec
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,10 +40,11 @@
 int ipc_exec_init(void) {
 	int errsv = 0;
 
-	/* TODO: Create key */
+	/* Create key */
+	rune.pipck = (pipck_t) rune.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(rune.pipcd = pipc_slave_register(rune.pipck, IPC_USE_ID, rune.config.ipc.msgmax, rune.config.ipc.msgsize, 0600)))
+	if (!(rune.pipcd = pipc_slave_register(rune.pipck, IPC_USE_ID, rune.config.ipc.msg_max, rune.config.ipc.msg_size, 0600))) {
 		errsv = errno;
 		log_warn("ipc_exec_init(): pipc_slave_register(): %s\n", strerror(errno));
 		errno = errsv;

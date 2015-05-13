@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -208,15 +208,15 @@ void entry_daemon_exec_dispatch(void *arg) {
 	/* Check delta time before processing event (Absolute value is a safe check. Negative values
 	 * won't ocurr here... hopefully).
 	 */
-	if ((unsigned int) labs((long) (time(NULL) - entry->trigger)) >= rund.config.core.delta_noexec) {
-		log_warn("entry_daemon_exec_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.core.delta_noexec);
+	if ((unsigned int) labs((long) (time(NULL) - entry->trigger)) >= rund.config.exec.delta_noexec) {
+		log_warn("entry_daemon_exec_dispatch(): Entry delta T (%d seconds) is >= than the configured delta T for noexec (%d seconds). Ignoring execution...\n", time(NULL) - entry->trigger, rund.config.exec.delta_noexec);
 
 		/* Do not deliver this entry to the uSched executer (use) */
 		goto _process;
 	}
 
 	/* Allocate message memory */
-	if (!(buf = mm_alloc((size_t) rund.config.core.ipc_msgsize))) {
+	if (!(buf = mm_alloc((size_t) rund.config.ipc.msg_size))) {
 		log_warn("entry_daemon_exec_dispatch(): mm_alloc(): %s\n", strerror(errno));
 
 		/* Force daemon to be restarted and reload a clean state */
@@ -225,7 +225,7 @@ void entry_daemon_exec_dispatch(void *arg) {
 		goto _finish;
 	}
 
-	memset(buf, 0, (size_t) rund.config.core.ipc_msgsize);
+	memset(buf, 0, (size_t) rund.config.ipc.msg_size);
 
 	/* Check if this entry is authorized */
 	if (!entry_has_flag(entry, USCHED_ENTRY_FLAG_AUTHORIZED)) {

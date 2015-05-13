@@ -3,7 +3,7 @@
  * @brief uSched
  *        Exec configuration and administration interface
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -131,7 +131,7 @@ int exec_admin_delta_noexec_show(void) {
 	return 0;
 }
 
-int exec_admin_delta_noexec_change(const char *ipc_msgmax) {
+int exec_admin_delta_noexec_change(const char *delta_noexec) {
 	int errsv = 0;
 
 	if (admin_property_change(CONFIG_USCHED_DIR_EXEC, CONFIG_USCHED_FILE_EXEC_DELTA_NOEXEC, delta_noexec) < 0) {

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Daemon
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,10 +41,11 @@
 int ipc_daemon_init(void) {
 	int errsv = 0;
 
-	/* TODO: Create key */
+	/* Create key */
+	rund.pipck = (pipck_t) rund.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(rund.pipcd = pipc_slave_register(rund.pipck, IPC_USD_ID, rund.config.ipc.msgmax, rund.config.ipc.msgsize, 0600))) {
+	if (!(rund.pipcd = pipc_slave_register(rund.pipck, IPC_USD_ID, rund.config.ipc.msg_max, rund.config.ipc.msg_size, 0600))) {
 		errsv = errno;
 		log_warn("ipc_daemon_init(): pipc_slave_register(): %s\n", strerror(errno));
 		errno = errsv;

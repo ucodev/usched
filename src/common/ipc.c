@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Common
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,27 +34,27 @@
 #include "ipc.h"
 #include "log.h"
 
-ssize_t ipc_send(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count) {
+ssize_t ipc_send(pipcd_t *pipcd, long src_id, long dst_id, const char *msg, size_t count) {
 	return pipc_send(pipcd, src_id, dst_id, msg, count);
 }
 
-ssize_t ipc_send_nowait(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count) {
+ssize_t ipc_send_nowait(pipcd_t *pipcd, long src_id, long dst_id, const char *msg, size_t count) {
 	return pipc_send_nowait(pipcd, src_id, dst_id, msg, count);
 }
 
-ssize_t ipc_recv(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count) {
+ssize_t ipc_recv(pipcd_t *pipcd, long *src_id, long *dst_id, char *msg, size_t count) {
 	return pipc_recv(pipcd, src_id, dst_id, msg, count);
 }
 
-ssize_t ipc_recv_nowait(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count) {
+ssize_t ipc_recv_nowait(pipcd_t *pipcd, long *src_id, long *dst_id, char *msg, size_t count) {
 	return pipc_recv_nowait(pipcd, src_id, dst_id, msg, count);
 }
 
-int ipc_pending(pipcd_t pipcd) {
+int ipc_pending(pipcd_t *pipcd) {
 	return pipc_pending(pipcd);
 }
 
-void ipc_close(pipcd_t pipcd) {
+void ipc_close(pipcd_t *pipcd) {
 	/* TODO */
 	return ;
 }

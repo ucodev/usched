@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -37,6 +37,7 @@
 #include "auth.h"
 #include "core.h"
 #include "exec.h"
+#include "ipc.h"
 #include "network.h"
 #include "stat.h"
 #include "log.h"
@@ -627,18 +628,7 @@ int category_core_change(size_t argc, char **args) {
 	}
 
 	if (!strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
-			/* set delta.noexec */
-			if (core_admin_delta_noexec_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_core_change(): core_admin_delta_noexec_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
 			/* set delta.reload */
 			if (core_admin_delta_reload_change(args[2]) < 0) {
 				errsv = errno;
@@ -674,59 +664,6 @@ int category_core_change(size_t argc, char **args) {
 		/* Unknown property */
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change core jail");
 		log_warn("category_core_change(): Invalid 'jail' property: %s\n", args[1]);
-		errno = EINVAL;
-
-		return -1;
-	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* set ipc.msgmax */
-			if (core_admin_ipc_msgmax_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_core_change(): core_admin_ipc_msgmax_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* set ipc.msgsize */
-			if (core_admin_ipc_msgsize_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_core_change(): core_admin_ipc_msgsize_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* set ipc.name */
-			if (core_admin_ipc_name_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_core_change(): core_admin_ipc_name_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
-			/* set ipc.key */
-			if (core_admin_ipc_key_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_core_change(): core_admin_ipc_key_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		}
-
-		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change core ipc");
-		log_warn("category_core_change(): Invalid 'ipc' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;
@@ -839,18 +776,7 @@ int category_core_show(size_t argc, char **args) {
 	}
 
 	if (!strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
-			/* show delta.noexec */
-			if (core_admin_delta_noexec_show() < 0) {
-				errsv = errno;
-				log_warn("category_core_show(): core_admin_delta_noexec_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_RELOAD_STR)) {
 			/* show delta.reload */
 			if (core_admin_delta_reload_show() < 0) {
 				errsv = errno;
@@ -886,59 +812,6 @@ int category_core_show(size_t argc, char **args) {
 		/* Unknown property */
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show core jail");
 		log_warn("category_core_show(): Invalid 'jail' property: %s\n", args[1]);
-		errno = EINVAL;
-
-		return -1;
-	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* show ipc.msgmax */
-			if (core_admin_ipc_msgmax_show() < 0) {
-				errsv = errno;
-				log_warn("category_core_show(): core_admin_ipc_msgmax_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* show ipc.msgsize */
-			if (core_admin_ipc_msgsize_show() < 0) {
-				errsv = errno;
-				log_warn("category_core_show(): core_admin_ipc_msgsize_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* show ipc.name */
-			if (core_admin_ipc_name_show() < 0) {
-				errsv = errno;
-				log_warn("category_core_show(): core_admin_ipc_name_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
-			/* show ipc.name */
-			if (core_admin_ipc_key_show() < 0) {
-				errsv = errno;
-				log_warn("category_core_show(): core_admin_ipc_key_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		}
- 
-		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show core ipc");
-		log_warn("category_core_show(): Invalid 'ipc' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;
@@ -1087,45 +960,12 @@ int category_exec_change(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* set ipc.msgmax */
-			if (exec_admin_ipc_msgmax_change(args[2]) < 0) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
+			/* set delta.noexec */
+			if (exec_admin_delta_noexec_change(args[2]) < 0) {
 				errsv = errno;
-				log_warn("category_exec_change(): exec_admin_ipc_msgmax_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* set ipc.msgsize */
-			if (exec_admin_ipc_msgsize_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_exec_change(): exec_admin_ipc_msgsize_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* set ipc.name */
-			if (exec_admin_ipc_name_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_exec_change(): exec_admin_ipc_name_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
-			/* set ipc.key */
-			if (exec_admin_ipc_key_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_exec_change(): exec_admin_ipc_key_change(): %s\n", strerror(errno));
+				log_warn("category_exec_change(): exec_admin_delta_noexec_change(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -1135,8 +975,8 @@ int category_exec_change(size_t argc, char **args) {
 		}
 
 		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change exec ipc");
-		log_warn("category_exec_change(): Invalid 'ipc' property: %s\n", args[1]);
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change exec delta");
+		log_warn("category_exec_change(): Invalid 'delta' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;
@@ -1166,45 +1006,12 @@ int category_exec_show(size_t argc, char **args) {
 		return -1;
 	}
 
-	if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* show ipc.msgmax */
-			if (exec_admin_ipc_msgmax_show() < 0) {
+	if (!strcasecmp(args[0], USCHED_COMPONENT_DELTA_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_NOEXEC_STR)) {
+			/* show delta.noexec */
+			if (exec_admin_delta_noexec_show() < 0) {
 				errsv = errno;
-				log_warn("category_exec_show(): exec_admin_ipc_msgmax_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* show ipc.msgsize */
-			if (exec_admin_ipc_msgsize_show() < 0) {
-				errsv = errno;
-				log_warn("category_exec_show(): exec_admin_ipc_msgsize_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* show ipc.name */
-			if (core_admin_ipc_name_show() < 0) {
-				errsv = errno;
-				log_warn("category_exec_show(): exec_admin_ipc_name_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
-			/* show ipc.name */
-			if (exec_admin_ipc_key_show() < 0) {
-				errsv = errno;
-				log_warn("category_exec_show(): exec_admin_ipc_key_show(): %s\n", strerror(errno));
+				log_warn("category_exec_show(): exec_admin_delta_noexec_show(): %s\n", strerror(errno));
 				errno = errsv;
 				return -1;
 			}
@@ -1214,8 +1021,8 @@ int category_exec_show(size_t argc, char **args) {
 		}
  
 		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show exec ipc");
-		log_warn("category_exec_show(): Invalid 'ipc' property: %s\n", args[1]);
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show exec delta");
+		log_warn("category_exec_show(): Invalid 'delta' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;
@@ -1909,59 +1716,6 @@ int category_stat_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* set ipc.msgmax */
-			if (stat_admin_ipc_msgmax_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_stat_change(): stat_admin_ipc_msgmax_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* set ipc.msgsize */
-			if (stat_admin_ipc_msgsize_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_stat_change(): stat_admin_ipc_msgsize_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* set ipc.name */
-			if (stat_admin_ipc_name_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_stat_change(): stat_admin_ipc_name_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
-			/* set ipc.key */
-			if (stat_admin_ipc_key_change(args[2]) < 0) {
-				errsv = errno;
-				log_warn("category_stat_change(): stat_admin_ipc_key_change(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		}
-
-		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change stat ipc");
-		log_warn("category_stat_change(): Invalid 'ipc' property: %s\n", args[1]);
-		errno = EINVAL;
-
-		return -1;
 	} else if (!strcasecmp(args[0], USCHED_COMPONENT_PRIVDROP_STR)) {
 		if (!strcasecmp(args[1], USCHED_PROPERTY_GROUP_STR)) {
 			/* set privdrop.group */
@@ -2036,60 +1790,6 @@ int category_stat_show(size_t argc, char **args) {
 		/* Unknown property */
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat jail");
 		log_warn("category_stat_show(): Invalid 'jail' property: %s\n", args[1]);
-		errno = EINVAL;
-
-		return -1;
-	} else if (!strcasecmp(args[0], USCHED_COMPONENT_IPC_STR)) {
-		if (!strcasecmp(args[1], USCHED_PROPERTY_MSGMAX_STR)) {
-			/* show ipc.msgmax */
-			if (stat_admin_ipc_msgmax_show() < 0) {
-				errsv = errno;
-				log_warn("category_stat_show(): stat_admin_ipc_msgmax_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MSGSIZE_STR)) {
-			/* show ipc.msgsize */
-			if (stat_admin_ipc_msgsize_show() < 0) {
-				errsv = errno;
-				log_warn("category_stat_show(): stat_admin_ipc_msgsize_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_NAME_STR)) {
-			/* show ipc.name */
-			if (stat_admin_ipc_name_show() < 0) {
-				errsv = errno;
-				log_warn("category_stat_show(): stat_admin_ipc_name_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		} else if (!strcasecmp(args[1], USCHED_PROPERTY_KEY_STR)) {
-			/* show ipc.name */
-			if (stat_admin_ipc_key_show() < 0) {
-				errsv = errno;
-				log_warn("category_stat_show(): stat_admin_ipc_key_show(): %s\n", strerror(errno));
-				errno = errsv;
-				return -1;
-			}
-
-			/* All good */
-			return 0;
-		}
- 
-
-		/* Unknown property */
-		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat ipc");
-		log_warn("category_stat_show(): Invalid 'ipc' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;

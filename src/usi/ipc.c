@@ -3,7 +3,7 @@
  * @brief uSched
  *        IPC Controller Main Component
  *
- * Date: 29-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -84,10 +84,11 @@ int main(int argc, char **argv) {
 int ipc_ipc_init(void) {
 	int errsv = 0;
 
-	/* TODO: Create key */
+	/* Create key */
+	runi.pipck = (pipck_t) runi.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(runi.pipcd = pipc_master_register(runi.pipck, IPC_USI_ID, runi.config.ipc.msgmax, runi.config.ipc.msgsize, 0600)))
+	if (!(runi.pipcd = pipc_master_register(runi.pipck, IPC_USI_ID, runi.config.ipc.msg_max, runi.config.ipc.msg_size, 0600))) {
 		errsv = errno;
 		log_warn("ipc_ipc_init(): pipc_master_register(): %s\n", strerror(errno));
 		errno = errsv;

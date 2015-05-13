@@ -3,7 +3,7 @@
  * @brief uSched
  *        Administration interface
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,7 @@
 #include "log.h"
 #include "print.h"
 #include "op.h"
+#include "file.h"
 
 
 static void _init(int argc, char **argv) {
@@ -77,7 +78,7 @@ int admin_property_show(const char *category_dir, const char *category_str, cons
 	}
 
 	/* Reset temporary buffer */
-	memset(prop_path_tmp, 0, prop_path_len);
+	memset(prop_path_tmp, 0, prop_path_tmp_len);
 
 	/* Craft temporary property absolute file path */
 	sprintf(prop_path_tmp, "%s/%s/.%s", CONFIG_USCHED_DIR_BASE, category_dir, property_file);

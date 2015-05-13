@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface header
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -75,12 +75,12 @@ struct ipc_uss_hdr {
 };
 
 /* Prototypes */
-ssize_t ipc_send(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count);
-ssize_t ipc_send_nowait(pipcd_t pipcd, long src_id, long dst_id, const char *msg, size_t count);
-ssize_t ipc_recv(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count);
-ssize_t ipc_recv_nowait(pipcd_t pipcd, long *src_id, long *dst_id, char *msg, size_t count);
-int ipc_pending(pipcd_t pipcd);
-void ipc_close(pipcd_t pipcd);
+ssize_t ipc_send(pipcd_t *pipcd, long src_id, long dst_id, const char *msg, size_t count);
+ssize_t ipc_send_nowait(pipcd_t *pipcd, long src_id, long dst_id, const char *msg, size_t count);
+ssize_t ipc_recv(pipcd_t *pipcd, long *src_id, long *dst_id, char *msg, size_t count);
+ssize_t ipc_recv_nowait(pipcd_t *pipcd, long *src_id, long *dst_id, char *msg, size_t count);
+int ipc_pending(pipcd_t *pipcd);
+void ipc_close(pipcd_t *pipcd);
 int ipc_daemon_init(void);
 int ipc_exec_init(void);
 int ipc_stat_init(void);
@@ -94,6 +94,10 @@ int ipc_admin_rollback(void);
 int ipc_admin_show(void);
 int ipc_admin_auth_key_show(void);
 int ipc_admin_auth_key_change(const char *auth_key);
+int ipc_admin_id_key_change(const char *id_key);
+int ipc_admin_id_key_show(void);
+int ipc_admin_id_name_change(const char *id_key);
+int ipc_admin_id_name_show(void);
 int ipc_admin_msg_max_show(void);
 int ipc_admin_msg_max_change(const char *msg_max);
 int ipc_admin_msg_size_show(void);

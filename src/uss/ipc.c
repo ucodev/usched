@@ -3,7 +3,7 @@
  * @brief uSched
  *        Inter-Process Communication interface - Stat
  *
- * Date: 12-05-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,10 +40,11 @@
 int ipc_stat_init(void) {
 	int errsv = 0;
 
-	/* TODO: Create key */
+	/* Create key */
+	runs.pipck = (pipck_t) runs.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(runs.pipcd = pipc_slave_register(runs.pipck, IPC_USS_ID, runs.config.ipc.msgmax, runs.config.ipc.msgsize, 0600)))
+	if (!(runs.pipcd = pipc_slave_register(runs.pipck, IPC_USS_ID, runs.config.ipc.msg_max, runs.config.ipc.msg_size, 0600))) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): pipc_slave_register(): %s\n", strerror(errno));
 		errno = errsv;

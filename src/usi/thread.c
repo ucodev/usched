@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface - IPC
  *
- * Date: 17-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -36,12 +36,10 @@
 #include "thread.h"
 
 int thread_ipc_components_init(void) {
-	errno = ENOSYS;
-
-	return -1;
+	return 0;
 }
 
-void thread_stat_components_destroy(void) {
+void thread_ipc_components_destroy(void) {
 	return ;
 }
 

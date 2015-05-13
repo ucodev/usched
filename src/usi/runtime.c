@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - IPC
  *
- * Date: 17-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -117,7 +117,7 @@ int runtime_ipc_init(int argc, char **argv) {
 	/* Initialize IPC */
 	log_info("Initializing IPC interface...\n");
 
-	if (ipc_init() < 0) {
+	if (ipc_ipc_init() < 0) {
 		errsv = errno;
 		log_crit("runtime_ipc_init(): ipc_init(): %s\n", strerror(errno));
 		errno = errsv;
@@ -154,7 +154,7 @@ int runtime_ipc_interrupted(void) {
 void runtime_ipc_destroy(void) {
 	/* Destroy IPC interface */
 	log_info("Destroying IPC interface...\n");
-	ipc_destroy();
+	ipc_ipc_destroy();
 	log_info("IPC interface destroyed.\n");
 
 	/* Destroy thread behaviour interface */

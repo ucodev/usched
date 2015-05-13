@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface - Exec
  *
- * Date: 01-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -52,6 +52,13 @@ int config_exec_init(void) {
 		return -1;
 	}
 
+	if (config_init_ipc(&config->ipc) < 0) {
+		errsv = errno;
+		log_warn("config_exec_init(): config_init_ipc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -60,6 +67,7 @@ void config_exec_destroy(void) {
 
 	config_destroy_core(&config->core);
 	config_destroy_exec(&config->exec);
+	config_destroy_ipc(&config->ipc);
 
 	memset(config, 0, sizeof(struct usched_config));
 }

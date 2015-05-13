@@ -63,10 +63,10 @@ static void _loop(int argc, char **argv) {
 		debug_printf(DEBUG_INFO, "_loop(): Interrupted...\n");
 
 		/* Check for runtime interruptions */
-		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE))
+		if (bit_test(&runi.flags, USCHED_RUNTIME_FLAG_TERMINATE))
 			break;
 
-		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
+		if (bit_test(&runi.flags, USCHED_RUNTIME_FLAG_RELOAD)) {
 			_destroy();
 			_init(argc, argv);
 		}

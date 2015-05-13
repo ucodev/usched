@@ -44,7 +44,7 @@ int ipc_admin_commit(void) {
 
 	/* Check if services are running and stop processing if they are */
 	if (fsop_path_exists(CONFIG_USCHED_DAEMON_PID_FILE)) {
-		log_crit("ipc_admin_commit(): uSched services are running (usd). You must stop all uSched services before you can commit exec configuration changes.\n");
+		log_crit("ipc_admin_commit(): uSched services are running (usd). You must stop all uSched services before you can commit core configuration changes.\n");
 		errno = EBUSY;
 		return -1;
 	}
@@ -56,13 +56,13 @@ int ipc_admin_commit(void) {
 	}
 
 	if (fsop_path_exists(CONFIG_USCHED_STAT_PID_FILE)) {
-		log_crit("ipc_admin_commit(): uSched services are running (uss). You must stop all uSched services before you can commit exec configuration changes.\n");
+		log_crit("ipc_admin_commit(): uSched services are running (uss). You must stop all uSched services before you can commit stat configuration changes.\n");
 		errno = EBUSY;
 		return -1;
 	}
 
 	if (fsop_path_exists(CONFIG_USCHED_IPC_PID_FILE)) {
-		log_crit("ipc_admin_commit(): uSched services are running (usi). You must stop all uSched services before you can commit exec configuration changes.\n");
+		log_crit("ipc_admin_commit(): uSched services are running (usi). You must stop all uSched services before you can commit ipc configuration changes.\n");
 		errno = EBUSY;
 		return -1;
 	}

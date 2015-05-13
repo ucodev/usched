@@ -45,7 +45,7 @@ int ipc_daemon_init(void) {
 	rund.pipck = (pipck_t) rund.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(rund.pipcd = pipc_slave_register(rund.pipck, IPC_USD_ID, rund.config.ipc.msg_max, rund.config.ipc.msg_size, 0600))) {
+	if (!(rund.pipcd = pipc_slave_register(rund.pipck, IPC_USD_ID, rund.config.ipc.msg_max, rund.config.ipc.msg_size, 0660))) {
 		errsv = errno;
 		log_warn("ipc_daemon_init(): pipc_slave_register(): %s\n", strerror(errno));
 		errno = errsv;

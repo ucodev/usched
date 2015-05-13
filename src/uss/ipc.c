@@ -44,7 +44,7 @@ int ipc_stat_init(void) {
 	runs.pipck = (pipck_t) runs.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(runs.pipcd = pipc_slave_register(runs.pipck, IPC_USS_ID, runs.config.ipc.msg_max, runs.config.ipc.msg_size, 0600))) {
+	if (!(runs.pipcd = pipc_slave_register(runs.pipck, IPC_USS_ID, runs.config.ipc.msg_max, runs.config.ipc.msg_size, 0660))) {
 		errsv = errno;
 		log_warn("ipc_stat_init(): pipc_slave_register(): %s\n", strerror(errno));
 		errno = errsv;

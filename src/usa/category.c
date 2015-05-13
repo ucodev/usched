@@ -1236,7 +1236,7 @@ int category_ipc_show(size_t argc, char **args) {
 
 	/* Usage: show ipc <component> <property> */
 	if (!argc) {
-		exec_admin_show();
+		ipc_admin_show();
 		return 0;
 	}
 

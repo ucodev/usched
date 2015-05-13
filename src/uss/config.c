@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface - Stat
  *
- * Date: 01-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -45,6 +45,13 @@ int config_stat_init(void) {
 		return -1;
 	}
 
+	if (config_init_ipc(&config->ipc) < 0) {
+		errsv = errno;
+		log_warn("config_stat_init(): config_init_ipc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if (config_init_stat(&config->stat) < 0) {
 		errsv = errno;
 		log_warn("config_stat_init(): config_init_stat(): %s\n", strerror(errno));
@@ -59,6 +66,7 @@ void config_stat_destroy(void) {
 	struct usched_config *config = &runs.config;
 
 	config_destroy_exec(&config->exec);
+	config_destroy_ipc(&config->ipc);
 	config_destroy_stat(&config->stat);
 
 	memset(config, 0, sizeof(struct usched_config));

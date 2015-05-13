@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logging interface
  *
- * Date: 31-03-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -62,6 +62,12 @@ int log_daemon_init(void) {
 
 int log_exec_init(void) {
 	openlog(CONFIG_USCHED_EXEC_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_DAEMON);
+
+	return 0;
+}
+
+int log_ipc_init(void) {
+	openlog(CONFIG_USCHED_IPC_PROC_NAME, LOG_NOWAIT | LOG_PID, LOG_DAEMON);
 
 	return 0;
 }

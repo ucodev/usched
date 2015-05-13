@@ -44,7 +44,7 @@ int ipc_exec_init(void) {
 	rune.pipck = (pipck_t) rune.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(rune.pipcd = pipc_slave_register(rune.pipck, IPC_USE_ID, rune.config.ipc.msg_max, rune.config.ipc.msg_size, 0600))) {
+	if (!(rune.pipcd = pipc_slave_register(rune.pipck, IPC_USE_ID, rune.config.ipc.msg_max, rune.config.ipc.msg_size, 0660))) {
 		errsv = errno;
 		log_warn("ipc_exec_init(): pipc_slave_register(): %s\n", strerror(errno));
 		errno = errsv;

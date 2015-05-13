@@ -1,3 +1,6 @@
+v0.2-dev-50 (2015-05-13):
+ - Proper privilege drops for the new IPC mechanism
+
 v0.2-dev-49 (2015-05-13):
  - Fixes and consolidations all around
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Stat
  *
- * Date: 11-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -40,25 +40,33 @@
 #include "ipc.h"
 #include "pool.h"
 
-static int _runtime_stat_drop_privs(void) {
+#if CONFIG_USCHED_DROP_PRIVS == 1
+static int _runtime_stat_drop_group_privs(void) {
 	int errsv = 0;
 
 	if (setregid(runs.config.stat.privdrop_gid, runs.config.stat.privdrop_gid) < 0) {
 		errsv = errno;
-		log_crit("_runtime_stat_drop_privs(): setregid(): %s\n", strerror(errno));
-		errno = errsv;
-		return -1;
-	}
-
-	if (setreuid(runs.config.stat.privdrop_uid, runs.config.stat.privdrop_uid) < 0) {
-		errsv = errno;
-		log_crit("_runtime_stat_drop_privs(): setreuid(): %s\n", strerror(errno));
+		log_crit("_runtime_stat_drop_group_privs(): setregid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
 	return 0;
 }
+
+static int _runtime_stat_drop_user_privs(void) {
+	int errsv = 0;
+
+	if (setreuid(runs.config.stat.privdrop_uid, runs.config.stat.privdrop_uid) < 0) {
+		errsv = errno;
+		log_crit("_runtime_stat_drop_user_privs(): setreuid(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+#endif
 
 int runtime_stat_init(int argc, char **argv) {
 	int errsv = 0;
@@ -126,6 +134,24 @@ int runtime_stat_init(int argc, char **argv) {
 
 	log_info("Pools initialized.\n");
 
+#if CONFIG_USCHED_DROP_PRIVS == 1
+	/* NOTE: Drop group privileges BEFORE initializing IPC interface, so the IPC system will
+	 * belong to the same group.
+	 */
+
+	/* Drop privileges to the configured nopriv group */
+	log_info("Dropping group process privileges...\n");
+
+	if (_runtime_stat_drop_group_privs() < 0) {
+		errsv = errno;
+		log_crit("runtime_stat_init(): _runtime_stat_drop_group_privs(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Group privileges successfully dropped.\n");
+#endif
+
 	/* Initialize IPC */
 	log_info("Initializing IPC interface...\n");
 
@@ -138,17 +164,19 @@ int runtime_stat_init(int argc, char **argv) {
 
 	log_info("IPC interface initialized.\n");
 
-	/* Drop privileges to the configured nopriv user and group */
-	log_info("Dropping process privileges...\n");
+#if CONFIG_USCHED_DROP_PRIVS == 1
+	/* Drop privileges to the configured nopriv user */
+	log_info("Dropping user process privileges...\n");
 
-	if (_runtime_stat_drop_privs() < 0) {
+	if (_runtime_stat_drop_user_privs() < 0) {
 		errsv = errno;
-		log_crit("runtime_stat_init(): _runtime_stat_drop_privs(): %s\n", strerror(errno));
+		log_crit("runtime_stat_init(): _runtime_stat_drop_user_privs(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	log_info("Privileges successfully dropped.\n");
+	log_info("User privileges successfully dropped.\n");
+#endif
 
 	/* All good */
 	log_info("All systems go. Ignition!\n");

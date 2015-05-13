@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 15-04-2015
+ * Date: 13-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -74,19 +74,25 @@ static int _runtime_daemon_jail(void) {
 #endif
 
 #if CONFIG_USCHED_DROP_PRIVS == 1
-static int _runtime_daemon_drop_privs(void) {
+static int _runtime_daemon_drop_group_privs(void) {
 	int errsv = 0;
 
 	if (setregid(rund.config.core.privdrop_gid, rund.config.core.privdrop_gid) < 0) {
 		errsv = errno;
-		log_crit("_runtime_daemon_drop_privs(): setregid(): %s\n", strerror(errno));
+		log_crit("_runtime_daemon_drop_group_privs(): setregid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
+	return 0;
+}
+
+static int _runtime_daemon_drop_user_privs(void) {
+	int errsv = 0;
+
 	if (setreuid(rund.config.core.privdrop_uid, rund.config.core.privdrop_uid) < 0) {
 		errsv = errno;
-		log_crit("_runtime_daemon_drop_privs(): setreuid(): %s\n", strerror(errno));
+		log_crit("_runtime_daemon_drop_user_privs(): setreuid(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -151,6 +157,24 @@ int runtime_daemon_init(int argc, char **argv) {
 	}
 
 	log_info("Signals interface initialized.\n");
+
+#if CONFIG_USCHED_DROP_PRIVS == 1
+	/* NOTE: Drop group privileges BEFORE initializing IPC interface, so the IPC system will
+	 * belong to the same group.
+	 */
+
+	/* Drop group process privileges */
+	log_info("Dropping group process privileges...\n");
+
+	if (_runtime_daemon_drop_group_privs() < 0) {
+		errsv = errno;
+		log_crit("runtime_daemon_init(): _runtime_daemon_drop_group_privs(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Group privileges successfully dropped.\n");
+#endif
 
 	/* Initialize IPC */
 	log_info("Initializing IPC interface...\n");
@@ -326,17 +350,17 @@ int runtime_daemon_init(int argc, char **argv) {
 #endif
 
 #if CONFIG_USCHED_DROP_PRIVS == 1
-	/* Drop process privileges */
-	log_info("Dropping process privileges...\n");
+	/* Drop user process privileges */
+	log_info("Dropping user process privileges...\n");
 
-	if (_runtime_daemon_drop_privs() < 0) {
+	if (_runtime_daemon_drop_user_privs() < 0) {
 		errsv = errno;
-		log_crit("runtime_daemon_init(): _runtime_daemon_drop_privs(): %s\n", strerror(errno));
+		log_crit("runtime_daemon_init(): _runtime_daemon_drop_user_privs(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
 
-	log_info("Privileges successfully dropped.\n");
+	log_info("User privileges successfully dropped.\n");
 #endif
 
 	/* All good */

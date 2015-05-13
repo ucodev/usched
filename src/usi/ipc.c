@@ -88,7 +88,7 @@ int ipc_ipc_init(void) {
 	runi.pipck = (pipck_t) runi.config.ipc.id_key;
 
 	/* Create IPC descriptor */
-	if (!(runi.pipcd = pipc_master_register(runi.pipck, IPC_USI_ID, runi.config.ipc.msg_max, runi.config.ipc.msg_size, 0600))) {
+	if (!(runi.pipcd = pipc_master_register(runi.pipck, IPC_USI_ID, runi.config.ipc.msg_max, runi.config.ipc.msg_size, runi.config.ipc.privdrop_uid, runi.config.ipc.privdrop_gid, 0660))) {
 		errsv = errno;
 		log_warn("ipc_ipc_init(): pipc_master_register(): %s\n", strerror(errno));
 		errno = errsv;

@@ -1,3 +1,6 @@
+v0.2-dev-53 (2015-05-14):
+ - Updated README and README.md
+
 v0.2-dev-52 (2015-05-14):
  - Modules are now forced to be restarted when IPC components fail for some reason (self-healing)
  - Modules no longer wait to flush IPC queue when a termination is requested

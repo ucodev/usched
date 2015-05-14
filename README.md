@@ -30,8 +30,8 @@ Perform the following commands:
 
       ~# cd /usr/src
       ~# mkdir usched
-      ~# wget https://github.com/ucodev/usched/archive/v0.1-beta-06.tar.gz
-      ~# tar zxvf usched-v0.1-beta-06.tar.gz -C usched
+      ~# wget https://github.com/ucodev/usched/archive/v0.1.tar.gz
+      ~# tar zxvf usched-v0.1.tar.gz -C usched
       ~# cd usched
       ~# ./deploy
 
@@ -242,6 +242,6 @@ The best way to do it is through GitHub. Clone it, fork it, change it and improv
 
 ## Notes
 
-* Tree v0.1 of the project is on a **beta stage** and shall not be used beyond testing purposes.
+* Tree v0.1 of the project is now considered **stable**.
 * Tree v0.2 is **under development** and may not be fully functional.
 

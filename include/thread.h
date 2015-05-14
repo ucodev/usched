@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface header
  *
- * Date: 17-04-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -32,6 +32,8 @@
 /* Prototypes */
 int thread_daemon_components_init(void);
 void thread_daemon_components_destroy(void);
+int thread_exec_components_init(void);
+void thread_exec_components_destroy(void);
 int thread_exec_behaviour_init(void);
 void thread_exec_behaviour_destroy(void);
 int thread_ipc_components_init(void);

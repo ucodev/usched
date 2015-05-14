@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - IPC
  *
- * Date: 13-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,8 +44,6 @@
 static int _runtime_ipc_drop_group_privs(void) {
 	int errsv = 0;
 
-	debug_printf(DEBUG_INFO, "PROCESS GID: %u\n", runi.config.ipc.privdrop_gid);
-
 	if (setregid(runi.config.ipc.privdrop_gid, runi.config.ipc.privdrop_gid) < 0) {
 		errsv = errno;
 		log_crit("_runtime_ipc_drop_group_privs(): setregid(): %s\n", strerror(errno));
@@ -58,8 +56,6 @@ static int _runtime_ipc_drop_group_privs(void) {
 
 static int _runtime_ipc_drop_user_privs(void) {
 	int errsv = 0;
-
-	debug_printf(DEBUG_INFO, "PROCESS UID: %u\n", runi.config.ipc.privdrop_uid);
 
 	if (setreuid(runi.config.ipc.privdrop_uid, runi.config.ipc.privdrop_uid) < 0) {
 		errsv = errno;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Daemon Main Component
  *
- * Date: 07-03-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -115,7 +115,7 @@ static int _loop(int argc, char **argv) {
 		}
 
 		if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL)) {
-			ret = 1;
+			ret = 1; /* This module must be restarted by its monitor */
 			break;
 		}
 

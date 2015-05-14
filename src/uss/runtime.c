@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Stat
  *
- * Date: 13-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -184,8 +184,37 @@ int runtime_stat_init(int argc, char **argv) {
 	return 0;
 }
 
+void runtime_stat_fatal(void) {
+	/* We need to check if the runtime was already interrupted BEFORE setting the FATAL flag.
+	 * If already interrupted, just mark it with FATAL.
+	 * If not interrupted, mark it with FATAL and force the interruption.
+	 */
+	if (runtime_stat_interrupted()) {
+		bit_set(&runs.flags, USCHED_RUNTIME_FLAG_FATAL);
+	} else {
+		bit_set(&runs.flags, USCHED_RUNTIME_FLAG_FATAL);
+		runtime_stat_interrupt();
+	}
+}
+
+void runtime_stat_interrupt(void) {
+	/* Atomically set the INTERRUPT flag (if unset) and deliver the interruption signal */
+	pthread_mutex_lock(&runs.mutex_interrupt);
+
+	if (!bit_test(&runs.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
+		bit_set(&runs.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
+
+		pthread_mutex_unlock(&runs.mutex_interrupt);
+
+		return;
+	}
+
+	pthread_mutex_unlock(&runs.mutex_interrupt);
+}
+
 int runtime_stat_interrupted(void) {
-	if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&runs.flags, USCHED_RUNTIME_FLAG_RELOAD))
+	/* FIXME: Probably it's a good idea to acquire the mutex_interrupt before testing */
+	if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&runs.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&runs.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&runs.flags, USCHED_RUNTIME_FLAG_INTERRUPT))
 		return 1;
 
 	return 0;

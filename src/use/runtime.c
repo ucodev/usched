@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Exec
  *
- * Date: 11-04-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -106,6 +106,18 @@ int runtime_exec_init(int argc, char **argv) {
 
 	log_info("Signals interface initialized.\n");
 
+	/* Initialize thread components  */
+	log_info("Initializing thread components interface...\n");
+
+	if (thread_exec_components_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_exec_init(): thread_exec_components_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Thread components interface initialized.\n");
+
 	/* Initialize threads behaviour */
 	log_info("Initializing thread behaviour interface...\n");
 
@@ -150,8 +162,37 @@ int runtime_exec_init(int argc, char **argv) {
 	return 0;
 }
 
+void runtime_exec_fatal(void) {
+	/* We need to check if the runtime was already interrupted BEFORE setting the FATAL flag.
+	 * If already interrupted, just mark it with FATAL.
+	 * If not interrupted, mark it with FATAL and force the interruption.
+	 */
+	if (runtime_exec_interrupted()) {
+		bit_set(&rune.flags, USCHED_RUNTIME_FLAG_FATAL);
+	} else {
+		bit_set(&rune.flags, USCHED_RUNTIME_FLAG_FATAL);
+		runtime_exec_interrupt();
+	}
+}
+
+void runtime_exec_interrupt(void) {
+	/* Atomically set the INTERRUPT flag (if unset) and deliver the interruption signal */
+	pthread_mutex_lock(&rune.mutex_interrupt);
+
+	if (!bit_test(&rune.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
+		bit_set(&rune.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
+
+		pthread_mutex_unlock(&rune.mutex_interrupt);
+
+		return;
+	}
+
+	pthread_mutex_unlock(&rune.mutex_interrupt);
+}
+
 int runtime_exec_interrupted(void) {
-	if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD))
+	/* FIXME: Probably it's a good idea to acquire the mutex_interrupt before testing */
+	if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rune.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rune.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rune.flags, USCHED_RUNTIME_FLAG_INTERRUPT))
 		return 1;
 
 	return 0;
@@ -167,6 +208,11 @@ void runtime_exec_destroy(void) {
 	log_info("Destroying thread behaviour interface...\n");
 	thread_exec_behaviour_destroy();
 	log_info("Thread behaviour interface destroyed.\n");
+
+	/* Destroy thread components interface */
+	log_info("Destroying thread components interface...\n");
+	thread_exec_components_destroy();
+	log_info("Thread components interface destroyed.\n");
 
 	/* Destroy signals interface */
 	log_info("Destroying signals interface...\n");
@@ -189,6 +235,7 @@ void runtime_exec_quiet_destroy(void) {
 	/* NOTE: this destructor is _ONLY_ used by child processes invoked by uSched Executer */
 	ipc_exec_destroy();
 	thread_exec_behaviour_destroy();
+	thread_exec_components_destroy();
 	sig_exec_destroy();
 	config_exec_destroy();
 

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Daemon
  *
- * Date: 13-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -383,7 +383,7 @@ void runtime_daemon_fatal(void) {
 }
 
 void runtime_daemon_interrupt(void) {
-	/* Atomically set the SIGNALED flag (if unset) and deliver the interruption signal */
+	/* Atomically set the INTERRUPT flag (if unset) and deliver the interruption signal */
 	pthread_mutex_lock(&rund.mutex_interrupt);
 
 	if (!bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
@@ -408,6 +408,7 @@ int runtime_daemon_terminated(void) {
 }
 
 int runtime_daemon_interrupted(void) {
+	/* FIXME: Probably it's a good idea to acquire the mutex_interrupt before testing */
 	if (bit_test(&rund.flags, USCHED_RUNTIME_FLAG_TERMINATE) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_RELOAD) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FATAL) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_FLUSH) || bit_test(&rund.flags, USCHED_RUNTIME_FLAG_INTERRUPT))
 		return 1;
 

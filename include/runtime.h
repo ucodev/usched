@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 12-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -164,6 +164,8 @@ struct usched_runtime_exec {
 	volatile usched_runtime_flag_t flags;
 	struct sigaction sa_save;
 
+	pthread_mutex_t mutex_interrupt;
+
 	pipck_t pipck;
 	pipcd_t *pipcd; /* IPC descriptor */
 
@@ -187,6 +189,7 @@ struct usched_runtime_stat {
 
 	pthread_cond_t cond_dpool;
 
+	pthread_mutex_t mutex_interrupt;
 	pthread_mutex_t mutex_dpool;
 	pthread_mutex_t mutex_spool;
 
@@ -252,8 +255,12 @@ void runtime_daemon_fatal(void);
 void runtime_daemon_interrupt(void);
 int runtime_daemon_terminated(void);
 int runtime_daemon_interrupted(void);
+void runtime_exec_fatal(void);
+void runtime_exec_interrupt(void);
 int runtime_exec_interrupted(void);
 int runtime_ipc_interrupted(void);
+void runtime_stat_fatal(void);
+void runtime_stat_interrupt(void);
 int runtime_stat_interrupted(void);
 #endif /* CONFIG_CLIENT_ONLY == 0 */
 void runtime_client_destroy(void);

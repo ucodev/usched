@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface - Exec
  *
- * Date: 31-03-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,23 @@
 #include "log.h"
 #include "runtime.h"
 #include "thread.h"
+
+int thread_exec_components_init(void) {
+	int errsv = 0;
+
+	if ((errno = pthread_mutex_init(&rune.mutex_interrupt, NULL))) {
+		errsv = errno;
+		log_crit("thread_exec_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	return 0;
+}
+
+void thread_exec_components_destroy(void) {
+	pthread_mutex_destroy(&rune.mutex_interrupt);
+}
 
 int thread_exec_behaviour_init(void) {
 	int errsv = 0;

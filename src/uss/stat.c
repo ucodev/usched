@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 12-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -174,6 +174,15 @@ static int _use_incoming(void) {
 		log_warn("_use_process(): ipc_recv(): %s\n", strerror(errno));
 		mm_free(buf);
 		errno = errsv;
+
+		/* Any of the following errno are a fatal condition and this module needs to
+		 * be restarted by its monitor.
+		 */
+		if (errno == EACCES || errno == EFAULT || errno == EINVAL || errno == EIDRM || errno == ENOMEM)
+			runtime_stat_fatal();
+
+		errno = errsv;
+
 		return -1;
 	}
 
@@ -269,8 +278,18 @@ static int _usd_dispatch(void) {
 		log_warn("_usd_dispatch(): ipc_send_nowait(): %s\n", strerror(errno));
 		mm_free(msg);
 		errno = errsv;
+
+		/* Any of the following errno are a fatal condition and this module needs to
+		 * be restarted by its monitor.
+		 */
+		if (errno == EACCES || errno == EFAULT || errno == EINVAL || errno == EIDRM || errno == ENOMEM)
+			runtime_stat_fatal();
+
+		errno = errsv;
+
 		return -1;
 	}
+
 	/* Free message memory */
 	mm_free(msg);
 
@@ -360,7 +379,9 @@ static void _destroy(void) {
 	runtime_stat_destroy();
 }
 
-static void _loop(int argc, char **argv) {
+static int _loop(int argc, char **argv) {
+	int ret = 0;
+
 	_init(argc, argv);
 
 	for (;;) {
@@ -370,6 +391,11 @@ static void _loop(int argc, char **argv) {
 		debug_printf(DEBUG_INFO, "_loop(): Interrupted...\n");
 
 		/* Check for runtime interruptions */
+		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_FATAL)) {
+			ret = 1; /* This module must be restarted by its monitor */
+			break;
+		}
+
 		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_TERMINATE))
 			break;
 
@@ -377,15 +403,22 @@ static void _loop(int argc, char **argv) {
 			_destroy();
 			_init(argc, argv);
 		}
+
+		/* Clear the interrupt flag if we reach this point */
+		if (bit_test(&runs.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
+			pthread_mutex_lock(&runs.mutex_interrupt);
+			bit_clear(&runs.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
+			pthread_mutex_unlock(&runs.mutex_interrupt);
+		}
 	}
 
 	_destroy();
+
+	return ret;
 }
 
 int main(int argc, char **argv) {
-	_loop(argc, argv);
-
-	return 0;
+	return _loop(argc, argv);
 }
 
 int stat_compare(const void *s1, const void *s2) {

@@ -296,6 +296,8 @@ void entry_daemon_exec_dispatch(void *arg) {
 	 * stall in the case of a full message queue or unresponsive executer.
 	 */
 	if (ipc_send_nowait(rund.pipcd, IPC_USD_ID, IPC_USE_ID, buf, (size_t) rund.config.ipc.msg_size) < 0) {
+		errsv = errno;
+
 		log_warn("entry_daemon_exec_dispatch(): ipc_send_nowait(): %s\n", strerror(errno));
 
 		/* NOTE:
@@ -309,6 +311,16 @@ void entry_daemon_exec_dispatch(void *arg) {
 		 */
 
 		log_crit("entry_daemon_exec_dispatch(): The Entry ID 0x%016llX was NOT executed at timestamp %u due to the previously reported error while performing an event write.\n", entry->id, entry->trigger);
+
+		errno = errsv;
+
+		/* Any of the following errno are a fatal condition and this module needs to
+		 * be restarted by its monitor.
+		 */
+		if (errno == EACCES || errno == EFAULT || errno == EINVAL || errno == EIDRM || errno == ENOMEM)
+			runtime_daemon_fatal();
+
+		errno = errsv;
 	}
 
 _process:

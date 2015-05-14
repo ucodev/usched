@@ -3,7 +3,7 @@
  * @brief uSched
  *        Thread handlers interface - Stat
  *
- * Date: 12-04-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,6 +38,13 @@
 int thread_stat_components_init(void) {
 	int errsv = 0;
 
+	if ((errno = pthread_mutex_init(&runs.mutex_interrupt, NULL))) {
+		errsv = errno;
+		log_crit("thread_stat_components_init(): pthread_mutex_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
 	if ((errno = pthread_cond_init(&runs.cond_dpool, NULL))) {
 		errsv = errno;
 		log_crit("thread_stat_components_init(): pthread_cond_init(): %s\n", strerror(errno));
@@ -63,6 +70,7 @@ int thread_stat_components_init(void) {
 }
 
 void thread_stat_components_destroy(void) {
+	pthread_mutex_destroy(&runs.mutex_interrupt);
 	pthread_cond_destroy(&runs.cond_dpool);
 	pthread_mutex_destroy(&runs.mutex_dpool);
 	pthread_mutex_destroy(&runs.mutex_spool);

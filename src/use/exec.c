@@ -3,7 +3,7 @@
  * @brief uSched
  *        Execution Module Main Component
  *
- * Date: 13-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -102,6 +102,16 @@ static int _uss_dispatch(
 		log_warn("_uss_dispatch(): ipc_send_nowait(): %s\n", strerror(errno));
 		mm_free(buf);
 		errno = errsv;
+
+		/* Any of the following errno are a fatal condition and this module needs to
+		 * be restarted by its monitor.
+		 */
+		if (errno == EACCES || errno == EFAULT || errno == EINVAL || errno == EIDRM || errno == ENOMEM)
+			runtime_exec_fatal();
+
+
+		errno = errsv;
+
 		return -1;
 	}
 
@@ -317,16 +327,14 @@ _exec_finish:
 }
 
 static void _exec_process(void) {
+	int errsv = 0;
 	pthread_t ptid;
 	char *tbuf = NULL;
 
 	for (;;) {
 		/* Check for rutime interruptions */
-		if (runtime_exec_interrupted()) {
-			/* Interrupt execution only when there are no messages in the queue */
-			if (!ipc_pending(rune.pipcd))
-				break;
-		}
+		if (runtime_exec_interrupted())
+			break;
 
 		/* Allocate temporary buffer size, plus one byte that won't be written to safe guard
 		 * the subject NULL termination
@@ -343,8 +351,19 @@ static void _exec_process(void) {
 
 		/* Wait for IPC message */
 		if (ipc_recv(rune.pipcd, (long [1]) { IPC_USD_ID }, (long [1]) { IPC_USE_ID }, tbuf, (size_t) rune.config.ipc.msg_size) < 0) {
+			errsv = errno;
 			log_warn("_exec_process(): ipc_recv(): %s\n", strerror(errno));
 			mm_free(tbuf);
+			errno = errsv;
+
+			/* Any of the following errno are a fatal condition and this module needs to
+			 * be restarted by its monitor.
+			 */
+			if (errno == EACCES || errno == EFAULT || errno == EINVAL || errno == EIDRM || errno == ENOMEM)
+				runtime_exec_fatal();
+
+			errno = errsv;
+
 			continue;
 		}
 
@@ -374,7 +393,9 @@ static void _destroy(void) {
 	runtime_exec_destroy();
 }
 
-static void _loop(int argc, char **argv) {
+static int _loop(int argc, char **argv) {
+	int ret = 0;
+
 	_init(argc, argv);
 
 	for (;;) {
@@ -382,6 +403,11 @@ static void _loop(int argc, char **argv) {
 		_exec_process();
 
 		/* Check for runtime interruptions */
+		if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_FATAL)) {
+			ret = 1; /* This module must be restarted by its monitor */
+			break;
+		}
+
 		if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_TERMINATE))
 			break;
 
@@ -389,14 +415,21 @@ static void _loop(int argc, char **argv) {
 			_destroy();
 			_init(argc, argv);
 		}
+
+		/* Clear the interrupt flag if we reach this point */
+		if (bit_test(&rune.flags, USCHED_RUNTIME_FLAG_INTERRUPT)) {
+			pthread_mutex_lock(&rune.mutex_interrupt);
+			bit_clear(&rune.flags, USCHED_RUNTIME_FLAG_INTERRUPT);
+			pthread_mutex_unlock(&rune.mutex_interrupt);
+		}
 	}
 
 	_destroy();
+
+	return ret;
 }
 
 int main(int argc, char *argv[]) {
-	_loop(argc, argv);
-
-	return 0;
+	return _loop(argc, argv);
 }
 

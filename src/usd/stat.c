@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics worker interface - Daemon
  *
- * Date: 12-05-2015
+ * Date: 14-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -94,15 +94,14 @@ static int _stat_daemon_process(char *msg) {
 }
 
 static void *_stat_daemon_worker(void *arg) {
+	int errsv = 0;
 	char *msg = NULL;
 	arg = NULL;
 
 	for (;;) {
 		/* Check for runtime interruptions */
-		if (runtime_daemon_interrupted()) {
-			if (!ipc_pending(rund.pipcd))
-				break;
-		}
+		if (runtime_daemon_interrupted())
+			break;
 
 		/* Allocate message size */
 		if (!(msg = mm_alloc((size_t) rund.config.ipc.msg_size + 1))) {
@@ -115,8 +114,19 @@ static void *_stat_daemon_worker(void *arg) {
 
 		/* Wait for IPC message */
 		if (ipc_recv(rund.pipcd, (long [1]) { IPC_USS_ID }, (long [1]) { IPC_USD_ID }, msg, (size_t) rund.config.ipc.msg_size) < 0) {
+			errsv = errno;
 			log_warn("_stat_daemon_worker(): ipc_recv(): %s\n", strerror(errno));
 			mm_free(msg);
+			errno = errsv;
+
+			/* Any of the following errno are a fatal condition and this module needs to
+			 * be restarted by its monitor.
+			 */
+			if (errno == EACCES || errno == EFAULT || errno == EINVAL || errno == EIDRM || errno == ENOMEM)
+				runtime_daemon_fatal();
+
+			errno = errsv;
+
 			continue;
 		}
 

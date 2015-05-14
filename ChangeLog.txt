@@ -1,3 +1,7 @@
+v0.2-dev-52 (2015-05-14):
+ - Modules are now forced to be restarted when IPC components fail for some reason (self-healing)
+ - Modules no longer wait to flush IPC queue when a termination is requested
+
 v0.2-dev-51 (2015-05-14):
  - Updated startup scripts
 

@@ -1,3 +1,6 @@
+v0.1 (2015-05-15):
+ - Changed VERSION
+
 v0.1-beta-09 (2015-04-14):
  - Fixed curl flags on 'deps' script
 

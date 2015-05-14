@@ -4,7 +4,7 @@
 # @brief uSched
 #        uSched flush/start/stop script - Python implementation
 #
-# Date: 01-04-2015
+# Date: 14-05-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -34,11 +34,13 @@ import time
 CONFIG_USCHED_ADMIN_BIN = "@_SYSSBINDIR_@/usa"
 CONFIG_USCHED_DAEMON_BIN = "@_SYSSBINDIR_@/usd"
 CONFIG_USCHED_EXEC_BIN = "@_SYSSBINDIR_@/use"
+CONFIG_USCHED_IPC_BIN = "@_SYSSBINDIR_@/usi"
 CONFIG_USCHED_STAT_BIN = "@_SYSSBINDIR_@/uss"
 CONFIG_USCHED_MONITOR_BIN = "@_SYSSBINDIR_@/usm"
 CONFIG_USCHED_PREINIT_BIN = "@_SYSSBINDIR_@/usched_preinit"
 CONFIG_USCHED_DAEMON_PID_FILE = "@_SYSRUNDIR_@/usched_usd.pid"
 CONFIG_USCHED_EXEC_PID_FILE = "@_SYSRUNDIR_@/usched_use.pid"
+CONFIG_USCHED_IPC_PID_FILE = "@_SYSRUNDIR_@/usched_usi.pid"
 CONFIG_USCHED_STAT_PID_FILE = "@_SYSRUNDIR_@/usched_uss.pid"
 
 # Operations
@@ -140,6 +142,26 @@ def usched_start():
 		print_info("Failed: Unable to commit uSched Core configuration.\n")
 		return False
 
+	# Commit uSched Exec configuration changes
+	try:
+		status = subprocess.call([CONFIG_USCHED_ADMIN_BIN, "commit", "exec"])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to commit uSched IPC configuration.\n")
+		return False
+
+	# Commit uSched IPC configuration changes
+	try:
+		status = subprocess.call([CONFIG_USCHED_ADMIN_BIN, "commit", "ipc"])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to commit uSched IPC configuration.\n")
+		return False
+
 	# Commit uSched Stat configuration changes
 	try:
 		status = subprocess.call([CONFIG_USCHED_ADMIN_BIN, "commit", "stat"])
@@ -149,6 +171,18 @@ def usched_start():
 	if status != EXIT_SUCCESS:
 		print_info("Failed: Unable to commit uSched Stat configuration.\n")
 		return False
+
+	# Start uSched IPC module
+	try:
+		status = subprocess.call([CONFIG_USCHED_MONITOR_BIN, "-p", CONFIG_USCHED_IPC_PID_FILE, "-r", "-S", CONFIG_USCHED_IPC_BIN])
+	except OSError:
+		status = 127
+
+	if status != EXIT_SUCCESS:
+		print_info("Failed: Unable to start uSched IPC Module\n")
+		return False
+
+	time.sleep(1)
 
 	# Start uSched Status and Statistics module
 	try:
@@ -219,8 +253,16 @@ def usched_stop():
 	if signal_pid_file(CONFIG_USCHED_STAT_PID_FILE, signal.SIGTERM) == False:
 		return False
 
-	# Wait for 'use' to terminate
+	# Wait for 'uss' to terminate
 	while os.path.isfile(CONFIG_USCHED_STAT_PID_FILE):
+		time.sleep(1)
+
+	# Terminate usi
+	if signal_pid_file(CONFIG_USCHED_IPC_PID_FILE, signal.SIGTERM) == False:
+		return False
+
+	# Wait for 'usi' to terminate
+	while os.path.isfile(CONFIG_USCHED_IPC_PID_FILE):
 		time.sleep(1)
 
 	return True
@@ -235,17 +277,23 @@ def usched_force_stop():
 		# Terminate use
 		signal_pid_file(CONFIG_USCHED_EXEC_PID_FILE, signal.SIGKILL, True)
 
-		# Terminate use
+		# Terminate uss
 		signal_pid_file(CONFIG_USCHED_STAT_PID_FILE, signal.SIGKILL, True)
 
-		# Remote the daemon pid file
+		# Terminate usi
+		signal_pid_file(CONFIG_USCHED_IPC_PID_FILE, signal.SIGKILL, True)
+
+		# Remove the daemon pid file
 		os.unlink(CONFIG_USCHED_DAEMON_PID_FILE)
 
-		# Remote the exec pid file
+		# Remove the exec pid file
 		os.unlink(CONFIG_USCHED_EXEC_PID_FILE)
 
-		# Remote the stat pid file
+		# Remove the stat pid file
 		os.unlink(CONFIG_USCHED_STAT_PID_FILE)
+
+		# Remove the ipc pid file
+		os.unlink(CONFIG_USCHED_IPC_PID_FILE)
 	except:
 		pass
 

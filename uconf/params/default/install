@@ -1,3 +1,5 @@
+groupadd usched || true
+useradd -g usched usched || true
 make install_all
 make install_doc
 usa change ipc auth key "`./tools/usched_ipcpwgen`"

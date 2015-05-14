@@ -1,10 +1,10 @@
-#!@_SYSSHELL_@
+#!/bin/sh
 #
 # @file usched_preinit.sh
 # @brief uSched
 #        uSched pre initialization script
 #
-# Date: 01-04-2015
+# Date: 14-05-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -32,31 +32,30 @@ ipc_key_regen()
 	MODULE=${1}
 
 	# Get current IPC key
-	ipc_key_last="`${USCHED_USA_BIN} show ${MODULE} ipc key | cut -d' ' -f3`"
+	ipc_key_last="`${USCHED_USA_BIN} show ${MODULE} auth key | cut -d' ' -f3`"
 
 	# Change IPC key
-	${USCHED_USA_BIN} change ${MODULE} ipc key $(${USCHED_IPCPWGEN_BIN} 128) > /dev/null
+	${USCHED_USA_BIN} change ${MODULE} auth key $(${USCHED_IPCPWGEN_BIN} 128) > /dev/null
 	${USCHED_USA_BIN} commit ${MODULE}
 
 	# Get new IPC key
-	ipc_key_new="`${USCHED_USA_BIN} show ${MODULE} ipc key | cut -d' ' -f3`"
+	ipc_key_new="`${USCHED_USA_BIN} show ${MODULE} auth key | cut -d' ' -f3`"
 
 	# Check if IPC key is valid
 	if [ -z "${ipc_key_new}" ]; then
-		echo "Fatal: IPC key is empty"
+		echo "Fatal: IPC authentication key is empty"
 		exit 1
 	fi
 
 	# Check if IPC key was changed
 	if [ "${ipc_key_last}" = "${ipc_key_new}" ]; then
-		echo "Fatal: IPC key wasn't changed"
+		echo "Fatal: IPC authentication key wasn't changed"
 		exit 1
 	fi
 }
 
 # Regen IPC keys
-ipc_key_regen "core"
-ipc_key_regen "stat"
+ipc_key_regen "ipc"
 
 # All good
 exit 0

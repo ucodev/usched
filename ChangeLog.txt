@@ -1,3 +1,6 @@
+v0.2-dev-51 (2015-05-14):
+ - Updated startup scripts
+
 v0.2-dev-50 (2015-05-13):
  - Proper privilege drops for the new IPC mechanism
 

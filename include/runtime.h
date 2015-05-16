@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface header
  *
- * Date: 14-05-2015
+ * Date: 16-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -186,6 +186,7 @@ struct usched_runtime_stat {
 
 	pthread_t tid_incoming;
 	pthread_t tid_dispatch;
+	pthread_t tid_report;
 
 	pthread_cond_t cond_dpool;
 

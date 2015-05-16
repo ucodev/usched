@@ -3,7 +3,7 @@
  * @brief uSched
  *        Runtime handlers interface - Stat
  *
- * Date: 14-05-2015
+ * Date: 16-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -39,6 +39,7 @@
 #include "bitops.h"
 #include "ipc.h"
 #include "pool.h"
+#include "report.h"
 
 #if CONFIG_USCHED_DROP_PRIVS == 1
 static int _runtime_stat_drop_group_privs(void) {
@@ -134,6 +135,18 @@ int runtime_stat_init(int argc, char **argv) {
 
 	log_info("Pools initialized.\n");
 
+	/* Initialize reports */
+	log_info("Initializing reporting interface...\n");
+
+	if (report_stat_init() < 0) {
+		errsv = errno;
+		log_crit("runtime_stat_init(): report_stat_init(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	log_info("Reporting interface initialized.\n");
+
 #if CONFIG_USCHED_DROP_PRIVS == 1
 	/* NOTE: Drop group privileges BEFORE initializing IPC interface, so the IPC system will
 	 * belong to the same group.
@@ -225,6 +238,11 @@ void runtime_stat_destroy(void) {
 	log_info("Destroying IPC interface...\n");
 	ipc_stat_destroy();
 	log_info("IPC interface destroyed.\n");
+
+	/* Destroy reporting interface */
+	log_info("Destroying reporting interface...\n");
+	report_stat_destroy();
+	log_info("Reporting interface destroyed.\n");
 
 	/* Destroy pools */
 	log_info("Destroying pools...\n");

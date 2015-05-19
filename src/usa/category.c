@@ -3,7 +3,7 @@
  * @brief uSched
  *        Category processing interface
  *
- * Date: 13-05-2015
+ * Date: 19-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -1747,7 +1747,49 @@ int category_stat_change(size_t argc, char **args) {
 		errno = EINVAL;
 
 		return -1;
-	} 
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_REPORT_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_FILE_STR)) {
+			/* set report.file */
+			if (stat_admin_report_file_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_report_file_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_FREQ_STR)) {
+			/* set report.freq */
+			if (stat_admin_report_freq_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_report_freq_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MODE_STR)) {
+			/* set report.mode */
+			if (stat_admin_report_mode_change(args[2]) < 0) {
+				errsv = errno;
+				log_warn("category_stat_change(): stat_admin_report_mode_change(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "change stat report");
+		log_warn("category_stat_change(): Invalid 'report' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	}
 
 	/* Unknown component */
 	usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_COMPONENT, "change stat");
@@ -1821,6 +1863,48 @@ int category_stat_show(size_t argc, char **args) {
 		/* Unknown property */
 		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat privdrop");
 		log_warn("category_stat_show(): Invalid 'privdrop' property: %s\n", args[1]);
+		errno = EINVAL;
+
+		return -1;
+	} else if (!strcasecmp(args[0], USCHED_COMPONENT_REPORT_STR)) {
+		if (!strcasecmp(args[1], USCHED_PROPERTY_FILE_STR)) {
+			/* show report.file */
+			if (stat_admin_report_file_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_report_file_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_FREQ_STR)) {
+			/* show report.freq */
+			if (stat_admin_report_freq_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_report_freq_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		} else if (!strcasecmp(args[1], USCHED_PROPERTY_MODE_STR)) {
+			/* show report.mode */
+			if (stat_admin_report_mode_show() < 0) {
+				errsv = errno;
+				log_warn("category_stat_show(): stat_admin_report_mode_show(): %s\n", strerror(errno));
+				errno = errsv;
+				return -1;
+			}
+
+			/* All good */
+			return 0;
+		}
+
+		/* Unknown property */
+		usage_admin_error_set(USCHED_USAGE_ADMIN_ERR_INVALID_PROPERTY, "show stat report");
+		log_warn("category_stat_show(): Invalid 'report' property: %s\n", args[1]);
 		errno = EINVAL;
 
 		return -1;

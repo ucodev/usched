@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface header
  *
- * Date: 14-05-2015
+ * Date: 19-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -76,6 +76,9 @@
 #define CONFIG_USCHED_FILE_STAT_JAIL_DIR	"jail.dir"
 #define CONFIG_USCHED_FILE_STAT_PRIVDROP_USER	"privdrop.user"
 #define CONFIG_USCHED_FILE_STAT_PRIVDROP_GROUP	"privdrop.group"
+#define CONFIG_USCHED_FILE_STAT_REPORT_FILE	"report.file"
+#define CONFIG_USCHED_FILE_STAT_REPORT_FREQ	"report.freq"
+#define CONFIG_USCHED_FILE_STAT_REPORT_MODE	"report.mode"
 #define CONFIG_USCHED_DAEMON_PID_FILE		"@_SYSRUNDIR_@/usched_usd.pid"
 #define CONFIG_USCHED_EXEC_PID_FILE		"@_SYSRUNDIR_@/usched_use.pid"
 #define CONFIG_USCHED_IPC_PID_FILE		"@_SYSRUNDIR_@/usched_usi.pid"
@@ -323,6 +326,9 @@ struct usched_config_stat {
 	char *privdrop_group;
 	uid_t privdrop_uid;
 	gid_t privdrop_gid;
+	char *report_file;
+	unsigned int report_freq;
+	mode_t report_mode;
 };
 
 struct usched_config {

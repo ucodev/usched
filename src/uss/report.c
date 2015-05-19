@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and statistics reporting interface
  *
- * Date: 16-05-2015
+ * Date: 19-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -55,8 +55,8 @@ static void *_report_stat_monitor(void *arg) {
 		/* TODO: Check for runtime interruptions */
 
 		/* Open the named pipe */
-		if (!(fp = fopen("/tmp/uss", "w"))) {
-			log_warn("_report_stat_monitor(): fopen(\"%s\", \"w\"): %s\n", "/tmp/uss", strerror(errno));
+		if (!(fp = fopen(runs.config.stat.report_file, "w"))) {
+			log_warn("_report_stat_monitor(): fopen(\"%s\", \"w\"): %s\n", runs.config.stat.report_file, strerror(errno));
 			continue;
 		}
 
@@ -67,7 +67,7 @@ static void *_report_stat_monitor(void *arg) {
 		fclose(fp);
 
 		/* Wait some time before generating another report */
-		usleep(1000000);
+		usleep(1000000 / (float) runs.config.stat.report_freq);
 	}
 
 	/* All good */
@@ -85,21 +85,28 @@ int report_stat_init(void) {
 	/* If the named pipe for reporting doesn't exist or if the file exists but it isn't a
 	 * named pipe, recreate it
 	 */
-	if (!fsop_path_exists("/tmp/uss") || !fsop_path_isfifo("/tmp/uss")) {
-		unlink("/tmp/uss");
+	if (!fsop_path_exists(runs.config.stat.report_file) || !fsop_path_isfifo(runs.config.stat.report_file)) {
+		unlink(runs.config.stat.report_file);
 
-		if (mkfifo("/tmp/uss", 0666) < 0) {
+		if (mkfifo(runs.config.stat.report_file, runs.config.stat.report_mode) < 0) {
 			errsv = errno;
-			log_warn("report_stat_init(): mkfifo(\"%s\"): %s\n", "/tmp/uss", strerror(errno));
+			log_warn("report_stat_init(): mkfifo(\"%s\"): %s\n", runs.config.stat.report_file, strerror(errno));
 			errno = errsv;
 			return -1;
 		}
 	}
 
 	/* Grant that the named pipe has the correct mode */
-	if (chmod("/tmp/uss", 0666) < 0) {
+	if (chmod(runs.config.stat.report_file, runs.config.stat.report_mode) < 0) {
 		errsv = errno;
 		log_warn("report_stat_init(): chmod(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	if (chown(runs.config.stat.report_file, runs.config.stat.privdrop_uid, runs.config.stat.privdrop_gid) < 0) {
+		errsv = errno;
+		log_warn("report_stat_init(): chown(): %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Stat configuration and administration interface header
  *
- * Date: 12-05-2015
+ * Date: 19-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -59,6 +59,12 @@ int stat_admin_privdrop_group_show(void);
 int stat_admin_privdrop_group_change(const char *privdrop_group);
 int stat_admin_privdrop_user_show(void);
 int stat_admin_privdrop_user_change(const char *privdrop_user);
+int stat_admin_report_file_show(void);
+int stat_admin_report_file_change(const char *report_file);
+int stat_admin_report_freq_show(void);
+int stat_admin_report_freq_change(const char *report_freq);
+int stat_admin_report_mode_show(void);
+int stat_admin_report_mode_change(const char *report_mode);
 int stat_daemon_init(void);
 void stat_daemon_destroy(void);
 int stat_compare(const void *s1, const void *s2);

@@ -3,7 +3,7 @@
  * @brief uSched
  *        uSched Common interface header
  *
- * Date: 13-05-2015
+ * Date: 19-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -44,6 +44,7 @@
 #define USCHED_COMPONENT_MSG_STR	"msg"
 #define USCHED_COMPONENT_PRIVDROP_STR	"privdrop"
 #define USCHED_COMPONENT_REMOTE_STR	"remote"
+#define USCHED_COMPONENT_REPORT_STR	"report"
 #define USCHED_COMPONENT_SERIALIZE_STR	"serialize"
 #define USCHED_COMPONENT_SOCK_STR	"sock"
 #define USCHED_COMPONENT_THREAD_STR	"thread"
@@ -53,11 +54,13 @@
 #define USCHED_PROPERTY_ADDR_STR	"addr"
 #define USCHED_PROPERTY_DIR_STR		"dir"
 #define USCHED_PROPERTY_FILE_STR	"file"
+#define USCHED_PROPERTY_FREQ_STR	"freq"
 #define USCHED_PROPERTY_GID_STR		"gid"
 #define USCHED_PROPERTY_GROUP_STR	"group"
 #define USCHED_PROPERTY_KEY_STR		"key"
 #define USCHED_PROPERTY_LIMIT_STR	"limit"
 #define USCHED_PROPERTY_MAX_STR		"max"
+#define USCHED_PROPERTY_MODE_STR	"mode"
 #define USCHED_PROPERTY_NAME_STR	"name"
 #define USCHED_PROPERTY_NOEXEC_STR	"noexec"
 #define USCHED_PROPERTY_PORT_STR	"port"

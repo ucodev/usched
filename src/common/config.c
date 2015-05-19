@@ -3,7 +3,7 @@
  * @brief uSched
  *        Configuration interface
  *
- * Date: 12-05-2015
+ * Date: 19-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -1169,6 +1169,35 @@ static int _config_validate_stat_privdrop_group(const struct usched_config_stat 
 	return 1;
 }
 
+static int _config_init_stat_report_file(struct usched_config_stat *stat) {
+	if (!(stat->report_file = _value_init_string_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_REPORT_FILE)))
+		return -1;
+
+	return 0;
+}
+
+static int _config_validate_stat_report_file(const struct usched_config_stat *stat) {
+	/* TODO */
+	return 1;
+}
+
+static int _config_init_stat_report_freq(struct usched_config_stat *stat) {
+	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_REPORT_FREQ, &stat->report_freq);
+}
+
+static int _config_validate_stat_report_freq(const struct usched_config_stat *stat) {
+	return stat->report_freq >= 1;
+}
+
+static int _config_init_stat_report_mode(struct usched_config_stat *stat) {
+	return _value_init_uint_from_file(CONFIG_USCHED_DIR_BASE "/" CONFIG_USCHED_DIR_STAT "/" CONFIG_USCHED_FILE_STAT_REPORT_MODE, &stat->report_mode);
+}
+
+static int _config_validate_stat_report_mode(const struct usched_config_stat *stat) {
+	/* TODO */
+	return 1;
+}
+
 int config_init_stat(struct usched_config_stat *stat) {
 	int errsv = 0;
 	struct passwd passwd_buf, *passwd = NULL;
@@ -1242,6 +1271,51 @@ int config_init_stat(struct usched_config_stat *stat) {
 	/* Validate privilege drop group */
 	if (!_config_validate_stat_privdrop_group(stat)) {
 		log_warn("_config_init_stat(): _config_validate_stat_privdrop_group(): Invalid stat.privdrop.group value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read the report file config */
+	if (_config_init_stat_report_file(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_report_file(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate report file */
+	if (!_config_validate_stat_report_file(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_report_file(): Invalid stat.report.file value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read the report freq */
+	if (_config_init_stat_report_freq(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_report_freq(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate report freq */
+	if (!_config_validate_stat_report_freq(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_report_freq(): Invalid stat.report.freq value.\n");
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Read the report mode */
+	if (_config_init_stat_report_mode(stat) < 0) {
+		errsv = errno;
+		log_warn("_config_init_stat(): _config_init_stat_report_mode(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Validate report mode */
+	if (!_config_validate_stat_report_mode(stat)) {
+		log_warn("_config_init_stat(): _config_validate_stat_report_mode(): Invalid stat.report.mode value.\n");
 		errno = EINVAL;
 		return -1;
 	}
@@ -1564,6 +1638,8 @@ void config_destroy_stat(struct usched_config_stat *stat) {
 	mm_free(stat->privdrop_user);
 	memset(stat->privdrop_group, 0, strlen(stat->privdrop_group));
 	mm_free(stat->privdrop_group);
+	memset(stat->report_file, 0, strlen(stat->report_file));
+	mm_free(stat->report_file);
 
 	memset(stat, 0, sizeof(struct usched_config_stat));
 }

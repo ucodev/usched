@@ -3,7 +3,7 @@
  * @brief uSched
  *        Stat configuration and administration interface header
  *
- * Date: 19-05-2015
+ * Date: 21-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -29,15 +29,15 @@
 
 /* Structures */
 struct usched_stat_exec {
-	uid_t uid;
-	gid_t gid;
-	pid_t pid;
-	int status;
-	struct timespec trigger;
-	struct timespec start;
-	struct timespec end;
-	size_t outdata_len;
-	char outdata[CONFIG_USCHED_EXEC_OUTPUT_MAX + 1];
+	uid_t uid;			/* The Entry UID */
+	gid_t gid;			/* The Entry GID */
+	pid_t pid;			/* The Entry PID */
+	int status;			/* The Entry exit status */
+	struct timespec trigger;	/* Timestamp of the Entry trigger */
+	struct timespec start;		/* Timestamp of when the Entry processing was started */
+	struct timespec end;		/* Timestamp of when the Entry finished processing */
+	size_t outdata_len;		/* Length of the Entry output (may be truncated) */
+	char outdata[CONFIG_USCHED_EXEC_OUTPUT_MAX + 1]; /* Entry output (may be truncated) */
 };
 
 struct usched_stat_entry {

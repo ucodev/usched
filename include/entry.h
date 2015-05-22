@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 15-04-2015
+ * Date: 22-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -185,8 +185,8 @@ usched_entry {
 	uint32_t create_time;
 
 	/*
-	 * The entry signature after USCHED_ENTRY_FLAG_COMPLETE is set.
-	 * THe entry signature is the resulting hash of the following fields concatenation:
+	 * The entry signature is set after USCHED_ENTRY_FLAG_COMPLETE is set.
+	 * The entry signature is the resulting hash of the following fields concatenation:
 	 *
 	 * blake2s(entry->id + entry->uid + entry->gid + entry->subj + entry->create_time)
 	 *

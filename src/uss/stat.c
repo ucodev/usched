@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 14-05-2015
+ * Date: 22-05-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -99,6 +99,7 @@ static int _stat_entry_update(
 	s->current.uid = uid;
 	s->current.gid = gid;
 	s->current.pid = pid;
+	s->current.status = WEXITSTATUS(status);
 	memcpy(&s->current.trigger, trigger, sizeof(struct timespec));
 	memcpy(&s->current.start, start, sizeof(struct timespec));
 	memcpy(&s->current.end, end, sizeof(struct timespec));

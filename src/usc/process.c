@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 13-04-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -78,6 +78,7 @@ int process_client_recv_run(struct usched_entry *entry) {
 	int errsv = 0;
 	uint64_t entry_id = 0;
 	uint32_t data_len = 0;
+	ssize_t ret = 0;
 
 	/* Free payload memory */
 	if (entry->payload) {
@@ -87,9 +88,9 @@ int process_client_recv_run(struct usched_entry *entry) {
 	}
 
 	/* Read the payload size */
-	if (panet_read(runc.fd, &data_len, 4) != 4) {
+	if (conn_read_blocking(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_run(): panet_read(..., &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_run(): conn_read_blocking(..., &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -106,9 +107,9 @@ int process_client_recv_run(struct usched_entry *entry) {
 	}
 
 	/* Read the payload data */
-	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
+	if ((ret = conn_read_blocking(runc.fd, entry->payload, entry->psize)) != (ssize_t) entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_run(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_run(): conn_read_blocking(..., entry->payload, entry->psize) != entry->psize: %s. (conn_read_blocking(): %zd bytes, entry->psize: %zd bytes)\n", strerror(errno), ret, entry->psize);
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
@@ -157,9 +158,9 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	}
 
 	/* Read data size */
-	if (panet_read(runc.fd, &data_len, 4) != 4) {
+	if (conn_read_blocking(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_stop(): panet_read(, &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_stop(): conn_read_blocking(, &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -176,9 +177,9 @@ int process_client_recv_stop(struct usched_entry *entry) {
 	}
 
 	/* Receive the payload */
-	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
+	if (conn_read_blocking(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_stop(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_stop(): conn_read_blocking(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
@@ -250,6 +251,7 @@ int process_client_recv_show(struct usched_entry *entry) {
 	uint32_t entry_list_nmemb = 0, data_len = 0;
 	struct usched_entry *entry_list = NULL;
 	size_t p_offset = 0;
+	ssize_t pret = 0;
 
 	/* Cleanup entry payload if required */
 	if (entry->payload) {
@@ -259,9 +261,9 @@ int process_client_recv_show(struct usched_entry *entry) {
 	}
 
 	/* Read data size */
-	if (panet_read(runc.fd, &data_len, 4) != 4) {
+	if (conn_read_blocking(runc.fd, &data_len, 4) != 4) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): panet_read(, &data_len, 4) != 4: %s\n", strerror(errno));
+		log_crit("process_client_recv_show(): conn_read_blocking(..., &data_len, 4) != 4: %s\n", strerror(errno));
 		errno = errsv;
 		return -1;
 	}
@@ -278,9 +280,9 @@ int process_client_recv_show(struct usched_entry *entry) {
 	}
 
 	/* Receive the payload */
-	if (panet_read(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
+	if ((pret = conn_read_blocking(runc.fd, entry->payload, entry->psize)) != (ssize_t) entry->psize) {
 		errsv = errno;
-		log_crit("process_client_recv_show(): panet_read(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		log_crit("process_client_recv_show(): conn_read_blocking(..., entry->payload, entry->psize) != entry->psize: %s. (conn_read_blocking(): %zd bytes, entry->psize: %zd bytes)\n", strerror(errno), pret, entry->psize);
 		entry_unset_payload(entry);
 		errno = errsv;
 		return -1;
@@ -337,6 +339,11 @@ int process_client_recv_show(struct usched_entry *entry) {
 		entry_list[i].trigger = ntohl(entry_list[i].trigger);
 		entry_list[i].step = ntohl(entry_list[i].step);
 		entry_list[i].expire = ntohl(entry_list[i].expire);
+		entry_list[i].pid = ntohl(entry_list[i].pid);
+		entry_list[i].status = ntohl(entry_list[i].status);
+		entry_list[i].exec_time = ntohll(entry_list[i].exec_time);
+		entry_list[i].latency = ntohll(entry_list[i].latency);
+		entry_list[i].outdata_len = ntohl(entry_list[i].outdata_len);
 
 		/* Read the entry username */
 		memcpy(entry_list[i].username, entry->payload + p_offset, CONFIG_USCHED_AUTH_USERNAME_MAX);
@@ -354,9 +361,8 @@ int process_client_recv_show(struct usched_entry *entry) {
 			goto _recv_show_finish;
 		}
 
-		p_offset += entry_list[i].subj_size + 1;
+		p_offset += entry_list[i].subj_size + 1; /* Byte order is correct, since entry_set_subj() resets the subj_size value */
 	}
-
 
 	/* Check if this is a library call */
 	if (bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB)) {

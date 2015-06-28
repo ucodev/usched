@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 27-02-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -110,6 +110,7 @@ int conn_client_process(void) {
 		cur->trigger = htonl(cur->trigger);
 		cur->step = htonl(cur->step);
 		cur->expire = htonl(cur->expire);
+		/* We can ignore pid, status, exec_time, latency, outdata_len and outdata here */
 		cur->psize = htonl(cur->psize);
 
 		/* Set username and session data if this is a remote connection */
@@ -143,9 +144,9 @@ int conn_client_process(void) {
 		}
 
 		/* Send the first entry block */
-		if (panet_write(runc.fd, cur, usched_entry_hdr_size()) != (ssize_t) usched_entry_hdr_size()) {
+		if (conn_write_blocking(runc.fd, cur, usched_entry_hdr_size()) != (ssize_t) usched_entry_hdr_size()) {
 			errsv = errno;
-			log_crit("conn_client_process(): panet_write() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
+			log_crit("conn_client_process(): conn_write_blocking() != %d: %s\n", usched_entry_hdr_size(), strerror(errno));
 			/* The payload size is in network byte order. We need to revert it before
 			 * calling entry_destroy().
 			 */
@@ -166,9 +167,9 @@ int conn_client_process(void) {
 		cur->psize = ntohl(cur->psize) - (conn_is_remote(runc.fd) ? CRYPT_EXTRA_SIZE_CHACHA20POLY1305 : 0); /* Set the original payload size if the connection is remote. */
 
 		/* Read the session token into the session field for further processing */
-		if (panet_read(runc.fd, cur->session, sizeof(cur->session)) != (ssize_t) sizeof(cur->session)) {
+		if (conn_read_blocking(runc.fd, cur->session, sizeof(cur->session)) != (ssize_t) sizeof(cur->session)) {
 			errsv = errno;
-			log_crit("conn_client_process(): panet_read() != sizeof(cur->session): %s\n", strerror(errno));
+			log_crit("conn_client_process(): conn_read_blocking() != sizeof(cur->session): %s\n", strerror(errno));
 			entry_destroy(cur);
 			errno = errsv;
 			return -1;
@@ -211,9 +212,9 @@ int conn_client_process(void) {
 		memcpy(aaa_payload_data + sizeof(cur->session), cur->payload, cur->psize);
 
 		/* Send the authentication and authorization data along entry payload */
-		if (panet_write(runc.fd, aaa_payload_data, sizeof(cur->session) + cur->psize) != (ssize_t) (sizeof(cur->session) + cur->psize)) {
+		if (conn_write_blocking(runc.fd, aaa_payload_data, sizeof(cur->session) + cur->psize) != (ssize_t) (sizeof(cur->session) + cur->psize)) {
 			errsv = errno;
-			log_crit("conn_client_process(): panet_write() != (sizeof(cur->session) + cur->psize): %s\n", strerror(errno));
+			log_crit("conn_client_process(): conn_write_blocking() != (sizeof(cur->session) + cur->psize): %s\n", strerror(errno));
 			entry_destroy(cur);
 			mm_free(aaa_payload_data);
 			errno = errsv;

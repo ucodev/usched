@@ -3,7 +3,7 @@
  * @brief uSched
  *        Signals interface - Client
  *
- * Date: 08-02-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -30,12 +30,14 @@
 #include <pthread.h>
 
 #include "config.h"
+#include "debug.h"
 #include "runtime.h"
 #include "bitops.h"
 #include "log.h"
 #include "sig.h"
 
 static void _sig_pipe_client_handler(int n) {
+	debug_printf(DEBUG_INFO, "_sig_pipe_client_handler(): SIGPIPE caught. Ignoring...\n");
 	/* Ignore SIGPIPE */
 	return;
 }

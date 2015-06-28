@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Common
  *
- * Date: 03-03-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -38,6 +38,7 @@
 #include <psec/crypt.h>
 #include <psec/hash/low.h>
 
+#include "debug.h"
 #include "mm.h"
 #include "entry.h"
 #include "bitops.h"
@@ -166,6 +167,8 @@ int entry_payload_decrypt(struct usched_entry *entry) {
 	int errsv = 0;
 	unsigned char *payload_dec = NULL;
 	size_t out_len = 0;
+
+	debug_printf(DEBUG_INFO, "entry_payload_decrypt(): Decrypting...\n");
 
 	/* Alloc memory for decrypted payload */
 	if (!(payload_dec = mm_alloc(entry->psize - CRYPT_EXTRA_SIZE_CHACHA20POLY1305))) {

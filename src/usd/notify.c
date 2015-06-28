@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 22-05-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -145,9 +145,15 @@ void notify_read(struct async_op *aop) {
 		}
 
 		return;
+	} else if (rtsaio_status(aop) == ASYNCOP_STATUS_INCOMPLETE) {
+		/* TODO: Read the missing data? */
+		return;
 	}
 
 _read_failure:
+	if (rtsaio_error(aop))
+		log_warn("notify_read(): rtsaio_error(): %s. Bytes read: %d, Bytes expected: %d\n", strerror(rtsaio_error(aop)), rtsaio_count(aop), aop->count);
+
 	/* Discard connection */
 	log_info("notify_read(): Terminating connection from file descriptor %d\n", aop->fd);
 
@@ -195,6 +201,8 @@ _read_failure:
 void notify_write(struct async_op *aop) {
 	struct usched_entry *entry = NULL;
 	int cur_fd = aop->fd;
+
+	debug_printf(DEBUG_INFO, "notify_write(): rtsaio_status(aop): %d\n", rtsaio_status(aop));
 
 	if ((rtsaio_status(aop) == ASYNCOP_STATUS_COMPLETE) && (rtsaio_count(aop) == aop->count)) {
 		/* Free aop->data memory */
@@ -268,9 +276,15 @@ void notify_write(struct async_op *aop) {
 		}
 
 		return;
+	} else if (rtsaio_status(aop) == ASYNCOP_STATUS_INCOMPLETE) {
+		/* TODO: Read the missing data? */
+		return;
 	}
 
 _write_failure:
+	if (rtsaio_error(aop))
+		log_warn("notify_write(): rtsaio_error(): %s. Bytes written: %d, Bytes expected: %d\n", strerror(rtsaio_error(aop)), rtsaio_count(aop), aop->count);
+
 	/* Discard connection */
 	log_info("notify_write(): Terminating connection from file descriptor %d\n", aop->fd);
 

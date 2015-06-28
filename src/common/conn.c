@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Common
  *
- * Date: 28-03-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,7 @@
 
 #include <panet/panet.h>
 
+#include "debug.h"
 #include "conn.h"
 #include "log.h"
 
@@ -106,3 +107,54 @@ int conn_set_nonblock(sock_t fd) {
 	return 0;
 #endif
 }
+
+ssize_t conn_read_blocking(sock_t fd, void *buf, size_t count) {
+	int errsv = 0;
+	ssize_t len = 0, count_local = 0;
+
+	for (len = 0, count_local = count; count_local; count_local -= len) {
+		len = panet_read(fd, ((char *) buf) + (count - count_local), count_local);
+
+		/* EOF ? */
+		if (!len)
+			break;
+
+		/* Check for errors */
+		if (len < 0) {
+			errsv = errno;
+			log_warn("conn_read_blocking(): panet_read(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	}
+
+	debug_printf(DEBUG_INFO, "conn_read_blocking(): %zd. (count: %zu, count_local: %zd)\n", count - count_local, count, count_local);
+
+	return count - count_local;
+}
+
+ssize_t conn_write_blocking(sock_t fd, const void *buf, size_t count) {
+	int errsv = 0;
+	ssize_t len = 0, count_local = 0;
+
+	for (len = 0, count_local = count; count_local; count_local -= len) {
+		len = panet_write(fd, ((char *) buf) + (count - count_local), count_local);
+
+		/* EOF ? */
+		if (!len)
+			break;
+
+		/* Check for errors */
+		if (len < 0) {
+			errsv = errno;
+			log_warn("conn_write_blocking(): panet_write(): %s\n", strerror(errno));
+			errno = errsv;
+			return -1;
+		}
+	}
+
+	debug_printf(DEBUG_INFO, "conn_write_blocking(): %zd. (count: %zu, count_local: %zd)\n", count - count_local, count, count_local);
+
+	return count - count_local;
+}
+

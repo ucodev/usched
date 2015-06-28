@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 13-05-2015
+ * Date: 28-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -286,28 +286,34 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 
 	/* Transmission buffer 'buf' layout
 	 *
-	 * +===========+=================================+
-	 * | Field     | Size                            |
-	 * +===========+=================================+   --+
-	 * | nmemb     | 32 bits                         |      > Header
-	 * +-----------+---------------------------------+   --+
-	 * | id        | 64 bits                         |     |
-	 * | flags     | 32 bits                         |     |
-	 * | uid       | 32 bits                         |     |
-	 * | gid       | 32 bits                         |     |
-	 * | trigger   | 32 bits                         |     |
-	 * | step      | 32 bits                         |      > Serialized entry #1
-	 * | expire    | 32 bits                         |     |
-	 * | username  | CONFIG_USCHED_AUTH_USERNAME_MAX |     |
-	 * | subj_size | 32 bits                         |     |
-	 * | subj      | subj_size                       |     |
-	 * +-----------+---------------------------------+   --+
-	 * |           |                                 |     |
-	 * |   ....    |              ....               |     | 
-	 * |           |                                 |      > Serialized entry #2
-	 * .           .                                 .     .
-         * .           .                                 .     .
-         * .           .                                 .    ..
+	 * +=============+=================================+
+	 * | Field       | Size                            |
+	 * +=============+=================================+   --+
+	 * | nmemb       | 32 bits                         |      > Header
+	 * +-------------+---------------------------------+   --+
+	 * | id          | 64 bits                         |     |
+	 * | flags       | 32 bits                         |     |
+	 * | uid         | 32 bits                         |     |
+	 * | gid         | 32 bits                         |     |
+	 * | trigger     | 32 bits                         |     |
+	 * | step        | 32 bits                         |      > Serialized entry #1
+	 * | expire      | 32 bits                         |     |
+	 * | pid         | 32 bits                         |     |
+	 * | status      | 32 bits                         |     |
+	 * | exec_time   | 64 bits                         |     |
+	 * | latency     | 64 bits                         |     |
+	 * | outdata_len | 32 bits                         |     |
+	 * | outdata     | CONFIG_USCHED_EXEC_OUTPUT_MAX   |     |
+	 * | username    | CONFIG_USCHED_AUTH_USERNAME_MAX |     |
+	 * | subj_size   | 32 bits                         |     |
+	 * | subj        | subj_size                       |     |
+	 * +-------------+---------------------------------+   --+
+	 * |             |                                 |     |
+	 * |    .....    |              ....               |     | 
+	 * |             |                                 |      > Serialized entry #2
+	 * .             .                                 .     .
+         * .             .                                 .     .
+         * .             .                                 .    ..
 	 *
 	 */
 
@@ -385,6 +391,15 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 			continue;
 		}
 
+		/* Grant that outdata_len doesn't exceed the hardlimit */
+		if ((entry_c->outdata_len >= CONFIG_USCHED_EXEC_OUTPUT_MAX) || (entry_c->outdata_len != strlen(entry_c->outdata))) {
+			log_crit("_process_recv_update_op_get(): (entry_c->outdata_len >= CONFIG_USCHED_EXEC_OUTPUT_MAX) || (entry_c->outdata_len != strlen(entry_c->outdata))\n");
+
+			entry_destroy(entry_c);
+
+			continue;
+		}
+
 		/* Clear entry session data, so it won't be transmitted to client */
 		memset(entry_c->session, 0, CONFIG_USCHED_AUTH_SESSION_MAX);
 
@@ -417,6 +432,11 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 		entry_c->trigger = htonl(entry_c->trigger);
 		entry_c->step = htonl(entry_c->step);
 		entry_c->expire = htonl(entry_c->expire);
+		entry_c->pid = htonl(entry_c->pid);
+		entry_c->status = htonl(entry_c->status);
+		entry_c->exec_time = htonll(entry_c->exec_time);
+		entry_c->latency = htonll(entry_c->latency);
+		entry_c->outdata_len = htonl(entry_c->outdata_len);
 		/* NOTE: We don't convert the entry_c->subj_size here as we need to handle sizes
 		 * based on this value. It will be converted later
 		 */
@@ -446,7 +466,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	entry->payload = buf;
 	entry->psize = buf_offset;
 
-	/* Encrypt the payload */
+	/* Encrypt the payload and reserve 4 bytes on top of it to prepend the payload size later */
 	if (entry_payload_encrypt(entry, 4) < 0) {
 		errsv = errno;
 		log_warn("_process_recv_update_op_get(): entry_payload_encrypt(): %s\n", strerror(errno));
@@ -469,7 +489,7 @@ static int _process_recv_update_op_get(struct async_op *aop, struct usched_entry
 	aop->timeout.tv_sec = rund.config.network.conn_timeout;
 	aop->data = entry->payload;
 
-	/* Unset the payload without free()ing it */
+	/* Unset the payload without free()ing it. The new reference to the region was set to aop->data */
 	entry->payload = NULL;
 	entry->psize = 0;
 

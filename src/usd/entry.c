@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 13-05-2015
+ * Date: 29-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -379,7 +379,7 @@ _finish:
 int entry_daemon_serialize(pall_fd_t fd, void *data) {
 	int errsv = 0;
 	struct usched_entry *entry = data;
-	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
+	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->pid) + sizeof(entry->status) + sizeof(entry->exec_time) + sizeof(entry->latency) + sizeof(entry->outdata_len) + sizeof(entry->outdata) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
 	size_t offset = 0;
 
 	/* If this entry is set to be REMOVED, do not serialize it */
@@ -411,6 +411,24 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 
 	memcpy(buf + offset, &entry->expire, sizeof(entry->expire));
 	offset += sizeof(entry->expire);
+
+	memcpy(buf + offset, &entry->pid, sizeof(entry->pid));
+	offset += sizeof(entry->pid);
+
+	memcpy(buf + offset, &entry->status, sizeof(entry->status));
+	offset += sizeof(entry->status);
+
+	memcpy(buf + offset, &entry->exec_time, sizeof(entry->exec_time));
+	offset += sizeof(entry->exec_time);
+
+	memcpy(buf + offset, &entry->latency, sizeof(entry->latency));
+	offset += sizeof(entry->latency);
+
+	memcpy(buf + offset, &entry->outdata_len, sizeof(entry->outdata_len));
+	offset += sizeof(entry->outdata_len);
+
+	memcpy(buf + offset, entry->outdata, sizeof(entry->outdata));
+	offset += sizeof(entry->outdata);
 
 	memcpy(buf + offset, entry->username, sizeof(entry->username));
 	offset += sizeof(entry->username);
@@ -449,7 +467,7 @@ int entry_daemon_serialize(pall_fd_t fd, void *data) {
 void *entry_daemon_unserialize(pall_fd_t fd) {
 	int errsv = 0;
 	struct usched_entry *entry = NULL;
-	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
+	char buf[sizeof(entry->id) + sizeof(entry->flags) + sizeof(entry->uid) + sizeof(entry->gid) + sizeof(entry->trigger) + sizeof(entry->step) + sizeof(entry->expire) + sizeof(entry->pid) + sizeof(entry->status) + sizeof(entry->exec_time) + sizeof(entry->latency) + sizeof(entry->outdata_len) + sizeof(entry->outdata) + sizeof(entry->username) + sizeof(entry->subj_size) + sizeof(entry->create_time) + sizeof(entry->signature)];
 	size_t offset = 0;
 
 	/* Allocate enough memory for the entry */
@@ -492,6 +510,34 @@ void *entry_daemon_unserialize(pall_fd_t fd) {
 
 	memcpy(&entry->expire, buf + offset, sizeof(entry->expire));
 	offset += sizeof(entry->expire);
+
+	memcpy(&entry->pid, buf + offset, sizeof(entry->pid));
+	offset += sizeof(entry->pid);
+
+	memcpy(&entry->status, buf + offset, sizeof(entry->status));
+	offset += sizeof(entry->status);
+
+	memcpy(&entry->exec_time, buf + offset, sizeof(entry->exec_time));
+	offset += sizeof(entry->exec_time);
+
+	memcpy(&entry->latency, buf + offset, sizeof(entry->latency));
+	offset += sizeof(entry->latency);
+
+	if (entry->outdata_len >= CONFIG_USCHED_EXEC_OUTPUT_MAX) {
+		errsv = errno = EINVAL;
+		log_crit("entry_daemon_unserialize(): entry->outdata_len >= CONFIG_USCHED_EXEC_OUTPUT_MAX\n", strerror(errno));
+		entry_destroy(entry);
+		errno = EINVAL;
+		return NULL;
+	}
+
+	memcpy(&entry->outdata_len, buf + offset, sizeof(entry->outdata_len));
+	offset += sizeof(entry->outdata_len);
+
+	memcpy(entry->outdata, buf + offset, entry->outdata_len);
+	offset += sizeof(entry->outdata);
+
+	entry->outdata[entry->outdata_len] = 0;
 
 	memcpy(entry->username, buf + offset, sizeof(entry->username));
 	offset += sizeof(entry->username);

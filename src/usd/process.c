@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Daemon
  *
- * Date: 28-06-2015
+ * Date: 29-06-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -525,6 +525,7 @@ struct usched_entry *process_daemon_recv_create(struct async_op *aop) {
 	entry_set_trigger(entry, ntohl(entry->trigger));
 	entry_set_step(entry, ntohl(entry->step));
 	entry_set_expire(entry, ntohl(entry->expire));
+	/* NOTE: pid, status, exec_time, latency, outdata_len and outdata are ignored here */
 	entry_set_psize(entry, ntohl(entry->psize));
 
 	/* Set the last byte of username field to 0, so it will always be NULL terminated */

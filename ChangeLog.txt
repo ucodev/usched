@@ -1,3 +1,6 @@
+v0.2-dev-59 (2015-06-29):
+ - Serialize/Unserialize basic statistics data (usd)
+
 v0.2-dev-58 (2015-06-28):
  - Explicit blocking I/O handlers
  - Included stat data in entry headers

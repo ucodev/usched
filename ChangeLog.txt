@@ -1,3 +1,6 @@
+v0.2-dev-60 (2015-07-01):
+ - New output for uSched Client (usc)
+
 v0.2-dev-59 (2015-06-29):
  - Serialize/Unserialize basic statistics data (usd)
 

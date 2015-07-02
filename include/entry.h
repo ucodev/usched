@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface header
  *
- * Date: 28-06-2015
+ * Date: 02-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -70,6 +70,7 @@ typedef enum USCHED_ENTRY_FLAGS {
 	USCHED_ENTRY_FLAG_TRIGGERED,	/* Entry was triggered at least once by the scheduler */
 	USCHED_ENTRY_FLAG_SERIALIZED,	/* Entry is serialized */
 	USCHED_ENTRY_FLAG_INVALID,	/* Entry is in an invalid state */
+	USCHED_ENTRY_FLAG_EXPIRED,	/* TODO: Entry is expired */
 	USCHED_ENTRY_FLAG_REMOVED	/* Entry was marked to be removed */
 } usched_entry_flag_t;
 

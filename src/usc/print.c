@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Client
  *
- * Date: 01-07-2015
+ * Date: 02-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include "entry.h"
+#include "bitops.h"
 
 void print_client_result_error(void) {
 	printf("An error ocurred. Check your syslog entries for more details.\n");
@@ -55,7 +56,13 @@ static void _print_client_result_single_show(const struct usched_entry *entry_li
 		return;
 
 	printf("Entry ID:  0x%016llX\n", (unsigned long long) entry->id);
-	/* TODO: Show flags */
+	printf("Flags:     %c%c%c%c%c%c\n",
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_EXPIRED) ? 'e' : '-',
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_INVALID) ? 'i' : '-',
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_SERIALIZED) ? 's' : '-',
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_TRIGGERED) ? 't' : '-',
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN) ? 'm' : '-',
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_YEARDAY_ALIGN) ? 'y' : '-');
 	printf("Username:  %s\n", !entry->username[0] ? "-" : entry->username);
 	printf("Trigger:   %u\n", (unsigned int) entry->trigger);
 	printf("Step:      %u\n", (unsigned int) entry->step);
@@ -73,19 +80,25 @@ static void _print_client_result_single_show(const struct usched_entry *entry_li
 static void _print_client_result_multi_show(const struct usched_entry *entry_list, size_t count) {
 	size_t i = 0;
 
-	printf("                 id |    user | status |     trigger |     step |      expire | cmd\n");
+	printf("                 id |  flags |    user | status |     trigger |     step |      expire | cmd\n");
 
 	for (i = 0; i < count; i ++) {
 		printf(
-			"%c0x%016llX | " \
+			" 0x%016llX | " \
+			"%c%c%c%c%c%c | " \
 			"%7s | " \
 			"%6u | " \
 			"%11u | " \
 			"%8u | " \
 			"%11u | " \
 			"%s\n",
-			entry_has_flag(&entry_list[i], USCHED_ENTRY_FLAG_INVALID) ? '*' : ' ',
 			(unsigned long long) entry_list[i].id,
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_EXPIRED) ? 'e' : '-',
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_INVALID) ? 'i' : '-',
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_SERIALIZED) ? 's' : '-',
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_TRIGGERED) ? 't' : '-',
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_MONTHDAY_ALIGN) ? 'm' : '-',
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_YEARDAY_ALIGN) ? 'y' : '-',
 			!entry_list[i].username[0] ? "-" : entry_list[i].username,
 			(unsigned int) entry_list[i].status,
 			(unsigned int) entry_list[i].trigger,

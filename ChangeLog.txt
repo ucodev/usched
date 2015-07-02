@@ -1,3 +1,7 @@
+v0.2-dev-61 (2015-07-02):
+ - Fixed exit status transport (from uss to usd)
+ - uSched client now displays entry flags
+
 v0.2-dev-60 (2015-07-01):
  - New output for uSched Client (usc)
 

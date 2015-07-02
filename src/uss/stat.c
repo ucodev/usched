@@ -3,7 +3,7 @@
  * @brief uSched
  *        Status and Statistics Module Main Component
  *
- * Date: 22-05-2015
+ * Date: 02-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -257,7 +257,7 @@ static int _usd_dispatch(void) {
 	hdr->exec_time = ((s->current.end.tv_sec * 1000000000) + s->current.end.tv_nsec) - ((s->current.start.tv_sec * 1000000000) + s->current.start.tv_nsec);
 	hdr->latency = ((s->current.start.tv_sec * 1000000000) + s->current.start.tv_nsec) - ((s->current.trigger.tv_sec * 1000000000) + s->current.trigger.tv_nsec);
 	hdr->pid = s->current.pid;
-	hdr->status = WEXITSTATUS(s->current.status);
+	hdr->status = s->current.status;
 	hdr->outdata_len = strlen(s->current.outdata);
 
 	/* Assert outdata length */

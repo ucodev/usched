@@ -88,6 +88,7 @@
 #define USCHED_OP_RUN_STR		"run"
 #define USCHED_OP_STOP_STR		"stop"
 #define USCHED_OP_SHOW_STR		"show"
+#define USCHED_OP_HOLD_STR		"hold"
 #define USCHED_OP_ADD_STR		"add"
 #define USCHED_OP_DELETE_STR		"delete"
 #define USCHED_OP_CHANGE_STR		"change"
@@ -158,6 +159,7 @@ typedef enum OP {
 	USCHED_OP_RUN = 1,
 	USCHED_OP_STOP,
 	USCHED_OP_SHOW,
+	USCHED_OP_HOLD,
 	USCHED_OP_ADD,		/* Used by administration tools only */
 	USCHED_OP_DELETE,	/* Used by administration tools only */
 	USCHED_OP_CHANGE,	/* Used by administration tools only */

@@ -3,9 +3,9 @@
  * @brief uSched
  *        Operation Handling interface - Client
  *
- * Date: 05-08-2014
+ * Date: 13-07-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -44,6 +44,15 @@ int op_client_process(void) {
 	runc.op = runc.req->op;
 
 	switch (runc.op) {
+		case USCHED_OP_HOLD:
+			ret = logic_client_process_hold();
+
+			if (ret < 0) {
+				errsv = errno;
+				log_warn("op_client_process(): logic_client_process_hold(): %s\n", strerror(errno));
+			}
+
+			break;
 		case USCHED_OP_RUN:
 			ret = logic_client_process_run();
 
@@ -58,7 +67,7 @@ int op_client_process(void) {
 
 			if (ret < 0) {
 				errsv = errno;
-				log_warn("op_client_process(): logic_client_process_run(): %s\n", strerror(errno));
+				log_warn("op_client_process(): logic_client_process_stop(): %s\n", strerror(errno));
 			}
 
 			break;
@@ -67,7 +76,7 @@ int op_client_process(void) {
 
 			if (ret < 0) {
 				errsv = errno;
-				log_warn("op_client_process(): logic_client_process_run(): %s\n", strerror(errno));
+				log_warn("op_client_process(): logic_client_process_show(): %s\n", strerror(errno));
 			}
 
 			break;

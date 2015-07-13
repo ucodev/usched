@@ -3,7 +3,7 @@
  * @brief uSched
  *        Printing interface - Client
  *
- * Date: 02-07-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -49,6 +49,13 @@ void print_client_result_del(const uint64_t *entry_list, size_t count) {
 		printf("Deleted Entry ID: 0x%016llX\n", (unsigned long long) entry_list[i]);
 }
 
+void print_client_result_hold(const uint64_t *entry_list, size_t count) {
+	size_t i = 0;
+
+	for (i = 0; i < count; i ++)
+		printf("Paused Entry ID: 0x%016llX\n", (unsigned long long) entry_list[i]);
+}
+
 static void _print_client_result_single_show(const struct usched_entry *entry_list, size_t count) {
 	const struct usched_entry *entry = &entry_list[0];
 
@@ -56,7 +63,8 @@ static void _print_client_result_single_show(const struct usched_entry *entry_li
 		return;
 
 	printf("Entry ID:  0x%016llX\n", (unsigned long long) entry->id);
-	printf("Flags:     %c%c%c%c%c%c\n",
+	printf("Flags:     %c%c%c%c%c%c%c\n",
+		bit_test(&entry->flags, USCHED_ENTRY_FLAG_PAUSED) ? 'p' : '-',
 		bit_test(&entry->flags, USCHED_ENTRY_FLAG_EXPIRED) ? 'e' : '-',
 		bit_test(&entry->flags, USCHED_ENTRY_FLAG_INVALID) ? 'i' : '-',
 		bit_test(&entry->flags, USCHED_ENTRY_FLAG_SERIALIZED) ? 's' : '-',
@@ -80,12 +88,12 @@ static void _print_client_result_single_show(const struct usched_entry *entry_li
 static void _print_client_result_multi_show(const struct usched_entry *entry_list, size_t count) {
 	size_t i = 0;
 
-	printf("                 id |  flags |    user | status |     trigger |     step |      expire | cmd\n");
+	printf("                 id |   flags |    user | status |     trigger |     step |      expire | cmd\n");
 
 	for (i = 0; i < count; i ++) {
 		printf(
 			" 0x%016llX | " \
-			"%c%c%c%c%c%c | " \
+			"%c%c%c%c%c%c%c | " \
 			"%7s | " \
 			"%6u | " \
 			"%11u | " \
@@ -93,6 +101,7 @@ static void _print_client_result_multi_show(const struct usched_entry *entry_lis
 			"%11u | " \
 			"%s\n",
 			(unsigned long long) entry_list[i].id,
+			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_PAUSED) ? 'p' : '-',
 			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_EXPIRED) ? 'e' : '-',
 			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_INVALID) ? 'i' : '-',
 			bit_test(&entry_list[i].flags, USCHED_ENTRY_FLAG_SERIALIZED) ? 's' : '-',

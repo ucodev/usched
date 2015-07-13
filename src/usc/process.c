@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface - Client
  *
- * Date: 28-06-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -48,6 +48,13 @@
 #include "lib.h"
 
 /* Reserved library functions */
+static int _process_lib_result_set_hold(uint64_t *entry_list, size_t nmemb) {
+	runc.result = entry_list;
+	runc.result_nmemb = nmemb;
+
+	return 0;
+}
+
 static int _process_lib_result_add_run(uint64_t entry_id) {
 	if (!(runc.result = mm_realloc(runc.result, sizeof(uint64_t) * (runc.result_nmemb + 1)))) {
 		log_warn("_process_lib_result_add_run(): mm_realloc(): %s\n", strerror(errno));
@@ -70,6 +77,108 @@ static int _process_lib_result_set_stop(uint64_t *entry_list, size_t nmemb) {
 static int _process_lib_result_set_show(struct usched_entry *entry_list, size_t nmemb) {
 	runc.result = entry_list;
 	runc.result_nmemb = nmemb;
+
+	return 0;
+}
+
+int process_client_recv_hold(struct usched_entry *entry) {
+	int errsv = 0;
+	uint32_t i = 0, entry_list_nmemb = 0, data_len = 0;
+	uint64_t *entry_list = NULL;
+	size_t p_offset = 0;
+
+	/* Cleanup entry payload if required */
+	if (entry->payload) {
+		mm_free(entry->payload);
+		entry->payload = NULL;
+		entry->psize = 0;
+	}
+
+	/* Read data size */
+	if (conn_read_blocking(runc.fd, &data_len, 4) != 4) {
+		errsv = errno;
+		log_crit("process_client_recv_hold(): conn_read_blocking(, &data_len, 4) != 4: %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Set the entry payload size */
+	entry->psize = ntohl(data_len) - 4;
+
+	/* Allocate enough memory to receive the payload */
+	if (!(entry->payload = mm_alloc(entry->psize))) {
+		errsv = errno;
+		log_crit("process_client_recv_hold(): mm_alloc(): %s\n", strerror(errno));
+		errno = errsv;
+		return -1;
+	}
+
+	/* Receive the payload */
+	if (conn_read_blocking(runc.fd, entry->payload, entry->psize) != (ssize_t) entry->psize) {
+		errsv = errno;
+		log_crit("process_client_recv_hold(): conn_read_blocking(..., entry->payload, entry->psize) != entry->psize: %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Decrypt the payload */
+	if (entry_payload_decrypt(entry) < 0) {
+		errsv = errno;
+		log_crit("process_client_recv_hold(): entry_payload_decrypt(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read te number of elements to process */
+	memcpy(&entry_list_nmemb, entry->payload, sizeof(entry_list_nmemb));
+	p_offset += sizeof(entry_list_nmemb);
+
+	/* Network to Host byte order */
+	entry_list_nmemb = ntohl(entry_list_nmemb);
+
+	if (!entry_list_nmemb) {
+		log_info("process_client_recv_hold(): No entries were deleted.\n");
+		entry_unset_payload(entry);
+		print_client_result_empty();
+		return 0;
+	}
+
+	/* Alloc sufficient memory to process the deleted entries list */
+	if (!(entry_list = mm_alloc(entry_list_nmemb * sizeof(uint64_t)))) {
+		errsv = errno;
+		log_crit("process_client_recv_hold(): mm_alloc(): %s\n", strerror(errno));
+		entry_unset_payload(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Read the deleted entries list */
+	memcpy(entry_list, entry->payload + p_offset, entry_list_nmemb * sizeof(uint64_t));
+	/* p_offset += entry_list_nmemb * sizeof(uint64_t); */
+
+	/* Unset entry payload */
+	entry_unset_payload(entry);
+
+	/* Iterate the received entries list */
+	for (i = 0; i < entry_list_nmemb; i ++) {
+		/* Network to Host byte order */
+		entry_list[i] = ntohll(entry_list[i]);
+
+		debug_printf(DEBUG_INFO, "Entry ID 0x%llX was paused\n", entry_list[i]);
+	}
+
+	if (bit_test(&runc.flags, USCHED_RUNTIME_FLAG_LIB)) {
+		/* This is from library */
+		return _process_lib_result_set_hold(entry_list, entry_list_nmemb);
+	} else {
+		/* Otherwise print the deleted entries */
+		print_client_result_hold(entry_list, entry_list_nmemb);
+	}
+
+	/* Free entry_list memory */
+	mm_free(entry_list);
 
 	return 0;
 }

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface header
  *
- * Date: 18-02-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -34,6 +34,7 @@ int logic_admin_process_change(void);
 int logic_admin_process_show(void);
 int logic_admin_process_commit(void);
 int logic_admin_process_rollback(void);
+int logic_client_process_hold(void);
 int logic_client_process_run(void);
 int logic_client_process_stop(void);
 int logic_client_process_show(void);

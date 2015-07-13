@@ -43,6 +43,7 @@ void print_admin_config_users_from_file(const char *file, char modification);
 void print_admin_category_var_value(const char *component, const char *var, const char *value);
 void print_client_result_error(void);
 void print_client_result_empty(void);
+void print_client_result_hold(const uint64_t *entry_list, size_t count);
 void print_client_result_run(uint64_t entry_id);
 void print_client_result_del(const uint64_t *entry_list, size_t count);
 void print_client_result_show(const struct usched_entry *entry_list, size_t count);

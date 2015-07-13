@@ -3,7 +3,7 @@
  * @brief uSched
  *        Logic Analyzer interface - Client
  *
- * Date: 27-02-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -42,6 +42,86 @@
 #include "bitops.h"
 #include "usched.h"
 
+
+int logic_client_process_hold(void) {
+	int errsv = 0;
+	char *ptr = NULL, *saveptr = NULL, *endptr = NULL;
+	struct usched_client_request *cur = NULL;
+	struct usched_entry *entry = NULL;
+	uint64_t *entry_list = NULL;
+	uint64_t entry_id = 0;
+	size_t entry_list_nmemb = 0;
+
+	/* Validate the if the current request list has at least one valid entry */
+	if (!(cur = runc.req)) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Validate if this request refers to all entries beloging to this user */
+	if (!strcasecmp(cur->subj, USCHED_SUBJ_ALL_STR)) {
+		entry_list_nmemb = 1;
+
+		if (!(entry_list = mm_alloc(sizeof(uint64_t))))
+			return -1;
+
+		entry_list[0] = USCHED_SUBJ_ALL; /* means all entries belonging to this user */
+	} else {
+		/* Iterate the current request list in order to craft an entry payload */
+		for (ptr = cur->subj, entry_list_nmemb = 0; (ptr = strtok_r(ptr, ",", &saveptr)); ptr = NULL) {
+			entry_list_nmemb ++;
+
+			/* Realloc the entry_list size */
+			if (!(entry_list = mm_realloc(entry_list, entry_list_nmemb * sizeof(uint64_t))))
+				return -1;
+
+			/* If the requested entry id to be deleted is 0 or invalid, fail to accept logic */
+			if (!(entry_id = strtoull(ptr, &endptr, 16)) || (*endptr) || (endptr == ptr)) {
+				mm_free(entry_list);
+				errno = EINVAL;
+				return -1;
+			}
+
+			debug_printf(DEBUG_INFO, "OP == HOLD: entry_id == 0x%llX\n", entry_id);
+
+			/* Append the extracted entry id to the current entry list */
+			entry_list[entry_list_nmemb - 1] = htonll(entry_id);
+		}
+	}
+
+	/* No conjunctions are accepted in a STOP operation */
+	if (cur->conj) {
+		mm_free(entry_list);
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* Initialize the entry to be transmitted */
+	if (!(entry = entry_client_init(cur->uid, cur->gid, 0, entry_list, entry_list_nmemb * sizeof(uint64_t)))) {
+		errsv = errno;
+		mm_free(entry_list);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Free entry_list */
+	mm_free(entry_list);
+
+	/* Set this entry to be deleted */
+	entry_set_flag(entry, USCHED_ENTRY_FLAG_PAUSE);
+
+	/* Push the entry into the entries pool */
+	if (runc.epool->push(runc.epool, entry) < 0) {
+		errsv = errno;
+		mm_free(entry_list);
+		entry_destroy(entry);
+		errno = errsv;
+		return -1;
+	}
+
+	/* Logic accepted */
+	return 0;
+}
 
 int logic_client_process_run(void) {
 	struct usched_client_request *cur = NULL;

@@ -3,7 +3,7 @@
  * @brief uSched
  *        Connections interface - Client
  *
- * Date: 28-06-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -232,6 +232,8 @@ int conn_client_process(void) {
 			ret = process_client_recv_stop(cur);
 		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_GET)) {
 			ret = process_client_recv_show(cur);
+		} else if (entry_has_flag(cur, USCHED_ENTRY_FLAG_PAUSE)) {
+			ret = process_client_recv_hold(cur);
 		} else {
 			log_warn("conn_client_process(): Unexpected value found in entry->flags\n");
 			errno = EINVAL;

@@ -1,3 +1,6 @@
+v0.2-dev-62 (2015-07-13):
+ - Initial steps for 'hold' operation implementation.
+
 v0.2-dev-61 (2015-07-02):
  - Fixed exit status transport (from uss to usd)
  - uSched client now displays entry flags

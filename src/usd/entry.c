@@ -3,7 +3,7 @@
  * @brief uSched
  *        Entry handling interface - Daemon
  *
- * Date: 29-06-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -342,7 +342,6 @@ _process:
 
 	errsv = errno;
 
-
 	/* Check if an error ocurred */
 	if (ret < 0) {
 		errno = errsv;
@@ -364,6 +363,14 @@ _process:
 	 */
 
 	log_info("entry_daemon_exec_dispatch(): The Entry ID 0x%016llX isn't recurrent and will be deleted from the active pool.", entry->id);
+
+/* _expire: */
+	/*  TODO: Mark the entry as expired */
+	/*        This will require handling on serialization/unserialization. Expired entries should
+	 *        not be passed to the schedule_*() layer.
+	 */
+	/* entry_set_flag(entry, USCHED_ENTRY_FLAG_EXPIRED); */
+	/* goto _finish; */
 
 _remove:
 	/* Remove the entry from active pool */

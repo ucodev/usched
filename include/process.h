@@ -3,7 +3,7 @@
  * @brief uSched
  *        Data Processing interface header
  *
- * Date: 17-01-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -41,6 +41,7 @@
 struct usched_entry *process_daemon_recv_create(struct async_op *aop);
 int process_daemon_recv_update(struct async_op *aop, struct usched_entry *entry);
 #endif /* CONFIG_CLIENT_ONLY == 0 */
+int process_client_recv_hold(struct usched_entry *entry);
 int process_client_recv_run(struct usched_entry *entry);
 int process_client_recv_stop(struct usched_entry *entry);
 int process_client_recv_show(struct usched_entry *entry);

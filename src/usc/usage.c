@@ -3,9 +3,9 @@
  * @brief uSched
  *        Usage handlers interface - Client
  *
- * Date: 05-08-2014
+ * Date: 13-07-2015
  * 
- * Copyright 2014 Pedro A. Hortas (pah@ucodev.org)
+ * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
  * This file is part of usched.
  *
@@ -99,7 +99,7 @@ void usage_client_show(void) {
 	fprintf(stderr, "\t\t-U\tUsername for remote authentication.\n");
 	fprintf(stderr, "\t\t-P\tPassword for remote authentication.\n");
 	fprintf(stderr, "\n");
-	fprintf(stderr,     "\tOP\t\trun     | stop     | show\n");
+	fprintf(stderr,     "\tOP\t\thold    | run      | stop  | show\n");
 	fprintf(stderr,   "\tPREP\t\tevery   | in       | now   | on    | to\n");
 	fprintf(stderr, "\tADVERB\t\tseconds | minutes  | hours | days  | weeks    | months\n");
 	fprintf(stderr,       "\t\t\tyears   | weekdays | time  | date  | datetime | timestamp\n");

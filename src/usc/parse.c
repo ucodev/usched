@@ -3,7 +3,7 @@
  * @brief uSched
  *        Parser interface - Client
  *
- * Date: 01-03-2015
+ * Date: 13-07-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -198,6 +198,9 @@ static long _parse_req_arg(struct usched_client_request *req, const char *arg) {
 }
 
 static usched_op_t _parse_get_op(const char *op) {
+	if (!strcasecmp(op, USCHED_OP_HOLD_STR))
+		return USCHED_OP_HOLD;
+
 	if (!strcasecmp(op, USCHED_OP_RUN_STR))
 		return USCHED_OP_RUN;
 
@@ -492,6 +495,13 @@ static struct usched_client_request *_parse_op_compound(struct usched_client_req
 
 	/* Evaluate argument counter validity for each operation */
 	switch (req->op) {
+		case USCHED_OP_HOLD: {
+			if (argc != 2) {
+				usage_client_error_set(USCHED_USAGE_CLIENT_ERR_TOOMANY_ARGS, NULL);
+				goto _op_error;
+			}
+		} break;
+
 		case USCHED_OP_RUN: {
 			if (argc < 3) {
 				usage_client_error_set(USCHED_USAGE_CLIENT_ERR_INSUFF_ARGS, NULL);

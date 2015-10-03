@@ -3,7 +3,7 @@
 # uSched init script
 
 #
-# Date: 22-03-2015
+# Date: 03-10-2015
 # 
 # Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
 #
@@ -35,7 +35,7 @@
 # Short-Description: uSched Service
 ### END INIT INFO
 
-. @_SYSLIBDIR_@/lsb/init-functions
+. /lib/lsb/init-functions
 
 flush()
 {

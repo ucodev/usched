@@ -3,7 +3,7 @@
  * @brief uSched
  *        Scheduling handlers interface
  *
- * Date: 09-04-2015
+ * Date: 03-10-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -109,6 +109,9 @@ int schedule_entry_create(struct usched_entry *entry) {
 			return -1;
 		}
 	} while (rund.apool->search(rund.apool, entry) || !entry->id);
+
+	/* Update entry creation time */
+	entry->create_time = time(NULL);
 
 	/* Update entry signature */
 	entry_update_signature(entry);

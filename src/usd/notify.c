@@ -3,7 +3,7 @@
  * @brief uSched
  *        I/O Notification interface
  *
- * Date: 09-04-2015
+ * Date: 03-10-2015
  * 
  * Copyright 2014-2015 Pedro A. Hortas (pah@ucodev.org)
  *
@@ -101,9 +101,6 @@ void notify_read(struct async_op *aop) {
 
 			/* Cleanup all session data */
 			entry_cleanup_session(entry);
-
-			/* Set the entry creation time */
-			entry->create_time = time(NULL);
 
 			/* This is a complete entry */
 			log_info("notify_read(): Request from file descriptor %d successfully processed.\n", aop->fd);

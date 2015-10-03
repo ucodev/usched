@@ -1,3 +1,6 @@
+v0.1.1 (2015-10-03):
+ - Fixed invalid signatures issue.
+
 v0.1 (2015-05-15):
  - Changed VERSION
 
